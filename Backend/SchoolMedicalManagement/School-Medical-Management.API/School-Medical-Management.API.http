@@ -1,0 +1,6 @@
+@School_Medical_Management.API_HostAddress = http://localhost:5016
+
+GET {{School_Medical_Management.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
