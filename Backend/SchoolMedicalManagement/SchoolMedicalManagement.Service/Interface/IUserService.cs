@@ -1,4 +1,5 @@
-﻿using SchoolMedicalManagement.Repository.Response;
+﻿using SchoolMedicalManagement.Repository.Request;
+using SchoolMedicalManagement.Repository.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace SchoolMedicalManagement.Service.Interface
         Task<List<UserListResponse>> GetAll();
         Task<UserManagementResponse> GetUserById(int id);
 
-
+        
     }
 
 }

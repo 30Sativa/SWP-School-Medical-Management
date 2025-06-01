@@ -28,9 +28,16 @@ namespace SchoolMedicalManagement.Repository.Repository
         public async Task<User> GetUserById(int id)
         {
             return await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.UserId == id);
-        } 
+        }
 
-        //
+        //Get user by id for change password
+        public Task<User> GetUserById(UserChangePasswordRequest request)
+        {
+            return _context.Users.FirstOrDefaultAsync(u => u.UserId == request.UserId);
+        }
+
+
+
 
     }
 }

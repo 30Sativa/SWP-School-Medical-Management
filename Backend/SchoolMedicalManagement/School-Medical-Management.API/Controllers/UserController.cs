@@ -51,5 +51,18 @@ namespace School_Medical_Management.API.Controllers
             }
             return NotFound($"User with ID {id} not found");
         }
+
+
+        [HttpPost("change-password{id}")]
+        public async Task<IActionResult> ChangePasswordAfterFirstLogin(UserChangePasswordRequest userChangePasswordRequest)
+        {
+            var response = await _authService.ChangePasswordAfterFirstLogin(userChangePasswordRequest);
+            if (response !=null)
+            {
+                return Ok(response);
+            }
+            return BadRequest("Failed to change password or user not eligible for password change");
+        }
     }
+
 }
