@@ -1,5 +1,4 @@
 import '../../assets/CSS/Login.css'; // Import your CSS styles
-import { Table } from "antd";
 import axios from "axios";
 import React, { useState } from "react";
 
