@@ -53,7 +53,7 @@ namespace School_Medical_Management.API.Controllers
         }
 
 
-        [HttpPost("change-password{id}")]
+        [HttpPost("change-password")]
         public async Task<IActionResult> ChangePasswordAfterFirstLogin(UserChangePasswordRequest userChangePasswordRequest)
         {
             var response = await _authService.ChangePasswordAfterFirstLogin(userChangePasswordRequest);
