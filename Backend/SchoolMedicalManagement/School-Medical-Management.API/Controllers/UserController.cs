@@ -42,7 +42,7 @@ namespace School_Medical_Management.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserById(int id)
+        public async Task<IActionResult> GetUserById([FromRoute] int id)
         {
             var user = await _userService.GetUserById(id);
             if (user != null)
