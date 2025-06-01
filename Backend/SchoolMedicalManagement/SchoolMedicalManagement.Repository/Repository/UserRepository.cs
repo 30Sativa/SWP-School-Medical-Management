@@ -17,5 +17,20 @@ namespace SchoolMedicalManagement.Repository.Repository
                                        .FirstOrDefaultAsync(u => u.Username == loginRequest.Username &&
                                                                  u.Password == loginRequest.Password);
         }
+
+        // Get list ds người dùng từ db ra
+        public async Task<List<User>> GetAll()
+        {
+            return await _context.Users.Include(u => u.Role).ToListAsync();
+        }
+
+        //Get user by id
+        public async Task<User> GetUserById(int id)
+        {
+            return await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.UserId == id);
+        } 
+
+        //
+
     }
 }

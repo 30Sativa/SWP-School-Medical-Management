@@ -11,9 +11,12 @@ namespace School_Medical_Management.API.Controllers
     public class UserController : ControllerBase
     {
         private readonly IAuthService _authService;
-        public UserController(IAuthService authService)
+        private readonly IUserService _userService;
+
+        public UserController(IAuthService authService, IUserService userService)
         {
             _authService = authService;
+            _userService = userService;
         }
 
 
@@ -25,6 +28,28 @@ namespace School_Medical_Management.API.Controllers
                 return Unauthorized("Invalid username or password");
 
             return Ok(response);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var users = await _userService.GetAll();
+            if (users != null)
+            {
+                return Ok(users);
+            }
+            return NotFound("No users found");
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserById(int id)
+        {
+            var user = await _userService.GetUserById(id);
+            if (user != null)
+            {
+                return Ok(user);
+            }
+            return NotFound($"User with ID {id} not found");
         }
     }
 }
