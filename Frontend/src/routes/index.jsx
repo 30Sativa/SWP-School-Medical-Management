@@ -1,19 +1,14 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Login from '../pages/auth/Login';
+import { Routes, Route } from "react-router-dom";
+import Homepage from "../pages/homepage/Homepage";
+import Login from "../pages/auth/Login";
 
 const AppRouter = () => {
   return (
     <Routes>
-      {/* Redirect root to login page */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      
-      {/* Auth routes */}
+      <Route path="/" element={<Homepage />} />
       <Route path="/login" element={<Login />} />
-      
-      {/* 404 route */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 };
 
-export default AppRouter; 
+export default AppRouter;
