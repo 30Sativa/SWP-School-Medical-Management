@@ -11,7 +11,7 @@ const Login = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const { username, password, role } = form;
     if (!username || !password || !role) {
@@ -19,10 +19,20 @@ const Login = () => {
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const response = await axios.post("/api/User/login", {
+        username,
+        password
+      });
+      // Xử lý kết quả trả về ở đây (ví dụ: lưu token, chuyển trang, ...)
       alert("Đăng nhập thành công!");
-    }, 2000);
+      // Ví dụ: lưu token vào localStorage
+      // localStorage.setItem('token', response.data.token);
+    } catch (error) {
+      alert("Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleFocus = (idx) => setFocusIndex(idx);
@@ -72,21 +82,6 @@ const Login = () => {
               onFocus={() => handleFocus(1)}
               onBlur={handleBlur}
             />
-          </div>
-          <div className="form-group" style={{ transform: focusIndex === 2 ? "scale(1.02)" : "scale(1)" }}>
-            <label htmlFor="role">Vai trò</label>
-            <select
-              id="role"
-              name="role"
-              value={form.role}
-              onChange={handleChange}
-              onFocus={() => handleFocus(2)}
-              onBlur={handleBlur}
-            >
-              <option value="parent">Phụ huynh</option>
-              <option value="admin">Quản trị viên</option>
-              <option value="nurse">Y tá</option>
-            </select>
           </div>
           <div className="forgot-password">
             <a href="#">Quên mật khẩu?</a>
