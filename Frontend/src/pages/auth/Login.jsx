@@ -74,7 +74,7 @@ const Login = () => {
             />
           </div>
           <div className="form-group" style={{ transform: focusIndex === 2 ? "scale(1.02)" : "scale(1)" }}>
-            <label htmlFor="role">Đăng nhập với quyền</label>
+            <label htmlFor="role">Vai trò</label>
             <select
               id="role"
               name="role"
@@ -96,7 +96,7 @@ const Login = () => {
           </button>
           <div className="register-link">
             <span>Chưa có tài khoản? </span>
-            <a href="#">Đăng ký ngay</a>
+            {/* <a href="#">Đăng ký ngay</a> */}
           </div>
         </form>
       </div>
