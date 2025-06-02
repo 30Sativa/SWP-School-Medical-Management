@@ -88,9 +88,9 @@ namespace School_Medical_Management.API.Controllers
 
 
         [HttpPost("change-password{id}")]
-        public async Task<IActionResult> ChangePasswordAfterFirstLogin(UserChangePasswordRequest userChangePasswordRequest)
+        public async Task<IActionResult> ChangePasswordAfterFirstLogin([FromRoute] int id, UserChangePasswordRequest userChangePasswordRequest)
         {
-            var response = await _authService.ChangePasswordAfterFirstLogin(userChangePasswordRequest);
+            var response = await _authService.ChangePasswordAfterFirstLogin(id,userChangePasswordRequest);
             if (response !=null)
             {
                 return Ok(response);

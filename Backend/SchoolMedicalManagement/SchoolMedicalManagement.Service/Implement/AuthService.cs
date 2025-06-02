@@ -9,6 +9,7 @@ using Azure.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SchoolMedicalManagement.Models.Entity;
+using SchoolMedicalManagement.Models.Utils;
 using SchoolMedicalManagement.Repository.Repository;
 using SchoolMedicalManagement.Repository.Request;
 using SchoolMedicalManagement.Repository.Response;
@@ -29,13 +30,13 @@ namespace SchoolMedicalManagement.Service.Implement
 
 
         // First login change password
-        public async Task<UserChangePasswordResponse> ChangePasswordAfterFirstLogin(UserChangePasswordRequest userChangePasswordRequest)
+        public async Task<UserChangePasswordResponse> ChangePasswordAfterFirstLogin(int id, UserChangePasswordRequest userChangePasswordRequest)
         {
-            var user = await _userRepository.GetUserById(userChangePasswordRequest.UserId);
+            var user = await _userRepository.GetUserById(id);
             if (user == null || user.IsFirstLogin == false)
                 return null;
 
-            user.Password = userChangePasswordRequest.NewPassword;
+            user.Password = HashPassword.HashPasswordd(userChangePasswordRequest.NewPassword);
             user.IsFirstLogin = false;
 
             await _userRepository.UpdateAsync(user);
@@ -51,19 +52,11 @@ namespace SchoolMedicalManagement.Service.Implement
             };
         }
 
-        public Task<UserChangePasswordResponse> ChangePasswordAfterFirstLogin(UserChangePasswordResponse request)
-        {
-            throw new NotImplementedException();
-        }
-
-
-
-
 
         //Login
         public async Task<UserLoginResponse> Login(UserLoginRequest loginRequest)
         {
-            var user = await _userRepository.Login(loginRequest);
+            var user = await _userRepository.GetLogin(loginRequest);
 
             if (user == null) return null;
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using SchoolMedicalManagement.Models.Entity;
+using SchoolMedicalManagement.Models.Utils;
 using SchoolMedicalManagement.Repository.Repository;
 using SchoolMedicalManagement.Repository.Request;
 using SchoolMedicalManagement.Repository.Response;
@@ -34,7 +35,7 @@ namespace SchoolMedicalManagement.Service.Implement
             var newUser = new User
             {
                 Username = user.Username,
-                Password = user.Password,
+                Password = HashPassword.HashPasswordd(user.Password),
                 FullName = user.FullName,
                 RoleId = user.RoleId,
                 Phone = user.Phone,
@@ -126,7 +127,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return null;
             }
 
-            userToUpdate.Password = string.IsNullOrEmpty(request.Password) ? userToUpdate.Password : request.Password;
+            userToUpdate.Password = HashPassword.HashPasswordd(string.IsNullOrEmpty(request.Password) ? userToUpdate.Password : request.Password);
             userToUpdate.FullName = string.IsNullOrEmpty(request.FullName) ? userToUpdate.FullName : request.FullName;
             userToUpdate.Phone = string.IsNullOrEmpty(request.Phone) ? userToUpdate.Phone : request.Phone;
             userToUpdate.Email = string.IsNullOrEmpty(request.Email) ? userToUpdate.Email : request.Email;

@@ -6,17 +6,18 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 using SchoolMedicalManagement.Models.Entity;
+using SchoolMedicalManagement.Models.Utils;
 using SchoolMedicalManagement.Repository.Request;
 
 namespace SchoolMedicalManagement.Repository.Repository
 {
     public class UserRepository : GenericRepository<User>
     {
-        public async Task<User?> Login(UserLoginRequest loginRequest)
+        public async Task<User?> GetLogin(UserLoginRequest loginRequest)
         {
             return await _context.Users.Include(u => u.Role)
                                        .FirstOrDefaultAsync(u => u.Username == loginRequest.Username &&
-                                                                 u.Password == loginRequest.Password);
+                                                                 u.Password == HashPassword.HashPasswordd(loginRequest.Password));
         }
 
         // Get list ds người dùng từ db ra
@@ -78,9 +79,9 @@ namespace SchoolMedicalManagement.Repository.Repository
         }
          
         //Get user by id for change password
-        public Task<User?> GetUserById(UserChangePasswordRequest request)
+        public Task<User?> GetUserById(int id, UserChangePasswordRequest request)
         {
-            return _context.Users.FirstOrDefaultAsync(u => u.UserId == request.UserId);
+            return _context.Users.FirstOrDefaultAsync(u => u.UserId == id);
         }
 
 
