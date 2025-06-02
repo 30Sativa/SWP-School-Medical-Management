@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
-using SchoolMedicalManagement.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
+using SchoolMedicalManagement.Models.Entity;
 using SchoolMedicalManagement.Repository.Request;
 using SchoolMedicalManagement.Repository.Response;
+using SchoolMedicalManagement.Service.Interface;
 
 namespace School_Medical_Management.API.Controllers
 {
@@ -45,12 +46,45 @@ namespace School_Medical_Management.API.Controllers
         public async Task<IActionResult> GetUserById([FromRoute] int id)
         {
             var user = await _userService.GetUserById(id);
-            if (user != null)
+            if (user == null)
+                return NotFound($"User with ID {id} not found");
+            return Ok(user);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateUser(UserCreateRequest request)
+        {
+            var userToCreate = await _userService.CreateUser(request);
+            if (userToCreate == null)
             {
-                return Ok(user);
+                return BadRequest("Failed to create user. Please check the request data.");
+            }
+            return Ok(userToCreate);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var result = await _userService.DeleteUser(id);
+            if (result)
+            {
+                return Ok($"Delete User with ID: {id} successfully");
             }
             return NotFound($"User with ID {id} not found");
+
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, UserUpdateRequest request)
+        {
+            var updatedUser = await _userService.UpdateUser(id, request);
+            if (updatedUser == null)
+            {
+                return NotFound($"User with ID {id} not found!");
+            }
+            return Ok(updatedUser);
+        }
+
 
 
         [HttpPost("change-password{id}")]
