@@ -1,5 +1,5 @@
-﻿using SchoolMedicalManagement.Repository.Request;
-using SchoolMedicalManagement.Repository.Response;
+﻿using SchoolMedicalManagement.Models.Request;
+using SchoolMedicalManagement.Models.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;

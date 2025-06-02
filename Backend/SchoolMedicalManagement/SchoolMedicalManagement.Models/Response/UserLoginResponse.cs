@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SchoolMedicalManagement.Models.Entity;
 
-namespace SchoolMedicalManagement.Repository.Response
+namespace SchoolMedicalManagement.Models.Response
 {
     public class UserLoginResponse
     {

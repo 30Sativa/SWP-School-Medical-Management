@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 using SchoolMedicalManagement.Models.Entity;
 using SchoolMedicalManagement.Models.Utils;
-using SchoolMedicalManagement.Repository.Request;
+using SchoolMedicalManagement.Models.Request;
 
 namespace SchoolMedicalManagement.Repository.Repository
 {

@@ -4,17 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SchoolMedicalManagement.Repository.Request
+namespace SchoolMedicalManagement.Models.Request
 {
-    public class UserCreateRequest
+    public class UserUpdateRequest
     {
-        public string Username { get; set; } = null!;
-
         public string Password { get; set; } = null!;
 
         public string? FullName { get; set; }
-
-        public int RoleId { get; set; }
 
         public string? Phone { get; set; }
 
@@ -22,6 +18,5 @@ namespace SchoolMedicalManagement.Repository.Request
 
         public string? Address { get; set; }
 
-        public bool? IsFirstLogin { get; set; }
     }
 }

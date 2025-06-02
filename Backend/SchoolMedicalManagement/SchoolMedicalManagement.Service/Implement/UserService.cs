@@ -2,8 +2,8 @@
 using SchoolMedicalManagement.Models.Entity;
 using SchoolMedicalManagement.Models.Utils;
 using SchoolMedicalManagement.Repository.Repository;
-using SchoolMedicalManagement.Repository.Request;
-using SchoolMedicalManagement.Repository.Response;
+using SchoolMedicalManagement.Models.Request;
+using SchoolMedicalManagement.Models.Response;
 using SchoolMedicalManagement.Service.Interface;
 using System;
 using System.Collections.Generic;

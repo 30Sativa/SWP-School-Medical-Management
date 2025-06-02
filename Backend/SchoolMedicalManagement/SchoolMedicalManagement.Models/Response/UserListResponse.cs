@@ -1,19 +1,15 @@
-﻿using System;
+﻿using SchoolMedicalManagement.Models.Entity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SchoolMedicalManagement.Repository.Response
+namespace SchoolMedicalManagement.Models.Response
 {
-    
-    public class UserManagementResponse
+    public class UserListResponse
     {
         public int UserId { get; set; }
-
-        public string Username { get; set; } = null!;
-
-        public string Password { get; set; } = null!;
 
         public string? FullName { get; set; }
 
@@ -25,6 +21,5 @@ namespace SchoolMedicalManagement.Repository.Response
 
         public string? Address { get; set; }
 
-        public bool? IsFirstLogin { get; set; }
     }
 }

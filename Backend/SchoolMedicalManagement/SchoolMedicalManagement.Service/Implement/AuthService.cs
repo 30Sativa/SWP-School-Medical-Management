@@ -11,13 +11,14 @@ using Microsoft.IdentityModel.Tokens;
 using SchoolMedicalManagement.Models.Entity;
 using SchoolMedicalManagement.Models.Utils;
 using SchoolMedicalManagement.Repository.Repository;
-using SchoolMedicalManagement.Repository.Request;
-using SchoolMedicalManagement.Repository.Response;
+using SchoolMedicalManagement.Models.Request;
+
 using SchoolMedicalManagement.Service.Interface;
+using SchoolMedicalManagement.Models.Response;
 
 namespace SchoolMedicalManagement.Service.Implement
 {
-    public class AuthService : IAuthService
+    public class AuthService : IAuthService 
     {
         private readonly UserRepository _userRepository;
         private readonly IConfiguration _config;

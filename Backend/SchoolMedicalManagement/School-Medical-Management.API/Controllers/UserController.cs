@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolMedicalManagement.Models.Entity;
-using SchoolMedicalManagement.Repository.Request;
-using SchoolMedicalManagement.Repository.Response;
+using SchoolMedicalManagement.Models.Request;
+using SchoolMedicalManagement.Models.Response;
 using SchoolMedicalManagement.Service.Interface;
 
 namespace School_Medical_Management.API.Controllers
