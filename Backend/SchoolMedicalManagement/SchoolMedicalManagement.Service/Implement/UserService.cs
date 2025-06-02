@@ -126,28 +126,12 @@ namespace SchoolMedicalManagement.Service.Implement
                 return null;
             }
 
-            //Chỉ update nếu nhập vào giá trị
-            if (!string.IsNullOrEmpty(request.Password))
-            {
-                userToUpdate.Password = request.Password;
-            }
-            if (!string.IsNullOrEmpty(request.FullName))
-            {
-                userToUpdate.FullName = request.FullName;
-            }
-            if (!string.IsNullOrEmpty(request.Phone))
-            {
-                userToUpdate.Phone = request.Phone;
-            }
-            if (!string.IsNullOrEmpty(request.Email))
-            {
-                userToUpdate.Email = request.Email;
-            }
-            if (!string.IsNullOrEmpty(request.Address))
-            {
-                userToUpdate.Address = request.Address;
-            }
-
+            userToUpdate.Password = string.IsNullOrEmpty(request.Password) ? userToUpdate.Password : request.Password;
+            userToUpdate.FullName = string.IsNullOrEmpty(request.FullName) ? userToUpdate.FullName : request.FullName;
+            userToUpdate.Phone = string.IsNullOrEmpty(request.Phone) ? userToUpdate.Phone : request.Phone;
+            userToUpdate.Email = string.IsNullOrEmpty(request.Email) ? userToUpdate.Email : request.Email;
+            userToUpdate.Address = string.IsNullOrEmpty(request.Address) ? userToUpdate.Address : request.Address;
+            // Nếu không có thay đổi gì thì trả về null
             var updatedUser = await _userRepository.UpdateUser(userToUpdate);
             if (updatedUser == null)
             {

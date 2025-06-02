@@ -12,7 +12,7 @@ namespace SchoolMedicalManagement.Repository.Repository
 {
     public class UserRepository : GenericRepository<User>
     {
-        public async Task<User> Login(UserLoginRequest loginRequest)
+        public async Task<User?> Login(UserLoginRequest loginRequest)
         {
             return await _context.Users.Include(u => u.Role)
                                        .FirstOrDefaultAsync(u => u.Username == loginRequest.Username &&
@@ -26,7 +26,7 @@ namespace SchoolMedicalManagement.Repository.Repository
         }
 
         //Get user by id
-        public async Task<User> GetUserById(int id)
+        public async Task<User?> GetUserById(int id)
         {
             return await _context.Users
                 .Include(u => u.Role)
@@ -34,7 +34,7 @@ namespace SchoolMedicalManagement.Repository.Repository
         }
 
         //Get user by username
-        public async Task<User> GetUserByUsername(string username)
+        public async Task<User?> GetUserByUsername(string username)
         {
             return await _context.Users
                 .Include(u => u.Role)
@@ -42,7 +42,7 @@ namespace SchoolMedicalManagement.Repository.Repository
         }
 
         //Create a new user
-        public async Task<User> CreateUser(User user)
+        public async Task<User?> CreateUser(User user)
         {
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
@@ -65,7 +65,7 @@ namespace SchoolMedicalManagement.Repository.Repository
         }   
 
         //Update a user
-        public async Task<User> UpdateUser(User user)
+        public async Task<User?> UpdateUser(User user)
         {
 
             _context.Users.Update(user);
@@ -76,11 +76,9 @@ namespace SchoolMedicalManagement.Repository.Repository
                 .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.UserId == user.UserId);
         }
-            return await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.UserId == id);
-        }
-
+         
         //Get user by id for change password
-        public Task<User> GetUserById(UserChangePasswordRequest request)
+        public Task<User?> GetUserById(UserChangePasswordRequest request)
         {
             return _context.Users.FirstOrDefaultAsync(u => u.UserId == request.UserId);
         }
