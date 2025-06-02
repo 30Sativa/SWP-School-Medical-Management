@@ -76,6 +76,17 @@ namespace SchoolMedicalManagement.Repository.Repository
                 .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.UserId == user.UserId);
         }
+            return await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.UserId == id);
+        }
+
+        //Get user by id for change password
+        public Task<User> GetUserById(UserChangePasswordRequest request)
+        {
+            return _context.Users.FirstOrDefaultAsync(u => u.UserId == request.UserId);
+        }
+
+
+
 
     }
 }

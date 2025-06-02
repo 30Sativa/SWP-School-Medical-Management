@@ -43,7 +43,7 @@ namespace School_Medical_Management.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserById(int id)
+        public async Task<IActionResult> GetUserById([FromRoute] int id)
         {
             var user = await _userService.GetUserById(id);
             if (user == null)
@@ -85,5 +85,18 @@ namespace School_Medical_Management.API.Controllers
             return Ok(updatedUser);
         }
 
+
+
+        [HttpPost("change-password{id}")]
+        public async Task<IActionResult> ChangePasswordAfterFirstLogin(UserChangePasswordRequest userChangePasswordRequest)
+        {
+            var response = await _authService.ChangePasswordAfterFirstLogin(userChangePasswordRequest);
+            if (response !=null)
+            {
+                return Ok(response);
+            }
+            return BadRequest("Failed to change password or user not eligible for password change");
+        }
     }
+
 }

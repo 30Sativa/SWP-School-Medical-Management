@@ -27,6 +27,40 @@ namespace SchoolMedicalManagement.Service.Implement
             _config = config;
         }
 
+
+        // First login change password
+        public async Task<UserChangePasswordResponse> ChangePasswordAfterFirstLogin(UserChangePasswordRequest userChangePasswordRequest)
+        {
+            var user = await _userRepository.GetUserById(userChangePasswordRequest.UserId);
+            if (user == null || user.IsFirstLogin == false)
+                return null;
+
+            user.Password = userChangePasswordRequest.NewPassword;
+            user.IsFirstLogin = false;
+
+            await _userRepository.UpdateAsync(user);
+
+            return new UserChangePasswordResponse
+            {
+                UserId = user.UserId,
+                FullName = user.FullName,
+                RoleName = user.Role.RoleName,
+                Email = user.Email,
+                Phone = user.Phone,
+                IsFirstLogin = user.IsFirstLogin.GetValueOrDefault() // GetValueOrDefault() sẽ trả về false nếu user.IsFirstLogin == null
+            };
+        }
+
+        public Task<UserChangePasswordResponse> ChangePasswordAfterFirstLogin(UserChangePasswordResponse request)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+
+
+        //Login
         public async Task<UserLoginResponse> Login(UserLoginRequest loginRequest)
         {
             var user = await _userRepository.Login(loginRequest);

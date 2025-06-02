@@ -14,6 +14,7 @@ namespace SchoolMedicalManagement.Repository.Response
         public string? FullName { get; set; } = null!;
         public Role Role { get; set; } = null!;
 
+        public bool? IsFirstLogin { get; set; } 
         public string Token { get; set; } = null!;
 
     }
