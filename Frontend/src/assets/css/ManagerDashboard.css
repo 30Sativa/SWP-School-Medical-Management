@@ -19,6 +19,25 @@ html, body, #root {
 }
 
 /* Sidebar */
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* khoảng cách giữa ảnh và chữ */
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 40px;
+}
+
+/* Kích thước ảnh logo trong sidebar */
+.sidebar-logo img.logo {
+  width: 40px;       /* chiều rộng cố định */
+  height: auto;      /* chiều cao tự động theo tỉ lệ */
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+}
+
 .sidebar {
   width: 220px;
   min-width: 220px;
@@ -81,6 +100,9 @@ html, body, #root {
   border-radius: 8px;
   cursor: pointer;
   text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   transition: background-color 0.3s ease;
 }
 
@@ -90,8 +112,13 @@ html, body, #root {
 }
 
 .nav-btn.active {
-  background-color: #1677ff;
   color: white;
+}
+
+.sidebar-icon {
+  font-size: 18px;
+  display: flex;
+  align-items: center;
 }
 
 .sidebar-collapse {
@@ -242,8 +269,17 @@ html, body, #root {
   text-align: center;
   transition: box-shadow 0.3s ease;
   cursor: default;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
+.stat-icon {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .stat-card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
