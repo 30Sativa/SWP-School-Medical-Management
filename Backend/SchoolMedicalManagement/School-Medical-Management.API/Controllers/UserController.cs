@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolMedicalManagement.Models.Entity;
 using SchoolMedicalManagement.Models.Request;
@@ -20,8 +21,8 @@ namespace School_Medical_Management.API.Controllers
             _userService = userService;
         }
 
-
         [HttpPost("login")]
+        
         public async Task<IActionResult> Login([FromBody] UserLoginRequest loginRequest)
         {
             var response = await _authService.Login(loginRequest);
@@ -31,6 +32,7 @@ namespace School_Medical_Management.API.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "Manager")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -41,7 +43,7 @@ namespace School_Medical_Management.API.Controllers
             }
             return NotFound("No users found");
         }
-
+        [Authorize(Roles = "Manager")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById([FromRoute] int id)
         {
@@ -50,7 +52,7 @@ namespace School_Medical_Management.API.Controllers
                 return NotFound($"User with ID {id} not found");
             return Ok(user);
         }
-
+        [Authorize(Roles = "Manager")]
         [HttpPost]
         public async Task<IActionResult> CreateUser(UserCreateRequest request)
         {
@@ -61,7 +63,7 @@ namespace School_Medical_Management.API.Controllers
             }
             return Ok(userToCreate);
         }
-
+        [Authorize(Roles = "Manager")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
@@ -73,7 +75,7 @@ namespace School_Medical_Management.API.Controllers
             return NotFound($"User with ID {id} not found");
 
         }
-
+        [Authorize(Roles = "Manager")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, UserUpdateRequest request)
         {
