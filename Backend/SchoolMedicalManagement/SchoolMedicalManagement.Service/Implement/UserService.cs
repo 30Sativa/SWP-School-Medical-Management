@@ -37,7 +37,6 @@ namespace SchoolMedicalManagement.Service.Implement
                 };
             }
 
-
             var newUser = new User
             {
                 Username = user.Username,
@@ -155,11 +154,6 @@ namespace SchoolMedicalManagement.Service.Implement
             return userManagementResponse;
         }
 
-
-        // Sau khi suy nghĩ lại thì hàm update này ko nên update password
-        // vì password là thông tin nhạy cảm, nên tách riêng ra thành hàm update password
-        // Thấy không Văn Thành?
-
         public async Task<BaseResponse> UpdateUser(int id, UserUpdateRequest request)
 
         {
@@ -175,7 +169,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 }; // User not found
             }
 
-            userToUpdate.Password = HashPassword.HashPasswordd(string.IsNullOrEmpty(request.Password) ? userToUpdate.Password : request.Password);
+            
             userToUpdate.FullName = string.IsNullOrEmpty(request.FullName) ? userToUpdate.FullName : request.FullName;
             userToUpdate.Phone = string.IsNullOrEmpty(request.Phone) ? userToUpdate.Phone : request.Phone;
             userToUpdate.Email = string.IsNullOrEmpty(request.Email) ? userToUpdate.Email : request.Email;
@@ -201,7 +195,6 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     UserId = updatedUser.UserId,
                     Username = updatedUser.Username,
-                    Password = updatedUser.Password,
                     FullName = updatedUser.FullName,
                     Role = new Role
                     {

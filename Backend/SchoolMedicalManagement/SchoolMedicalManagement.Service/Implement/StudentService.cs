@@ -1,56 +1,29 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.Http;
 using SchoolMedicalManagement.Models.Entity;
 using SchoolMedicalManagement.Models.Request;
 using SchoolMedicalManagement.Models.Response;
 using SchoolMedicalManagement.Repository.Repository;
 using SchoolMedicalManagement.Service.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SchoolMedicalManagement.Service.Implement
 {
     public class StudentService : IStudentService
     {
-        private readonly StudentRepository _studentReposioty;
+        private readonly StudentRepository _studentRepository;
 
         public StudentService(StudentRepository studentRepository)
         {
-            _studentReposioty = studentRepository;
+            _studentRepository = studentRepository;
         }
 
-        //Get student by id
-        public async Task<StudentManagementResponse> GetStudentById(int studentId)
-        {
-            var student = await _studentReposioty.GetStudentById(studentId);
-
-            if (student == null)
-            {
-                return null;
-            }
-
-            var response = new StudentManagementResponse()
-            {
-                StudentId = student.StudentId,
-                FullName = student.FullName,
-                DateOfBirth = student.DateOfBirth,
-                Gender = student.Gender,
-                Class = student.Class,
-                Parent = student.Parent?.Username
-            };
-            return response;
-        }
-
-        //Get list student
         public async Task<List<StudentListResponse>> GetStudentList()
         {
-            var students = await _studentReposioty.GetAllStudent();
+            var students = await _studentRepository.GetAllStudent();
             List<StudentListResponse> studentListResponses = new List<StudentListResponse>();
+
             foreach (var student in students)
             {
-                studentListResponses.Add(new StudentListResponse()
+                studentListResponses.Add(new StudentListResponse
                 {
                     StudentId = student.StudentId,
                     FullName = student.FullName,
@@ -63,8 +36,37 @@ namespace SchoolMedicalManagement.Service.Implement
             return studentListResponses;
         }
 
-        //Create student
-        public async Task<StudentManagementResponse> CreateStudent(CreateStudentRequest request)
+        public async Task<BaseResponse> GetStudentById(int studentId)
+        {
+            var student = await _studentRepository.GetStudentById(studentId);
+
+            if (student == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Student with ID {studentId} not found.",
+                    Data = null
+                };
+            }
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Student found successfully.",
+                Data = new StudentManagementResponse
+                {
+                    StudentId = student.StudentId,
+                    FullName = student.FullName,
+                    DateOfBirth = student.DateOfBirth,
+                    Gender = student.Gender,
+                    Class = student.Class,
+                    Parent = student.Parent?.Username
+                }
+            };
+        }
+
+        public async Task<BaseResponse> CreateStudent(CreateStudentRequest request)
         {
             var student = new Student
             {
@@ -75,46 +77,54 @@ namespace SchoolMedicalManagement.Service.Implement
                 ParentId = request.ParentId
             };
 
-            var createdStudent = await _studentReposioty.CreateStudent(student);
+            var createdStudent = await _studentRepository.CreateStudent(student);
 
             if (createdStudent == null)
             {
-                return null; // Xử lí trường hợp tạo hs ko thành công
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Failed to create student. Please check the request data.",
+                    Data = null
+                };
             }
 
-            return new StudentManagementResponse
+            return new BaseResponse
             {
-                StudentId = createdStudent.StudentId,
-                FullName = createdStudent.FullName,
-                DateOfBirth = createdStudent.DateOfBirth,
-                Gender = createdStudent.Gender,
-                Class = createdStudent.Class
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Student created successfully.",
+                Data = new StudentManagementResponse
+                {
+                    StudentId = createdStudent.StudentId,
+                    FullName = createdStudent.FullName,
+                    DateOfBirth = createdStudent.DateOfBirth,
+                    Gender = createdStudent.Gender,
+                    Class = createdStudent.Class,
+                    Parent = createdStudent.Parent?.Username
+                }
             };
         }
 
-        //Update student
-        //sau khi suy nghĩ lại thì hàm update chỉ nên trả về bool thui nhỉ
         public async Task<bool> UpdateStudent(UpdateStudentRequest request)
         {
-            // Tìm coi học sinh cần update có trong db không
-            var studentToUpdate = await _studentReposioty.GetStudentById(request.StudentId);
-            if (studentToUpdate == null) return false;
-
+            var studentToUpdate = await _studentRepository.GetStudentById(request.StudentId);
+            if (studentToUpdate == null)
+            {
+                return false;
+            }
 
             studentToUpdate.FullName = string.IsNullOrEmpty(request.FullName) ? studentToUpdate.FullName : request.FullName;
             studentToUpdate.DateOfBirth = request.DateOfBirth == default ? studentToUpdate.DateOfBirth : request.DateOfBirth;
             studentToUpdate.Gender = string.IsNullOrEmpty(request.Gender) ? studentToUpdate.Gender : request.Gender;
             studentToUpdate.Class = string.IsNullOrEmpty(request.Class) ? studentToUpdate.Class : request.Class;
-            studentToUpdate.ParentId = request.ParentId ?? studentToUpdate.ParentId;// cái này đang phân vân ko biết nên cho đổi phụ huynh ko :))
-            
+            studentToUpdate.ParentId = request.ParentId ?? studentToUpdate.ParentId;
 
-            return await _studentReposioty.SaveChangesAsync();
+            return await _studentRepository.SaveChangesAsync();
         }
 
-        //Delete student
         public async Task<bool> DeleteStudent(int studentId)
         {
-            return await _studentReposioty.DeleteStudent(studentId);
+            return await _studentRepository.DeleteStudent(studentId);
         }
     }
 }

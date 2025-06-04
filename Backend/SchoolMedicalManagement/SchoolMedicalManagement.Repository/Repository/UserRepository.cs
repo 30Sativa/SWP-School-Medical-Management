@@ -84,8 +84,5 @@ namespace SchoolMedicalManagement.Repository.Repository
             return _context.Users.FirstOrDefaultAsync(u => u.UserId == id);
         }
 
-
-
-
     }
 }
