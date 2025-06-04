@@ -35,11 +35,11 @@ namespace School_Medical_Management.API.Controllers
         public async Task<IActionResult> GetAll()
         {
             var users = await _userService.GetAll();
-            if (users != null)
+            if (users == null)
             {
-                return Ok(users);
+                return NotFound("User list is empty!!!");
             }
-            return NotFound("No users found");
+            return Ok(users);
         }
         [Authorize(Roles = "Manager")]
         [HttpGet("{id}")]
