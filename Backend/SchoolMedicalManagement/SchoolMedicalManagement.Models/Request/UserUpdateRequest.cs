@@ -8,8 +8,6 @@ namespace SchoolMedicalManagement.Models.Request
 {
     public class UserUpdateRequest
     {
-        public string Password { get; set; } = null!;
-
         public string? FullName { get; set; }
 
         public string? Phone { get; set; }

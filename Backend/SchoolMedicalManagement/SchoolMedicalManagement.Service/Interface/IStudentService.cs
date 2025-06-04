@@ -11,8 +11,8 @@ using SchoolMedicalManagement.Models.Response;
         public interface IStudentService
         {
             Task<List<StudentListResponse>> GetStudentList();
-            Task<StudentManagementResponse> GetStudentById(int studentId);
-            Task<StudentManagementResponse> CreateStudent(CreateStudentRequest request);
+            Task<BaseResponse> GetStudentById(int studentId);
+            Task<BaseResponse> CreateStudent(CreateStudentRequest request);
             Task<bool> UpdateStudent(UpdateStudentRequest request);
             Task<bool> DeleteStudent(int studentId);
     }
