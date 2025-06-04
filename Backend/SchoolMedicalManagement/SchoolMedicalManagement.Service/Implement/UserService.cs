@@ -24,7 +24,7 @@ namespace SchoolMedicalManagement.Service.Implement
 
         public async Task<UserManagementResponse> CreateUser(UserCreateRequest user)
         {
-            // Kiểm tra user đó tồn tại chưa
+            // Kiểm tra username đó tồn tại chưa
             var existingUser = await _userRepository.GetUserByUsername(user.Username);
             if (existingUser != null)
             {
@@ -118,6 +118,9 @@ namespace SchoolMedicalManagement.Service.Implement
             return userManagementResponse;
         }
 
+        // Sau khi suy nghĩ lại thì hàm update này ko nên update password
+        // vì password là thông tin nhạy cảm, nên tách riêng ra thành hàm update password
+        // Thấy không Văn Thành?
         public async Task<UserManagementResponse> UpdateUser(int id, UserUpdateRequest request)
         {
             // Kiểm tra user cần update có tồn tại ko?
