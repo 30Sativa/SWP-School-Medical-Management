@@ -5,6 +5,8 @@ using System.Text;
 using SchoolMedicalManagement.Repository.Repository;
 using SchoolMedicalManagement.Service.Implement;
 using SchoolMedicalManagement.Service.Interface;
+using Microsoft.EntityFrameworkCore;
+using SchoolMedicalManagement.Models.Entity;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,7 +24,8 @@ builder.Services.AddScoped<StudentRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
-
+builder.Services.AddDbContext<SwpEduHealV1Context>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 builder.Services.AddSwaggerGen(option =>
 {
     option.DescribeAllParametersInCamelCase();
@@ -68,11 +71,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
