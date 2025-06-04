@@ -159,7 +159,6 @@ namespace SchoolMedicalManagement.Service.Implement
         // Sau khi suy nghĩ lại thì hàm update này ko nên update password
         // vì password là thông tin nhạy cảm, nên tách riêng ra thành hàm update password
         // Thấy không Văn Thành?
-        public async Task<UserManagementResponse> UpdateUser(int id, UserUpdateRequest request)
 
         public async Task<BaseResponse> UpdateUser(int id, UserUpdateRequest request)
 
