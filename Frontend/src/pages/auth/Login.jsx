@@ -1,12 +1,17 @@
-import '../../assets/CSS/Login.css'; // Import your CSS styles
+import "../../assets/CSS/Login.css"; // Import your CSS styles
 import axios from "axios";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [form, setForm] = useState({ username: "", password: "", role: "parent" });
+  const [form, setForm] = useState({
+    username: "",
+    password: "",
+    role: "parent",
+  });
   const [loading, setLoading] = useState(false);
   const [focusIndex, setFocusIndex] = useState(null);
-
+  const navigate = useNavigate();
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -22,6 +27,17 @@ const Login = () => {
     setTimeout(() => {
       setLoading(false);
       alert("Đăng nhập thành công!");
+
+      // 🌟 Chuyển trang theo role
+      if (role === "admin") {
+        navigate("/manager");
+      } else if (role === "nurse") {
+        navigate("/nurse");
+      } else if (role === "parent") {
+        navigate("/parent");
+      } else {
+        alert("Vai trò không xác định");
+      }
     }, 2000);
   };
 
@@ -47,7 +63,10 @@ const Login = () => {
           <p>Chào mừng bạn trở lại!</p>
         </div>
         <form onSubmit={handleSubmit}>
-          <div className="form-group" style={{ transform: focusIndex === 0 ? "scale(1.02)" : "scale(1)" }}>
+          <div
+            className="form-group"
+            style={{ transform: focusIndex === 0 ? "scale(1.02)" : "scale(1)" }}
+          >
             <label htmlFor="username">Tài khoản</label>
             <input
               type="text"
@@ -60,7 +79,10 @@ const Login = () => {
               onBlur={handleBlur}
             />
           </div>
-          <div className="form-group" style={{ transform: focusIndex === 1 ? "scale(1.02)" : "scale(1)" }}>
+          <div
+            className="form-group"
+            style={{ transform: focusIndex === 1 ? "scale(1.02)" : "scale(1)" }}
+          >
             <label htmlFor="password">Mật khẩu</label>
             <input
               type="password"
@@ -73,7 +95,10 @@ const Login = () => {
               onBlur={handleBlur}
             />
           </div>
-          <div className="form-group" style={{ transform: focusIndex === 2 ? "scale(1.02)" : "scale(1)" }}>
+          <div
+            className="form-group"
+            style={{ transform: focusIndex === 2 ? "scale(1.02)" : "scale(1)" }}
+          >
             <label htmlFor="role">Vai trò</label>
             <select
               id="role"

@@ -31,10 +31,8 @@ const Homepage = () => {
               Kết nối phụ huynh, nhà trường và đội ngũ y tế để theo dõi, chăm sóc sức khỏe học sinh một cách toàn diện và hiệu quả.
             </p>
             <div className="hero-buttons">
-              <button className="primary-btn">Đăng ký ngay</button>
-              <button className="outline-btn" onClick={() => navigate("/login")}>
-              Đăng nhập
-              </button>
+              <button className="primary-btn">Tìm hiểu thêm </button>
+              
             </div>
           </div>
           <div className="hero-image">

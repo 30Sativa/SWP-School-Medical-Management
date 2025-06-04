@@ -40,6 +40,9 @@ ul {
   gap: 20px;
   align-items: center;
 }
+.nav-links a {
+  color: black;
+}
 .login-btn {
   background: #00b894;
   color: #fff;
