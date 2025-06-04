@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "School-Medical-Management.API", "School-Medical-Management.API\School-Medical-Management.API.csproj", "{E135A823-954C-43BE-9A28-26D5B2407C4C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolMedicalManagement.API", "School-Medical-Management.API\SchoolMedicalManagement.API.csproj", "{E135A823-954C-43BE-9A28-26D5B2407C4C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolMedicalManagement.Models", "SchoolMedicalManagement.Models\SchoolMedicalManagement.Models.csproj", "{247410AB-20E0-D050-FEAE-994AB07360BE}"
 EndProject

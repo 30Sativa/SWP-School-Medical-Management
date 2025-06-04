@@ -67,6 +67,7 @@ namespace School_Medical_Management.API.Controllers
             return NotFound($"User with ID {id} not found");
 
         }
+        //testCICD
         [Authorize(Roles = "Manager")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, UserUpdateRequest request)
