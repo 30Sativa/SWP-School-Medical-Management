@@ -54,12 +54,12 @@ const ManagerDashboard = () => {
     }, 1000);
   }, []);
 
-  if (loading)
-    return (
-      <div className="manager-dashboard-loading">
-        Đang tải dữ liệu....
-      </div>
-    );
+  // if (loading)
+  //   return (
+  //     <div className="manager-dashboard-loading">
+  //       Đang tải dữ liệu....
+  //     </div>
+  //   );
 
   if (error)
     return (
