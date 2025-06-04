@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace SchoolMedicalManagement.Service.Implement
 {
@@ -22,13 +23,18 @@ namespace SchoolMedicalManagement.Service.Implement
             _userRepository = userRepository;
         }
 
-        public async Task<UserManagementResponse> CreateUser(UserCreateRequest user)
+        public async Task<BaseResponse> CreateUser(UserCreateRequest user)
         {
             // Kiểm tra username đó tồn tại chưa
             var existingUser = await _userRepository.GetUserByUsername(user.Username);
             if (existingUser != null)
             {
-                return null; // Username đã tồn tại
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Username already exists.",
+                    Data = null
+                };
             }
 
 
@@ -49,21 +55,34 @@ namespace SchoolMedicalManagement.Service.Implement
             // Nếu không thì trả về null
             if (createdUser == null)
             {
-                return null; // Tạo người dùng không thành công
+                return new BaseResponse { 
+                    Status = StatusCodes.Status400BadRequest.ToString(), 
+                    Message = "Create Fail", 
+                    Data = null 
+                }; // Tạo người dùng không thành công
             }
-            
+
             // Nếu tạo thành công thì trả về thông tin người dùng
-            var response = new UserManagementResponse
+            var response = new BaseResponse
             {
-                UserId = createdUser.UserId,
-                Username = createdUser.Username,
-                Password = createdUser.Password,
-                FullName = createdUser.FullName,
-                Role = createdUser.Role.RoleName,
-                Phone = createdUser.Phone,
-                Email = createdUser.Email,
-                Address = createdUser.Address,
-                IsFirstLogin = createdUser.IsFirstLogin
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Create user successfully.",
+                Data = new UserManagementResponse
+                {
+                    UserId = createdUser.UserId,
+                    Username = createdUser.Username,
+                    Password = createdUser.Password,
+                    FullName = createdUser.FullName,
+                    Role = new Role
+                    {
+                        RoleId = createdUser.Role.RoleId,
+                        RoleName = createdUser.Role.RoleName
+                    },
+                    Phone = createdUser.Phone,
+                    Email = createdUser.Email,
+                    Address = createdUser.Address,
+                    IsFirstLogin = createdUser.IsFirstLogin
+                }
             };
             return response;
         }
@@ -83,7 +102,11 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     UserId = user.UserId,
                     FullName = user.FullName,
-                    Role = user.Role.RoleName,
+                    Role = new Role
+                    {
+                        RoleId = user.Role.RoleId,
+                        RoleName = user.Role.RoleName
+                    },
                     Phone = user.Phone,
                     Email = user.Email,
                     Address = user.Address
@@ -92,7 +115,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return userListResponse;
         }
 
-        public async Task<UserManagementResponse> GetUserById(int id)
+        public async Task<BaseResponse> GetUserById(int id)
         {
             var user = await _userRepository.GetUserById(id);
 
@@ -100,34 +123,57 @@ namespace SchoolMedicalManagement.Service.Implement
             // tránh bị lỗi khi truy cập thuộc tính của user null
             if (user == null)
             {
-                return null; // User not found
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"User with ID {id} not found.",
+                    Data = null
+                }; // User not found
             }
 
-            var userManagementResponse = new UserManagementResponse
+            var userManagementResponse = new BaseResponse
             {
-                UserId = user.UserId,
-                Username = user.Username,
-                Password = user.Password,
-                FullName = user.FullName,
-                Role = user.Role.RoleName,
-                Phone = user.Phone,
-                Email = user.Email,
-                Address = user.Address,
-                IsFirstLogin = user.IsFirstLogin
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "User found successfully.",
+                Data = new UserManagementResponse
+                {
+                    UserId = user.UserId,
+                    Username = user.Username,
+                    Password = user.Password,
+                    FullName = user.FullName,
+                    Role = new Role
+                    {
+                        RoleId = user.Role.RoleId,
+                        RoleName = user.Role.RoleName
+                    },
+                    Phone = user.Phone,
+                    Email = user.Email,
+                    Address = user.Address,
+                    IsFirstLogin = user.IsFirstLogin
+                }
             };
             return userManagementResponse;
         }
+
 
         // Sau khi suy nghĩ lại thì hàm update này ko nên update password
         // vì password là thông tin nhạy cảm, nên tách riêng ra thành hàm update password
         // Thấy không Văn Thành?
         public async Task<UserManagementResponse> UpdateUser(int id, UserUpdateRequest request)
+
+        public async Task<BaseResponse> UpdateUser(int id, UserUpdateRequest request)
+
         {
             // Kiểm tra user cần update có tồn tại ko?
             var userToUpdate = await _userRepository.GetUserById(id);
             if (userToUpdate == null)
             {
-                return null;
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"User with ID {id} not found.",
+                    Data = null
+                }; // User not found
             }
 
             userToUpdate.Password = HashPassword.HashPasswordd(string.IsNullOrEmpty(request.Password) ? userToUpdate.Password : request.Password);
@@ -139,23 +185,36 @@ namespace SchoolMedicalManagement.Service.Implement
             var updatedUser = await _userRepository.UpdateUser(userToUpdate);
             if (updatedUser == null)
             {
-                return null; // Update không thành công
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Update failed. Please check the request data.",
+                    Data = null
+                }; // Update không thành công
             }
 
             // Trả về thông tin người dùng sau khi cập nhật
-            var response = new UserManagementResponse
+            var response = new BaseResponse
             {
-                UserId = updatedUser.UserId,
-                Username = updatedUser.Username,
-                Password = updatedUser.Password,
-                FullName = updatedUser.FullName,
-                Role = updatedUser.Role.RoleName,
-                Phone = updatedUser.Phone,
-                Email = updatedUser.Email,
-                Address = updatedUser.Address,
-                IsFirstLogin = updatedUser.IsFirstLogin
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "User updated successfully.",
+                Data = new UserManagementResponse
+                {
+                    UserId = updatedUser.UserId,
+                    Username = updatedUser.Username,
+                    Password = updatedUser.Password,
+                    FullName = updatedUser.FullName,
+                    Role = new Role
+                    {
+                        RoleId = updatedUser.Role.RoleId,
+                        RoleName = updatedUser.Role.RoleName
+                    },
+                    Phone = updatedUser.Phone,
+                    Email = updatedUser.Email,
+                    Address = updatedUser.Address,
+                    IsFirstLogin = updatedUser.IsFirstLogin
+                }
             };
-
             return response;
 
         }

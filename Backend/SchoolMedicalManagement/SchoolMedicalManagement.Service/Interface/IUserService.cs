@@ -11,10 +11,10 @@ namespace SchoolMedicalManagement.Service.Interface
     public interface IUserService
     {
         Task<List<UserListResponse>> GetAll();
-        Task<UserManagementResponse> GetUserById(int id);
-        Task<UserManagementResponse> CreateUser(UserCreateRequest user);
+        Task<BaseResponse> GetUserById(int id);
+        Task<BaseResponse> CreateUser(UserCreateRequest user);
         Task<bool> DeleteUser(int id);
-        Task<UserManagementResponse> UpdateUser(int id, UserUpdateRequest user);
+        Task<BaseResponse> UpdateUser(int id, UserUpdateRequest user);
         
     }
 

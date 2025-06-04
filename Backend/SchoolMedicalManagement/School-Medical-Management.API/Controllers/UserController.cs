@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Azure;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolMedicalManagement.Models.Entity;
 using SchoolMedicalManagement.Models.Request;
@@ -20,17 +22,15 @@ namespace School_Medical_Management.API.Controllers
             _userService = userService;
         }
 
-
         [HttpPost("login")]
+        
         public async Task<IActionResult> Login([FromBody] UserLoginRequest loginRequest)
         {
             var response = await _authService.Login(loginRequest);
-            if (response == null)
-                return Unauthorized("Invalid username or password");
-
-            return Ok(response);
+            return StatusCode(int.Parse(response.Status), response);
         }
 
+        [Authorize(Roles = "Manager")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -41,27 +41,21 @@ namespace School_Medical_Management.API.Controllers
             }
             return Ok(users);
         }
-
+        [Authorize(Roles = "Manager")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById([FromRoute] int id)
         {
             var user = await _userService.GetUserById(id);
-            if (user == null)
-                return NotFound($"User with ID {id} not found");
-            return Ok(user);
+            return StatusCode(int.Parse(user.Status), user);
         }
-
+        [Authorize(Roles = "Manager")]
         [HttpPost]
         public async Task<IActionResult> CreateUser(UserCreateRequest request)
         {
             var userToCreate = await _userService.CreateUser(request);
-            if (userToCreate == null)
-            {
-                return BadRequest("Failed to create user. Please check the request data.");
-            }
-            return Ok(userToCreate);
+            return StatusCode(int.Parse(userToCreate.Status), userToCreate);
         }
-
+        [Authorize(Roles = "Manager")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
@@ -73,16 +67,12 @@ namespace School_Medical_Management.API.Controllers
             return NotFound($"User with ID {id} not found");
 
         }
-
+        [Authorize(Roles = "Manager")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, UserUpdateRequest request)
         {
             var updatedUser = await _userService.UpdateUser(id, request);
-            if (updatedUser == null)
-            {
-                return NotFound($"User with ID {id} not found!");
-            }
-            return Ok(updatedUser);
+            return StatusCode(int.Parse(updatedUser.Status), updatedUser);
         }
 
 
@@ -91,11 +81,7 @@ namespace School_Medical_Management.API.Controllers
         public async Task<IActionResult> ChangePasswordAfterFirstLogin([FromRoute] int id, UserChangePasswordRequest userChangePasswordRequest)
         {
             var response = await _authService.ChangePasswordAfterFirstLogin(id,userChangePasswordRequest);
-            if (response !=null)
-            {
-                return Ok(response);
-            }
-            return BadRequest("Failed to change password or user not eligible for password change");
+            return StatusCode(int.Parse(response.Status), response);
         }
     }
 
