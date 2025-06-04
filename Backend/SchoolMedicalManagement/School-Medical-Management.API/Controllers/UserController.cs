@@ -26,10 +26,7 @@ namespace School_Medical_Management.API.Controllers
         public async Task<IActionResult> Login([FromBody] UserLoginRequest loginRequest)
         {
             var response = await _authService.Login(loginRequest);
-            if (response == null)
-                return Unauthorized("Invalid username or password");
-
-            return Ok(response);
+            return StatusCode(int.Parse(response.Status), response);
         }
 
         [Authorize(Roles = "Manager")]
@@ -93,11 +90,7 @@ namespace School_Medical_Management.API.Controllers
         public async Task<IActionResult> ChangePasswordAfterFirstLogin([FromRoute] int id, UserChangePasswordRequest userChangePasswordRequest)
         {
             var response = await _authService.ChangePasswordAfterFirstLogin(id,userChangePasswordRequest);
-            if (response !=null)
-            {
-                return Ok(response);
-            }
-            return BadRequest("Failed to change password or user not eligible for password change");
+            return StatusCode(int.Parse(response.Status), response);
         }
     }
 
