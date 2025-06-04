@@ -16,7 +16,7 @@ const Login = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const { username, password, role } = form;
     if (!username || !password || !role) {
@@ -24,9 +24,14 @@ const Login = () => {
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const response = await axios.post("/api/User/login", {
+        username,
+        password
+      });
+      // Xử lý kết quả trả về ở đây (ví dụ: lưu token, chuyển trang, ...)
       alert("Đăng nhập thành công!");
+
 
       // 🌟 Chuyển trang theo role
       if (role === "admin") {
@@ -39,6 +44,15 @@ const Login = () => {
         alert("Vai trò không xác định");
       }
     }, 2000);
+
+      // Ví dụ: lưu token vào localStorage
+      // localStorage.setItem('token', response.data.token);
+    } catch (error) {
+      alert("Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin.");
+    } finally {
+      setLoading(false);
+    }
+
   };
 
   const handleFocus = (idx) => setFocusIndex(idx);
@@ -64,6 +78,7 @@ const Login = () => {
             <h2>Đăng nhập</h2>
             <p>Chào mừng bạn trở lại!</p>
           </div>
+
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="username">Tài khoản</label>
@@ -111,6 +126,19 @@ const Login = () => {
             </div>
           </form>
         </div>
+
+          <div className="forgot-password">
+            <a href="#">Quên mật khẩu?</a>
+          </div>
+          <button type="submit" className="login-btn" disabled={loading}>
+            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+          </button>
+          <div className="register-link">
+            <span>Chưa có tài khoản? </span>
+            {/* <a href="#">Đăng ký ngay</a> */}
+          </div>
+        </form>
+
       </div>
     </div>
   </div>
