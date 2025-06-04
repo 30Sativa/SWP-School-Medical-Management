@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "../../assets/css/ManagerDashboard.css";
-import Logo from '../../assets/img/eduhealthlogo.jpg';
+import Logo from '../../assets/icon/admin.png';
 import { useNavigate } from "react-router-dom";
 // Import icon từ antd
 import {
@@ -19,7 +19,7 @@ const ManagerDashboard = () => {
   const [stats, setStats] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {

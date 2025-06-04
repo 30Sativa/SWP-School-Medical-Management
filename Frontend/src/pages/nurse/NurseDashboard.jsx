@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import "../../assets/css/nursedashboard.css";
-import log1 from "../../assets/icon/admin.png";
-import log2 from "../../assets/icon/admin.png";
-import log3 from "../../assets/icon/admin.png";
-import log4 from "../../assets/icon/admin.png";
-import log5 from "../../assets/icon/admin.png";
-import log6 from "../../assets/icon/admin.png";
+import log1 from "../../assets/icon/feedback.png";
+import log2 from "../../assets/icon/nurse.png";
+import log3 from "../../assets/icon/notify.png";
+import log4 from "../../assets/icon/Overlay.png";
+import log5 from "../../assets/icon/tick.png";
+import log6 from "../../assets/icon/vacxin.png";
 
 const NurseDashBoard = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -35,9 +35,7 @@ const NurseDashBoard = () => {
             strokeWidth="2"
             strokeLinejoin="round"
             strokeLinecap="round"
-          >
-            <path d="M12 2L1 7l11 5 9-4.09V17h2V7L12 2z" fill="white" />
-          </svg>
+          ></svg>
           <a>EduHealth</a>
         </div>
         <nav>
@@ -55,10 +53,22 @@ const NurseDashBoard = () => {
       {/* Main content */}
       <main className="content">
         <header>
-          <h1 className="dashboard-header">Nurse Dashboard</h1>
-          <div className="subheader">
-            Xin chào, Nguyễn Thị Hương | Thứ Hai, 26 tháng 5, 2025 | Năm học
-            2024-2025
+          <div className="dashboard-header-bar">
+            <div className="title-group">
+              <h1>
+                <span className="text-black">Dash</span>
+                <span className="text-accent">board</span>
+              </h1>
+            </div>
+            <button
+              className="logout-btn"
+              onClick={() => {
+                localStorage.clear(); // nếu có token cần xóa
+                window.location.href = "/"; // chuyển về trang chủ
+              }}
+            >
+              Đăng xuất
+            </button>
           </div>
         </header>
 
@@ -258,7 +268,7 @@ const NurseDashBoard = () => {
           </div>
 
           <div className="right-column">
-            <aside className="right-section">
+            <div className="right-top">
               <div className="reminder-box">
                 <h3 className="reminder-title">Cảnh báo & Nhắc nhở</h3>
 
@@ -300,6 +310,9 @@ const NurseDashBoard = () => {
               </div>
 
               {/* Sự cố gần đây */}
+            </div>
+
+            <div className="right-bottm">
               <section className=" recent-incidents">
                 <div className="incident-header">
                   <h2>Sự cố gần đây</h2>
@@ -352,10 +365,8 @@ const NurseDashBoard = () => {
                   </li>
                 </ul>
               </section>
-            </aside>
+            </div>
           </div>
-
-          {/* Cảnh báo và Nhắc nhở bên phải */}
         </div>
       </main>
     </div>

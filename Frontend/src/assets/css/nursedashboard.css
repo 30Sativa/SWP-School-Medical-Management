@@ -16,33 +16,26 @@ a:hover {
 }
 
 .blue-text {
-    color : #20b2aa;
+  color: #20b2aa;
 }
-
 
 /* Layout */
 .container {
   display: flex;
   min-height: 100vh;
-  max-width: 1400px;
-  margin: 0 auto;
+  width: 100vw; /* full chiều ngang viewport */
+  max-width: none; /* bỏ giới hạn 1400px */
+  margin: 0; /* bỏ căn giữa */
   background: white;
-  box-shadow: 0 0 12px rgb(0 0 0 / 0.1);
-  border-radius: 10px;
+  box-shadow: none; /* bỏ viền đổ bóng nếu không cần */
+  border-radius: 0; /* bỏ bo góc nếu cần full */
   overflow: hidden;
-}
-
-/* Container đặt flex để sidebar và main content ngang hàng */
-.container {
-  display: flex;
-  min-height: 100vh;
-  transition: all 0.3s ease;
 }
 
 /* Sidebar mặc định rộng 280px */
 .sidebar {
   width: 280px;
-  background-color: #20b2aa;
+  background-color: rgba(132, 236, 231, 0.95);
   color: white;
   display: flex;
   flex-direction: column;
@@ -53,7 +46,7 @@ a:hover {
 
 /* Khi sidebar đóng, trượt sang trái hết */
 .sidebar-closed .sidebar {
-  margin-left: -280px; /* ẩn sidebar */
+  display: none !important;
 }
 
 /* Main content chiếm phần còn lại */
@@ -64,9 +57,10 @@ a:hover {
   transition: margin-left 0.3s ease;
 }
 
-/* Khi sidebar đóng, main content tràn full rộng */
 .sidebar-closed .content {
-  margin-left: 0;
+  margin-left: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 /* Khi sidebar mở, main content cách sidebar ra */
@@ -123,7 +117,19 @@ a:hover {
 
 .sidebar nav a.active,
 .sidebar nav a:hover {
-  background-color: #187b7b;
+  background: rgba(255, 255, 255, 0.12); /* nền trắng mờ */
+  color: #ffffff; /* chữ trắng */
+  font-weight: 700;
+  border-radius: 12px;
+  padding: 12px 16px;
+
+  /* hiệu ứng glass */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  /* đường viền nhẹ viền sáng */
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
 }
 
 /* Sidebar */
@@ -188,18 +194,36 @@ main.content {
   background-color: #f9fafb;
 }
 
-/* Header */
-header.dashboard-header {
-  font-weight: 700;
-  font-size: 1.8rem;
-  color: #1e293b;
-  margin-bottom: 6px;
+
+.dashboard-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20px;
 }
 
-header.subheader {
-  font-size: 0.9rem;
-  color: #64748b;
-  margin-bottom: 30px;
+.logout-btn {
+  background-color: #ef4444;
+  color: white;
+  font-weight: 600;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.logout-btn:hover {
+  background-color: #dc2626;
+}
+
+
+.text-black {
+  color: #1e293b; /* hoặc #000 nếu bạn muốn đen hơn */
+}
+
+.text-accent {
+  color: #20b2aa; /* xanh ngọc, đúng tone với app bạn */
 }
 
 /* Stats grid */
@@ -270,7 +294,7 @@ header.subheader {
 
 /* Left big card (requests) */
 .card-requests {
-  flex-grow: 1;
+  flex-grow: 0;
   background: white;
   border-radius: 16px;
   padding: 24px 28px;
@@ -311,6 +335,12 @@ table.request-table tbody tr {
   border-radius: 10px;
   box-shadow: 0 2px 4px rgb(0 0 0 / 0.05);
 }
+table.request-table tbody tr:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
 table.request-table tbody tr:hover {
   background-color: #f1f5f9;
 }
@@ -404,8 +434,7 @@ aside.right-sidebar {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
-  gap: 24px
-
+  gap: 24px;
 }
 
 .card-box {
@@ -488,7 +517,17 @@ aside.right-sidebar {
   background-color: #d1fae5;
 }
 
-
+.right-top,
+.right-bottom {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  gap: 16px;
+}
 
 /* Health check section */
 section.health-check {
@@ -561,18 +600,17 @@ section.health-check p {
 }
 
 .campaign-status {
-  display: inline-block;              /* ✅ bao quanh chữ */
+  display: inline-block; /* ✅ bao quanh chữ */
   background-color: #e0e7ff;
   color: #4f46e5;
   padding: 4px 12px;
   font-size: 13px;
   font-weight: 500;
   border-radius: 8px;
-  white-space: nowrap;               /* ✅ không xuống dòng */
-  width: auto !important;            /* ✅ override width nếu bị kéo dài */
-  max-width: fit-content;            /* thêm nếu bạn dùng Tailwind hoặc framework khác */
+  white-space: nowrap; /* ✅ không xuống dòng */
+  width: auto !important; /* ✅ override width nếu bị kéo dài */
+  max-width: fit-content; /* thêm nếu bạn dùng Tailwind hoặc framework khác */
 }
-
 
 .campaign-count {
   font-size: 13px;
@@ -597,7 +635,7 @@ section.health-check p {
   background: #fff;
   padding: 16px;
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   margin-top: 24px;
 }
 
@@ -697,10 +735,10 @@ section.health-check p {
 }
 
 .dashboard-4col {
-  display: flex;
+  display: grid;
+  grid-template-columns: 70% 30%; /* 👈 tỉ lệ chính xác */
   gap: 24px;
   align-items: stretch;
-  flex-wrap: wrap;
 }
 
 .left-column {
@@ -712,10 +750,11 @@ section.health-check p {
 }
 
 .right-column {
-  width: 320px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  justify-content: space-between;
+  flex: 1;
+  min-width: 300px;
 }
 
 .card-requests {
@@ -831,6 +870,3 @@ section.health-check p {
   font-weight: 500;
   cursor: pointer;
 }
-
-
-

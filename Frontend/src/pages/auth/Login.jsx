@@ -51,6 +51,7 @@ const Login = () => {
   };
 
   return (
+     <div className="login-page-wrapper">
     <div className="login-container">
       <div className="left-section">
         <h1>Hệ thống quản lý sức khỏe học đường</h1>
@@ -58,74 +59,61 @@ const Login = () => {
         <div className="illustration"></div>
       </div>
       <div className="right-section">
-        <div className="form-header">
-          <h2>Đăng nhập</h2>
-          <p>Chào mừng bạn trở lại!</p>
+        <div className="right-content">
+          <div className="form-header">
+            <h2>Đăng nhập</h2>
+            <p>Chào mừng bạn trở lại!</p>
+          </div>
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="username">Tài khoản</label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                placeholder="Nhập tài khoản của bạn"
+                value={form.username}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="password">Mật khẩu</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Nhập mật khẩu"
+                value={form.password}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="role">Vai trò</label>
+              <select
+                id="role"
+                name="role"
+                value={form.role}
+                onChange={handleChange}
+              >
+                <option value="parent">Phụ huynh</option>
+                <option value="admin">Quản trị viên</option>
+                <option value="nurse">Y tá</option>
+              </select>
+            </div>
+            <div className="forgot-password">
+              <a href="#">Quên mật khẩu?</a>
+            </div>
+            <button type="submit" className="login-btn" disabled={loading}>
+              {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+            </button>
+            <div className="register-link">
+              <span>Chưa có tài khoản?</span>
+            </div>
+          </form>
         </div>
-        <form onSubmit={handleSubmit}>
-          <div
-            className="form-group"
-            style={{ transform: focusIndex === 0 ? "scale(1.02)" : "scale(1)" }}
-          >
-            <label htmlFor="username">Tài khoản</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              placeholder="Nhập tài khoản của bạn"
-              value={form.username}
-              onChange={handleChange}
-              onFocus={() => handleFocus(0)}
-              onBlur={handleBlur}
-            />
-          </div>
-          <div
-            className="form-group"
-            style={{ transform: focusIndex === 1 ? "scale(1.02)" : "scale(1)" }}
-          >
-            <label htmlFor="password">Mật khẩu</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="Nhập mật khẩu"
-              value={form.password}
-              onChange={handleChange}
-              onFocus={() => handleFocus(1)}
-              onBlur={handleBlur}
-            />
-          </div>
-          <div
-            className="form-group"
-            style={{ transform: focusIndex === 2 ? "scale(1.02)" : "scale(1)" }}
-          >
-            <label htmlFor="role">Vai trò</label>
-            <select
-              id="role"
-              name="role"
-              value={form.role}
-              onChange={handleChange}
-              onFocus={() => handleFocus(2)}
-              onBlur={handleBlur}
-            >
-              <option value="parent">Phụ huynh</option>
-              <option value="admin">Quản trị viên</option>
-              <option value="nurse">Y tá</option>
-            </select>
-          </div>
-          <div className="forgot-password">
-            <a href="#">Quên mật khẩu?</a>
-          </div>
-          <button type="submit" className="login-btn" disabled={loading}>
-            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
-          </button>
-          <div className="register-link">
-            <span>Chưa có tài khoản? </span>
-            {/* <a href="#">Đăng ký ngay</a> */}
-          </div>
-        </form>
       </div>
     </div>
+  </div>
   );
 };
 
