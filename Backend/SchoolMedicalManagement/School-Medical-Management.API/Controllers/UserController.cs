@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolMedicalManagement.Models.Entity;
@@ -45,20 +46,14 @@ namespace School_Medical_Management.API.Controllers
         public async Task<IActionResult> GetUserById([FromRoute] int id)
         {
             var user = await _userService.GetUserById(id);
-            if (user == null)
-                return NotFound($"User with ID {id} not found");
-            return Ok(user);
+            return StatusCode(int.Parse(user.Status), user);
         }
         [Authorize(Roles = "Manager")]
         [HttpPost]
         public async Task<IActionResult> CreateUser(UserCreateRequest request)
         {
             var userToCreate = await _userService.CreateUser(request);
-            if (userToCreate == null)
-            {
-                return BadRequest("Failed to create user. Please check the request data.");
-            }
-            return Ok(userToCreate);
+            return StatusCode(int.Parse(userToCreate.Status), userToCreate);
         }
         [Authorize(Roles = "Manager")]
         [HttpDelete("{id}")]
@@ -77,11 +72,7 @@ namespace School_Medical_Management.API.Controllers
         public async Task<IActionResult> UpdateUser(int id, UserUpdateRequest request)
         {
             var updatedUser = await _userService.UpdateUser(id, request);
-            if (updatedUser == null)
-            {
-                return NotFound($"User with ID {id} not found!");
-            }
-            return Ok(updatedUser);
+            return StatusCode(int.Parse(updatedUser.Status), updatedUser);
         }
 
 
