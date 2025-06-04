@@ -4,10 +4,10 @@ WORKDIR /app
 
 # Copy solution and restore
 COPY *.sln .
-COPY School-Medical-Management.API/*.csproj ./School-Medical-Management.API/
-COPY SchoolMedicalManagement.Models/*.csproj ./SchoolMedicalManagement.Models/
-COPY SchoolMedicalManagement.Repository/*.csproj ./SchoolMedicalManagement.Repository/
-COPY SchoolMedicalManagement.Service/*.csproj ./SchoolMedicalManagement.Service/
+COPY School-Medical-Management.API/SchoolMedicalManagement.API.csproj ./School-Medical-Management.API/
+COPY SchoolMedicalManagement.Models/SchoolMedicalManagement.Models.csproj ./SchoolMedicalManagement.Models/
+COPY SchoolMedicalManagement.Repository/SchoolMedicalManagement.Repository.csproj ./SchoolMedicalManagement.Repository/
+COPY SchoolMedicalManagement.Service/SchoolMedicalManagement.Service.csproj ./SchoolMedicalManagement.Service/
 
 RUN dotnet restore
 
@@ -25,4 +25,4 @@ COPY --from=build /app/School-Medical-Management.API/out .
 ENV ASPNETCORE_URLS=http://+:80
 EXPOSE 80
 
-ENTRYPOINT ["dotnet", "School-Medical-Management.API.dll"]
+ENTRYPOINT ["dotnet", "SchoolMedicalManagement.API.dll"]
