@@ -1,0 +1,87 @@
+.search-bar {
+  padding: 10px;
+  width: 250px; /* Adjusted width */
+  border-radius: 5px; /* Rounded corners */
+  border: 1px solid #ddd; /* Light gray border */
+  background-color: #f4f4f4; /* Lighter background color */
+  color: #333; /* Text color */
+}
+
+.search-bar:focus {
+  outline: none;
+  border-color: #20b2aa; /* Highlight color when focused */
+  background-color: #ffffff; /* Light background when focused */
+}
+
+.search-bar::placeholder {
+  color: #888; /* Lighter placeholder text */
+}
+
+
+.add-btn {
+  padding: 10px 15px;
+  background-color: #20b2aa;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px; /* Rounded corners */
+  transition: background-color 0.3s ease;
+}
+
+.add-btn:hover {
+  background-color: #20b2aa; /* Darker shade on hover */
+}
+
+.student-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.student-table th, .student-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.student-table th {
+  background-color: #f4f4f4;
+}
+
+.student-table td button {
+  background-color: #20b2aa;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px; /* Rounded corners for buttons */
+  transition: background-color 0.3s ease;
+}
+
+.student-table td button:hover {
+  background-color: #45a049; /* Darker green on hover */
+}
+
+.pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.pagination button {
+  padding: 8px 16px; /* Increased padding */
+  border: 1px solid #ddd; /* Border around buttons */
+  margin: 0 5px; /* Space between pagination buttons */
+  cursor: pointer;
+  border-radius: 5px; /* Rounded corners */
+  background-color: #20b2aa; /* Background color */
+  transition: background-color 0.3s ease;
+}
+
+.pagination button:hover {
+  background-color: #20b2aa; /* Highlight color on hover */
+  color: #20b2aa; /* Change text color on hover */
+}
+
+.pagination button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(32, 178, 170, 0.5); /* Focus effect */
+}

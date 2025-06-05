@@ -6,9 +6,11 @@ import log3 from "../../assets/icon/notify.png";
 import log4 from "../../assets/icon/Overlay.png";
 import log5 from "../../assets/icon/tick.png";
 import log6 from "../../assets/icon/vacxin.png";
+import { useNavigate } from "react-router-dom";
 
 const NurseDashBoard = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
+   const navigate = useNavigate();
 
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
@@ -42,7 +44,12 @@ const NurseDashBoard = () => {
           <a href="#" className="active">
             Dashboard
           </a>
-          <a href="#">Danh sách học sinh</a>
+         <a
+            href="#"
+            onClick={() => navigate("/students")} // Chuyển trang khi nhấn vào "Danh sách học sinh"
+          >
+            Danh sách học sinh
+          </a>
           <a href="#">Quản lý thuốc</a>
           <a href="#">Chiến dịch tiêm chủng</a>
           <a href="#">Kiểm tra sức khỏe</a>
