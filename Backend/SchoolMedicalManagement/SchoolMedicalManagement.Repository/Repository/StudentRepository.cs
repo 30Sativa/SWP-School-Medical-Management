@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SchoolMedicalManagement.Models.Entity;
 using System;
 using System.Collections.Generic;
@@ -10,6 +10,10 @@ namespace SchoolMedicalManagement.Repository.Repository
 {
     public class StudentRepository : GenericRepository<Student>
     {
+        public StudentRepository(SwpEduHealV1Context context) : base(context)
+        {
+        }
+
         //Get Student by id
         public async Task<Student?> GetStudentById(int id) =>
             await _context.Students

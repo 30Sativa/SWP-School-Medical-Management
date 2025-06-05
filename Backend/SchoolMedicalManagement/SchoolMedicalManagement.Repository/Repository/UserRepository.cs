@@ -13,6 +13,10 @@ namespace SchoolMedicalManagement.Repository.Repository
 {
     public class UserRepository : GenericRepository<User>
     {
+        public UserRepository(SwpEduHealV1Context context) : base(context)
+        {
+        }
+
         public async Task<User?> GetLogin(UserLoginRequest loginRequest)
         {
             return await _context.Users.Include(u => u.Role)
