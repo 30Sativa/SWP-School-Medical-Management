@@ -26,8 +26,22 @@ const Login = () => {
       });
       // Xử lý kết quả trả về ở đây (ví dụ: lưu token, chuyển trang, ...)
       alert("Đăng nhập thành công!");
-      // Ví dụ: lưu token vào localStorage
-      // localStorage.setItem('token', response.data.token);
+      // Lưu token vào localStorage nếu có
+      if (response.data && response.data.token) {
+        localStorage.setItem('token', response.data.token);
+      }
+      // Lấy role từ response (giả sử response.data.role trả về role)
+      const userRole = response.data.role || role;
+      // Chuyển hướng theo role
+      if (userRole === 'parent') {
+        window.location.href = '/parent';
+      } else if (userRole === 'manager') {
+        window.location.href = '/manager';
+      } else if (userRole === 'admin') {
+        window.location.href = '/admin';
+      } else {
+        window.location.href = '/'; // fallback
+      }
     } catch (error) {
       alert("Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin.");
     } finally {
