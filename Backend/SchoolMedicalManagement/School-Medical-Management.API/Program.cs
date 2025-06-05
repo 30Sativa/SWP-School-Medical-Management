@@ -15,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-
+builder.Configuration.AddEnvironmentVariables();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddScoped<UserRepository>();
@@ -24,8 +24,7 @@ builder.Services.AddScoped<StudentRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
-builder.Services.AddDbContext<SwpEduHealV1Context>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddSwaggerGen(option =>
 {
     option.DescribeAllParametersInCamelCase();
