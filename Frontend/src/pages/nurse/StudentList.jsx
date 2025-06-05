@@ -6,7 +6,7 @@ import axios from "axios";
 const StudentList = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [students, setStudents] = useState([]); // Đặt đúng vị trí
-  const [currentPage, setCurrentPage] = useState(1); // Sửa lại đúng cú pháp
+  // const [currentPage, setCurrentPage] = useState(1); // Sửa lại đúng cú pháp
   const navigate = useNavigate();
 
   const toggleSidebar = () => {
@@ -31,9 +31,9 @@ const StudentList = () => {
 
   const totalPages = 5;
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
+  // const handlePageChange = (page) => {
+  //   setCurrentPage(page);
+  // };
 
   return (
     <div
@@ -145,7 +145,7 @@ const StudentList = () => {
 
         <div className="pagination">
           {[...Array(totalPages)].map((_, index) => (
-            <button key={index} onClick={() => handlePageChange(index + 1)}>
+            <button key={index}>
               {index + 1}
             </button>
           ))}

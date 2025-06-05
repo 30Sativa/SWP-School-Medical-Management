@@ -24,45 +24,30 @@ const Login = () => {
       return;
     }
     setLoading(true);
-    try {
-      const response = await axios.post("/api/User/login", {
-        username,
-        password
-      });
-      // Xử lý kết quả trả về ở đây (ví dụ: lưu token, chuyển trang, ...)
-      alert("Đăng nhập thành công!");
-
-
-      // 🌟 Chuyển trang theo role
-      if (role === "admin") {
-        navigate("/manager");
-      } else if (role === "nurse") {
-        navigate("/nurse");
-      } else if (role === "parent") {
-        navigate("/parent");
+    // Đăng nhập giả lập không cần gọi API
+    setTimeout(() => {
+      if (
+        (role === "admin" && username === "admin" && password === "admin") ||
+        (role === "nurse" && username === "nurse" && password === "nurse") ||
+        (role === "parent" && username === "parent" && password === "parent")
+      ) {
+        alert("Đăng nhập thành công!");
+        if (role === "admin") {
+          navigate("/manager");
+        } else if (role === "nurse") {
+          navigate("/nurse");
+        } else if (role === "parent") {
+          navigate("/parent");
+        }
       } else {
-        alert("Vai trò không xác định");
+        alert("Sai tài khoản hoặc mật khẩu!");
       }
-    }, 2000);
-
-      // Ví dụ: lưu token vào localStorage
-      // localStorage.setItem('token', response.data.token);
-    } catch (error) {
-      alert("Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin.");
-    } finally {
       setLoading(false);
-    }
-
+    }, 1000);
   };
 
   const handleFocus = (idx) => setFocusIndex(idx);
   const handleBlur = () => setFocusIndex(null);
-
-  // Example: fetchProduct function (not used in UI)
-  const fetchProduct = async () => {
-    const response = await axios.get("http://14.225.210.212:8080/api/products");
-    console.log(response);
-  };
 
   return (
      <div className="login-page-wrapper">
@@ -126,19 +111,6 @@ const Login = () => {
             </div>
           </form>
         </div>
-
-          <div className="forgot-password">
-            <a href="#">Quên mật khẩu?</a>
-          </div>
-          <button type="submit" className="login-btn" disabled={loading}>
-            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
-          </button>
-          <div className="register-link">
-            <span>Chưa có tài khoản? </span>
-            {/* <a href="#">Đăng ký ngay</a> */}
-          </div>
-        </form>
-
       </div>
     </div>
   </div>
