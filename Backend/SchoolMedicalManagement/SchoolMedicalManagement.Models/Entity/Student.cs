@@ -17,6 +17,8 @@ public partial class Student
 
     public int? ParentId { get; set; }
 
+    public bool? IsActive { get; set; }
+
     public virtual ICollection<HealthCheckSummary> HealthCheckSummaries { get; set; } = new List<HealthCheckSummary>();
 
     public virtual HealthProfile? HealthProfile { get; set; }

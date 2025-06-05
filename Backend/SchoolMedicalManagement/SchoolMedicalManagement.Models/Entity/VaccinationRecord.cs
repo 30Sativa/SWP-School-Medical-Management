@@ -21,6 +21,8 @@ public partial class VaccinationRecord
 
     public string? FollowUpNote { get; set; }
 
+    public bool? IsActive { get; set; }
+
     public virtual VaccinationCampaign? Campaign { get; set; }
 
     public virtual Student? Student { get; set; }

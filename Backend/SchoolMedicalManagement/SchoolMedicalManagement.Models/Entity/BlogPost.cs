@@ -15,5 +15,7 @@ public partial class BlogPost
 
     public DateOnly? PostedDate { get; set; }
 
+    public bool? IsActive { get; set; }
+
     public virtual User? Author { get; set; }
 }

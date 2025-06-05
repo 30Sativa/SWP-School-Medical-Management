@@ -19,6 +19,8 @@ public partial class MedicalEvent
 
     public string? Notes { get; set; }
 
+    public bool? IsActive { get; set; }
+
     public virtual ICollection<HandleRecord> HandleRecords { get; set; } = new List<HandleRecord>();
 
     public virtual User? HandledByNavigation { get; set; }
