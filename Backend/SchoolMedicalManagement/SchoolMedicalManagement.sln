@@ -1,9 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35931.197 d17.13
+VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "School-Medical-Management.API", "School-Medical-Management.API\School-Medical-Management.API.csproj", "{E135A823-954C-43BE-9A28-26D5B2407C4C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolMedicalManagement.Models", "SchoolMedicalManagement.Models\SchoolMedicalManagement.Models.csproj", "{247410AB-20E0-D050-FEAE-994AB07360BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolMedicalManagement.Repository", "SchoolMedicalManagement.Repository\SchoolMedicalManagement.Repository.csproj", "{1E1AAFFE-3D0E-EAB4-B724-3B675F813FAC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolMedicalManagement.Service", "SchoolMedicalManagement.Service\SchoolMedicalManagement.Service.csproj", "{13704FA7-5BE9-4923-1D03-AD1D446A3B72}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +21,18 @@ Global
 		{E135A823-954C-43BE-9A28-26D5B2407C4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E135A823-954C-43BE-9A28-26D5B2407C4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E135A823-954C-43BE-9A28-26D5B2407C4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{247410AB-20E0-D050-FEAE-994AB07360BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{247410AB-20E0-D050-FEAE-994AB07360BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{247410AB-20E0-D050-FEAE-994AB07360BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{247410AB-20E0-D050-FEAE-994AB07360BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E1AAFFE-3D0E-EAB4-B724-3B675F813FAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E1AAFFE-3D0E-EAB4-B724-3B675F813FAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E1AAFFE-3D0E-EAB4-B724-3B675F813FAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E1AAFFE-3D0E-EAB4-B724-3B675F813FAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13704FA7-5BE9-4923-1D03-AD1D446A3B72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13704FA7-5BE9-4923-1D03-AD1D446A3B72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13704FA7-5BE9-4923-1D03-AD1D446A3B72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13704FA7-5BE9-4923-1D03-AD1D446A3B72}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
