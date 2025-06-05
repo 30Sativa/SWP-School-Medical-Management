@@ -24,7 +24,9 @@ builder.Services.AddScoped<StudentRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
-builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<SwpEduHealV1Context>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddSwaggerGen(option =>
 {
     option.DescribeAllParametersInCamelCase();
