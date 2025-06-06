@@ -7,7 +7,6 @@ const Login = () => {
   const [form, setForm] = useState({
     username: "",
     password: "",
-    role: "parent",
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -18,10 +17,10 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { username, password, role } = form;
+    const { username, password } = form;
 
-    if (!username || !password || !role) {
-      alert("Vui lòng nhập đầy đủ thông tin và chọn quyền đăng nhập!");
+    if (!username || !password) {
+      alert("Vui lòng nhập đầy đủ tài khoản và mật khẩu!");
       return;
     }
 
@@ -33,21 +32,26 @@ const Login = () => {
         { username, password }
       );
 
+      const resData = response.data?.data;
+      const roleName = resData?.role?.roleName;
+
       console.log("📥 Phản hồi từ server:", response.data);
 
       if (response.data.message?.toLowerCase().includes("login successful")) {
-        localStorage.setItem("token", "demo-token");
-        console.log("✅ Đăng nhập thành công, role:", role);
-        setTimeout(() => {
-          alert("Đăng nhập thành công!");
-          if (role === "admin") {
-            navigate("/manager");
-          } else if (role === "nurse") {
-            navigate("/nurse");
-          } else if (role === "parent") {
-            navigate("/parent");
-          }
-        }, 100);
+        localStorage.setItem("token", resData.token);
+        alert("✅ Đăng nhập thành công!");
+
+        // ✅ Điều hướng theo vai trò
+        if (roleName === "Manager") {
+          navigate("/manager");
+        } else if (roleName === "Nurse") {
+          navigate("/nurse");
+        } else if (roleName === "Parent") {
+          navigate("/parent");
+        } else {
+          alert("❗ Vai trò không xác định!");
+          navigate("/");
+        }
       } else {
         alert("Đăng nhập thất bại!");
       }
@@ -98,19 +102,6 @@ const Login = () => {
                   value={form.password}
                   onChange={handleChange}
                 />
-              </div>
-              <div className="form-group">
-                <label htmlFor="role">Vai trò</label>
-                <select
-                  id="role"
-                  name="role"
-                  value={form.role}
-                  onChange={handleChange}
-                >
-                  <option value="parent">Phụ huynh</option>
-                  <option value="admin">Quản trị viên</option>
-                  <option value="nurse">Y tá</option>
-                </select>
               </div>
               <div className="forgot-password">
                 <a href="#">Quên mật khẩu?</a>
