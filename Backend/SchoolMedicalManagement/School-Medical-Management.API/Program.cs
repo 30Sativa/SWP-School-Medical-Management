@@ -24,9 +24,24 @@ builder.Services.AddScoped<StudentRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
+});
+
+//Database
 builder.Services.AddDbContext<SwpEduHealV1Context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
+// Swagger And Authentication
 builder.Services.AddSwaggerGen(option =>
 {
     option.DescribeAllParametersInCamelCase();
@@ -74,7 +89,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 app.UseSwagger();
 app.UseSwaggerUI();
-
+app.UseCors("AllowAllOrigins");
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
