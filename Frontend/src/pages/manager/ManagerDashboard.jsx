@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "../../assets/css/ManagerDashboard.css";
-import Logo from "../../assets/icon/admin.png";
+import Logo from "../../assets/icon/header.jpg";
 import { useNavigate } from "react-router-dom";
 // Import icon từ antd
 import {
@@ -25,12 +25,12 @@ const sidebarItems = [
 const ManagerDashboard = () => {
   const [stats, setStats] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   const [error] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    setLoading(true);
+    // setLoading(true);
     setTimeout(() => {
       setStats([
         {
@@ -76,14 +76,14 @@ const ManagerDashboard = () => {
           time: "1 ngày trước",
         },
       ]);
-      setLoading(false);
+      // setLoading(false);
     }, 1000);
   }, []);
 
-  if (loading)
-    return (
-      <div className="manager-dashboard-loading">Đang tải dữ liệu....</div>
-    );
+  // if (loading)
+  //   return (
+  //     <div className="manager-dashboard-loading">Đang tải dữ liệu....</div>
+  //   );
 
   if (error) return <div className="manager-dashboard-error">Lỗi: {error}</div>;
 

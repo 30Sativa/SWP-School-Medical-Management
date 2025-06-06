@@ -28,12 +28,32 @@ html, body, #root {
   flex-direction: column;
   padding: 20px;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .sidebar-logo {
   font-size: 24px;
   font-weight: bold;
-  margin-bottom: 40px;
+  margin-bottom: 10px;
+  display: flex;
+  
+  
+  gap: 15px; /* Khoảng cách giữa logo và chữ */
+  width: 100%; /* Đảm bảo logo không vượt quá chiều rộng sidebar */
+}
+
+.sidebar-logo img {
+  width: 37px;
+  height: 41px;
+  
+  object-fit: contain; /* Đảm bảo logo giữ tỷ lệ mà không bị biến dạng */
+}
+
+.sidebar-logo span {
+  display: block;
+  font-size: 18px;
+  text-align: center;
+  word-wrap: break-word; /* Giúp text tự xuống dòng khi dài */
 }
 
 .sidebar-profile {
