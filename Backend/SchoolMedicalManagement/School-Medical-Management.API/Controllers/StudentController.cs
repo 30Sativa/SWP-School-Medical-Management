@@ -62,5 +62,13 @@ namespace School_Medical_Management.API.Controllers
             }
             return Ok($"Delete Student with ID: {id} successfully");
         }
+
+        [HttpGet("health-profile")]
+        public async Task<IActionResult> GetHealthProfileByStudentId([FromQuery] GetHealthProfileRequest request)
+        {
+            var response = await _studentService.GetHealthProfileByStudentId(request);
+            return StatusCode(int.Parse(response.Status), response);
+        }
+
     }
 }

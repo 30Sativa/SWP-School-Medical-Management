@@ -30,7 +30,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     DateOfBirth = student.DateOfBirth,
                     Gender = student.Gender,
                     Class = student.Class,
-                    Parent = student.Parent?.Username
+                    Parent = student.Parent?.FullName
                 });
             }
             return studentListResponses;
@@ -125,6 +125,38 @@ namespace SchoolMedicalManagement.Service.Implement
         public async Task<bool> DeleteStudent(int studentId)
         {
             return await _studentRepository.DeleteStudent(studentId);
+        }
+
+        public async Task<BaseResponse> GetHealthProfileByStudentId(GetHealthProfileRequest request)
+        {
+            var healthProfile = await _studentRepository.GetHealthProfileByStudentId(request);
+
+            if (healthProfile == null)
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = "Health profile not found.",
+                    Data = null
+                };
+
+            var response = new HealthProfileManagementResponse
+            {
+                ProfileId = healthProfile.ProfileId,
+                StudentId = healthProfile.StudentId,
+                Height = healthProfile.Height,
+                Weight = healthProfile.Weight,
+                ChronicDiseases = healthProfile.ChronicDiseases,
+                Allergies = healthProfile.Allergies,
+                GeneralNote = healthProfile.GeneralNote,
+                IsActive = healthProfile.IsActive
+            };
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Health profile found successfully.",
+                Data = response
+            };
         }
     }
 }

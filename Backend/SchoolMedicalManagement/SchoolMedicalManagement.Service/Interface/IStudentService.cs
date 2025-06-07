@@ -15,5 +15,7 @@ using SchoolMedicalManagement.Models.Response;
             Task<BaseResponse> CreateStudent(CreateStudentRequest request);
             Task<bool> UpdateStudent(UpdateStudentRequest request);
             Task<bool> DeleteStudent(int studentId);
+            Task<BaseResponse> GetHealthProfileByStudentId(GetHealthProfileRequest request);
+            
     }
     }
