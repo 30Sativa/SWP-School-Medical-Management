@@ -47,8 +47,10 @@ const NurseDashBoard = () => {
           <div className="dashboard-header-bar">
             <div className="title-group">
               <h1>
+                <span className="text-accent">|</span>
                 <span className="text-black">Dash</span>
                 <span className="text-accent">board</span>
+                <h5 className="text-welcome">Chào mừng trở lại!</h5>
               </h1>
             </div>
           </div>

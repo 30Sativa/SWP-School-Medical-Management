@@ -1,0 +1,75 @@
+/* src/components/sidebar/Sidebar.css */
+.sb-sidebar {
+  background-color: #20b2aa;
+  color: white;
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  /* ✅ KHÔNG cần height ở đây */
+}
+
+.sb-sidebar.expanded {
+  width: 220px;
+}
+
+.sb-sidebar.collapsed {
+  width: 64px;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 8px;
+  margin-bottom: 24px;
+  font-size: 20px;
+  align-self: flex-start;
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.sb-sidebar.collapsed .nav-item span {
+  display: none;
+}
+
+/* Layout fix */
+.layout-container {
+  display: flex;
+  align-items: stretch;
+  min-height: 100vh; /* giúp kéo dài theo màn hình ban đầu */
+}
+
+.layout-content {
+  flex: 1;
+  padding: 24px;
+  background-color: #f9fafb;
+}
+
+.nav-item.active {
+  background-color: rgba(255, 255, 255, 0.15);
+  font-weight: bold;
+}
+

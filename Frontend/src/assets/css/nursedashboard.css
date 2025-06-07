@@ -226,6 +226,27 @@ main.content {
   color: #20b2aa; /* xanh ngọc, đúng tone với app bạn */
 }
 
+.text-welcome {
+  font-size: 30px;
+  overflow: hidden;
+  border-right: 2px solid #10b981;
+  white-space: nowrap;
+  animation: typing 2.5s steps(20, end), blink 0.75s step-end infinite;
+  width: fit-content;
+  margin-left: auto;
+  margin-top: auto;
+}
+
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes blink {
+  from, to { border-color: transparent }
+  50% { border-color: #10b981 }
+}
+
 /* Stats grid */
 .stats-grid {
   display: grid;
