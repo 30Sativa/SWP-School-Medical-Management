@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SchoolMedicalManagement.Models.Entity;
+using SchoolMedicalManagement.Models.Request;
+using SchoolMedicalManagement.Models.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,5 +75,12 @@ namespace SchoolMedicalManagement.Repository.Repository
             return true;
 
         }
+
+        //Get Health Profile by Student Id
+        public async Task<HealthProfile?> GetHealthProfileByStudentId(GetHealthProfileRequest request) =>
+            await _context.HealthProfiles
+                                        .Where(hp => hp.StudentId == request.StudentId)
+                                        .FirstOrDefaultAsync();
+        
     }
 }
