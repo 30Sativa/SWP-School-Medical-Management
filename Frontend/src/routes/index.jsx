@@ -5,6 +5,7 @@ import ManagerDashboard from "../pages/manager/ManagerDashboard";
 import NurseDashboard from "../pages/nurse/NurseDashboard";
 import UsersList from "../pages/manager/UsersList";
 import StudentList from "../pages/nurse/StudentList";
+import StudenntDetail from "../pages/nurse/StudentDetail"
 const AppRouter = () => {
   return (
     <Routes>

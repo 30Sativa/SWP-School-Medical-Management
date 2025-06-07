@@ -5,7 +5,7 @@
   padding: 0;
 }
 body {
-  font-family: 'Segoe UI', sans-serif;
+  font-family: "Segoe UI", sans-serif;
   color: #2d3436;
   line-height: 1.6;
   background-color: #fff;
@@ -19,7 +19,8 @@ ul {
   list-style: none;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
 }
@@ -31,24 +32,27 @@ html, body {
   align-items: center;
   padding: 16px 32px;
   background: #ffffff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
   z-index: 1000;
   margin: 0;
+  height: 98px;
 }
 
 .logo {
   display: flex;
   align-items: center; /* Căn giữa theo chiều dọc */
-  gap: 8px; /* Khoảng cách giữa logo và chữ */
+  justify-content: center;
+  height: 98px;
 }
 
 /* Chiều cao cố định cho toàn nav */
 .nav-links {
   display: flex;
   gap: 20px;
-  height: 40px; /* đảm bảo căn giữa */
+  height: 40px;
+  flex-direction: row; /* đảm bảo căn giữa */
 }
 
 .nav-links a {
@@ -56,7 +60,7 @@ html, body {
   align-items: center;
   white-space: nowrap;
   font-size: 20px;
-  height: 100%;       /* đồng bộ chiều cao với nav */
+  height: 100%; /* đồng bộ chiều cao với nav */
   line-height: 1;
 }
 
@@ -89,10 +93,13 @@ html, body {
   color: white;
 }
 
-
 .logo-img {
-  width: 70px;
-  height: auto;
+  height: 100px; /* hoặc 80px nếu bạn muốn to hơn */
+  width: auto;
+  object-fit: contain;
+  transform: translateY(-6px);
+  display: block;
+  margin-top: 45px;
 }
 
 .logo-text {
@@ -102,7 +109,7 @@ html, body {
 }
 
 .highlight {
-  color : #00b894 ;
+  color: #00b894;
 }
 
 /* ===== Hero Section ===== */
@@ -110,10 +117,10 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
- 
+
   background-color: #eaf8ff;
   width: 100%;
-   align-items: stretch;
+  align-items: stretch;
 }
 
 .hero-text {
@@ -121,8 +128,8 @@ html, body {
   padding: 60px;
   display: flex;
   flex-direction: column;
-  justify-content: center;  /* ✅ Căn giữa theo chiều dọc */
-  height: 100%;              /* Đảm bảo chiếm full chiều cao của section */
+  justify-content: center; /* ✅ Căn giữa theo chiều dọc */
+  height: 100%; /* Đảm bảo chiếm full chiều cao của section */
 }
 
 .hero-text h1 {
@@ -187,7 +194,7 @@ html, body {
 .features {
   background: #fff;
   padding: 60px 20px;
-  width: 100vw;         /* Chiếm toàn màn hình */
+  width: 100vw; /* Chiếm toàn màn hình */
   box-sizing: border-box;
 }
 
@@ -199,7 +206,7 @@ html, body {
 
 .description {
   text-align: center;
-  margin-top: -25px;     /* Nếu muốn sát tiêu đề hơn */
+  margin-top: -25px; /* Nếu muốn sát tiêu đề hơn */
   margin-bottom: 25px;
   color: #636e72;
   font-size: 16px;
@@ -210,7 +217,7 @@ html, body {
   flex-direction: column;
   gap: 30px;
   width: 100%;
-  max-width: 1200px;    /* Giới hạn chiều rộng nội dung */
+  max-width: 1200px; /* Giới hạn chiều rộng nội dung */
   margin: 0 auto;
 }
 
@@ -255,15 +262,21 @@ html, body {
   border-radius: 12px;
   width: 300px;
   text-align: center;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 .role-icon {
   font-size: 36px;
   margin-bottom: 12px;
 }
-.parent .role-icon { color: #3498db; }
-.health .role-icon { color: #2ecc71; }
-.board .role-icon { color: #9b59b6; }
+.parent .role-icon {
+  color: #3498db;
+}
+.health .role-icon {
+  color: #2ecc71;
+}
+.board .role-icon {
+  color: #9b59b6;
+}
 .role-card ul {
   text-align: left;
   margin: 16px 0;
@@ -271,16 +284,24 @@ html, body {
 .role-card li {
   margin-bottom: 6px;
 }
-.btn-parent, .btn-health, .btn-board {
+.btn-parent,
+.btn-health,
+.btn-board {
   padding: 8px 16px;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
 }
-.btn-parent { background-color: #3498db; }
-.btn-health { background-color: #2ecc71; }
-.btn-board { background-color: #9b59b6; }
+.btn-parent {
+  background-color: #3498db;
+}
+.btn-health {
+  background-color: #2ecc71;
+}
+.btn-board {
+  background-color: #9b59b6;
+}
 
 /* ===== Feedback Section ===== */
 .feedback {
@@ -314,7 +335,7 @@ html, body {
 .feedback-user {
   display: flex;
   align-items: center; /* căn giữa theo chiều dọc */
-  gap: 12px;            /* khoảng cách giữa icon và tên */
+  gap: 12px; /* khoảng cách giữa icon và tên */
   margin-top: 20px;
 }
 
