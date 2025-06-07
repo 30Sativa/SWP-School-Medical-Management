@@ -14,8 +14,7 @@ html, body, #root {
 .manager-dashboard {
   display: flex;
   height: 100vh;
-  width: 100vw;
-  overflow-x: hidden;
+  
 }
 
 /* Sidebar */
@@ -38,22 +37,21 @@ html, body, #root {
   display: flex;
   
   
-  gap: 15px; /* Khoảng cách giữa logo và chữ */
-  width: 100%; /* Đảm bảo logo không vượt quá chiều rộng sidebar */
+  
 }
 
 .sidebar-logo img {
   width: 37px;
   height: 41px;
   
-  object-fit: contain; /* Đảm bảo logo giữ tỷ lệ mà không bị biến dạng */
+ 
 }
 
 .sidebar-logo span {
   display: block;
   font-size: 18px;
   text-align: center;
-  word-wrap: break-word; /* Giúp text tự xuống dòng khi dài */
+  
 }
 
 .sidebar-profile {
@@ -128,25 +126,27 @@ html, body, #root {
 /* Main content */
 .main-content {
   flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  width: calc(100vw - 220px);
-  max-width: calc(100vw - 220px);
-  box-sizing: border-box;
+  padding: 24px;
+  background-color: #f9fafb;
+  transition: margin-left 0.3s ease; /* Thêm hiệu ứng khi thu gọn sidebar */
 }
+
 
 /* Header */
 .header {
-  height: 64px;
-  background: white;
-  border-bottom: 1px solid #e0e0e0;
-  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  margin-right: 24px; /* Đảm bảo có không gian cho nút thu gọn */
+}
+
+.header .search-box {
+  width: 50%;
+}
+.header-right {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-shrink: 0;
-  box-sizing: border-box;
 }
 
 .search-box input {
@@ -172,12 +172,10 @@ html, body, #root {
 .icon-btn {
   background: none;
   border: none;
-  font-size: 18px;
   cursor: pointer;
-  color: #555;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: background-color 0.3s ease;
+  padding: 8px;
+  font-size: 18px;
+  margin-left: 12px;
 }
 
 .icon-btn:hover {
@@ -321,4 +319,18 @@ html, body, #root {
 .notification-time {
   font-size: 11px;
   color: #9ca3af;
+}
+
+.logout-btn {
+  background-color: #ef4444;
+  color: white;
+  font-weight: 600;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.logout-btn:hover {
+  background-color: #dc2626;
 }
