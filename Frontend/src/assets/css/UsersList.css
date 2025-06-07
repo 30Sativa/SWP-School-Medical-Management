@@ -1,0 +1,29 @@
+.userslist-container {
+  padding: 24px;
+  background-color: #f9fafb;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.userslist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.userslist-header h1 {
+  font-weight: 700;
+  font-size: 22px;
+  color: #111827;
+  margin: 0;
+}
+
+.userslist-footer {
+  margin-top: auto;
+  padding: 15px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
