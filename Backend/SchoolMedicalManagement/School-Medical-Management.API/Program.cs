@@ -1,4 +1,4 @@
-using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -15,7 +15,21 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Configuration.AddEnvironmentVariables();
+
+
+
+// ✅ Thêm cấu hình CORS (Cho phép React ở localhost:3000 gọi API)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        policy => policy.WithOrigins("http://localhost:3000") // React chạy ở port 3000
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
+});
+
+
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddScoped<UserRepository>();
@@ -97,6 +111,8 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors("AllowAllOrigins");
 app.UseHttpsRedirection();
+// ✅ Kích hoạt CORS (phải đặt trước Authorization!)
+app.UseCors("AllowReactApp");
 
 app.UseAuthorization();
 
