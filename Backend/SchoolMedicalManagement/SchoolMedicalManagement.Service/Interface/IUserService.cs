@@ -12,9 +12,9 @@ namespace SchoolMedicalManagement.Service.Interface
     {
         Task<List<UserListResponse>> GetAll();
         Task<BaseResponse> GetUserById(int id);
-        Task<BaseResponse> CreateUser(UserCreateRequest user);
+        Task<BaseResponse> CreateUser(CreateUserRequest user);
         Task<bool> DeleteUser(int id);
-        Task<BaseResponse> UpdateUser(int id, UserUpdateRequest user);
+        Task<BaseResponse> UpdateUser(int id, UpdateUserRequest user);
         
     }
 

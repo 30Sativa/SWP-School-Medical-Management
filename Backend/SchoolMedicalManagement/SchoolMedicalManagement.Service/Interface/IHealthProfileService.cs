@@ -10,7 +10,7 @@ namespace SchoolMedicalManagement.Service.Interface
 {
     public interface IHealthProfileService
     {
-        Task<List<HealthProfileManagementResponse>> GetAllHealthProfilesAsync();
+        Task<List<ManagerHealthProfileResponse>> GetAllHealthProfilesAsync();
         Task<BaseResponse?> GetHealthProfileByIdAsync(int id);
         Task<BaseResponse?> CreateHealthProfileAsync(CreateHealthProfileRequest healthProfile);
         Task<BaseResponse?> UpdateHealthProfileAsync(int id, UpdateHealthProfileRequest healthProfile);

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SchoolMedicalManagement.Models.Request
 {
-    public class UserUpdateRequest
+    public class UpdateUserRequest
     {
         public string? FullName { get; set; }
 

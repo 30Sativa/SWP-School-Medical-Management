@@ -21,13 +21,13 @@ namespace SchoolMedicalManagement.Service.Implement
             _healthProfileRepository = healthProfileRepository;
         }
 
-        public async Task<List<HealthProfileManagementResponse>> GetAllHealthProfilesAsync()
+        public async Task<List<ManagerHealthProfileResponse>> GetAllHealthProfilesAsync()
         {
             var healthProfiles = await _healthProfileRepository.GetAllHealthProfile();
-            var result = new List<HealthProfileManagementResponse>();
+            var result = new List<ManagerHealthProfileResponse>();
             foreach (var hp in healthProfiles)
             {
-                result.Add(new HealthProfileManagementResponse
+                result.Add(new ManagerHealthProfileResponse
                 {
                     ProfileId = hp.ProfileId,
                     StudentId = hp.StudentId ?? 0,
@@ -58,7 +58,7 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 Status = StatusCodes.Status200OK.ToString(),
                 Message = "Health profile found successfully.",
-                Data = new HealthProfileManagementResponse
+                Data = new ManagerHealthProfileResponse
                 {
                     ProfileId = hp.ProfileId,
                     StudentId = hp.StudentId ?? 0,
@@ -98,7 +98,7 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 Status = StatusCodes.Status200OK.ToString(),
                 Message = "Create health profile successfully.",
-                Data = new HealthProfileManagementResponse
+                Data = new ManagerHealthProfileResponse
                 {
                     ProfileId = created.ProfileId,
                     StudentId = created.StudentId ?? 0,
@@ -144,7 +144,7 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 Status = StatusCodes.Status200OK.ToString(),
                 Message = "Health profile updated successfully.",
-                Data = new HealthProfileManagementResponse
+                Data = new ManagerHealthProfileResponse
                 {
                     ProfileId = updated.ProfileId,
                     StudentId = updated.StudentId ?? 0,

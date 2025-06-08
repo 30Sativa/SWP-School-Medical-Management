@@ -11,7 +11,7 @@ namespace SchoolMedicalManagement.Service.Interface
 {
     public interface IAuthService
     {
-        Task<BaseResponse> Login(UserLoginRequest loginRequest);
-        Task<BaseResponse> ChangePasswordAfterFirstLogin(int id,UserChangePasswordRequest request);
+        Task<BaseResponse> Login(LoginUserRequest loginRequest);
+        Task<BaseResponse> ChangePasswordAfterFirstLogin(int id, Models.Request.ChangePasswordUser request);
     }
 }

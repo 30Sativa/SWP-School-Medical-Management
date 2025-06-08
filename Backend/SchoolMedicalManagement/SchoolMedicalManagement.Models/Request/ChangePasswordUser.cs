@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SchoolMedicalManagement.Models.Request
 {
-    public class UserChangePasswordRequest
+    public class ChangePasswordUser
     {
         public string NewPassword { get; set; } = null!;
     }

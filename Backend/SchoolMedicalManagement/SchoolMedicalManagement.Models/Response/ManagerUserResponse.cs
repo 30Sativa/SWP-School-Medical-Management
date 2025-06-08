@@ -8,7 +8,7 @@ using SchoolMedicalManagement.Models.Entity;
 namespace SchoolMedicalManagement.Models.Response
 {
     
-    public class UserManagementResponse
+    public class ManagerUserResponse
     {
         public int UserId { get; set; }
 

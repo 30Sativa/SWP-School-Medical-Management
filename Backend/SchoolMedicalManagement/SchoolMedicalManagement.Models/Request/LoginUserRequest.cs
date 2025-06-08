@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SchoolMedicalManagement.Models.Request
 {
-    public class UserLoginRequest
+    public class LoginUserRequest
     {
 
         public string Username { get; set; } = null!;

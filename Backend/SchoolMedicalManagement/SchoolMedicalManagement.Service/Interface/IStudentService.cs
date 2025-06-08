@@ -10,7 +10,7 @@ using SchoolMedicalManagement.Models.Response;
     {
         public interface IStudentService
         {
-            Task<List<StudentListResponse>> GetStudentList();
+            Task<List<ListStudentResponse>> GetStudentList();
             Task<BaseResponse> GetStudentById(int studentId);
             Task<BaseResponse> CreateStudent(CreateStudentRequest request);
             Task<bool> UpdateStudent(UpdateStudentRequest request);

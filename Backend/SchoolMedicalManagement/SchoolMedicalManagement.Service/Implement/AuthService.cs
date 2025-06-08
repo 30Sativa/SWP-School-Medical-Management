@@ -32,7 +32,7 @@ namespace SchoolMedicalManagement.Service.Implement
 
 
         // First login change password
-        public async Task<BaseResponse> ChangePasswordAfterFirstLogin(int id, UserChangePasswordRequest userChangePasswordRequest)
+        public async Task<BaseResponse> ChangePasswordAfterFirstLogin(int id, Models.Request.ChangePasswordUser userChangePasswordRequest)
         {
             var user = await _userRepository.GetUserById(id);
             if (user == null || user.IsFirstLogin == false)
@@ -48,11 +48,11 @@ namespace SchoolMedicalManagement.Service.Implement
 
             await _userRepository.UpdateAsync(user);
 
-            return new BaseResponse 
+            return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
                 Message = "Password changed successfully.",
-                Data = new UserChangePasswordResponse
+                Data = new Models.Response.ChangePasswordUser
                 {
                     UserId = user.UserId,
                     FullName = user.FullName,
@@ -66,7 +66,7 @@ namespace SchoolMedicalManagement.Service.Implement
 
 
         //Login
-        public async Task<BaseResponse> Login(UserLoginRequest loginRequest)
+        public async Task<BaseResponse> Login(LoginUserRequest loginRequest)
         {
             var user = await _userRepository.GetLogin(loginRequest);
 
@@ -100,7 +100,7 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 Status = StatusCodes.Status200OK.ToString(),
                 Message = "Login successful.",
-                Data = new UserLoginResponse
+                Data = new LoginUserRespsonse
                 {
                     UserId = user.UserId,
                     FullName = user.FullName,

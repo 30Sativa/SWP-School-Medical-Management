@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SchoolMedicalManagement.Models.Response
 {
-    public class HealthProfileManagementResponse
+    public class ManagerHealthProfileResponse
     {
         public int ProfileId { get; set; }
 

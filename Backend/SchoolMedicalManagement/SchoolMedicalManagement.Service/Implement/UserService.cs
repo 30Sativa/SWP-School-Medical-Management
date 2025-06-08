@@ -23,7 +23,7 @@ namespace SchoolMedicalManagement.Service.Implement
             _userRepository = userRepository;
         }
 
-        public async Task<BaseResponse> CreateUser(UserCreateRequest user)
+        public async Task<BaseResponse> CreateUser(CreateUserRequest user)
         {
             // Kiểm tra username đó tồn tại chưa
             var existingUser = await _userRepository.GetUserByUsername(user.Username);
@@ -154,7 +154,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return userManagementResponse;
         }
 
-        public async Task<BaseResponse> UpdateUser(int id, UserUpdateRequest request)
+        public async Task<BaseResponse> UpdateUser(int id, UpdateUserRequest request)
 
         {
             // Kiểm tra user cần update có tồn tại ko?

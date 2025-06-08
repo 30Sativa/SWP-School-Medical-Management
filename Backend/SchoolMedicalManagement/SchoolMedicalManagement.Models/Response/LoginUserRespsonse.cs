@@ -7,7 +7,7 @@ using SchoolMedicalManagement.Models.Entity;
 
 namespace SchoolMedicalManagement.Models.Response
 {
-    public class UserLoginResponse
+    public class LoginUserRespsonse
     {
         public int UserId { get; set; } 
 

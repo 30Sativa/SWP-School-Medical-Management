@@ -16,14 +16,14 @@ namespace SchoolMedicalManagement.Service.Implement
             _studentRepository = studentRepository;
         }
 
-        public async Task<List<StudentListResponse>> GetStudentList()
+        public async Task<List<ListStudentResponse>> GetStudentList()
         {
             var students = await _studentRepository.GetAllStudent();
-            List<StudentListResponse> studentListResponses = new List<StudentListResponse>();
+            List<ListStudentResponse> studentListResponses = new List<ListStudentResponse>();
 
             foreach (var student in students)
             {
-                studentListResponses.Add(new StudentListResponse
+                studentListResponses.Add(new ListStudentResponse
                 {
                     StudentId = student.StudentId,
                     FullName = student.FullName,
@@ -55,7 +55,7 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 Status = StatusCodes.Status200OK.ToString(),
                 Message = "Student found successfully.",
-                Data = new StudentManagementResponse
+                Data = new ManagerStudentResponse
                 {
                     StudentId = student.StudentId,
                     FullName = student.FullName,
@@ -95,7 +95,7 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 Status = StatusCodes.Status200OK.ToString(),
                 Message = "Student created successfully.",
-                Data = new StudentManagementResponse
+                Data = new ManagerStudentResponse
                 {
                     StudentId = createdStudent.StudentId,
                     FullName = createdStudent.FullName,
@@ -141,7 +141,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     Data = null
                 };
 
-            var response = new HealthProfileManagementResponse
+            var response = new ManagerHealthProfileResponse
             {
                 ProfileId = healthProfile.ProfileId,
                 StudentId = healthProfile.StudentId,

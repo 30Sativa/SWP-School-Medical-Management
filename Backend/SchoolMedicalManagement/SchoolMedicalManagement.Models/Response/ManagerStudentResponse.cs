@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SchoolMedicalManagement.Models.Response
 {
-    public class StudentManagementResponse
+    public class ManagerStudentResponse
     {
         public int StudentId { get; set; }
 
