@@ -23,6 +23,8 @@ public partial class User
 
     public bool? IsFirstLogin { get; set; }
 
+    public bool? IsActive { get; set; }
+
     public virtual ICollection<BlogPost> BlogPosts { get; set; } = new List<BlogPost>();
 
     public virtual ICollection<HealthCheckCampaign> HealthCheckCampaigns { get; set; } = new List<HealthCheckCampaign>();

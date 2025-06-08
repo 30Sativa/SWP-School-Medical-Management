@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SchoolMedicalManagement.Repository.Request
+namespace SchoolMedicalManagement.Models.Request
 {
-    public class UserChangePasswordRequest
+    public class ChangePasswordUser
     {
-        public int UserId { get; set; }
         public string NewPassword { get; set; } = null!;
     }
 }

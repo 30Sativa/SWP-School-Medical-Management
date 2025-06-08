@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
-using SchoolMedicalManagement.Service.Interface;
+﻿using Azure;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SchoolMedicalManagement.Repository.Request;
-using SchoolMedicalManagement.Repository.Response;
+using SchoolMedicalManagement.Models.Entity;
+using SchoolMedicalManagement.Models.Request;
+using SchoolMedicalManagement.Models.Response;
+using SchoolMedicalManagement.Service.Interface;
 
 namespace School_Medical_Management.API.Controllers
 {
@@ -19,49 +22,70 @@ namespace School_Medical_Management.API.Controllers
             _userService = userService;
         }
 
-
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserLoginRequest loginRequest)
+        
+        public async Task<IActionResult> Login([FromBody] LoginUserRequest loginRequest)
         {
             var response = await _authService.Login(loginRequest);
-            if (response == null)
-                return Unauthorized("Invalid username or password");
-
-            return Ok(response);
+            return StatusCode(int.Parse(response.Status), response);
         }
 
+        [Authorize(Roles = "Manager")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var users = await _userService.GetAll();
-            if (users != null)
+            if (users == null)
             {
-                return Ok(users);
+                return NotFound("User list is empty!!!");
             }
-            return NotFound("No users found");
+            return Ok(users);
         }
-
+        [Authorize(Roles = "Manager")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById([FromRoute] int id)
         {
             var user = await _userService.GetUserById(id);
-            if (user != null)
+            return StatusCode(int.Parse(user.Status), user);
+        }
+        [Authorize(Roles = "Manager")]
+        [HttpPost]
+        public async Task<IActionResult> CreateUser(CreateUserRequest request)
+        {
+            var userToCreate = await _userService.CreateUser(request);
+            return StatusCode(int.Parse(userToCreate.Status), userToCreate);
+        }
+        [Authorize(Roles = "Manager")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var result = await _userService.DeleteUser(id);
+            if (result)
             {
-                return Ok(user);
+                return Ok($"Delete User with ID: {id} successfully");
             }
             return NotFound($"User with ID {id} not found");
+
+        }
+        //testCICD
+        [Authorize(Roles = "Manager")]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, UpdateUserRequest request)
+        {
+            var updatedUser = await _userService.UpdateUser(id, request);
+            return StatusCode(int.Parse(updatedUser.Status), updatedUser);
         }
 
+
+
+        [HttpPost("change-password{id}")]
+        public async Task<IActionResult> ChangePasswordAfterFirstLogin([FromRoute] int id, SchoolMedicalManagement.Models.Request.ChangePasswordUser userChangePasswordRequest)
 
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePasswordAfterFirstLogin(UserChangePasswordRequest userChangePasswordRequest)
         {
-            var response = await _authService.ChangePasswordAfterFirstLogin(userChangePasswordRequest);
-            if (response !=null)
-            {
-                return Ok(response);
-            }
-            return BadRequest("Failed to change password or user not eligible for password change");
+            var response = await _authService.ChangePasswordAfterFirstLogin(id,userChangePasswordRequest);
+            return StatusCode(int.Parse(response.Status), response);
         }
     }
 

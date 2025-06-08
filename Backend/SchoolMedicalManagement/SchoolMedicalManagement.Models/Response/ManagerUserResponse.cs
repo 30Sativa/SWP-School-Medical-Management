@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SchoolMedicalManagement.Models.Entity;
 
-namespace SchoolMedicalManagement.Repository.Response
+namespace SchoolMedicalManagement.Models.Response
 {
-    public class UserManagementResponse
+    
+    public class ManagerUserResponse
     {
         public int UserId { get; set; }
 
@@ -16,7 +18,7 @@ namespace SchoolMedicalManagement.Repository.Response
 
         public string? FullName { get; set; }
 
-        public string Role { get; set; }
+        public Role Role { get; set; }
 
         public string? Phone { get; set; }
 

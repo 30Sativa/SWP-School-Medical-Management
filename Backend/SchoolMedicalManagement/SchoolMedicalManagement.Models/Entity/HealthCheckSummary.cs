@@ -41,6 +41,8 @@ public partial class HealthCheckSummary
 
     public string? ConsentStatus { get; set; }
 
+    public bool? IsActive { get; set; }
+
     public virtual HealthCheckCampaign? Campaign { get; set; }
 
     public virtual Student Student { get; set; } = null!;

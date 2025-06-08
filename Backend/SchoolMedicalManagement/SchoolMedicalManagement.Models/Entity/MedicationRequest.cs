@@ -25,6 +25,8 @@ public partial class MedicationRequest
 
     public int? ReceivedBy { get; set; }
 
+    public bool? IsActive { get; set; }
+
     public virtual User Parent { get; set; } = null!;
 
     public virtual User? ReceivedByNavigation { get; set; }

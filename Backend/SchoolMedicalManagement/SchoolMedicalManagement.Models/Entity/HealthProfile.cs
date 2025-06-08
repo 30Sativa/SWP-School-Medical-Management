@@ -19,5 +19,7 @@ public partial class HealthProfile
 
     public string? GeneralNote { get; set; }
 
+    public bool? IsActive { get; set; }
+
     public virtual Student? Student { get; set; }
 }

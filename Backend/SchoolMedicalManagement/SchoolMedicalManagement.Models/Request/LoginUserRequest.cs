@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SchoolMedicalManagement.Repository.Request
+namespace SchoolMedicalManagement.Models.Request
 {
-    public class UserLoginRequest
+    public class LoginUserRequest
     {
 
         public string Username { get; set; } = null!;

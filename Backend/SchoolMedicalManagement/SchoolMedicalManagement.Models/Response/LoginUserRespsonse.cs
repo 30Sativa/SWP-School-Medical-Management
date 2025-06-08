@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using SchoolMedicalManagement.Models.Entity;
 
-namespace SchoolMedicalManagement.Repository.Response
+namespace SchoolMedicalManagement.Models.Response
 {
-    public class UserLoginResponse
+    public class LoginUserRespsonse
     {
         public int UserId { get; set; } 
 

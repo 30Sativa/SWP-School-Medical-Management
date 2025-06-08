@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SchoolMedicalManagement.Repository.Response
+namespace SchoolMedicalManagement.Models.Response
 {
     public class UserListResponse
     {
@@ -13,7 +13,7 @@ namespace SchoolMedicalManagement.Repository.Response
 
         public string? FullName { get; set; }
 
-        public string Role { get; set; }
+        public Role Role { get; set; }
 
         public string? Phone { get; set; }
 

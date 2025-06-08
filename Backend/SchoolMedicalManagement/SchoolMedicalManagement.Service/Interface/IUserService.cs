@@ -1,5 +1,5 @@
-﻿using SchoolMedicalManagement.Repository.Request;
-using SchoolMedicalManagement.Repository.Response;
+﻿using SchoolMedicalManagement.Models.Request;
+using SchoolMedicalManagement.Models.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +11,10 @@ namespace SchoolMedicalManagement.Service.Interface
     public interface IUserService
     {
         Task<List<UserListResponse>> GetAll();
-        Task<UserManagementResponse> GetUserById(int id);
-
+        Task<BaseResponse> GetUserById(int id);
+        Task<BaseResponse> CreateUser(CreateUserRequest user);
+        Task<bool> DeleteUser(int id);
+        Task<BaseResponse> UpdateUser(int id, UpdateUserRequest user);
         
     }
 
