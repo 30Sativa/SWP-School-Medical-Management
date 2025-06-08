@@ -49,11 +49,8 @@ namespace SchoolMedicalManagement.Repository.Repository
         //Create a new user
         public async Task<User?> CreateUser(User user)
         {
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
-            return await _context.Users
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.UserId == user.UserId);
+            await CreateAsync(user);
+            return await GetUserById(user.UserId);
         }
 
         //Delete a user
@@ -64,22 +61,14 @@ namespace SchoolMedicalManagement.Repository.Repository
             {
                 return false; // User not found
             }
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-            return true; 
+            return await RemoveAsync(user);
         }   
 
         //Update a user
         public async Task<User?> UpdateUser(User user)
         {
-
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
-
-            //Trả về info user sau khi update
-            return await _context.Users
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.UserId == user.UserId);
+            await UpdateAsync(user);
+            return await GetUserById(user.UserId);
         }
          
         //Get user by id for change password

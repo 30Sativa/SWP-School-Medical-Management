@@ -52,9 +52,7 @@ namespace SchoolMedicalManagement.Repository.Repository
             {
                 return false;
             }
-            _context.HealthCheckCampaigns.Remove(campaign);
-            await _context.SaveChangesAsync();
-            return true;
+            return await RemoveAsync(campaign);
         }
     }
 }

@@ -33,8 +33,7 @@ namespace SchoolMedicalManagement.Repository.Repository
         //Create Student
         public async Task<Student?> CreateStudent(Student student)
         {
-            await _context.Students.AddAsync(student);
-            await _context.SaveChangesAsync();
+            await CreateAsync(student);
             return await GetStudentById(student.StudentId);
         }
 
@@ -67,12 +66,7 @@ namespace SchoolMedicalManagement.Repository.Repository
             {
                 return false; // ko có thì xủi
             }
-            //Cóa thì remove 
-            //Hello Văn Thành t nghĩ nên chuyển lại xóa mềm
-            //thêm trường active trong db thui
-            _context.Students.Remove(student);
-            await _context.SaveChangesAsync();
-            return true;
+            return await RemoveAsync(student);
 
         }
 

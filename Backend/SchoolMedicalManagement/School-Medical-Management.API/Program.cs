@@ -36,7 +36,11 @@ builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<StudentRepository>();
 builder.Services.AddScoped<HealthProfileRepository>();
 builder.Services.AddScoped<HealthCheckCampaignRepository>();
+
+builder.Services.AddScoped<MedicalEventRepository>();
+
 builder.Services.AddScoped<HealthCheckSummaryRepository>();
+
 
 
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -44,7 +48,11 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IHealthProfileService, HealthProfileService>();
 builder.Services.AddScoped<IHealthCheckCampaignService, HealthCheckCampaignService>();
+
+builder.Services.AddScoped<IMedicalEventService, MedicalEventService>();
+
 builder.Services.AddScoped<IHealthCheckSummaryService, HealthCheckSummaryService>();
+
 
 // CORS
 builder.Services.AddCors(options =>
