@@ -14,8 +14,14 @@ a {
   text-decoration: none;
   color: inherit;
 }
+
 ul {
   list-style: none;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
 }
 
 /* ===== Navbar ===== */
@@ -29,24 +35,74 @@ ul {
   position: sticky;
   top: 0;
   z-index: 1000;
+  margin: 0;
 }
+
 .logo {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #00b894;
+  display: flex;
+  align-items: center; /* Căn giữa theo chiều dọc */
+  gap: 8px; /* Khoảng cách giữa logo và chữ */
 }
+
+/* Chiều cao cố định cho toàn nav */
 .nav-links {
   display: flex;
   gap: 20px;
+  height: 40px; /* đảm bảo căn giữa */
+}
+
+.nav-links a {
+  display: flex;
   align-items: center;
+  white-space: nowrap;
+  font-size: 20px;
+  height: 100%;       /* đồng bộ chiều cao với nav */
+  line-height: 1;
+}
+
+/* Nút Đăng nhập chuẩn outline + căn giữa */
+.nav-links a {
+  color: black;
 }
 .login-btn {
-  background: #00b894;
-  color: #fff;
-  padding: 8px 16px;
-  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 6px 14px;
+  font-size: 20px;
+  height: 36px;
+
+  background-color: white;
+  color: #00b894;
+  border: 2px solid #00b894;
   border-radius: 6px;
+
+  font-weight: 600;
   cursor: pointer;
+  line-height: 1;
+  transition: 0.2s ease-in-out;
+}
+
+.login-btn:hover {
+  background-color: #00b894;
+  color: white;
+}
+
+
+.logo-img {
+  width: 70px;
+  height: auto;
+}
+
+.logo-text {
+  font-size: 35px;
+  font-weight: 600;
+  color: #00bfa5; /* màu xanh như bạn đang dùng */
+}
+
+.highlight {
+  color : #00b894 ;
 }
 
 /* ===== Hero Section ===== */
@@ -137,7 +193,16 @@ ul {
 
 .features h2 {
   font-size: 1.8rem;
-  margin-bottom: 40px;
+  margin-bottom: 38px;
+  text-align: center;
+}
+
+.description {
+  text-align: center;
+  margin-top: -25px;     /* Nếu muốn sát tiêu đề hơn */
+  margin-bottom: 25px;
+  color: #636e72;
+  font-size: 16px;
 }
 
 .feature-rows {
@@ -174,7 +239,9 @@ ul {
 .roles h2 {
   font-size: 1.8rem;
   margin-bottom: 30px;
+  margin-top: -65px;
 }
+
 .role-row {
   display: flex;
   justify-content: center;
@@ -242,6 +309,20 @@ ul {
   margin-top: 10px;
   font-weight: bold;
   color: #2d3436;
+}
+
+.feedback-user {
+  display: flex;
+  align-items: center; /* căn giữa theo chiều dọc */
+  gap: 12px;            /* khoảng cách giữa icon và tên */
+  margin-top: 20px;
+}
+
+.user-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%; /* nếu là ảnh tròn */
+  object-fit: cover;
 }
 
 /* ===== CTA Section ===== */
