@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/sidebar/Sidebar";
-import "../../assets/css/studentList.css";
+import style from "../../assets/css/studentList.module.css";
 import axios from "axios";
 
 const StudentList = () => {
@@ -23,31 +23,29 @@ const StudentList = () => {
   const totalPages = 5;
 
   return (
-    <div className="layout-container">
+    <div className={style.layoutContainer}>
       <Sidebar />
 
-      <main className="layout-content">
-        <header>
-          <div className="dashboard-header-bar">
-            <div className="title-group">
-              <h1>
-                <span className="text-black">Danh sách</span>
-                <span className="text-accent"> học sinh</span>
-              </h1>
-            </div>
+      <main className={style.layoutContent}>
+        <header className={style.dashboardHeaderBar}>
+          <div className={style.titleGroup}>
+            <h1>
+              <span className={style.textBlack}>Danh sách</span>
+              <span className={style.textAccent}> học sinh</span>
+            </h1>
           </div>
         </header>
 
-        <div className="header">
+        <div className={style.header}>
           <input
             type="text"
             placeholder="Tìm kiếm học sinh..."
-            className="search-bar"
+            className={style.searchBar}
           />
-          <button className="add-btn">Thêm học sinh</button>
+          <button className={style.addBtn}>Thêm học sinh</button>
         </div>
 
-        <table className="student-table">
+        <table className={style.studentTable}>
           <thead>
             <tr>
               <th>STT</th>
@@ -68,7 +66,7 @@ const StudentList = () => {
                   <td>{student.class}</td>
                   <td>{student.parent}</td>
                   <td>
-                    <button className="btn">Xem chi tiết</button>
+                    <button className={style.btn}>Xem chi tiết</button>
                   </td>
                 </tr>
               ))
@@ -82,7 +80,7 @@ const StudentList = () => {
           </tbody>
         </table>
 
-        <div className="pagination">
+        <div className={style.pagination}>
           {[...Array(totalPages)].map((_, index) => (
             <button key={index}>{index + 1}</button>
           ))}

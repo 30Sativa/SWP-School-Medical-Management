@@ -32,158 +32,6 @@ a:hover {
   overflow: hidden;
 }
 
-/* Sidebar mặc định rộng 280px */
-.sidebar {
-  width: 280px;
-  background-color: rgba(132, 236, 231, 0.95);
-  color: white;
-  display: flex;
-  flex-direction: column;
-  padding: 24px 20px;
-  box-sizing: border-box;
-  transition: margin-left 0.3s ease;
-}
-
-/* Khi sidebar đóng, trượt sang trái hết */
-.sidebar-closed .sidebar {
-  display: none !important;
-}
-
-/* Main content chiếm phần còn lại */
-.content {
-  flex-grow: 1;
-  background: #f8fafc;
-  padding: 24px;
-  transition: margin-left 0.3s ease;
-}
-
-.sidebar-closed .content {
-  margin-left: 0 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-}
-
-/* Khi sidebar mở, main content cách sidebar ra */
-.sidebar-open .content {
-  margin-left: 0;
-}
-
-/* Nút toggle */
-.sidebar-toggle-btn {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  z-index: 1100;
-  background-color: #20b2aa;
-  border: none;
-  color: white;
-  font-size: 28px;
-  border-radius: 6px;
-  padding: 4px 12px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.sidebar-toggle-btn:hover {
-  background-color: #1b8b8b;
-}
-
-/* Đảm bảo toggle luôn hiện trên mọi phần */
-.sidebar-toggle-btn:focus {
-  outline: none;
-}
-
-/* Logo trong sidebar */
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 700;
-  font-size: 1.6rem;
-  margin-bottom: 36px;
-}
-
-/* Nav liên kết */
-.sidebar nav a {
-  display: block;
-  color: white;
-  padding: 10px 12px;
-  border-radius: 8px;
-  text-decoration: none;
-  margin-bottom: 10px;
-  font-weight: 600;
-  transition: background-color 0.3s ease;
-}
-
-.sidebar nav a.active,
-.sidebar nav a:hover {
-  background: rgba(255, 255, 255, 0.12); /* nền trắng mờ */
-  color: #ffffff; /* chữ trắng */
-  font-weight: 700;
-  border-radius: 12px;
-  padding: 12px 16px;
-
-  /* hiệu ứng glass */
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-
-  /* đường viền nhẹ viền sáng */
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
-  transition: all 0.3s ease;
-}
-
-/* Sidebar */
-aside.sidebar {
-  width: 280px;
-  background-color: #20b2aa;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  padding: 24px 20px;
-}
-aside.sidebar .logo {
-  display: flex;
-  align-items: center;
-  margin-bottom: 40px;
-  font-weight: 700;
-  font-size: 1.25rem;
-}
-aside.sidebar .logo svg {
-  width: 36px;
-  height: 36px;
-  margin-right: 12px;
-  fill: white;
-}
-aside.sidebar nav {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-aside.sidebar nav a {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  padding: 8px 12px;
-  border-radius: 8px;
-  transition: background-color 0.2s;
-  cursor: pointer;
-}
-aside.sidebar nav a.active,
-aside.sidebar nav a:hover {
-  background-color: transparent;
-}
-aside.sidebar nav a svg {
-  width: 18px;
-  height: 18px;
-  fill: white;
-  opacity: 0.8;
-}
-aside.sidebar nav a.active svg {
-  opacity: 1;
-}
-
 /* Main content */
 main.content {
   flex-grow: 1;
@@ -193,7 +41,6 @@ main.content {
   gap: 36px;
   background-color: #f9fafb;
 }
-
 
 .dashboard-header-bar {
   display: flex;
@@ -217,7 +64,6 @@ main.content {
   background-color: #dc2626;
 }
 
-
 .text-black {
   color: #1e293b; /* hoặc #000 nếu bạn muốn đen hơn */
 }
@@ -238,13 +84,22 @@ main.content {
 }
 
 @keyframes typing {
-  from { width: 0 }
-  to { width: 100% }
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 @keyframes blink {
-  from, to { border-color: transparent }
-  50% { border-color: #10b981 }
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: #10b981;
+  }
 }
 
 /* Stats grid */

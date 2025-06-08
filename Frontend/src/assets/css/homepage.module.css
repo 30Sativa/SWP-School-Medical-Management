@@ -1,26 +1,26 @@
 /* ===== General Reset ===== */
-* {
+:global(*) {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
-body {
+:global(body) {
   font-family: "Segoe UI", sans-serif;
   color: #2d3436;
   line-height: 1.6;
   background-color: #fff;
 }
-a {
+:global(a) {
   text-decoration: none;
   color: inherit;
 }
 
-ul {
+:global(ul) {
   list-style: none;
 }
 
-html,
-body {
+:global(html),
+:global(body) {
   margin: 0;
   padding: 0;
 }
@@ -42,70 +42,57 @@ body {
 
 .logo {
   display: flex;
-  align-items: center; /* Căn giữa theo chiều dọc */
+  align-items: center;
   justify-content: center;
   height: 98px;
 }
 
-/* Chiều cao cố định cho toàn nav */
-.nav-links {
+.navLinks {
   display: flex;
   gap: 20px;
   height: 40px;
-  flex-direction: row; /* đảm bảo căn giữa */
+  flex-direction: row;
 }
 
-.nav-links a {
+.navLinks a {
   display: flex;
   align-items: center;
   white-space: nowrap;
   font-size: 20px;
-  height: 100%; /* đồng bộ chiều cao với nav */
+  height: 100%;
   line-height: 1;
-}
-
-/* Nút Đăng nhập chuẩn outline + căn giữa */
-.nav-links a {
   color: black;
 }
-.login-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
 
-  padding: 6px 14px;
-  font-size: 20px;
-  height: 36px;
-
-  background-color: white;
-  color: #00b894;
-  border: 2px solid #00b894;
-  border-radius: 6px;
-
-  font-weight: 600;
-  cursor: pointer;
-  line-height: 1;
-  transition: 0.2s ease-in-out;
-}
-
-.login-btn:hover {
+.loginBtn {
   background-color: #00b894;
   color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.logo-img {
-  height: 100px; /* hoặc 80px nếu bạn muốn to hơn */
+.loginBtn:hover {
+  background-color: #019879;
+}
+
+.logoImg {
+  height: 100px;
   width: auto;
   object-fit: contain;
   transform: translateY(-6px);
   display: block;
-  margin-top: 45px;
+  margin-top: 0px;
 }
 
-.logo-text {
+.logoText {
   font-size: 35px;
   font-weight: 600;
-  color: #00bfa5; /* màu xanh như bạn đang dùng */
+  color: #00bfa5;
 }
 
 .highlight {
@@ -117,59 +104,52 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   background-color: #eaf8ff;
   width: 100%;
   align-items: stretch;
 }
 
-.hero-text {
+.heroText {
   flex: 0 0 60%;
   padding: 60px;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* ✅ Căn giữa theo chiều dọc */
-  height: 100%; /* Đảm bảo chiếm full chiều cao của section */
+  justify-content: center;
+  height: 100%;
 }
 
-.hero-text h1 {
+.heroText h1 {
   font-size: 2rem;
   margin-bottom: 16px;
 }
 
-.hero-text p {
+.heroText p {
   max-width: 500px;
   color: #636e72;
   margin-bottom: 24px;
 }
 
-.hero-buttons {
+.heroButtons {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
 }
 
-.hero-image {
+.heroImage {
   flex: 0 0 40%;
   height: auto;
   position: relative;
 }
 
-.hero-image img {
+.heroImage img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Lấp đầy khung */
+  object-fit: cover;
   display: block;
 }
 
-.hero-buttons {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.primary-btn,
-.outline-btn {
+.primaryBtn,
+.outlineBtn {
   padding: 10px 20px;
   border-radius: 6px;
   font-weight: 500;
@@ -178,13 +158,13 @@ body {
   font-size: 15px;
 }
 
-.primary-btn {
+.primaryBtn {
   background-color: #00b894;
   color: white;
   border: none;
 }
 
-.outline-btn {
+.outlineBtn {
   background: white;
   border: 2px solid #00b894;
   color: #00b894;
@@ -194,7 +174,7 @@ body {
 .features {
   background: #fff;
   padding: 60px 20px;
-  width: 100vw; /* Chiếm toàn màn hình */
+  width: 100vw;
   box-sizing: border-box;
 }
 
@@ -206,22 +186,22 @@ body {
 
 .description {
   text-align: center;
-  margin-top: -25px; /* Nếu muốn sát tiêu đề hơn */
+  margin-top: -25px;
   margin-bottom: 25px;
   color: #636e72;
   font-size: 16px;
 }
 
-.feature-rows {
+.featureRows {
   display: flex;
   flex-direction: column;
   gap: 30px;
   width: 100%;
-  max-width: 1200px; /* Giới hạn chiều rộng nội dung */
+  max-width: 1200px;
   margin: 0 auto;
 }
 
-.feature-row {
+.featureRow {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
@@ -229,7 +209,7 @@ body {
   width: 100%;
 }
 
-.feature-box {
+.featureBox {
   flex: 1 1 30%;
   min-width: 250px;
   padding: 20px;
@@ -237,6 +217,7 @@ body {
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
+
 /* ===== Roles Section ===== */
 .roles {
   padding: 60px 20px;
@@ -249,14 +230,14 @@ body {
   margin-top: -65px;
 }
 
-.role-row {
+.roleRow {
   display: flex;
   justify-content: center;
   gap: 30px;
   flex-wrap: wrap;
   margin-top: 30px;
 }
-.role-card {
+.roleCard {
   background-color: #f5f5f5;
   padding: 24px;
   border-radius: 12px;
@@ -264,42 +245,42 @@ body {
   text-align: center;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
-.role-icon {
+.roleIcon {
   font-size: 36px;
   margin-bottom: 12px;
 }
-.parent .role-icon {
+.parent .roleIcon {
   color: #3498db;
 }
-.health .role-icon {
+.health .roleIcon {
   color: #2ecc71;
 }
-.board .role-icon {
+.board .roleIcon {
   color: #9b59b6;
 }
-.role-card ul {
+.roleCard ul {
   text-align: left;
   margin: 16px 0;
 }
-.role-card li {
+.roleCard li {
   margin-bottom: 6px;
 }
-.btn-parent,
-.btn-health,
-.btn-board {
+.btnParent,
+.btnHealth,
+.btnBoard {
   padding: 8px 16px;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
 }
-.btn-parent {
+.btnParent {
   background-color: #3498db;
 }
-.btn-health {
+.btnHealth {
   background-color: #2ecc71;
 }
-.btn-board {
+.btnBoard {
   background-color: #9b59b6;
 }
 
@@ -313,36 +294,36 @@ body {
   font-size: 1.8rem;
   margin-bottom: 30px;
 }
-.feedback-cards {
+.feedbackCards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 20px;
   margin-top: 20px;
 }
-.feedback-card {
+.feedbackCard {
   background: white;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   text-align: left;
 }
-.feedback-card h4 {
+.feedbackCard h4 {
   margin-top: 10px;
   font-weight: bold;
   color: #2d3436;
 }
 
-.feedback-user {
+.feedbackUser {
   display: flex;
-  align-items: center; /* căn giữa theo chiều dọc */
-  gap: 12px; /* khoảng cách giữa icon và tên */
+  align-items: center;
+  gap: 12px;
   margin-top: 20px;
 }
 
-.user-icon {
+.userIcon {
   width: 48px;
   height: 48px;
-  border-radius: 50%; /* nếu là ảnh tròn */
+  border-radius: 50%;
   object-fit: cover;
 }
 
@@ -360,7 +341,7 @@ body {
   color: #636e72;
   margin-bottom: 20px;
 }
-.cta-buttons {
+.ctaButtons {
   display: flex;
   justify-content: center;
   gap: 15px;
@@ -374,31 +355,31 @@ body {
   padding: 40px 32px 20px;
   font-size: 14px;
 }
-.footer-top {
+.footerTop {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 40px;
   margin-bottom: 30px;
 }
-.footer-logo {
+.footerLogo {
   font-size: 1.5rem;
   font-weight: bold;
 }
-.footer-columns h4 {
+.footerColumn h4 {
   margin-bottom: 10px;
   font-weight: bold;
 }
-.footer-columns ul {
+.footerColumn ul {
   padding: 0;
 }
-.footer-columns ul li {
+.footerColumn ul li {
   margin-bottom: 6px;
 }
-.footer-columns a {
+.footerColumn a {
   color: #dcdde1;
   text-decoration: none;
 }
-.footer-bottom {
+.footerBottom {
   text-align: center;
   border-top: 1px solid #3a3a3a;
   padding-top: 15px;
@@ -407,16 +388,16 @@ body {
 
 /* ===== Responsive Adjustments ===== */
 @media (max-width: 768px) {
-  .feature-row,
-  .role-row {
+  .featureRow,
+  .roleRow {
     flex-direction: column;
     align-items: center;
   }
-  .feature-box,
-  .role-card {
+  .featureBox,
+  .roleCard {
     width: 90%;
   }
-  .footer-top {
+  .footerTop {
     grid-template-columns: 1fr;
     text-align: center;
   }

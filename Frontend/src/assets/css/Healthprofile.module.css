@@ -1,137 +1,204 @@
+
 .container {
   display: flex;
   min-height: 100vh;
-  background-color: #f9fbfc;
 }
 
 .content {
-  flex: 1;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
+  flex-grow: 1;
+  padding: 24px;
+  background-color: #f9fafb;
 }
 
 .dashboard-header-bar {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .title-group h1 {
   font-size: 50px;
   font-weight: bold;
-}
-
-.text-black {
-  color: #111827;
+  color: #0f172a;
 }
 
 .text-accent {
-  color: #20b2aa;
+  color: #14b8a6;
+}
+
+.text-black {
+  color: #0f172a;
 }
 
 .card {
-  background-color: white;
-  border-radius: 10px;
+  background: white;
+  border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
+.card-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+}
+
 .profile-card {
-  width: 300px;
-  flex-shrink: 0;
+  width: 320px;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 .avatar {
-  border-radius: 50%;
   width: 100px;
   height: 100px;
-  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 8px;
 }
 
-.update-btn {
-  background-color: #20b2aa;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
+.info-section p {
   margin: 10px 0;
-  cursor: pointer;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #ccc; /* dòng ngắt giống trang vở */
+  font-size: 15px;
 }
 
-.info-section {
-  text-align: left;
+.info-section strong {
+  display: inline-block;
+  width: 130px;
+  color: #333;
+}
+
+.info-section input,
+.info-section textarea,
+.info-section select {
   width: 100%;
-  font-size: 14px;
+  padding: 8px 12px;
+  margin: 6px 0;
+  border: none;
+  border-bottom: 1px solid #ccc;
+  border-radius: 0;
+  background-color: #fff;   /* trắng nền */
+  color: #111;              /* đen chữ rõ ràng */
+  font-size: 15px;
+  outline: none;
 }
 
-.card-group {
-  flex: 1;
+.inputGroup {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
-
-.vitals-card {
-  display: flex;
-  justify-content: space-around;
-  text-align: center;
-}
-
-.vitals-card div {
-  flex: 1;
-}
-
-.report-card, .prescription-card {
-  background-color: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-}
-
-.report-header {
-  font-size: 18px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  gap: 8px;
   margin-bottom: 12px;
+}
+
+.inputGroup label {
+  font-weight: 500;
+  font-size: 14px;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.input, .textarea, .select {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: white;
   color: #1e293b;
 }
 
-.report-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.textarea {
+  resize: vertical;
+  min-height: 80px;
 }
 
-.report-list li {
-  padding: 6px 0;
+.select {
+  appearance: none;
+}
+
+.buttonRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.update-btn,
+.save-button,
+.cancel-button {
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.update-btn {
+  background-color: #14b8a6;
+  color: white;
+  margin-top: 16px;
+}
+
+.save-button {
+  background-color: #14b8a6;
+  color: white;
+}
+
+.cancel-button {
+  background-color: #e2e8f0;
+  color: #1e293b;
+}
+
+.vitals-card {
+   display: flex;
+  justify-content: space-around;
+  padding: 20px;
+  border-radius: 12px;
+  background-color: white;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+.vital-box {
+  text-align: center;
+}
+
+.vital-icon {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.vital-title {
+  font-weight: 600;
+  color: #14b8a6;
+  margin-bottom: 2px;
+}
+
+.vital-value {
   font-size: 15px;
-  color: #374151;
+  color: #1e293b;
 }
 
-.report-list li span {
-  color: #6b7280;
+.report-header {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.report-list {
+  padding-left: 16px;
   font-size: 14px;
-  margin-left: 4px;
+  color: #334155;
 }
 
 .add-btn {
   background: none;
-  color: #20b2aa;
   border: none;
+  color: #14b8a6;
+  font-weight: 600;
   cursor: pointer;
-  margin-bottom: 10px;
-  font-size: 15px;
-  transition: color 0.2s ease;
+  margin-bottom: 8px;
 }
-
-.add-btn:hover {
-  text-decoration: underline;
-  color: #20b2aa;
-}
-
-
-

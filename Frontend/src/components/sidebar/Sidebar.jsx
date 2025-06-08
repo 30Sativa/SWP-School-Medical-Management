@@ -10,7 +10,7 @@ import {
   LogOut,
   Menu,
 } from "lucide-react";
-import "./Sidebar.css";
+import style from "./Sidebar.module.css"; // ✅ Import module
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -19,34 +19,67 @@ const Sidebar = () => {
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   return (
-    <aside className={`sb-sidebar ${isOpen ? "expanded" : "collapsed"}`}>
-      <button className="toggle-btn" onClick={toggleSidebar}>
+    <aside
+      className={`${style.sbSidebar} ${
+        isOpen ? style.expanded : style.collapsed
+      }`}
+    >
+      <button className={style.toggleBtn} onClick={toggleSidebar}>
         <Menu size={22} />
       </button>
 
       <nav>
-        <NavLink to="/nurse" className="nav-item">
+        <NavLink
+          to="/nurse"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
           <Home size={20} />
           <span>Trang chủ</span>
         </NavLink>
-        <NavLink to="/students" className="nav-item">
+
+        <NavLink
+          to="/students"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
           <Users size={20} />
           <span>Danh sách học sinh</span>
         </NavLink>
-        <NavLink to="/medicine" className="nav-item">
+
+        <NavLink
+          to="/medicine"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
           <ClipboardList size={20} />
           <span>Quản lý thuốc</span>
         </NavLink>
-        <NavLink to="/vaccines" className="nav-item">
+
+        <NavLink
+          to="/vaccines"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
           <Syringe size={20} />
           <span>Tiêm chủng</span>
         </NavLink>
-        <NavLink to="/notifications" className="nav-item">
+
+        <NavLink
+          to="/notifications"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
           <Bell size={20} />
           <span>Thông báo</span>
         </NavLink>
         <button
-          className="nav-item"
+          className={style.navItem}
           onClick={() => {
             localStorage.clear();
             navigate("/");
