@@ -78,11 +78,8 @@ namespace School_Medical_Management.API.Controllers
 
 
 
-        [HttpPost("change-password{id}")]
+        [HttpPost("change-password-firstlogin/{id}")]
         public async Task<IActionResult> ChangePasswordAfterFirstLogin([FromRoute] int id, SchoolMedicalManagement.Models.Request.ChangePasswordUser userChangePasswordRequest)
-
-        [HttpPost("change-password")]
-        public async Task<IActionResult> ChangePasswordAfterFirstLogin(UserChangePasswordRequest userChangePasswordRequest)
         {
             var response = await _authService.ChangePasswordAfterFirstLogin(id,userChangePasswordRequest);
             return StatusCode(int.Parse(response.Status), response);
