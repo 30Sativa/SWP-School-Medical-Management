@@ -61,7 +61,8 @@ namespace SchoolMedicalManagement.Service.Implement
                     DateOfBirth = student.DateOfBirth,
                     Gender = student.Gender,
                     Class = student.Class,
-                    Parent = student.Parent?.Username
+                    Parent = student.Parent?.Username,
+                    ParentId = student.ParentId
                 }
             };
         }
