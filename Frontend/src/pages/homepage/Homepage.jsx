@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "../../assets/css/homepage.css";
 import minhhoa from "../../assets/img/homepage.jpg";
 import { useNavigate } from "react-router-dom";
-import logo from "../../assets/icon/header.jpg";
+import logo from "../../assets/icon/eduhealth.jpg";
 import parLogo from "../../assets/icon/Background.png";
 import nurseLogo from "../../assets/icon/nurse.png";
 import adminLogo from "../../assets/icon/admin.png";
@@ -17,13 +17,41 @@ import feedback from "../../assets/icon/feedback.png";
 
 const Homepage = () => {
   const navigate = useNavigate();
+  // ✅ Thêm Chatbase script khi component mount
+  useEffect(() => {
+    if (!window.chatbase || window.chatbase("getState") !== "initialized") {
+      window.chatbase = (...args) => {
+        if (!window.chatbase.q) window.chatbase.q = [];
+        window.chatbase.q.push(args);
+      };
+      window.chatbase = new Proxy(window.chatbase, {
+        get(target, prop) {
+          if (prop === "q") return target.q;
+          return (...args) => target(prop, ...args);
+        },
+      });
+    }
+
+    const onLoad = () => {
+      const script = document.createElement("script");
+      script.src = "https://www.chatbase.co/embed.min.js";
+      script.id = "CkJUXMzUTtGaAYX6V8_iH"; // 👈 ID của bạn
+      script.domain = "www.chatbase.co";
+      document.body.appendChild(script);
+    };
+
+    if (document.readyState === "complete") {
+      onLoad();
+    } else {
+      window.addEventListener("load", onLoad);
+    }
+  }, []);
   return (
     <>
       {/* Navbar */}
       <header className="navbar">
         <div className="logo">
           <img src={logo} alt="EduHealth Logo" className="logo-img" />
-          <span className="logo-text">EduHealth</span>
         </div>
         <nav className="nav-links">
           <a href="#">Trang chủ</a>

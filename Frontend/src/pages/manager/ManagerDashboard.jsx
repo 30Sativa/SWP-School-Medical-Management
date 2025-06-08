@@ -1,35 +1,60 @@
 import React, { useEffect, useState } from "react";
 import "../../assets/css/ManagerDashboard.css";
-import Logo from '../../assets/icon/admin.png';
+import Logo from "../../assets/icon/header.jpg";
 import { useNavigate } from "react-router-dom";
 // Import icon từ antd
 import {
-  MedicineBoxOutlined, TeamOutlined, ProfileOutlined, HeartOutlined, DashboardOutlined, FileTextOutlined, ReadOutlined, BarChartOutlined,
+  MedicineBoxOutlined,
+  TeamOutlined,
+  ProfileOutlined,
+  HeartOutlined,
+  DashboardOutlined,
+  FileTextOutlined,
+  ReadOutlined,
+  BarChartOutlined,
 } from "@ant-design/icons";
 
 const sidebarItems = [
-  { icon: <DashboardOutlined />, label: "Bảng điều khiển", active: true },
-  { icon: <FileTextOutlined />, label: "Nhật ký hoạt động" },
-  { icon: <TeamOutlined />, label: "Danh sách người dùng" },
-  { icon: <ReadOutlined />, label: "Blog" },
-  { icon: <BarChartOutlined />, label: "Báo cáo thống kê" },
+  { icon: <DashboardOutlined />, label: "Bảng điều khiển", path: "/" },
+  { icon: <FileTextOutlined />, label: "Nhật ký hoạt động", path: "/logs" },
+  { icon: <TeamOutlined />, label: "Danh sách người dùng", path: "/users" },
+  { icon: <ReadOutlined />, label: "Blog", path: "/blog" },
+  { icon: <BarChartOutlined />, label: "Báo cáo thống kê", path: "/reports" },
 ];
 
 const ManagerDashboard = () => {
   const [stats, setStats] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   const [error] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    setLoading(true);
+    // setLoading(true);
     setTimeout(() => {
       setStats([
-        { title: "Ca khám hôm nay", value: "48", icon: <HeartOutlined style={{ fontSize: 32, color: "#06b6d4" }} /> },
-        { title: "Nhân viên y tế", value: "12", icon: <TeamOutlined style={{ fontSize: 32, color: "#059669" }} /> },
-        { title: "Thuốc có sẵn", value: "156", icon: <MedicineBoxOutlined style={{ fontSize: 32, color: "#7c3aed" }} /> },
-        { title: "Hồ sơ sức khỏe", value: "1,248", icon: <ProfileOutlined style={{ fontSize: 32, color: "#d97706" }} /> },
+        {
+          title: "Ca khám hôm nay",
+          value: "48",
+          icon: <HeartOutlined style={{ fontSize: 32, color: "#06b6d4" }} />,
+        },
+        {
+          title: "Nhân viên y tế",
+          value: "12",
+          icon: <TeamOutlined style={{ fontSize: 32, color: "#059669" }} />,
+        },
+        {
+          title: "Thuốc có sẵn",
+          value: "156",
+          icon: (
+            <MedicineBoxOutlined style={{ fontSize: 32, color: "#7c3aed" }} />
+          ),
+        },
+        {
+          title: "Hồ sơ sức khỏe",
+          value: "1,248",
+          icon: <ProfileOutlined style={{ fontSize: 32, color: "#d97706" }} />,
+        },
       ]);
       setNotifications([
         {
@@ -51,23 +76,16 @@ const ManagerDashboard = () => {
           time: "1 ngày trước",
         },
       ]);
-      setLoading(false);
+      // setLoading(false);
     }, 1000);
   }, []);
 
-  if (loading)
-    return (
-      <div className="manager-dashboard-loading">
-        Đang tải dữ liệu....
-      </div>
-    );
+  // if (loading)
+  //   return (
+  //     <div className="manager-dashboard-loading">Đang tải dữ liệu....</div>
+  //   );
 
-  if (error)
-    return (
-      <div className="manager-dashboard-error">
-        Lỗi: {error}
-      </div>
-    );
+  if (error) return <div className="manager-dashboard-error">Lỗi: {error}</div>;
 
   return (
     <div className="manager-dashboard">
@@ -86,7 +104,7 @@ const ManagerDashboard = () => {
         </div>
         <nav className="sidebar-nav">
           {sidebarItems.map((item, idx) => (
-    <button
+            <button
               key={idx}
               className={`nav-btn ${item.active ? "active" : ""}`}
               type="button"
@@ -100,7 +118,7 @@ const ManagerDashboard = () => {
               <span className="sidebar-icon">{item.icon}</span>
               {item.label}
             </button>
-  ))}
+          ))}
         </nav>
         <button className="sidebar-collapse">Thu gọn &lt;</button>
       </aside>
@@ -113,8 +131,12 @@ const ManagerDashboard = () => {
             <input type="text" placeholder="Tìm kiếm..." />
           </div>
           <div className="header-right">
-            <button className="icon-btn" title="Trợ giúp">?</button>
-            <button className="icon-btn" title="Thông báo">🔔</button>
+            <button className="icon-btn" title="Trợ giúp">
+              ?
+            </button>
+            <button className="icon-btn" title="Thông báo">
+              🔔
+            </button>
             <div className="user-info">
               <span className="user-name">Nguyễn Ngọc Viên Ka</span>
             </div>

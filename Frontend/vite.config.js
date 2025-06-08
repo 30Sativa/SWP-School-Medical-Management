@@ -4,13 +4,13 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 5173, // hoặc 3000 nếu bạn dùng port khác
     proxy: {
       '/api': {
-        target: 'https://localhost:7031', // hoặc http nếu backend không bật HTTPS
+        target: 'https://swp-school-medical-management.onrender.com',
         changeOrigin: true,
-        secure: false, // Bắt buộc nếu chứng chỉ backend là tự ký
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
       },
     },
   },
-});
+})

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import "../../assets/css/nursedashboard.css";
 import log1 from "../../assets/icon/feedback.png";
 import log2 from "../../assets/icon/nurse.png";
@@ -6,69 +6,53 @@ import log3 from "../../assets/icon/notify.png";
 import log4 from "../../assets/icon/Overlay.png";
 import log5 from "../../assets/icon/tick.png";
 import log6 from "../../assets/icon/vacxin.png";
-
+import Sidebar from "../../components/sidebar/Sidebar"; // ✅ Sử dụng lại Sidebar component
 const NurseDashBoard = () => {
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
+  // ✅ Thêm Chatbase script khi component mount
+  useEffect(() => {
+    if (!window.chatbase || window.chatbase("getState") !== "initialized") {
+      window.chatbase = (...args) => {
+        if (!window.chatbase.q) window.chatbase.q = [];
+        window.chatbase.q.push(args);
+      };
+      window.chatbase = new Proxy(window.chatbase, {
+        get(target, prop) {
+          if (prop === "q") return target.q;
+          return (...args) => target(prop, ...args);
+        },
+      });
+    }
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!isSidebarOpen);
-  };
+    const onLoad = () => {
+      const script = document.createElement("script");
+      script.src = "https://www.chatbase.co/embed.min.js";
+      script.id = "CkJUXMzUTtGaAYX6V8_iH"; // 👈 ID của bạn
+      script.domain = "www.chatbase.co";
+      document.body.appendChild(script);
+    };
+
+    if (document.readyState === "complete") {
+      onLoad();
+    } else {
+      window.addEventListener("load", onLoad);
+    }
+  }, []);
 
   return (
-    <div
-      className={`container ${
-        isSidebarOpen ? "sidebar-open" : "sidebar-closed"
-      }`}
-    >
-      {/* Toggle button */}
-      <button className="sidebar-toggle-btn" onClick={toggleSidebar}>
-        ☰
-      </button>
+    <div className="container">
+      <Sidebar />
 
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <div className="logo">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-          ></svg>
-          <a>EduHealth</a>
-        </div>
-        <nav>
-          <a href="#" className="active">
-            Dashboard
-          </a>
-          <a href="#">Danh sách học sinh</a>
-          <a href="#">Quản lý thuốc</a>
-          <a href="#">Chiến dịch tiêm chủng</a>
-          <a href="#">Kiểm tra sức khỏe</a>
-          <a href="#">Sự cố y tế</a>
-        </nav>
-      </aside>
-
-      {/* Main content */}
       <main className="content">
         <header>
           <div className="dashboard-header-bar">
             <div className="title-group">
               <h1>
+                <span className="text-accent">|</span>
                 <span className="text-black">Dash</span>
                 <span className="text-accent">board</span>
+                <h5 className="text-welcome">Chào mừng trở lại!</h5>
               </h1>
             </div>
-            <button
-              className="logout-btn"
-              onClick={() => {
-                localStorage.clear(); // nếu có token cần xóa
-                window.location.href = "/"; // chuyển về trang chủ
-              }}
-            >
-              Đăng xuất
-            </button>
           </div>
         </header>
 
@@ -82,18 +66,16 @@ const NurseDashBoard = () => {
                 +2 so với hôm qua
               </div>
             </div>
-            <img src={log1}></img>
+            <img src={log1} alt="feedback" />
           </div>
-
           <div className="stat-card">
             <div className="stat-info">
               <div className="stat-title">Mũi tiêm sắp tới</div>
               <div className="stat-value">87</div>
               <div className="stat-sub">Trong tuần này</div>
             </div>
-            <img src={log5}></img>
+            <img src={log5} alt="tick" />
           </div>
-
           <div className="stat-card">
             <div className="stat-info">
               <div className="stat-title">Kiểm tra sức khỏe</div>
@@ -102,9 +84,8 @@ const NurseDashBoard = () => {
                 Đã lên lịch trong tuần
               </div>
             </div>
-            <img src={log3}></img>
+            <img src={log3} alt="notify" />
           </div>
-
           <div className="stat-card">
             <div className="stat-info">
               <div className="stat-title">Sự cố được báo cáo</div>
@@ -113,7 +94,7 @@ const NurseDashBoard = () => {
                 +1 so với hôm qua
               </div>
             </div>
-            <img src={log2}></img>
+            <img src={log2} alt="nurse" />
           </div>
         </section>
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Logo from "../../assets/icon/header.jpg";
 import {
     Layout,
     Menu,
@@ -166,17 +167,17 @@ const UsersList = () => {
 // };
 
 
-    const handleDelete = (user) => {
+   const handleDelete = (id) => {
   confirm({
-    title: `Bạn có chắc muốn xóa người dùng "${user.name}"?`,
+    title: `Bạn có chắc muốn xóa người dùng này?`,
     icon: <ExclamationCircleOutlined />,
     onOk() {
-      // Giả lập xóa
-      setUsers((prev) => prev.filter((u) => u.id !== user.id));
+      // Lọc và loại bỏ người dùng có id tương ứng
+      setUsers((prev) => prev.filter((user) => user.id !== id));
       message.success("Xóa người dùng thành công");
     },
     onCancel() {
-      // không làm gì
+      // Không làm gì khi hủy
     },
   });
 };
@@ -223,90 +224,73 @@ const UsersList = () => {
     };
 
     const columns = [
-        {
-            title: "Họ và tên",
-            dataIndex: "name",
-            key: "name",
-            render: (text, record) => (
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <Avatar src={record.avatar} alt={text}>
-                        {!record.avatar && text.charAt(0)}
-                    </Avatar>
-                    <span>{text}</span>
-                </div>
-            ),
-            sorter: (a, b) => a.name.localeCompare(b.name),
-        },
-        {
-            title: "Email",
-            dataIndex: "email",
-            key: "email",
-            sorter: (a, b) => a.email.localeCompare(b.email),
-        },
-        {
-            title: "Số điện thoại",
-            dataIndex: "phone",
-            key: "phone",
-        },
-        {
-            title: "Vai trò",
-            dataIndex: "role",
-            key: "role",
-            render: (role) => {
-                let color = "blue";
-                if (role === "Giáo viên") color = "green";
-                else if (role === "Quản trị viên") color = "purple";
-                return <Tag color={color}>{role}</Tag>;
-            },
-            filters: [
-                { text: "Học sinh", value: "Học sinh" },
-                { text: "Giáo viên", value: "Giáo viên" },
-                { text: "Quản trị viên", value: "Quản trị viên" },
-            ],
-            onFilter: (value, record) => record.role === value,
-        },
-        {
-            title: "Trạng thái",
-            dataIndex: "status",
-            key: "status",
-            render: (status) =>
-                status === "active" ? (
-                    <Tag color="green">Đang hoạt động</Tag>
-                ) : (
-                    <Tag color="red">Không hoạt động</Tag>
-                ),
-            filters: [
-                { text: "Đang hoạt động", value: "active" },
-                { text: "Không hoạt động", value: "inactive" },
-            ],
-            onFilter: (value, record) => record.status === value,
-        },
-        {
-            title: "Hoạt động gần đây",
-            dataIndex: "lastActive",
-            key: "lastActive",
-            sorter: (a, b) => new Date(a.lastActive) - new Date(b.lastActive),
-        },
-        {
-            title: "Hành động",
-            key: "action",
-            render: (_, record) => (
-                <>
-                    <Button
-                        type="link"
-                        icon={<EditOutlined />}
-                        onClick={() => showModal("edit", record)}
-                    />
-                    <Button
-                        type="link"
-                        danger
-                        icon={<DeleteOutlined />}
-                        onClick={() => handleDelete(record)}
-                    />
-                </>
-            ),
-        },
-    ];
+  {
+    title: "Họ và tên",
+    dataIndex: "name",
+    key: "name",
+    render: (text, record) => (
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <Avatar src={record.avatar} alt={text}>
+          {!record.avatar && text.charAt(0)}
+        </Avatar>
+        <span>{text}</span>
+      </div>
+    ),
+    sorter: (a, b) => a.name.localeCompare(b.name),
+  },
+  {
+    title: "Email",
+    dataIndex: "email",
+    key: "email",
+    sorter: (a, b) => a.email.localeCompare(b.email),
+  },
+  {
+    title: "Số điện thoại",
+    dataIndex: "phone",
+    key: "phone",
+  },
+  {
+    title: "Vai trò",
+    dataIndex: "role",
+    key: "role",
+    render: (role) => {
+      let color = "blue";
+      if (role === "Giáo viên") color = "green";
+      else if (role === "Quản trị viên") color = "purple";
+      return <Tag color={color}>{role}</Tag>;
+    },
+  },
+  {
+    title: "Trạng thái",
+    dataIndex: "status",
+    key: "status",
+    render: (status) =>
+      status === "active" ? (
+        <Tag color="green">Đang hoạt động</Tag>
+      ) : (
+        <Tag color="red">Không hoạt động</Tag>
+      ),
+  },
+  {
+    title: "Hành động",
+    key: "action",
+    render: (_, record) => (
+      <>
+        <Button
+          type="link"
+          icon={<EditOutlined />}
+          onClick={() => showModal("edit", record)}
+        />
+        <Button
+          type="link"
+          danger
+          icon={<DeleteOutlined />}
+          onClick={() => handleDelete(record.id)} // Đảm bảo truyền đúng `id`
+        />
+      </>
+    ),
+  },
+];
 
     return (
         <Layout style={{ minHeight: "100vh" }}>
@@ -322,7 +306,7 @@ const UsersList = () => {
                     style={{ color: "white", padding: 20, fontWeight: "bold", fontSize: 20 }}
                 >
                     <img
-                        src="/eduhealthlogo.jpg"
+                        src={Logo}
                         alt="EduHealth Logo"
                         style={{ width: 37, height: 41, marginRight: 10 }}
                     />
