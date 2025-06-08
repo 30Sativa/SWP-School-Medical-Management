@@ -39,6 +39,8 @@ const Login = () => {
 
       if (response.data.message?.toLowerCase().includes("login successful")) {
         localStorage.setItem("token", resData.token);
+        localStorage.setItem("userId", resData.userId); // 👈 THÊM DÒNG NÀY
+        localStorage.setItem("studentId", resData.studentId); // nếu có
         alert("✅ Đăng nhập thành công!");
 
         // ✅ Điều hướng theo vai trò
@@ -47,6 +49,20 @@ const Login = () => {
         } else if (roleName === "Nurse") {
           navigate("/nurse");
         } else if (roleName === "Parent") {
+          // Gọi danh sách học sinh - Giai phap tạm thời !!! Cần sửa gấp sau khi thêm parentId
+          const studentRes = await axios.get(
+            "https://swp-school-medical-management.onrender.com/api/Student"
+          );
+
+          const student = studentRes.data.find(
+            (s) => s.parentId === resData.userId
+          );
+
+          if (student) {
+            localStorage.setItem("studentId", student.studentId);
+          } else {
+            alert("❗Không tìm thấy học sinh tương ứng với phụ huynh này!");
+          }
           navigate("/parent");
         } else {
           alert("❗ Vai trò không xác định!");

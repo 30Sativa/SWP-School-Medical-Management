@@ -1,0 +1,137 @@
+.container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f9fbfc;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-header-bar {
+  margin-bottom: 20px;
+}
+
+.title-group h1 {
+  font-size: 50px;
+  font-weight: bold;
+}
+
+.text-black {
+  color: #111827;
+}
+
+.text-accent {
+  color: #20b2aa;
+}
+
+.card {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.profile-card {
+  width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatar {
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+}
+
+.update-btn {
+  background-color: #20b2aa;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  margin: 10px 0;
+  cursor: pointer;
+}
+
+.info-section {
+  text-align: left;
+  width: 100%;
+  font-size: 14px;
+}
+
+.card-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.vitals-card {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+}
+
+.vitals-card div {
+  flex: 1;
+}
+
+.report-card, .prescription-card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.report-header {
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: #1e293b;
+}
+
+.report-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.report-list li {
+  padding: 6px 0;
+  font-size: 15px;
+  color: #374151;
+}
+
+.report-list li span {
+  color: #6b7280;
+  font-size: 14px;
+  margin-left: 4px;
+}
+
+.add-btn {
+  background: none;
+  color: #20b2aa;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 10px;
+  font-size: 15px;
+  transition: color 0.2s ease;
+}
+
+.add-btn:hover {
+  text-decoration: underline;
+  color: #20b2aa;
+}
+
+
+
