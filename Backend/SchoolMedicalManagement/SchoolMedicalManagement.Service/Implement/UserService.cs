@@ -66,7 +66,7 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 Status = StatusCodes.Status200OK.ToString(),
                 Message = "Create user successfully.",
-                Data = new UserManagementResponse
+                Data = new ManagerUserResponse
                 {
                     UserId = createdUser.UserId,
                     Username = createdUser.Username,
@@ -134,7 +134,7 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 Status = StatusCodes.Status200OK.ToString(),
                 Message = "User found successfully.",
-                Data = new UserManagementResponse
+                Data = new ManagerUserResponse
                 {
                     UserId = user.UserId,
                     Username = user.Username,
@@ -191,7 +191,7 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 Status = StatusCodes.Status200OK.ToString(),
                 Message = "User updated successfully.",
-                Data = new UserManagementResponse
+                Data = new ManagerUserResponse
                 {
                     UserId = updatedUser.UserId,
                     Username = updatedUser.Username,

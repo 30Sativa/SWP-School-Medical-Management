@@ -24,7 +24,7 @@ namespace School_Medical_Management.API.Controllers
 
         [HttpPost("login")]
         
-        public async Task<IActionResult> Login([FromBody] UserLoginRequest loginRequest)
+        public async Task<IActionResult> Login([FromBody] LoginUserRequest loginRequest)
         {
             var response = await _authService.Login(loginRequest);
             return StatusCode(int.Parse(response.Status), response);
@@ -50,7 +50,7 @@ namespace School_Medical_Management.API.Controllers
         }
         [Authorize(Roles = "Manager")]
         [HttpPost]
-        public async Task<IActionResult> CreateUser(UserCreateRequest request)
+        public async Task<IActionResult> CreateUser(CreateUserRequest request)
         {
             var userToCreate = await _userService.CreateUser(request);
             return StatusCode(int.Parse(userToCreate.Status), userToCreate);
@@ -70,7 +70,7 @@ namespace School_Medical_Management.API.Controllers
         //testCICD
         [Authorize(Roles = "Manager")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, UserUpdateRequest request)
+        public async Task<IActionResult> UpdateUser(int id, UpdateUserRequest request)
         {
             var updatedUser = await _userService.UpdateUser(id, request);
             return StatusCode(int.Parse(updatedUser.Status), updatedUser);
@@ -79,7 +79,7 @@ namespace School_Medical_Management.API.Controllers
 
 
         [HttpPost("change-password{id}")]
-        public async Task<IActionResult> ChangePasswordAfterFirstLogin([FromRoute] int id, UserChangePasswordRequest userChangePasswordRequest)
+        public async Task<IActionResult> ChangePasswordAfterFirstLogin([FromRoute] int id, SchoolMedicalManagement.Models.Request.ChangePasswordUser userChangePasswordRequest)
         {
             var response = await _authService.ChangePasswordAfterFirstLogin(id,userChangePasswordRequest);
             return StatusCode(int.Parse(response.Status), response);

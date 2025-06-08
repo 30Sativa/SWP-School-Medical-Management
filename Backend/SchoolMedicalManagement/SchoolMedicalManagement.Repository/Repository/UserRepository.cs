@@ -17,7 +17,7 @@ namespace SchoolMedicalManagement.Repository.Repository
         {
         }
 
-        public async Task<User?> GetLogin(UserLoginRequest loginRequest)
+        public async Task<User?> GetLogin(LoginUserRequest loginRequest)
         {
             return await _context.Users.Include(u => u.Role)
                                        .FirstOrDefaultAsync(u => u.Username == loginRequest.Username &&
@@ -83,7 +83,7 @@ namespace SchoolMedicalManagement.Repository.Repository
         }
          
         //Get user by id for change password
-        public Task<User?> GetUserById(int id, UserChangePasswordRequest request)
+        public Task<User?> GetUserById(int id, ChangePasswordUser request)
         {
             return _context.Users.FirstOrDefaultAsync(u => u.UserId == id);
         }
