@@ -1,0 +1,1 @@
+Trong một dự án frontend, thư mục layouts/ thường chứa các bố cục tổng thể (layout templates) được sử dụng để bao quanh nội dung của các trang (pages). Layout giúp tái sử dụng những phần giao diện chung như header, footer, sidebar… giữa các trang khác nhau.

@@ -1,4 +1,4 @@
-using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -15,21 +15,44 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Configuration.AddEnvironmentVariables();
+
+
+
+// ✅ Thêm cấu hình CORS (Cho phép React ở localhost:3000 gọi API)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        policy => policy.WithOrigins("http://localhost:3000") // React chạy ở port 3000
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
+});
+
+
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<StudentRepository>();
 builder.Services.AddScoped<HealthProfileRepository>();
 builder.Services.AddScoped<HealthCheckCampaignRepository>();
+
 builder.Services.AddScoped<MedicalEventRepository>();
+
+builder.Services.AddScoped<HealthCheckSummaryRepository>();
+
+
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IHealthProfileService, HealthProfileService>();
 builder.Services.AddScoped<IHealthCheckCampaignService, HealthCheckCampaignService>();
+
 builder.Services.AddScoped<IMedicalEventService, MedicalEventService>();
+
+builder.Services.AddScoped<IHealthCheckSummaryService, HealthCheckSummaryService>();
+
 
 // CORS
 builder.Services.AddCors(options =>
@@ -98,6 +121,8 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors("AllowAllOrigins");
 app.UseHttpsRedirection();
+// ✅ Kích hoạt CORS (phải đặt trước Authorization!)
+app.UseCors("AllowReactApp");
 
 app.UseAuthorization();
 
