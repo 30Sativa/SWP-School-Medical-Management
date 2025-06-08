@@ -16,7 +16,7 @@ const Sidebar = () => {
       </button>
 
       <nav>
-        <NavLink to="/" className="nav-item">
+        <NavLink to="/manager" className="nav-item">
           <Home size={20} />
           <span>Bảng điều khiển</span>
         </NavLink>
