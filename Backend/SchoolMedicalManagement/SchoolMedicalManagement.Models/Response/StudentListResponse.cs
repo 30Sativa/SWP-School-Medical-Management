@@ -20,5 +20,8 @@ namespace SchoolMedicalManagement.Models.Response
         public string? Class { get; set; }
 
         public string? Parent { get; set; }
+
+        public int? ParentId { get; set; }
+
     }
 }

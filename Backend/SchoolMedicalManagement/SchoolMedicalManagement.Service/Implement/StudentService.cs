@@ -30,7 +30,8 @@ namespace SchoolMedicalManagement.Service.Implement
                     DateOfBirth = student.DateOfBirth,
                     Gender = student.Gender,
                     Class = student.Class,
-                    Parent = student.Parent?.FullName
+                    Parent = student.Parent?.FullName,
+                    ParentId = student.ParentId
                 });
             }
             return studentListResponses;
@@ -61,7 +62,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     DateOfBirth = student.DateOfBirth,
                     Gender = student.Gender,
                     Class = student.Class,
-                    Parent = student.Parent?.Username,
+                    Parent = student.Parent?.FullName,
                     ParentId = student.ParentId
                 }
             };
