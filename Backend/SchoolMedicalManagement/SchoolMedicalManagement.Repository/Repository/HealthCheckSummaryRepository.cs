@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SchoolMedicalManagement.Models.Entity;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace SchoolMedicalManagement.Repository.Repository
 {
@@ -21,25 +22,24 @@ namespace SchoolMedicalManagement.Repository.Repository
                 .Include(s => s.Campaign)
                 .FirstOrDefaultAsync(s => s.RecordId == id);
 
-        public async Task<HealthCheckSummary?> CreateHealthCheckSummary(HealthCheckSummary summary)
+        public async Task<HealthCheckSummary?> CreateHealthCheckSummary(HealthCheckSummary healthCheckRecord)
         {
-            await CreateAsync(summary);
-            return await GetHealthCheckSummaryById(summary.RecordId);
+            await CreateAsync(healthCheckRecord);
+            return await GetHealthCheckSummaryById(healthCheckRecord.RecordId);
         }
 
-        public async Task<HealthCheckSummary?> UpdateHealthCheckSummary(HealthCheckSummary summary)
+        public async Task<HealthCheckSummary?> UpdateHealthCheckSummary(HealthCheckSummary healthCheckRecord)
         {
-            await UpdateAsync(summary);
-            return await GetHealthCheckSummaryById(summary.RecordId);
+            await UpdateAsync(healthCheckRecord);
+            return await GetHealthCheckSummaryById(healthCheckRecord.RecordId);
         }
 
         public async Task<bool> DeleteHealthCheckSummary(int id)
         {
-            var summary = await GetHealthCheckSummaryById(id);
-            if (summary == null) return false;
-            _context.HealthCheckSummaries.Remove(summary);
-            await _context.SaveChangesAsync();
-            return true;
+            var isExist = await GetHealthCheckSummaryById(id);
+            if (isExist == null) return false;
+            
+            return await RemoveAsync(isExist);
         }
     }
 } 
