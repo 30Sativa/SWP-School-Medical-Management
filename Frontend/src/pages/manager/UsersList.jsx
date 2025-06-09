@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Input, Table, Tag, Avatar, message, Modal, Form, Select, Typography } from "antd"; 
+import { Button, Input, Table, Tag, Avatar, message, Modal, Form, Select, Typography } from "antd";
 import { SearchOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import Sidebar from "../../components/sb-Manager/Sidebar";
 import "../../assets/css/UsersList.css";
@@ -16,6 +16,7 @@ const UsersList = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState("add"); // 'add' or 'edit'
   const [currentUser, setCurrentUser] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1); // Trạng thái trang hiện tại
 
   const [form] = Form.useForm();
 
@@ -50,6 +51,11 @@ const UsersList = () => {
       user.email.toLowerCase().includes(searchText.toLowerCase()) ||
       user.phone.includes(searchText)
   );
+
+  // Pagination handler
+  const handlePageChange = (page) => {
+    setCurrentPage(page); // Cập nhật trang hiện tại khi chuyển trang
+  };
 
   const columns = [
     {
@@ -105,7 +111,6 @@ const UsersList = () => {
     setModalMode(mode);
     setCurrentUser(user);
     if (mode === "edit" && user) {
-      // Khi chỉnh sửa, KHÔNG tự động set lại roleId vào form nữa
       form.setFieldsValue({
         ...user
       });
@@ -118,7 +123,7 @@ const UsersList = () => {
   const handleModalCancel = () => {
     setIsModalVisible(false);
     setCurrentUser(null);
-    form.resetFields(); // Reset form fields when closing modal
+    form.resetFields();
   };
 
   // Xóa người dùng qua API
@@ -138,13 +143,8 @@ const UsersList = () => {
           } else {
             message.error("Xóa người dùng thất bại (status: " + res.status + ")");
           }
-        } catch (err) {
-          console.error("Delete error:", err);
-          if (err.response) {
-            message.error("Xóa người dùng thất bại: " + (err.response.data?.message || err.response.statusText));
-          } else {
-            message.error("Xóa người dùng thất bại");
-          }
+        } catch (error) {
+          message.error("Xóa người dùng thất bại");
         }
       },
     });
@@ -153,7 +153,6 @@ const UsersList = () => {
   // Xử lý submit form chỉnh sửa/thêm
   const handleFormSubmit = async (values) => {
     if (modalMode === "add") {
-      // Add a new user via API POST request
       try {
         const token = localStorage.getItem("token");
         const response = await axios.post(apiUrl, {
@@ -173,8 +172,8 @@ const UsersList = () => {
 
         if (response.data) {
           message.success("Thêm người dùng thành công");
-          fetchUsers(); // Re-fetch the updated users list
-          setIsModalVisible(false); // Close modal
+          fetchUsers();
+          setIsModalVisible(false);
         }
       } catch {
         message.error("Thêm người dùng thất bại");
@@ -182,7 +181,6 @@ const UsersList = () => {
     } else if (modalMode === "edit" && currentUser) {
       try {
         const token = localStorage.getItem("token");
-        // Loại bỏ field role khỏi payload mà không sinh cảnh báo lint
         const rest = { ...values };
         delete rest.role;
         const roleId = typeof rest.roleId === "string" ? parseInt(rest.roleId) : rest.roleId;
@@ -198,15 +196,11 @@ const UsersList = () => {
 
         if (response.data) {
           message.success("Cập nhật người dùng thành công");
-          fetchUsers(); // Re-fetch the updated users list
-          setIsModalVisible(false); // Close modal
+          fetchUsers();
+          setIsModalVisible(false);
         }
-      } catch (err) {
-        if (err.response) {
-          message.error("Cập nhật người dùng thất bại: " + (err.response.data?.message || err.response.statusText));
-        } else {
-          message.error("Cập nhật người dùng thất bại");
-        }
+      } catch (error) {
+        message.error("Cập nhật người dùng thất bại");
       }
     }
   };
@@ -234,12 +228,17 @@ const UsersList = () => {
             dataSource={filteredUsers}
             columns={columns}
             loading={loading}
-            pagination={{ pageSize: 5 }}
+            pagination={{
+              pageSize: 10,
+              total: filteredUsers.length,
+              showSizeChanger: false,
+              current: currentPage,
+              onChange: handlePageChange,
+            }}
           />
         </div>
       </div>
 
-      {/* Modal thêm/sửa người dùng */}
       <Modal
         title={modalMode === "add" ? "Thêm người dùng" : "Chỉnh sửa người dùng"}
         open={isModalVisible}
@@ -255,9 +254,8 @@ const UsersList = () => {
             <Input />
           </Form.Item>
           <Form.Item name="phone" label="Số điện thoại"><Input /></Form.Item>
-          {/* Ẩn trường vai trò khi chỉnh sửa, chỉ hiển thị khi thêm mới */}
           {modalMode === "add" && (
-            <Form.Item name="roleId" label="Vai trò" rules={[{ required: true, message: "Vui lòng chọn vai trò" }]}> 
+            <Form.Item name="roleId" label="Vai trò" rules={[{ required: true, message: "Vui lòng chọn vai trò" }]}>
               <Select>
                 <Option value={1}>Manager</Option>
                 <Option value={2}>Nurse</Option>
@@ -268,13 +266,12 @@ const UsersList = () => {
           <Form.Item name="address" label="Địa chỉ" rules={[{ required: true, message: "Vui lòng nhập địa chỉ" }]}>
             <Input />
           </Form.Item>
-          {/* Nếu là thêm mới thì hiển thị trường username và password */}
           {modalMode === "add" && (
             <>
-              <Form.Item name="username" label="Tên đăng nhập" rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập" }]}> 
+              <Form.Item name="username" label="Tên đăng nhập" rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập" }]}>
                 <Input />
               </Form.Item>
-              <Form.Item name="password" label="Mật khẩu" rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}> 
+              <Form.Item name="password" label="Mật khẩu" rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}>
                 <Input.Password />
               </Form.Item>
             </>
