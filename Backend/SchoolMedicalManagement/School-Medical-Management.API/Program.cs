@@ -41,6 +41,7 @@ builder.Services.AddScoped<MedicalEventRepository>();
 
 builder.Services.AddScoped<HealthCheckSummaryRepository>();
 
+builder.Services.AddScoped<VaccinationCampaignRepository>();
 
 
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -53,6 +54,7 @@ builder.Services.AddScoped<IMedicalEventService, MedicalEventService>();
 
 builder.Services.AddScoped<IHealthCheckSummaryService, HealthCheckSummaryService>();
 
+builder.Services.AddScoped<IVaccinationCampaignService, VaccinationCampaignService>();
 
 // CORS
 builder.Services.AddCors(options =>
