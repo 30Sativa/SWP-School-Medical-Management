@@ -5,7 +5,7 @@ import ManagerDashboard from "../pages/manager/ManagerDashboard";
 import NurseDashboard from "../pages/nurse/NurseDashboard";
 import UsersList from "../pages/manager/UsersList";
 import StudentList from "../pages/nurse/StudentList";
-import StudenntDetail from "../pages/nurse/StudentDetail";
+import StudentDetail from "../pages/nurse/StudentDetail";
 import ParentDashboard from "../pages/parent/ParentDashboard";
 import HealthProfile from "../pages/parent/HealthProfile";
 const AppRouter = () => {
@@ -18,6 +18,7 @@ const AppRouter = () => {
       <Route path="/parent" element={<ParentDashboard />} />
       <Route path="/users" element={<UsersList />} />
       <Route path="/students" element={<StudentList />} />
+      <Route path="/students/:id" element={<StudentDetail />} />
       <Route path="/healthprofile" element={<HealthProfile />} />
     </Routes>
   );

@@ -2,15 +2,25 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/sidebar/Sidebar";
 import style from "../../assets/css/studentList.module.css";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const StudentList = () => {
   const [students, setStudents] = useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const studentsPerPage = 10;
+  const navigate = useNavigate();
 
-  // Call API để lấy danh sách học sinh
+  const handleViewDetail = (id) => {
+    navigate(`/students/${id}`);
+  };
+
   const fetchStudents = async () => {
     try {
       const response = await axios.get("/api/Student");
       setStudents(response.data);
+      setFilteredStudents(response.data);
     } catch (error) {
       console.error("Có lỗi khi gọi API:", error);
     }
@@ -20,7 +30,22 @@ const StudentList = () => {
     fetchStudents();
   }, []);
 
-  const totalPages = 5;
+  // Tìm kiếm theo tên
+  useEffect(() => {
+    const filtered = students.filter((student) =>
+      student.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredStudents(filtered);
+    setCurrentPage(1); // Reset về trang đầu tiên
+  }, [searchTerm, students]);
+
+  const indexOfLastStudent = currentPage * studentsPerPage;
+  const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
+  const currentStudents = filteredStudents.slice(
+    indexOfFirstStudent,
+    indexOfLastStudent
+  );
+  const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
 
   return (
     <div className={style.layoutContainer}>
@@ -41,6 +66,8 @@ const StudentList = () => {
             type="text"
             placeholder="Tìm kiếm học sinh..."
             className={style.searchBar}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
           <button className={style.addBtn}>Thêm học sinh</button>
         </div>
@@ -57,16 +84,21 @@ const StudentList = () => {
             </tr>
           </thead>
           <tbody>
-            {students && students.length > 0 ? (
-              students.map((student, index) => (
+            {currentStudents.length > 0 ? (
+              currentStudents.map((student, index) => (
                 <tr key={student.id || index}>
-                  <td>{index + 1}</td>
+                  <td>{indexOfFirstStudent + index + 1}</td>
                   <td>{student.fullName}</td>
                   <td>{student.studentId}</td>
                   <td>{student.class}</td>
                   <td>{student.parent}</td>
                   <td>
-                    <button className={style.btn}>Xem chi tiết</button>
+                    <button
+                      className={style.btn}
+                      onClick={() => handleViewDetail(student.studentId)}
+                    >
+                      Xem chi tiết
+                    </button>
                   </td>
                 </tr>
               ))
@@ -82,7 +114,13 @@ const StudentList = () => {
 
         <div className={style.pagination}>
           {[...Array(totalPages)].map((_, index) => (
-            <button key={index}>{index + 1}</button>
+            <button
+              key={index}
+              onClick={() => setCurrentPage(index + 1)}
+              className={currentPage === index + 1 ? style.activePage : ""}
+            >
+              {index + 1}
+            </button>
           ))}
         </div>
       </main>

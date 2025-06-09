@@ -105,33 +105,85 @@
 }
 
 .btn:hover {
-  background-color: #178d89;
+  background-color: #20b2aa;
 }
 
 /* Pagination */
 .pagination {
-  margin-top: 24px;
+  margin-top: 20px;
   text-align: center;
 }
 
 .pagination button {
-  padding: 8px 16px;
-  border: 1px solid #ddd;
   margin: 0 5px;
-  cursor: pointer;
+  padding: 6px 12px;
+  border: none;
   border-radius: 5px;
-  background-color: #20b2aa;
-  color: white;
-  transition: all 0.3s ease;
+  background-color: #e0e0e0; /* xám nhạt */
+  color: #222; /* chữ đen */
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
 .pagination button:hover {
-  background-color: white;
-  color: #20b2aa;
-  border-color: #20b2aa;
+  background-color: #ccc;
 }
 
-.pagination button:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(32, 178, 170, 0.5);
+.pagination .activePage {
+  background-color: #20b2aa; /* xanh chủ đạo */
+  color: #fff;
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: white;
+  padding: 24px;
+  border-radius: 8px;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modalContent input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modalActions button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.modalActions button:first-child {
+  background-color: #10b981;
+  color: white;
+}
+
+.modalActions button:last-child {
+  background-color: #ef4444;
+  color: white;
 }
