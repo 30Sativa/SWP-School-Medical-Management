@@ -41,7 +41,7 @@ namespace SchoolMedicalManagement.Repository.Repository
             return await GetHealthProfileById(healthProfile.ProfileId);
         }
 
-        // Delete a health profile
+        // Soft delete a health profile
         public async Task<bool> DeleteHealthProfile(int id)
         {
             var healthProfile = await GetHealthProfileById(id);

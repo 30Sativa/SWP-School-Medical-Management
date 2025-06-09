@@ -12,7 +12,7 @@ namespace SchoolMedicalManagement.Service.Interface
     {
         Task<List<ManagerHealthProfileResponse>> GetAllHealthProfilesAsync();
         Task<BaseResponse?> GetHealthProfileByIdAsync(int id);
-        Task<BaseResponse?> CreateHealthProfileAsync(CreateHealthProfileRequest healthProfile);
+        Task<BaseResponse?> CreateHealthProfileAsync(CreateHealthProfileRequest healthProfile); 
         Task<BaseResponse?> UpdateHealthProfileAsync(int id, UpdateHealthProfileRequest healthProfile);
         Task<bool> DeleteHealthProfileAsync(int id);
     }

@@ -17,5 +17,7 @@ namespace SchoolMedicalManagement.Models.Request
         public string? Note { get; set; }
 
 
+        public List<SupplyUserRequest>? SuppliesUsed { get; set; }
+
     }
 }
