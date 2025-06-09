@@ -44,7 +44,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 FullName = user.FullName,
                 RoleId = user.RoleId,
                 Phone = user.Phone,
-                Email = user.Email,
+                Email = user.Email, // nên fix tạo lại đối tượng email @gmail.com
                 Address = user.Address,
                 IsFirstLogin = true // Acc mới tạo
             };
