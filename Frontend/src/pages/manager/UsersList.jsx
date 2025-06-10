@@ -107,20 +107,20 @@ const UsersList = () => {
     },
   ];
 
-  // Hiển thị modal
-  const showModal = (mode, user = null) => {
-    setModalMode(mode);
-    setEditingUser(user);
-    if (mode === "edit" && user) {
-      modalForm.setFieldsValue({
-        ...user,
-        roleId: user.role?.roleId || user.roleId, // Set the correct roleId
-      });
-    } else {
-      modalForm.resetFields();
-    }
-    setModalVisible(true);
-  };
+  // Hiển thị modal thêm/sửa người dùng
+const showModal = (mode, user = null) => {
+  setModalMode(mode);
+  setEditingUser(user);
+  if (mode === "edit" && user) {
+    modalForm.setFieldsValue({
+      ...user,
+      roleId: user.role?.roleId || user.roleId, // Set đúng roleId nếu có
+    });
+  } else {
+    modalForm.resetFields(); // Reset form khi mở modal thêm mới
+  }
+  setModalVisible(true); // Mở modal
+};
 
   // Đóng modal
   const handleModalCancel = () => {
@@ -154,43 +154,43 @@ const UsersList = () => {
   };
 
   // Xử lý submit form modal
-  const handleModalSubmit = async (values) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (modalMode === "add") {
-        await axios.post(apiUrl, {
-          username: values.username,
-          password: values.password,
-          fullName: values.fullName,
-          roleId: Number(values.roleId),
-          phone: values.phone,
-          email: values.email,
-          address: values.address,
-          isFirstLogin: true,
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        message.success("Thêm người dùng thành công");
-      } else if (modalMode === "edit" && editingUser) {
-        // Chỉ gửi roleId, không gửi object role
-        const rest = { ...values };
-        delete rest.role;
-        const roleId = Number(rest.roleId);
-        await axios.put(`${apiUrl}/${editingUser.userId}`, {
-          ...rest,
-          roleId,
-          userId: editingUser.userId,
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        message.success("Cập nhật người dùng thành công");
-      }
-      fetchUsers();
-      setModalVisible(false);
-    } catch {
-      message.error("Có lỗi khi lưu người dùng!");
+const handleModalSubmit = async (values) => {
+  try {
+    const token = localStorage.getItem("token");
+    
+    // Đảm bảo roleId được gửi đúng khi thêm hoặc chỉnh sửa
+    const dataToSend = {
+      username: values.username,
+      password: values.password,
+      fullName: values.fullName,
+      roleId: Number(values.roleId), // Chuyển roleId thành số
+      phone: values.phone,
+      email: values.email,
+      address: values.address,
+      isFirstLogin: true, // Cài đặt giá trị true cho lần đăng nhập đầu tiên
+    };
+
+    if (modalMode === "add") {
+      // Thêm người dùng mới
+      await axios.post(apiUrl, dataToSend, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      message.success("Thêm người dùng thành công");
+    } else if (modalMode === "edit" && editingUser) {
+      // Cập nhật người dùng
+      await axios.put(`${apiUrl}/${editingUser.userId}`, dataToSend, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      message.success("Cập nhật người dùng thành công");
     }
-  };
+
+    // Sau khi thêm hoặc chỉnh sửa, gọi lại API để lấy dữ liệu mới
+    fetchUsers();
+    setModalVisible(false);  // Đóng modal sau khi thành công
+  } catch (error) {
+    message.error("Có lỗi khi lưu người dùng!");
+  }
+};
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -268,26 +268,44 @@ const UsersList = () => {
 
         {/* Modal thêm/sửa người dùng */}
         <Modal
-          open={modalVisible}
-          title={modalMode === "add" ? "Thêm người dùng" : "Chỉnh sửa người dùng"}
-          onCancel={handleModalCancel}
-          onOk={() => modalForm.submit()}
-          okText={modalMode === "add" ? "Thêm" : "Lưu"}
-        >
-          <Form form={modalForm} layout="vertical" onFinish={handleModalSubmit}>
-            <Form.Item name="fullName" label="Họ và tên" rules={[{ required: true, message: "Vui lòng nhập tên người dùng" }]}> <Input /> </Form.Item>
-            <Form.Item name="email" label="Email" rules={[{ required: true, message: "Vui lòng nhập email" }, { type: "email", message: "Email không hợp lệ" }]}> <Input /> </Form.Item>
-            <Form.Item name="phone" label="Số điện thoại"> <Input /> </Form.Item>
-            <Form.Item name="address" label="Địa chỉ" rules={[{ required: true, message: "Vui lòng nhập địa chỉ" }]}> <Input /> </Form.Item>
-            <Form.Item name="roleId" label="Vai trò" rules={[{ required: true, message: "Vui lòng chọn vai trò" }]}> <Select> <Option value={1}>Manager</Option> <Option value={2}>Nurse</Option> <Option value={3}>Parent</Option> </Select> </Form.Item>
-            {modalMode === "add" && (
-              <>
-                <Form.Item name="username" label="Tên đăng nhập" rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập" }]}> <Input /> </Form.Item>
-                <Form.Item name="password" label="Mật khẩu" rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}> <Input.Password /> </Form.Item>
-              </>
-            )}
-          </Form>
-        </Modal>
+  open={modalVisible}
+  title={modalMode === "add" ? "Thêm người dùng" : "Chỉnh sửa người dùng"}
+  onCancel={handleModalCancel}
+  onOk={() => modalForm.submit()}  // Khi nhấn Lưu hoặc Thêm sẽ gọi submit form
+  okText={modalMode === "add" ? "Thêm" : "Lưu"}
+>
+  <Form form={modalForm} layout="vertical" onFinish={handleModalSubmit}>
+    <Form.Item name="fullName" label="Họ và tên" rules={[{ required: true, message: "Vui lòng nhập tên người dùng" }]}>
+      <Input />
+    </Form.Item>
+    <Form.Item name="email" label="Email" rules={[{ required: true, message: "Vui lòng nhập email" }, { type: "email", message: "Email không hợp lệ" }]}>
+      <Input />
+    </Form.Item>
+    <Form.Item name="phone" label="Số điện thoại">
+      <Input />
+    </Form.Item>
+    <Form.Item name="address" label="Địa chỉ" rules={[{ required: true, message: "Vui lòng nhập địa chỉ" }]}>
+      <Input />
+    </Form.Item>
+    <Form.Item name="roleId" label="Vai trò" rules={[{ required: true, message: "Vui lòng chọn vai trò" }]}> 
+      <Select> 
+        <Option value={1}>Manager</Option> 
+        <Option value={2}>Nurse</Option> 
+        <Option value={3}>Parent</Option> 
+      </Select> 
+    </Form.Item>
+    {modalMode === "add" && (
+      <>
+        <Form.Item name="username" label="Tên đăng nhập" rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập" }]}> 
+          <Input /> 
+        </Form.Item>
+        <Form.Item name="password" label="Mật khẩu" rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}> 
+          <Input.Password /> 
+        </Form.Item>
+      </>
+    )}
+  </Form>
+</Modal>
       </main>
     </div>
   );
