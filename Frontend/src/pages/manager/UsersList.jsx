@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Input, Table, message, Modal, Form, Select, Typography } from "antd";
+import { Button, Input, Table, message, Modal, Form, Select, Typography, Avatar, Tag } from "antd";
 import { SearchOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import Sidebar from "../../components/sb-Manager/Sidebar";
 import style from "../../assets/css/userList.module.css";  // Import CSS riêng cho UserList
@@ -13,11 +13,11 @@ const UsersList = () => {
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState("add"); // 'add' or 'edit'
-  const [currentUser, setCurrentUser] = useState(null);
+  const [editingUser, setEditingUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1); // Trạng thái trang hiện tại
-  const [form] = Form.useForm();
+  const [modalForm] = Form.useForm();
   const usersPerPage = 10; // Số người dùng mỗi trang
 
   const apiUrl = "https://swp-school-medical-management.onrender.com/api/User"; 
@@ -107,23 +107,26 @@ const UsersList = () => {
     },
   ];
 
+  // Hiển thị modal
   const showModal = (mode, user = null) => {
     setModalMode(mode);
-    setCurrentUser(user);
+    setEditingUser(user);
     if (mode === "edit" && user) {
-      form.setFieldsValue({
-        ...user
+      modalForm.setFieldsValue({
+        ...user,
+        roleId: user.role?.roleId || user.roleId, // Set the correct roleId
       });
     } else {
-      form.resetFields();
+      modalForm.resetFields();
     }
-    setIsModalVisible(true);
+    setModalVisible(true);
   };
 
+  // Đóng modal
   const handleModalCancel = () => {
-    setIsModalVisible(false);
-    setCurrentUser(null);
-    form.resetFields();
+    setModalVisible(false);
+    setEditingUser(null);
+    modalForm.resetFields();
   };
 
   // Xóa người dùng qua API
@@ -150,58 +153,42 @@ const UsersList = () => {
     });
   };
 
-  // Xử lý submit form chỉnh sửa/thêm
-  const handleFormSubmit = async (values) => {
-    if (modalMode === "add") {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await axios.post(apiUrl, {
+  // Xử lý submit form modal
+  const handleModalSubmit = async (values) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (modalMode === "add") {
+        await axios.post(apiUrl, {
           username: values.username,
           password: values.password,
           fullName: values.fullName,
-          roleId: values.roleId,
+          roleId: Number(values.roleId),
           phone: values.phone,
           email: values.email,
           address: values.address,
           isFirstLogin: true,
         }, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         });
-
-        if (response.data) {
-          message.success("Thêm người dùng thành công");
-          fetchUsers();
-          setIsModalVisible(false);
-        }
-      } catch (error) {
-        message.error("Thêm người dùng thất bại");
-      }
-    } else if (modalMode === "edit" && currentUser) {
-      try {
-        const token = localStorage.getItem("token");
+        message.success("Thêm người dùng thành công");
+      } else if (modalMode === "edit" && editingUser) {
+        // Chỉ gửi roleId, không gửi object role
         const rest = { ...values };
         delete rest.role;
-        const roleId = typeof rest.roleId === "string" ? parseInt(rest.roleId) : rest.roleId;
-        const response = await axios.put(`${apiUrl}/${currentUser.userId}`, {
+        const roleId = Number(rest.roleId);
+        await axios.put(`${apiUrl}/${editingUser.userId}`, {
           ...rest,
           roleId,
-          userId: currentUser.userId,
+          userId: editingUser.userId,
         }, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         });
-
-        if (response.data) {
-          message.success("Cập nhật người dùng thành công");
-          fetchUsers();
-          setIsModalVisible(false);
-        }
-      } catch (error) {
-        message.error("Cập nhật người dùng thất bại");
+        message.success("Cập nhật người dùng thành công");
       }
+      fetchUsers();
+      setModalVisible(false);
+    } catch {
+      message.error("Có lỗi khi lưu người dùng!");
     }
   };
 
@@ -228,7 +215,7 @@ const UsersList = () => {
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
-          <button className={style.addBtn}>Thêm người dùng</button>
+          <button className={style.addBtn} onClick={() => showModal("add")}>Thêm người dùng</button>
         </div>
 
         <table className={style.studentTable}>
@@ -252,8 +239,8 @@ const UsersList = () => {
                   <td>{user.phone}</td>
                   <td>{user.address}</td>
                   <td>
-                    <button className={style.btn}>Sửa</button>
-                    <button className={style.btn}>Xóa</button>
+                    <button className={style.btn} onClick={() => showModal("edit", user)}>Sửa</button>
+                    <button className={style.btn} onClick={() => handleDelete(user.userId)}>Xóa</button>
                   </td>
                 </tr>
               ))
@@ -278,6 +265,29 @@ const UsersList = () => {
             </button>
           ))}
         </div>
+
+        {/* Modal thêm/sửa người dùng */}
+        <Modal
+          open={modalVisible}
+          title={modalMode === "add" ? "Thêm người dùng" : "Chỉnh sửa người dùng"}
+          onCancel={handleModalCancel}
+          onOk={() => modalForm.submit()}
+          okText={modalMode === "add" ? "Thêm" : "Lưu"}
+        >
+          <Form form={modalForm} layout="vertical" onFinish={handleModalSubmit}>
+            <Form.Item name="fullName" label="Họ và tên" rules={[{ required: true, message: "Vui lòng nhập tên người dùng" }]}> <Input /> </Form.Item>
+            <Form.Item name="email" label="Email" rules={[{ required: true, message: "Vui lòng nhập email" }, { type: "email", message: "Email không hợp lệ" }]}> <Input /> </Form.Item>
+            <Form.Item name="phone" label="Số điện thoại"> <Input /> </Form.Item>
+            <Form.Item name="address" label="Địa chỉ" rules={[{ required: true, message: "Vui lòng nhập địa chỉ" }]}> <Input /> </Form.Item>
+            <Form.Item name="roleId" label="Vai trò" rules={[{ required: true, message: "Vui lòng chọn vai trò" }]}> <Select> <Option value={1}>Manager</Option> <Option value={2}>Nurse</Option> <Option value={3}>Parent</Option> </Select> </Form.Item>
+            {modalMode === "add" && (
+              <>
+                <Form.Item name="username" label="Tên đăng nhập" rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập" }]}> <Input /> </Form.Item>
+                <Form.Item name="password" label="Mật khẩu" rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}> <Input.Password /> </Form.Item>
+              </>
+            )}
+          </Form>
+        </Modal>
       </main>
     </div>
   );
