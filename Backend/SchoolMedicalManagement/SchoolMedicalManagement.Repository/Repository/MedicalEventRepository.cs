@@ -24,6 +24,8 @@ public class MedicalEventRepository : GenericRepository<MedicalEvent>
             .Include(e => e.Student)
                 .ThenInclude(pr => pr.Parent)
             .Include(e => e.HandledByNavigation)
+            .Include(e => e.HandleRecords)
+                .ThenInclude(hr => hr.Supply)
             .ToListAsync();
 
     // Tạo và trả về bản ghi đã tạo với đầy đủ liên kết
