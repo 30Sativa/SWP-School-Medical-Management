@@ -7,7 +7,7 @@ import UsersList from "../pages/manager/UsersList";
 import StudentList from "../pages/nurse/StudentList";
 import StudentDetail from "../pages/nurse/StudentDetail";
 import ParentDashboard from "../pages/parent/ParentDashboard";
-import HealthProfile from "../pages/parent/HealthProfile";
+import HealthProfile from "../pages/parent/HealthProfile"; 
 const AppRouter = () => {
   return (
     <Routes>
