@@ -10,7 +10,7 @@
 }
 
 .sb-sidebar.expanded + .main-content {
-  margin-left: 220px; /* Giữ cho main content không bị che khuất */
+  margin-left: 0px; /* Giữ cho main content không bị che khuất */
 }
 
 .sb-sidebar.collapsed + .main-content {

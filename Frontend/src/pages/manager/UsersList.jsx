@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Button, Input, Table, Tag, Avatar, message, Modal, Form, Select, Typography } from "antd";
+import { Button, Input, Table, message, Modal, Form, Select, Typography } from "antd";
 import { SearchOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import Sidebar from "../../components/sb-Manager/Sidebar";
-import "../../assets/css/UsersList.css";
-import axios from "axios"; // Import axios for API requests
+import style from "../../assets/css/userList.module.css";  // Import CSS riêng cho UserList
+import axios from "axios";
 
 const { Option } = Select;
 const { Title } = Typography;
@@ -17,10 +17,10 @@ const UsersList = () => {
   const [modalMode, setModalMode] = useState("add"); // 'add' or 'edit'
   const [currentUser, setCurrentUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1); // Trạng thái trang hiện tại
-
   const [form] = Form.useForm();
+  const usersPerPage = 10; // Số người dùng mỗi trang
 
-  const apiUrl = "https://swp-school-medical-management.onrender.com/api/User"; // Replace with your actual API URL
+  const apiUrl = "https://swp-school-medical-management.onrender.com/api/User"; 
 
   // Fetch users from API
   const fetchUsers = async () => {
@@ -29,8 +29,8 @@ const UsersList = () => {
       const token = localStorage.getItem("token");
       const response = await axios.get(apiUrl, {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
       setUsers(response.data);  // Assuming API returns an array of users
       setLoading(false);
@@ -62,7 +62,7 @@ const UsersList = () => {
       title: "Họ và tên",
       dataIndex: "fullName",
       key: "fullName",
-      render: (text, record) => (
+      render: (text) => (
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <Avatar>{text.charAt(0)}</Avatar> {/* Show first letter as avatar */}
           <span>{text}</span>
@@ -129,13 +129,13 @@ const UsersList = () => {
   // Xóa người dùng qua API
   const handleDelete = async (userId) => {
     Modal.confirm({
-      title: `Bạn có chắc muốn xóa người dùng này?`,
+      title: "Bạn có chắc muốn xóa người dùng này?",
       icon: <ExclamationCircleOutlined />,
       onOk: async () => {
         try {
           const token = localStorage.getItem("token");
           const res = await axios.delete(`${apiUrl}/${userId}`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
           });
           if (res.status === 200 || res.status === 204) {
             message.success("Xóa người dùng thành công");
@@ -175,7 +175,7 @@ const UsersList = () => {
           fetchUsers();
           setIsModalVisible(false);
         }
-      } catch {
+      } catch (error) {
         message.error("Thêm người dùng thất bại");
       }
     } else if (modalMode === "edit" && currentUser) {
@@ -208,76 +208,77 @@ const UsersList = () => {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
-    <div className="userslist-container">
+    <div className={style.layoutContainer}>
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-      <div className="main-content">
-        <header className="userslist-header">
-          <Input
-            placeholder="Tìm kiếm người dùng..."
-            prefix={<SearchOutlined />}
-            style={{ width: 300 }}
-            onChange={(e) => setSearchText(e.target.value)}
-            allowClear
-          />
+      <main className={style.layoutContent}>
+        <header className={style.dashboardHeaderBar}>
+          <div className={style.titleGroup}>
+            <h1>
+              <span className={style.textBlack}>Danh sách</span>
+              <span className={style.textAccent}> người dùng</span>
+            </h1>
+          </div>
         </header>
-        <div style={{ background: "#fff", padding: 20, borderRadius: 8 }}>
-          <Title level={3}>Danh sách người dùng</Title>
-          <Button type="primary" style={{ marginBottom: 16 }} onClick={() => showModal("add")}>Thêm người dùng</Button>
-          <Table
-            rowKey="userId"
-            dataSource={filteredUsers}
-            columns={columns}
-            loading={loading}
-            pagination={{
-              pageSize: 10,
-              total: filteredUsers.length,
-              showSizeChanger: false,
-              current: currentPage,
-              onChange: handlePageChange,
-            }}
-          />
-        </div>
-      </div>
 
-      <Modal
-        title={modalMode === "add" ? "Thêm người dùng" : "Chỉnh sửa người dùng"}
-        open={isModalVisible}
-        onCancel={handleModalCancel}
-        onOk={() => form.submit()}
-        okText={modalMode === "add" ? "Thêm" : "Lưu"}
-      >
-        <Form form={form} layout="vertical" onFinish={handleFormSubmit} initialValues={{ status: "active", role: "Học sinh" }}>
-          <Form.Item name="fullName" label="Họ và tên" rules={[{ required: true, message: "Vui lòng nhập tên người dùng" }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="email" label="Email" rules={[{ required: true, message: "Vui lòng nhập email" }, { type: "email", message: "Email không hợp lệ" }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="phone" label="Số điện thoại"><Input /></Form.Item>
-          {modalMode === "add" && (
-            <Form.Item name="roleId" label="Vai trò" rules={[{ required: true, message: "Vui lòng chọn vai trò" }]}>
-              <Select>
-                <Option value={1}>Manager</Option>
-                <Option value={2}>Nurse</Option>
-                <Option value={3}>Parent</Option>
-              </Select>
-            </Form.Item>
-          )}
-          <Form.Item name="address" label="Địa chỉ" rules={[{ required: true, message: "Vui lòng nhập địa chỉ" }]}>
-            <Input />
-          </Form.Item>
-          {modalMode === "add" && (
-            <>
-              <Form.Item name="username" label="Tên đăng nhập" rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập" }]}>
-                <Input />
-              </Form.Item>
-              <Form.Item name="password" label="Mật khẩu" rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}>
-                <Input.Password />
-              </Form.Item>
-            </>
-          )}
-        </Form>
-      </Modal>
+        <div className={style.header}>
+          <input
+            type="text"
+            placeholder="Tìm kiếm người dùng..."
+            className={style.searchBar}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
+          <button className={style.addBtn}>Thêm người dùng</button>
+        </div>
+
+        <table className={style.studentTable}>
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Họ và tên</th>
+              <th>Email</th>
+              <th>Số điện thoại</th>
+              <th>Địa chỉ</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredUsers.length > 0 ? (
+              filteredUsers.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage).map((user, index) => (
+                <tr key={user.userId || index}>
+                  <td>{(currentPage - 1) * usersPerPage + index + 1}</td>
+                  <td>{user.fullName}</td>
+                  <td>{user.email}</td>
+                  <td>{user.phone}</td>
+                  <td>{user.address}</td>
+                  <td>
+                    <button className={style.btn}>Sửa</button>
+                    <button className={style.btn}>Xóa</button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" style={{ textAlign: "center" }}>
+                  Không có dữ liệu người dùng
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        <div className={style.pagination}>
+          {[...Array(Math.ceil(filteredUsers.length / usersPerPage))].map((_, index) => (
+            <button
+              key={index}
+              onClick={() => handlePageChange(index + 1)}
+              className={currentPage === index + 1 ? style.activePage : ""}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
+      </main>
     </div>
   );
 };
