@@ -39,50 +39,59 @@ const LogsPage = () => {
 
       {/* Main content */}
       <div className={styles.mainContent}>
-        {/* Header */}
-        <header>
-          <div className={styles.dashboardHeaderBar}>
-            <div className={styles.titleGroup}>
-              <h1>
-                <span className={styles.textAccent}>|</span>
-                <span className={styles.textBlack}>Logs</span>
-              </h1>
-              <h5 className={styles.textWelcome}>Nhật Ký hoạt động</h5>
+        <div className={styles.logsMain}>
+          {/* Header */}
+          <header className={styles.headerLeft}>
+            <div className={styles.dashboardHeaderBar}>
+              <div className={styles.titleGroup}>
+                <h1>
+                  
+                  <span className={styles.textBlack}>Nhật ký hoạt động</span>
+                </h1>
+              </div>
             </div>
-          </div>
-        </header>
+          </header>
 
-        {/* Search Bar */}
-        <section className={styles.searchBar}>
-          <div className={styles.searchContainer}>
-            <SearchOutlined style={{ fontSize: 18, marginRight: 10 }} />
-            <input
-              type="text"
-              placeholder="Tìm kiếm..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className={styles.searchInput}
-            />
-          </div>
-        </section>
-
-        {/* Logs List */}
-        <section className={styles.logsList}>
-          <ul>
-            {filteredLogs.map((log, idx) => (
-              <li key={idx} className={`${styles.logItem} ${styles[log.type] || ""}`}>
-                <div className={styles.logTime}>{log.time}</div>
-                <div className={styles.logDetails}>
-                  <div className={styles.logAction}>
-                    <strong>{log.action}</strong>
-                    <span className={styles.logUser}> - {log.user}</span>
+          {/* Card Logs */}
+          <section className={styles.logsList}>
+            <h2 className={styles.logsTitle}>Thông tin hoạt động gần đây</h2>
+            <div className={styles.searchBar}>
+              <div className={styles.searchContainer}>
+                <SearchOutlined style={{ fontSize: 18, marginRight: 10 }} />
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  className={styles.searchInput}
+                />
+              </div>
+            </div>
+            <ul className={styles.logsUl}>
+              {filteredLogs.map((log, idx) => (
+                <li key={idx} className={`${styles.logItem} ${styles[log.type] || ""}`}
+                  onMouseEnter={e => e.currentTarget.classList.add(styles.logItemHover)}
+                  onMouseLeave={e => e.currentTarget.classList.remove(styles.logItemHover)}
+                >
+                  <div className={styles.logIcon}>
+                    {log.type === "info" && <ClockCircleOutlined style={{ color: '#06b6d4', fontSize: 22 }} />}
+                    {log.type === "view" && <SearchOutlined style={{ color: '#6366f1', fontSize: 22 }} />}
+                    {log.type === "create" && <ClockCircleOutlined style={{ color: '#059669', fontSize: 22 }} />}
+                    {log.type === "warning" && <ClockCircleOutlined style={{ color: '#ef4444', fontSize: 22 }} />}
                   </div>
-                  <p>{log.description}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
+                  <div className={styles.logDetails}>
+                    <div className={styles.logAction}>
+                      <strong>{log.action}</strong>
+                      <span className={styles.logUser}> - {log.user}</span>
+                    </div>
+                    <p>{log.description}</p>
+                  </div>
+                  <div className={styles.logTime}>{log.time}</div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
       </div>
     </div>
   );
