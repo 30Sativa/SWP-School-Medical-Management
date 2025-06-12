@@ -32,7 +32,7 @@ namespace SchoolMedicalManagement.Service.Implement
 
 
         // First login change password
-        public async Task<BaseResponse> ChangePasswordAfterFirstLogin(int id, Models.Request.ChangePasswordUser userChangePasswordRequest)
+        public async Task<BaseResponse> ChangePasswordAfterFirstLogin(Guid id, ChangePasswordUserRequest Request)
         {
             var user = await _userRepository.GetUserById(id);
             if (user == null || user.IsFirstLogin == false)
@@ -43,7 +43,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     Data = null
                 };
 
-            user.Password = HashPassword.HashPasswordd(userChangePasswordRequest.NewPassword);
+            user.Password = HashPassword.HashPasswordd(Request.NewPassword);
             user.IsFirstLogin = false;
 
             await _userRepository.UpdateAsync(user);
@@ -52,14 +52,14 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 Status = StatusCodes.Status200OK.ToString(),
                 Message = "Password changed successfully.",
-                Data = new Models.Response.ChangePasswordUser
+                Data = new ChangePasswordUserResponse
                 {
                     UserId = user.UserId,
                     FullName = user.FullName,
                     RoleName = user.Role.RoleName,
                     Email = user.Email,
                     Phone = user.Phone,
-                    IsFirstLogin = user.IsFirstLogin.GetValueOrDefault() // GetValueOrDefault() sẽ trả về false nếu user.IsFirstLogin == null
+                    IsFirstLogin = user.IsFirstLogin
                 }
             };
         }
@@ -68,7 +68,7 @@ namespace SchoolMedicalManagement.Service.Implement
         //Login
         public async Task<BaseResponse> Login(LoginUserRequest loginRequest)
         {
-            var user = await _userRepository.GetLogin(loginRequest);
+            var user = await _userRepository.GetLoginUser(loginRequest);
 
             if (user == null) {
                 return new BaseResponse{
@@ -100,15 +100,11 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 Status = StatusCodes.Status200OK.ToString(),
                 Message = "Login successful.",
-                Data = new LoginUserRespsonse
+                Data = new LoginUserResponse
                 {
                     UserId = user.UserId,
                     FullName = user.FullName,
-                    Role = new Role()
-                    {
-                        RoleId = user.Role.RoleId,
-                        RoleName = user.Role.RoleName
-                    },
+                    RoleName = user.Role.RoleName,
                     Token = new JwtSecurityTokenHandler().WriteToken(token)
                 }
             };

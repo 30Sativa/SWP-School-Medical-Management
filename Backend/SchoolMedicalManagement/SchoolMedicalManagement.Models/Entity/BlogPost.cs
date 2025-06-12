@@ -11,7 +11,7 @@ public partial class BlogPost
 
     public string? Content { get; set; }
 
-    public int? AuthorId { get; set; }
+    public Guid? AuthorId { get; set; }
 
     public DateOnly? PostedDate { get; set; }
 

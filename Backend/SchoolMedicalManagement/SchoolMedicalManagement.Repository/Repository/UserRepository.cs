@@ -4,41 +4,46 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
 using SchoolMedicalManagement.Models.Entity;
 using SchoolMedicalManagement.Models.Utils;
 using SchoolMedicalManagement.Models.Request;
 
 namespace SchoolMedicalManagement.Repository.Repository
 {
+    // Repository xử lý dữ liệu liên quan đến User
     public class UserRepository : GenericRepository<User>
     {
-        public UserRepository(SwpEduHealV1Context context) : base(context)
+        public UserRepository(SwpEduHealV5Context context) : base(context)
         {
         }
 
-        public async Task<User?> GetLogin(LoginUserRequest loginRequest)
+        // Đăng nhập: kiểm tra username và mật khẩu đã hash
+        public async Task<User?> GetLoginUser(LoginUserRequest loginRequest)
         {
-            return await _context.Users.Include(u => u.Role)
-                                       .FirstOrDefaultAsync(u => u.Username == loginRequest.Username &&
-                                                                 u.Password == HashPassword.HashPasswordd(loginRequest.Password));
+            return await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u =>
+                    u.Username == loginRequest.Username &&
+                    u.Password == HashPassword.HashPasswordd(loginRequest.Password));
         }
 
-        // Get list ds người dùng từ db ra
-        public async Task<List<User>> GetAll()
+        // Lấy danh sách tất cả người dùng (kèm Role)
+        public async Task<List<User>> GetAllUser()
         {
-            return await _context.Users.Include(u => u.Role).ToListAsync();
+            return await _context.Users
+                .Include(u => u.Role)
+                .ToListAsync();
         }
 
-        //Get user by id
-        public async Task<User?> GetUserById(int id)
+        // Lấy thông tin chi tiết 1 người dùng theo ID (kèm Role)
+        public async Task<User?> GetUserById(Guid id)
         {
             return await _context.Users
                 .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.UserId == id);
         }
 
-        //Get user by username
+        // Lấy người dùng theo Username (dùng để kiểm tra trùng)
         public async Task<User?> GetUserByUsername(string username)
         {
             return await _context.Users
@@ -46,47 +51,48 @@ namespace SchoolMedicalManagement.Repository.Repository
                 .FirstOrDefaultAsync(u => u.Username == username);
         }
 
-        //Create a new user
+        // Tạo người dùng mới → lấy lại thông tin đầy đủ (gồm Role)
         public async Task<User?> CreateUser(User user)
         {
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
-            return await _context.Users
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.UserId == user.UserId);
+            await CreateAsync(user);
+            return await GetUserById(user.UserId); // đảm bảo có Include Role
         }
 
-        //Delete a user
-        public async Task<bool> DeleteUser(int id)
+        // Xóa người dùng nếu tồn tại
+        public async Task<bool> HardDeleteUser(Guid id)
         {
             var user = await GetUserById(id);
             if (user == null)
             {
-                return false; // User not found
+                return false;
             }
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-            return true; 
-        }   
+            return await RemoveAsync(user);
+        }
 
-        //Update a user
+        // Cập nhật thông tin người dùng
         public async Task<User?> UpdateUser(User user)
         {
-
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
-
-            //Trả về info user sau khi update
-            return await _context.Users
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.UserId == user.UserId);
+            await UpdateAsync(user);
+            return await GetUserById(user.UserId); // trả lại thông tin mới (gồm Role)
         }
-         
-        //Get user by id for change password
-        public Task<User?> GetUserById(int id, ChangePasswordUser request)
+
+        // Lấy user đơn giản theo ID (không Include Role), dùng khi đổi mật khẩu
+        public Task<User?> GetUserById(Guid id, ChangePasswordUserRequest request)
         {
             return _context.Users.FirstOrDefaultAsync(u => u.UserId == id);
         }
 
+        public async Task<bool> SoftDeleteUser(Guid id)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == id);
+            if (user == null)
+            {
+                return false;
+            }
+           user.IsActive = false;
+            UpdateAsync(user);
+            return true;
+
+        }
     }
 }

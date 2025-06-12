@@ -9,11 +9,11 @@ namespace SchoolMedicalManagement.Models.Response
         public string? StudentName { get; set; }
         public int? CampaignId { get; set; }
         public string? CampaignTitle { get; set; }
-        public string? BloodPressure { get; set; }
-        public string? HeartRate { get; set; }
-        public string? Height { get; set; }
-        public string? Weight { get; set; }
-        public string? Bmi { get; set; }
+        public decimal? BloodPressure { get; set; }
+        public int? HeartRate { get; set; }
+        public decimal? Height { get; set; }
+        public decimal? Weight { get; set; }
+        public decimal? Bmi { get; set; }
         public string? VisionSummary { get; set; }
         public string? Ent { get; set; }
         public string? EntNotes { get; set; }
@@ -23,7 +23,7 @@ namespace SchoolMedicalManagement.Models.Response
         public string? ToothNotes { get; set; }
         public string? GeneralNote { get; set; }
         public string? FollowUpNote { get; set; }
-        public string? ConsentStatus { get; set; }
+        public int? ConsentStatusId { get; set; }
         public bool? IsActive { get; set; }
     }
 } 

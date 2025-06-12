@@ -11,19 +11,23 @@ public partial class Student
 
     public DateOnly? DateOfBirth { get; set; }
 
-    public string? Gender { get; set; }
+    public int GenderId { get; set; }
 
     public string? Class { get; set; }
 
-    public int? ParentId { get; set; }
+    public Guid? ParentId { get; set; }
 
     public bool? IsActive { get; set; }
+
+    public virtual GenderType Gender { get; set; } = null!;
 
     public virtual ICollection<HealthCheckSummary> HealthCheckSummaries { get; set; } = new List<HealthCheckSummary>();
 
     public virtual HealthProfile? HealthProfile { get; set; }
 
     public virtual ICollection<MedicalEvent> MedicalEvents { get; set; } = new List<MedicalEvent>();
+
+    public virtual ICollection<MedicalHistory> MedicalHistories { get; set; } = new List<MedicalHistory>();
 
     public virtual ICollection<MedicationRequest> MedicationRequests { get; set; } = new List<MedicationRequest>();
 

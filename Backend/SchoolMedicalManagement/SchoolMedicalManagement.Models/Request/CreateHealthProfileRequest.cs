@@ -8,20 +8,13 @@ namespace SchoolMedicalManagement.Models.Request
 {
     public class CreateHealthProfileRequest
     {
-        public int ProfileId { get; set; }
+        public int StudentId { get; set; }                       // Bắt buộc
 
-        public int StudentId { get; set; }
+        public decimal? Height { get; set; }                      // Có thể null
+        public decimal? Weight { get; set; }                      // Có thể null
 
-        public string? Height { get; set; }
-
-        public string? Weight { get; set; }
-
-        public string? ChronicDiseases { get; set; }
-
-        public string? Allergies { get; set; }
-
-        public string? GeneralNote { get; set; }
-
-        public bool? IsActive { get; set; }
+        public string? ChronicDiseases { get; set; }             // Bệnh mãn tính
+        public string? Allergies { get; set; }                   // Dị ứng
+        public string? GeneralNote { get; set; }                 // Ghi chú chung
     }
 }

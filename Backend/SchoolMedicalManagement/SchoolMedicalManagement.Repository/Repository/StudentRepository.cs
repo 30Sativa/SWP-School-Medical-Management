@@ -1,86 +1,88 @@
 using Microsoft.EntityFrameworkCore;
 using SchoolMedicalManagement.Models.Entity;
 using SchoolMedicalManagement.Models.Request;
-using SchoolMedicalManagement.Models.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SchoolMedicalManagement.Repository.Repository
 {
     public class StudentRepository : GenericRepository<Student>
     {
-        public StudentRepository(SwpEduHealV1Context context) : base(context)
+        private readonly SwpEduHealV5Context _context;
+
+        public StudentRepository(SwpEduHealV5Context context) : base(context)
         {
+            _context = context;
         }
 
-        //Get Student by id
-        public async Task<Student?> GetStudentById(int id) =>
-            await _context.Students
-            .Include(s => s.Parent)
-            .FirstOrDefaultAsync(s => s.StudentId == id);
+        // ✅ Lấy tất cả học sinh còn hoạt động
+        public async Task<List<Student>> GetAllStudents()
+        {
+            return await _context.Students
+                .Include(s => s.Parent)
+                .Include(s => s.Gender)
+                .Where(s => s.IsActive == true) // chỉ lấy học sinh đang hoạt động
+                .ToListAsync();
+        }
 
+        // ✅ Lấy học sinh theo ID
+        public async Task<Student?> GetStudentById(int studentId)
+        {
+            return await _context.Students
+                .Include(s => s.Parent)
+                .Include(s => s.Gender)
+                .FirstOrDefaultAsync(s => s.StudentId == studentId && s.IsActive == true);
+        }
 
-        //Get list Student
-        public async Task<List<Student>> GetAllStudent() =>
-            await _context.Students
-            .Include(s => s.Parent)
-            .ToListAsync();
+        // ✅ Lấy học sinh theo phụ huynh
+        public async Task<List<Student>> GetStudentsByParentId(Guid parentId)
+        {
+            return await _context.Students
+                .Include(s => s.Parent)
+                .Where(s => s.ParentId == parentId && s.IsActive == true)
+                .ToListAsync();
+        }
 
-
-        //Create Student
+        // ✅ Tạo mới học sinh
         public async Task<Student?> CreateStudent(Student student)
         {
-            await _context.Students.AddAsync(student);
-            await _context.SaveChangesAsync();
+            await CreateAsync(student);
             return await GetStudentById(student.StudentId);
         }
 
-        //Update Student
-        //public async Task<bool> UpdateStudent(Student student)
-        //{
-        //    // Tìm coi hs cần update có trong db không
-        //    var existingStudent = await GetStudentById(student.StudentId);
+        // ✅ Xoá mềm học sinh
+        public async Task<bool> SoftDeleteStudent(int studentId)
+        {
+            var student = await GetStudentById(studentId);
+            if (student == null) return false;
 
-        //    if (existingStudent == null) return false; //Ko có thì xủi
+            student.IsActive = false;
+            await UpdateAsync(student);
+            return true;
+        }
 
-        //    //Cóa thì entry zô rùi set lại giá trị của nó thui
-        //    _context.Entry(existingStudent).CurrentValues.SetValues(student);
-        //    await _context.SaveChangesAsync();
-        //    return true;
-        //}
-
-        // Bổ trợ hàm update trên tầng service
-        public async Task<bool> SaveChangesAsync()
+        // ✅ Lưu thay đổi
+        public async Task<bool> SaveChanges()
         {
             return await _context.SaveChangesAsync() > 0;
         }
 
-        //Delete Student
-        public async Task<bool> DeleteStudent(int id)
+        // ✅ Lấy hồ sơ sức khỏe
+        public async Task<HealthProfile?> GetHealthProfileByStudentId(int studentId)
         {
-            // Tìm xem học sinh cần xóa có trong db không
-            var student = await GetStudentById(id);
-            if (student == null)
-            {
-                return false; // ko có thì xủi
-            }
-            //Cóa thì remove 
-            //Hello Văn Thành t nghĩ nên chuyển lại xóa mềm
-            //thêm trường active trong db thui
-            _context.Students.Remove(student);
-            await _context.SaveChangesAsync();
-            return true;
-
+            return await _context.HealthProfiles
+                .Where(h => h.IsActive == true)
+                .FirstOrDefaultAsync(hp => hp.StudentId == studentId);
         }
 
-        //Get Health Profile by Student Id
-        public async Task<HealthProfile?> GetHealthProfileByStudentId(GetHealthProfileRequest request) =>
-            await _context.HealthProfiles
-                                        .Where(hp => hp.StudentId == request.StudentId)
-                                        .FirstOrDefaultAsync();
-        
+        // ✅ Lấy tất cả hồ sơ sức khỏe
+        public async Task<List<HealthProfile>> GetAllHealthProfiles()
+        {
+            return await _context.HealthProfiles
+                .Where(h => h.IsActive == true)
+                .ToListAsync();
+        }
     }
 }

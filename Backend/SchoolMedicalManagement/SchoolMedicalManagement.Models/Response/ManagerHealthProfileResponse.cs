@@ -8,20 +8,14 @@ namespace SchoolMedicalManagement.Models.Response
 {
     public class ManagerHealthProfileResponse
     {
-        public int ProfileId { get; set; }
+        public int ProfileId { get; set; }                 // ID hồ sơ sức khỏe
+        public int? StudentId { get; set; }                 // ID học sinh
 
-        public int? StudentId { get; set; }
-
-        public string? Height { get; set; }
-
-        public string? Weight { get; set; }
-
-        public string? ChronicDiseases { get; set; }
-
-        public string? Allergies { get; set; }
-
-        public string? GeneralNote { get; set; }
-
-        public bool? IsActive { get; set; }
+        public decimal? Height { get; set; }                // Chiều cao
+        public decimal? Weight { get; set; }                // Cân nặng
+        public string? ChronicDiseases { get; set; }       // Bệnh mãn tính
+        public string? Allergies { get; set; }             // Dị ứng
+        public string? GeneralNote { get; set; }           // Ghi chú tổng quan
+        public bool? IsActive { get; set; }                // Trạng thái hoạt động
     }
 }

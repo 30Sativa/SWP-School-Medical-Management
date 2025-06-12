@@ -11,11 +11,11 @@ public partial class VaccinationRecord
 
     public int? CampaignId { get; set; }
 
-    public string? ConsentStatus { get; set; }
+    public int? ConsentStatusId { get; set; }
 
-    public DateOnly? ConsentDate { get; set; }
+    public DateTime? ConsentDate { get; set; }
 
-    public DateOnly? VaccinationDate { get; set; }
+    public DateTime? VaccinationDate { get; set; }
 
     public string? Result { get; set; }
 
@@ -24,6 +24,8 @@ public partial class VaccinationRecord
     public bool? IsActive { get; set; }
 
     public virtual VaccinationCampaign? Campaign { get; set; }
+
+    public virtual ConsentStatusType? ConsentStatus { get; set; }
 
     public virtual Student? Student { get; set; }
 }

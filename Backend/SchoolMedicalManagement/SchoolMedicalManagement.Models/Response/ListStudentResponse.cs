@@ -15,13 +15,15 @@ namespace SchoolMedicalManagement.Models.Response
 
         public DateOnly? DateOfBirth { get; set; }
 
-        public string? Gender { get; set; }
+        public string? Gender { get; set; }            // Đã map từ entity: GenderType.GenderName
 
-        public string? Class { get; set; }
+        public string? ClassName { get; set; }         // 👉 nên đổi "Class" → "ClassName" để tránh nhầm từ khóa C#
 
-        public string? Parent { get; set; }
+        public string? ParentName { get; set; }
 
-        public int? ParentId { get; set; }
+        public Guid? ParentId { get; set; }
+
+        public bool? IsActive { get; set; }
 
     }
 }

@@ -17,55 +17,54 @@ namespace School_Medical_Management.API.Controllers
             _healthProfileService = healthProfileService;
         }
 
+        // ✅ Lấy danh sách hồ sơ sức khỏe
         [HttpGet]
-        public async Task<IActionResult> GetHealthProfileList()
+        public async Task<IActionResult> GetAll()
         {
-            var responses = await _healthProfileService.GetAllHealthProfilesAsync();
-            if (responses == null || responses.Count == 0)
-            {
-                return NotFound("Health profile list is empty!");
-            }
-            return Ok(responses);
+            var profiles = await _healthProfileService.GetAllHealthProfilesAsync();
+            return profiles == null || profiles.Count == 0
+                ? NotFound("Health profile list is empty!")
+                : Ok(profiles);
         }
 
+        // ✅ Lấy chi tiết theo ID
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetHealthProfileById([FromRoute] int id)
+        public async Task<IActionResult> GetById([FromRoute] int id)
         {
             var response = await _healthProfileService.GetHealthProfileByIdAsync(id);
-            if (response == null)
-            {
+            if (response == null || response.Data == null)
                 return NotFound($"Health profile with ID {id} not found.");
-            }
+
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
+        // ✅ Tạo mới hồ sơ
         [HttpPost]
-        public async Task<IActionResult> CreateHealthProfile([FromBody] CreateHealthProfileRequest request)
+        public async Task<IActionResult> Create([FromBody] CreateHealthProfileRequest request)
         {
             var response = await _healthProfileService.CreateHealthProfileAsync(request);
             return StatusCode(int.Parse(response?.Status ?? "200"), response);
         }
 
+        // ✅ Cập nhật hồ sơ
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateHealthProfile([FromRoute] int id, [FromBody] UpdateHealthProfileRequest request)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateHealthProfileRequest request)
         {
             var response = await _healthProfileService.UpdateHealthProfileAsync(id, request);
-            if (response == null)
-            {
-                return NotFound($"Health profile with ID {id} not found or could not be updated.");
-            }
+            if (response == null || response.Data == null)
+                return NotFound($"Health profile with ID {id} not found or update failed.");
+
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
+        // ✅ Xoá mềm hồ sơ
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteHealthProfile([FromRoute] int id)
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var result = await _healthProfileService.DeleteHealthProfileAsync(id);
-            if (!result)
-            {
-                return NotFound($"Health profile with ID {id} not found or could not be deleted.");
-            }
-            return Ok($"Delete Health profile with ID: {id} successfully");
+            var deleted = await _healthProfileService.DeleteHealthProfileAsync(id);
+            return deleted
+                ? Ok($"Deleted Health Profile with ID: {id} successfully.")
+                : NotFound($"Health profile with ID {id} not found or could not be deleted.");
         }
     }
 }

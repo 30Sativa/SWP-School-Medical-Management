@@ -10,10 +10,10 @@ namespace SchoolMedicalManagement.Repository.Repository
 {
     public class GenericRepository<T> where T : class
     {
-        protected SwpEduHealV1Context _context;
+        protected SwpEduHealV5Context _context;
 
 
-        public GenericRepository(SwpEduHealV1Context context)
+        public GenericRepository(SwpEduHealV5Context context)
         {
             _context = context;
         }
