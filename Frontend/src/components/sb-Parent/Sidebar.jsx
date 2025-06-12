@@ -1,4 +1,3 @@
-// src/components/sidebar/Sidebar.jsx
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
@@ -10,7 +9,7 @@ import {
   LogOut,
   Menu,
 } from "lucide-react";
-import styles from "./Sidebar.module.css"; // ✅ Import module đúng cách
+import styles from "./Sidebar.module.css";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -24,9 +23,11 @@ const Sidebar = () => {
         isOpen ? styles.expanded : styles.collapsed
       }`}
     >
-      <button className={styles.toggleBtn} onClick={toggleSidebar}>
-        <Menu size={22} />
-      </button>
+      {/* DÙNG navItem để đảm bảo icon và chữ thẳng hàng tuyệt đối */}
+      <div className={styles.navItem} onClick={toggleSidebar}>
+        <Menu size={20} />
+        {isOpen && <span className={styles.systemName}>EduHealth</span>}
+      </div>
 
       <nav>
         <NavLink

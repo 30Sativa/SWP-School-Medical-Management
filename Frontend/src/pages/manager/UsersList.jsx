@@ -34,7 +34,7 @@ const UsersList = () => {
       });
       setUsers(response.data);  // Assuming API returns an array of users
       setLoading(false);
-    } catch (error) {
+    } catch {
       message.error("Failed to fetch users");
       setLoading(false);
     }
@@ -62,7 +62,7 @@ const UsersList = () => {
       title: "Họ và tên",
       dataIndex: "fullName",
       key: "fullName",
-      render: (text, record) => (
+      render: (text) => (
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <Avatar>{text.charAt(0)}</Avatar> {/* Show first letter as avatar */}
           <span>{text}</span>
@@ -143,7 +143,7 @@ const UsersList = () => {
           } else {
             message.error("Xóa người dùng thất bại (status: " + res.status + ")");
           }
-        } catch (error) {
+        } catch {
           message.error("Xóa người dùng thất bại");
         }
       },
@@ -199,7 +199,7 @@ const UsersList = () => {
           fetchUsers();
           setIsModalVisible(false);
         }
-      } catch (error) {
+      } catch {
         message.error("Cập nhật người dùng thất bại");
       }
     }
@@ -229,7 +229,7 @@ const UsersList = () => {
             columns={columns}
             loading={loading}
             pagination={{
-              pageSize: 10,
+              pageSize: 6,
               total: filteredUsers.length,
               showSizeChanger: false,
               current: currentPage,
