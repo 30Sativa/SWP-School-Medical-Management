@@ -21,17 +21,18 @@ namespace SchoolMedicalManagement.Service.Implement
             _medicalSupplyRepository = medicalSupplyRepository;
         }
 
-        public async Task<BaseResponse?> AddSupplyAsync(CreateMedicalSupplyRequest request)
+        public async Task<BaseResponse> AddSupplyAsync(CreateMedicalSupplyRequest request)
         {
-            var supply = new MedicalSupply
+            var newSupply = new MedicalSupply
             {
-                Name = request.Name,
+                Name = request.Name.Trim(),
                 Quantity = request.Quantity,
-                Unit = request.Unit,
+                Unit = request.Unit.Trim(),
                 ExpiryDate = request.ExpiryDate
             };
-            var createsupply = await _medicalSupplyRepository.CreateMedicalSupply(supply);
-            if(createsupply == null)
+
+            var created = await _medicalSupplyRepository.CreateMedicalSupply(newSupply);
+            if (created == null)
             {
                 return new BaseResponse
                 {
@@ -40,26 +41,26 @@ namespace SchoolMedicalManagement.Service.Implement
                     Data = null
                 };
             }
+
             return new BaseResponse
             {
                 Status = StatusCodes.Status201Created.ToString(),
                 Message = "Medical supply created successfully.",
                 Data = new MedicalSupplyResponse
                 {
-                    SupplyID = createsupply.SupplyId,
-                    Name = createsupply.Name,
-                    Quantity = createsupply.Quantity,
-                    Unit = createsupply.Unit,
-                    ExpiryDate = createsupply.ExpiryDate
+                    SupplyID = created.SupplyId,
+                    Name = created.Name,
+                    Quantity = created.Quantity,
+                    Unit = created.Unit,
+                    ExpiryDate = created.ExpiryDate
                 }
             };
         }
 
         public async Task<List<MedicalSupplyResponse>> GetAllSuppliesAsync()
         {
-            
-            var supply = await _medicalSupplyRepository.GetAllMedicalSupply();
-            var response = supply.Select(s => new MedicalSupplyResponse
+            var list = await _medicalSupplyRepository.GetAllMedicalSupply();
+            return list.Select(s => new MedicalSupplyResponse
             {
                 SupplyID = s.SupplyId,
                 Name = s.Name,
@@ -67,8 +68,6 @@ namespace SchoolMedicalManagement.Service.Implement
                 Unit = s.Unit,
                 ExpiryDate = s.ExpiryDate
             }).ToList();
-
-            return response;
         }
 
         public async Task<BaseResponse> GetSupplyByIdAsync(int id)
@@ -83,6 +82,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     Data = null
                 };
             }
+
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
@@ -100,8 +100,8 @@ namespace SchoolMedicalManagement.Service.Implement
 
         public async Task<BaseResponse> UpdateSupplyAsync(UpdateMedicalSupplyRequest request)
         {
-            var supply = await _medicalSupplyRepository.GetByIdMedicalSupply(request.SupplyID);
-            if (supply == null)
+            var existing = await _medicalSupplyRepository.GetByIdMedicalSupply(request.SupplyID);
+            if (existing == null)
             {
                 return new BaseResponse
                 {
@@ -110,13 +110,14 @@ namespace SchoolMedicalManagement.Service.Implement
                     Data = null
                 };
             }
-            supply.Name = string.IsNullOrEmpty(request.Name) ? supply.Name : request.Name;
-            supply.Quantity = request.Quantity <= 0 ? supply.Quantity : request.Quantity;
-            supply.Unit = string.IsNullOrEmpty(request.Unit) ? supply.Unit : request.Unit;
-            supply.ExpiryDate = request.ExpiryDate ?? supply.ExpiryDate;
-            var updatedSupply = await _medicalSupplyRepository.UpdateMedicalSupply(supply);
 
-            if (updatedSupply == null)
+            existing.Name = string.IsNullOrWhiteSpace(request.Name) ? existing.Name : request.Name.Trim();
+            existing.Quantity = request.Quantity <= 0 ? existing.Quantity : request.Quantity;
+            existing.Unit = string.IsNullOrWhiteSpace(request.Unit) ? existing.Unit : request.Unit.Trim();
+            existing.ExpiryDate = request.ExpiryDate ?? existing.ExpiryDate;
+
+            var updated = await _medicalSupplyRepository.UpdateMedicalSupply(existing);
+            if (updated == null)
             {
                 return new BaseResponse
                 {
@@ -125,17 +126,18 @@ namespace SchoolMedicalManagement.Service.Implement
                     Data = null
                 };
             }
+
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
                 Message = "Medical supply updated successfully.",
                 Data = new MedicalSupplyResponse
                 {
-                    SupplyID = updatedSupply.SupplyId,
-                    Name = updatedSupply.Name,
-                    Quantity = updatedSupply.Quantity,
-                    Unit = updatedSupply.Unit,
-                    ExpiryDate = updatedSupply.ExpiryDate
+                    SupplyID = updated.SupplyId,
+                    Name = updated.Name,
+                    Quantity = updated.Quantity,
+                    Unit = updated.Unit,
+                    ExpiryDate = updated.ExpiryDate
                 }
             };
         }

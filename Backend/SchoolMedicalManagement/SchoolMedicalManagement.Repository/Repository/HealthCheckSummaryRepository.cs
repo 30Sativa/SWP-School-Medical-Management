@@ -8,7 +8,7 @@ namespace SchoolMedicalManagement.Repository.Repository
 {
     public class HealthCheckSummaryRepository : GenericRepository<HealthCheckSummary>
     {
-        public HealthCheckSummaryRepository(SwpEduHealV1Context context) : base(context) { }
+        public HealthCheckSummaryRepository(SwpEduHealV5Context context) : base(context) { }
 
         public async Task<List<HealthCheckSummary>> GetAllHealthCheckSummaries()
             => await _context.HealthCheckSummaries

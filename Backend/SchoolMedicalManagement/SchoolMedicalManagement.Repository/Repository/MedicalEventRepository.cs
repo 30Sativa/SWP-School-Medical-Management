@@ -1,21 +1,21 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore;
 using SchoolMedicalManagement.Models.Entity;
 using SchoolMedicalManagement.Repository.Repository;
 
 public class MedicalEventRepository : GenericRepository<MedicalEvent>
 {
-    public MedicalEventRepository(SwpEduHealV1Context context) : base(context) { }
+    public MedicalEventRepository(SwpEduHealV5Context context) : base(context) { }
 
     // Load đầy đủ dữ liệu liên quan: Student, Parent, Supplies
     public async Task<MedicalEvent?> GetMedicalEventById(int id) =>
         await _context.MedicalEvents
-            .Include(e => e.Student)
-                .ThenInclude(s => s.Parent)
+            .Include(e => e.Student).ThenInclude(s => s.Parent)
             .Include(e => e.HandledByNavigation)
-            .Include(e => e.HandleRecords)
-                .ThenInclude(hr => hr.Supply)
-            .FirstOrDefaultAsync(e => e.EventId == id);
+            .Include(e => e.EventType)
+            .Include(e => e.Severity)
+            .Include(e => e.HandleRecords).ThenInclude(hr => hr.Supply)
+            .FirstOrDefaultAsync(e => e.EventId == id && e.IsActive == true);
 
     // Đề xuất: lọc IsActive == true để tránh load những sự kiện đã xoá mềm
     public async Task<List<MedicalEvent>> GetAllMedicalEvents() =>
@@ -24,6 +24,8 @@ public class MedicalEventRepository : GenericRepository<MedicalEvent>
             .Include(e => e.Student)
                 .ThenInclude(pr => pr.Parent)
             .Include(e => e.HandledByNavigation)
+            .Include(e => e.EventType)
+            .Include(e => e.Severity)
             .Include(e => e.HandleRecords)
                 .ThenInclude(hr => hr.Supply)
             .ToListAsync();
@@ -79,15 +81,29 @@ public class MedicalEventRepository : GenericRepository<MedicalEvent>
     }
 
     // Bắt đầu giao dịch DB nếu cần rollback nhiều thao tác
-    public async Task<IDbContextTransaction> BeginTransactionAsync()
-    {
-        return await _context.Database.BeginTransactionAsync();
-    }
+    //public async Task<IDbContextTransaction> BeginTransactionAsync()
+    //{
+    //    return await _context.Database.BeginTransactionAsync();
+    //}
 
     // Xoá toàn bộ handle record nếu cần cập nhật SuppliesUsed
     public async Task RemoveHandleRecordsAsync(IEnumerable<HandleRecord> records)
     {
         _context.HandleRecords.RemoveRange(records);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<bool> AdjustSupplyQuantity(int supplyId, int quantityDelta)
+    {
+        var supply = await _context.MedicalSupplies.FindAsync(supplyId);
+        if (supply == null) return false;
+
+        var newQuantity = supply.Quantity - quantityDelta;
+        if (newQuantity < 0) return false;
+
+        supply.Quantity = newQuantity;
+        _context.MedicalSupplies.Update(supply);
+        await _context.SaveChangesAsync();
+        return true;
     }
 }

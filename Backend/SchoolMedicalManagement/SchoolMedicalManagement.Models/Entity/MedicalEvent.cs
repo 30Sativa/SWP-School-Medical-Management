@@ -9,21 +9,29 @@ public partial class MedicalEvent
 
     public int? StudentId { get; set; }
 
-    public string? EventType { get; set; }
+    public int? EventTypeId { get; set; }
 
-    public DateOnly? EventDate { get; set; }
+    public DateTime? EventDate { get; set; }
 
     public string? Description { get; set; }
 
-    public int? HandledBy { get; set; }
+    public Guid? HandledBy { get; set; }
+
+    public int? SeverityId { get; set; }
+
+    public string? Location { get; set; }
 
     public string? Notes { get; set; }
 
     public bool? IsActive { get; set; }
 
+    public virtual MedicalEventType? EventType { get; set; }
+
     public virtual ICollection<HandleRecord> HandleRecords { get; set; } = new List<HandleRecord>();
 
     public virtual User? HandledByNavigation { get; set; }
+
+    public virtual SeverityLevel? Severity { get; set; }
 
     public virtual Student? Student { get; set; }
 }

@@ -10,18 +10,18 @@ namespace SchoolMedicalManagement.Models.Response
     {
         public int ProfileId { get; set; }
 
-        public int? StudentId { get; set; }
+        public int? StudentId { get; set; }          // FK
 
-        public string? Height { get; set; }
+        public decimal? Height { get; set; }         // cm
 
-        public string? Weight { get; set; }
+        public decimal? Weight { get; set; }         // kg
 
-        public string? ChronicDiseases { get; set; }
+        public string? ChronicDiseases { get; set; } // bệnh nền (nullable)
 
-        public string? Allergies { get; set; }
+        public string? Allergies { get; set; }       // dị ứng
 
-        public string? GeneralNote { get; set; }
+        public string? GeneralNote { get; set; }     // ghi chú
 
-        public bool? IsActive { get; set; }
+        public bool? IsActive { get; set; } = true;   // soft-delete
     }
 }

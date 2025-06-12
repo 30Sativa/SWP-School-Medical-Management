@@ -1,4 +1,4 @@
-﻿using SchoolMedicalManagement.Models.Entity;
+using SchoolMedicalManagement.Models.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,7 @@ namespace SchoolMedicalManagement.Repository.Repository
 {
     public class HealthCheckCampaignRepository : GenericRepository<HealthCheckCampaign>
     {
-        public HealthCheckCampaignRepository(SwpEduHealV1Context context) : base(context)
+        public HealthCheckCampaignRepository(SwpEduHealV5Context context) : base(context)
         {
         }
 

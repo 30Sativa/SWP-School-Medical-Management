@@ -9,11 +9,13 @@ public partial class MedicalSupply
 
     public string? Name { get; set; }
 
-    public int? Quantity { get; set; }
+    public int Quantity { get; set; }
 
     public string? Unit { get; set; }
 
     public DateOnly? ExpiryDate { get; set; }
+
+    public bool? IsActive { get; set; }
 
     public virtual ICollection<HandleRecord> HandleRecords { get; set; } = new List<HandleRecord>();
 }

@@ -8,9 +8,9 @@ namespace SchoolMedicalManagement.Models.Response
 {
     public class SupplyUserResponse
     {
-        public int SupplyId { get; set; }
-        public string SupplyName { get; set; } = string.Empty;
-        public int? QuantityUsed { get; set; }
-        public string? Note { get; set; }
+        public int SupplyId { get; set; }                          // ID vật tư
+        public string SupplyName { get; set; } = string.Empty;     // Tên vật tư
+        public int? QuantityUsed { get; set; }                     // Số lượng đã dùng (nullable)
+        public string? Note { get; set; }                          // Ghi chú nếu có
     }
 }

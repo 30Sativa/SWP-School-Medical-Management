@@ -13,15 +13,16 @@ namespace SchoolMedicalManagement.Models.Response
 
         public string? FullName { get; set; }
 
-        public DateOnly? DateOfBirth { get; set; }
+        public DateOnly? DateOfBirth { get; set; }  
 
-        public string? Gender { get; set; }
+        public int? GenderId { get; set; }         // ✔️ có thể chuẩn hóa thêm nếu cần
 
+        public string? GenderName { get; set; }
         public string? Class { get; set; }
 
-        public int? ParentId { get; set; }
+        public Guid? ParentId { get; set; }         // ✔️ đúng kiểu với DB nếu đang dùng Guid
 
-        public string? Parent { get; set; }
+        public string? ParentName { get; set; }     // ✔️ rõ nghĩa hơn
 
     }
 }

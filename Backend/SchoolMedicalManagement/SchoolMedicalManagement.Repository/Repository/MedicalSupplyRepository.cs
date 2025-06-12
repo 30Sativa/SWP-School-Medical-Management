@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +10,7 @@ namespace SchoolMedicalManagement.Repository.Repository
 {
     public class MedicalSupplyRepository : GenericRepository<MedicalSupply>
     {
-        public MedicalSupplyRepository(SwpEduHealV1Context context) : base(context)
+        public MedicalSupplyRepository(SwpEduHealV5Context context) : base(context)
         {
         }
 

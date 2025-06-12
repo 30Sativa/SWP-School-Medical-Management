@@ -10,12 +10,20 @@ namespace SchoolMedicalManagement.Service.Interface
 {
     public interface IMedicalEventService
     {
-        Task<BaseResponse?> GetMedicalEventByIdAsync(int id);
+        // ✅ Lấy chi tiết 1 sự kiện y tế theo ID
+        Task<BaseResponse?> GetByIdMedicalEvent(int eventId);
 
-        Task<BaseResponse?> CreateMedicalEventAsync(ManageMedicalEventRequest medicalEvent);
-        Task<BaseResponse?> UpdateMedicalEventAsync(int id, ManageMedicalEventRequest request);
-        Task<bool> DeleteMedicalEventAsync(int id);
-        Task<List<ManageMedicalEventResponse>> GetAllMedicalEventsAsync();
+        // ✅ Tạo mới sự kiện y tế
+        Task<BaseResponse?> CreateMedicalEvent(CreateMedicalEventRequest request);
+
+        // ✅ Cập nhật sự kiện y tế (gồm cả vật tư sử dụng)
+        Task<BaseResponse?> UpdateMedicalEvent(int eventId, CreateMedicalEventRequest request);
+
+        // ✅ Xoá mềm sự kiện y tế
+        Task<bool> DeleteMedicalEvent(int eventId);
+
+        // ✅ Danh sách tất cả sự kiện y tế (đang hoạt động)
+        Task<List<CreateMedicalEventResponse>> GetAllMedicalEvent();
 
     }
 }

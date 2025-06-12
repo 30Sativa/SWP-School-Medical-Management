@@ -16,17 +16,15 @@ namespace School_Medical_Management.API.Controllers
             _studentService = studentService;
         }
 
+        // Luôn trả danh sách học sinh, không cần kiểm tra null vì trả về list rỗng cũng hợp lệ
         [HttpGet]
         public async Task<IActionResult> GetStudentList()
         {
             var responses = await _studentService.GetStudentList();
-            if (responses == null)
-            {
-                return NotFound("Student list is empty!");
-            }
             return Ok(responses);
         }
 
+        // Dùng StatusCode để phản hồi theo status code từ BaseResponse
         [HttpGet("{id}")]
         public async Task<IActionResult> GetStudentById([FromRoute] int id)
         {
@@ -34,6 +32,7 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status), response);
         }
 
+        // CreateStudent cũng trả về BaseResponse
         [HttpPost]
         public async Task<IActionResult> CreateStudent([FromBody] CreateStudentRequest request)
         {
@@ -41,6 +40,7 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status), response);
         }
 
+        // Gợi ý: nên dùng BaseResponse thay vì bool để đồng bộ cách phản hồi
         [HttpPut]
         public async Task<IActionResult> UpdateStudent([FromBody] UpdateStudentRequest request)
         {
@@ -63,6 +63,7 @@ namespace School_Medical_Management.API.Controllers
             return Ok($"Delete Student with ID: {id} successfully");
         }
 
+        // ✅ Health profile theo student ID (qua query string)
         [HttpGet("health-profile")]
         public async Task<IActionResult> GetHealthProfileByStudentId([FromQuery] GetHealthProfileRequest request)
         {
@@ -70,5 +71,12 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status), response);
         }
 
+        // ✅ Sửa lại dùng StatusCode như các hàm khác
+        [HttpGet("by-parent/{parentId}")]
+        public async Task<IActionResult> GetStudentsOfParent(int parentId)
+        {
+            var response = await _studentService.GetStudentsOfParent(parentId);
+            return StatusCode(int.Parse(response.Status), response);
+        }
     }
 }
