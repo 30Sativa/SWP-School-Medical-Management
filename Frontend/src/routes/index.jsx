@@ -8,6 +8,7 @@ import StudentList from "../pages/nurse/StudentList";
 import StudentDetail from "../pages/nurse/StudentDetail";
 import ParentDashboard from "../pages/parent/ParentDashboard";
 import HealthProfile from "../pages/parent/HealthProfile";
+import SendMedicine from "../pages/parent/SendMedicine";
 const AppRouter = () => {
   return (
     <Routes>
@@ -20,6 +21,8 @@ const AppRouter = () => {
       <Route path="/students" element={<StudentList />} />
       <Route path="/students/:id" element={<StudentDetail />} />
       <Route path="/healthprofile" element={<HealthProfile />} />
+      <Route path="/sendmedicine" element={<SendMedicine />} />
+      {/* Add more routes as needed */}
     </Routes>
   );
 };
