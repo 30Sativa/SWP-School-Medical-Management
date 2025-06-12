@@ -15,14 +15,14 @@ namespace SchoolMedicalManagement.Repository.Repository
         public async Task<List<HealthProfile>> GetAllHealthProfile()
             => await _context.HealthProfiles
                 .Include(hp => hp.Student)
-                .Where(hp => hp.IsActive.GetValueOrDefault()) // ✅ Thêm điều kiện lọc nếu dùng soft delete
+                .Where(hp => hp.IsActive == true) // ✅ Thêm điều kiện lọc nếu dùng soft delete
                 .ToListAsync();
 
         // ✅ Lấy 1 hồ sơ theo ID
         public async Task<HealthProfile?> GetHealthProfileById(int id)
             => await _context.HealthProfiles
                 .Include(hp => hp.Student)
-                .FirstOrDefaultAsync(hp => hp.ProfileId == id && hp.IsActive.GetValueOrDefault());
+                .FirstOrDefaultAsync(hp => hp.ProfileId == id && hp.IsActive == true);
 
         // ✅ Tạo mới hồ sơ
         public async Task<HealthProfile?> CreateHealthProfile(HealthProfile healthProfile)

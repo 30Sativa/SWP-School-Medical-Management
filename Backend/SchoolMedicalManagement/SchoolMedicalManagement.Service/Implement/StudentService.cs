@@ -29,7 +29,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 StudentId = s.StudentId,
                 FullName = s.FullName,
                 DateOfBirth = s.DateOfBirth,
-                Gender = s.Gender.GenderName,
+                Gender = s.Gender?.GenderName ?? "Unknown",
                 ClassName = s.Class,
                 ParentName = s.Parent?.FullName,
                 ParentId = s.ParentId,

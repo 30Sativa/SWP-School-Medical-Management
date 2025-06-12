@@ -22,7 +22,8 @@ namespace SchoolMedicalManagement.Repository.Repository
         {
             return await _context.Students
                 .Include(s => s.Parent)
-                .Where(s => s.IsActive.GetValueOrDefault()) // chỉ lấy học sinh đang hoạt động
+                .Include(s => s.Gender)
+                .Where(s => s.IsActive == true) // chỉ lấy học sinh đang hoạt động
                 .ToListAsync();
         }
 
@@ -31,7 +32,8 @@ namespace SchoolMedicalManagement.Repository.Repository
         {
             return await _context.Students
                 .Include(s => s.Parent)
-                .FirstOrDefaultAsync(s => s.StudentId == studentId && s.IsActive.GetValueOrDefault());
+                .Include(s => s.Gender)
+                .FirstOrDefaultAsync(s => s.StudentId == studentId && s.IsActive == true);
         }
 
         // ✅ Lấy học sinh theo phụ huynh
@@ -39,7 +41,7 @@ namespace SchoolMedicalManagement.Repository.Repository
         {
             return await _context.Students
                 .Include(s => s.Parent)
-                .Where(s => s.ParentId == parentId && s.IsActive.GetValueOrDefault())
+                .Where(s => s.ParentId == parentId && s.IsActive == true)
                 .ToListAsync();
         }
 
@@ -71,7 +73,16 @@ namespace SchoolMedicalManagement.Repository.Repository
         public async Task<HealthProfile?> GetHealthProfileByStudentId(int studentId)
         {
             return await _context.HealthProfiles
+                .Where(h => h.IsActive == true)
                 .FirstOrDefaultAsync(hp => hp.StudentId == studentId);
+        }
+
+        // ✅ Lấy tất cả hồ sơ sức khỏe
+        public async Task<List<HealthProfile>> GetAllHealthProfiles()
+        {
+            return await _context.HealthProfiles
+                .Where(h => h.IsActive == true)
+                .ToListAsync();
         }
     }
 }

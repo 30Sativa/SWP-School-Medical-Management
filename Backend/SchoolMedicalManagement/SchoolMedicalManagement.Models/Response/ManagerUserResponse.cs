@@ -11,7 +11,7 @@ namespace SchoolMedicalManagement.Models.Response
 
         public string? FullName { get; set; }           // Họ tên
 
-        public Role Role { get; set; }                  // Thông tin vai trò
+        public string? RoleName { get; set; }                  // Thông tin vai trò
 
         public string? Phone { get; set; }              // Số điện thoại
 
