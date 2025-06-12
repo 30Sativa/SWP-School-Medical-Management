@@ -1,24 +1,23 @@
-/* Sidebar.module.css */
-.sbSidebar {
+.sb-sidebar {
   background-color: #20b2aa;
   color: white;
   padding: 20px 12px;
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* ✅ Đổi thành min-height để match nội dung dài */
   transition: width 0.3s ease;
   overflow: hidden;
+  height: 100vh;
 }
 
-.sbSidebar.expanded {
-  width: 220px;
+.sb-sidebar.expanded + .main-content {
+  margin-left: 0px; /* Giữ cho main content không bị che khuất */
 }
 
-.sbSidebar.collapsed {
-  width: 64px;
+.sb-sidebar.collapsed + .main-content {
+  margin-left: 64px; /* Điều chỉnh khi sidebar thu gọn */
 }
 
-.toggleBtn {
+.toggle-btn {
   background: none;
   border: none;
   color: white;
@@ -35,7 +34,7 @@ nav {
   gap: 14px;
 }
 
-.navItem {
+.nav-item {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -45,40 +44,19 @@ nav {
   font-weight: 500;
   border-radius: 8px;
   transition: background-color 0.2s ease;
-  height: 48px;
 }
 
-.navItem:hover {
+.nav-item:hover {
   background-color: rgba(255, 255, 255, 0.12);
 }
 
-.sbSidebar.collapsed .navItem span {
+.sb-sidebar.collapsed .nav-item span {
   display: none;
 }
 
-.navItem.active {
+.nav-item.active {
   background-color: rgba(255, 255, 255, 0.15);
   font-weight: bold;
 }
 
-.sidebarHeader {
-  display: flex;
-  align-items: center;
-  height: 48px; /* giống navItem */
-  padding: 0 20px;
-  gap: 12px;
-}
-
-.menuIcon {
-  color: white;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.systemName {
-  font-size: 17px;
-  font-weight: 600;
-  color: white;
-  white-space: nowrap;
-}
 

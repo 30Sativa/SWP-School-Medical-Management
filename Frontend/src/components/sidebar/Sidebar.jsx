@@ -24,9 +24,11 @@ const Sidebar = () => {
         isOpen ? style.expanded : style.collapsed
       }`}
     >
-      <button className={style.toggleBtn} onClick={toggleSidebar}>
-        <Menu size={22} />
-      </button>
+      {/* DÙNG navItem để đảm bảo icon và chữ thẳng hàng tuyệt đối */}
+      <div className={style.navItem} onClick={toggleSidebar}>
+        <Menu size={20} />
+        {isOpen && <span className={style.systemName}>EduHealth</span>}
+      </div>
 
       <nav>
         <NavLink

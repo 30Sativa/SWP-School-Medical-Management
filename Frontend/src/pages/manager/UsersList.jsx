@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Button, Input, Table, message, Modal, Form, Select, Typography, Avatar, Tag } from "antd";
+import { Button, Input, Table, Tag, Avatar, message, Modal, Form, Select, Typography } from "antd";
 import { SearchOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import Sidebar from "../../components/sb-Manager/Sidebar";
-import style from "../../assets/css/userList.module.css";  // Import CSS riêng cho UserList
-import axios from "axios";
+import "../../assets/css/UsersList.css";
+import axios from "axios"; // Import axios for API requests
 
 const { Option } = Select;
 const { Title } = Typography;
@@ -13,14 +13,14 @@ const UsersList = () => {
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState("add"); // 'add' or 'edit'
-  const [editingUser, setEditingUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1); // Trạng thái trang hiện tại
-  const [modalForm] = Form.useForm();
-  const usersPerPage = 10; // Số người dùng mỗi trang
 
-  const apiUrl = "https://swp-school-medical-management.onrender.com/api/User"; 
+  const [form] = Form.useForm();
+
+  const apiUrl = "https://swp-school-medical-management.onrender.com/api/User"; // Replace with your actual API URL
 
   // Fetch users from API
   const fetchUsers = async () => {
@@ -29,12 +29,12 @@ const UsersList = () => {
       const token = localStorage.getItem("token");
       const response = await axios.get(apiUrl, {
         headers: {
-          Authorization: `Bearer ${token}`,
-        },
+          Authorization: `Bearer ${token}`
+        }
       });
       setUsers(response.data);  // Assuming API returns an array of users
       setLoading(false);
-    } catch (error) {
+    } catch {
       message.error("Failed to fetch users");
       setLoading(false);
     }
@@ -107,38 +107,35 @@ const UsersList = () => {
     },
   ];
 
-  // Hiển thị modal thêm/sửa người dùng
-const showModal = (mode, user = null) => {
-  setModalMode(mode);
-  setEditingUser(user);
-  if (mode === "edit" && user) {
-    modalForm.setFieldsValue({
-      ...user,
-      roleId: user.role?.roleId || user.roleId, // Set đúng roleId nếu có
-    });
-  } else {
-    modalForm.resetFields(); // Reset form khi mở modal thêm mới
-  }
-  setModalVisible(true); // Mở modal
-};
+  const showModal = (mode, user = null) => {
+    setModalMode(mode);
+    setCurrentUser(user);
+    if (mode === "edit" && user) {
+      form.setFieldsValue({
+        ...user
+      });
+    } else {
+      form.resetFields();
+    }
+    setIsModalVisible(true);
+  };
 
-  // Đóng modal
   const handleModalCancel = () => {
-    setModalVisible(false);
-    setEditingUser(null);
-    modalForm.resetFields();
+    setIsModalVisible(false);
+    setCurrentUser(null);
+    form.resetFields();
   };
 
   // Xóa người dùng qua API
   const handleDelete = async (userId) => {
     Modal.confirm({
-      title: "Bạn có chắc muốn xóa người dùng này?",
+      title: `Bạn có chắc muốn xóa người dùng này?`,
       icon: <ExclamationCircleOutlined />,
       onOk: async () => {
         try {
           const token = localStorage.getItem("token");
           const res = await axios.delete(`${apiUrl}/${userId}`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${token}` }
           });
           if (res.status === 200 || res.status === 204) {
             message.success("Xóa người dùng thành công");
@@ -146,167 +143,141 @@ const showModal = (mode, user = null) => {
           } else {
             message.error("Xóa người dùng thất bại (status: " + res.status + ")");
           }
-        } catch (error) {
+        } catch {
           message.error("Xóa người dùng thất bại");
         }
       },
     });
   };
 
-  // Xử lý submit form modal
-const handleModalSubmit = async (values) => {
-  try {
-    const token = localStorage.getItem("token");
-    
-    // Đảm bảo roleId được gửi đúng khi thêm hoặc chỉnh sửa
-    const dataToSend = {
-      username: values.username,
-      password: values.password,
-      fullName: values.fullName,
-      roleId: Number(values.roleId), // Chuyển roleId thành số
-      phone: values.phone,
-      email: values.email,
-      address: values.address,
-      isFirstLogin: true, // Cài đặt giá trị true cho lần đăng nhập đầu tiên
-    };
-
+  // Xử lý submit form chỉnh sửa/thêm
+  const handleFormSubmit = async (values) => {
     if (modalMode === "add") {
-      // Thêm người dùng mới
-      await axios.post(apiUrl, dataToSend, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      message.success("Thêm người dùng thành công");
-    } else if (modalMode === "edit" && editingUser) {
-      // Cập nhật người dùng
-      await axios.put(`${apiUrl}/${editingUser.userId}`, dataToSend, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      message.success("Cập nhật người dùng thành công");
-    }
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.post(apiUrl, {
+          username: values.username,
+          password: values.password,
+          fullName: values.fullName,
+          roleId: values.roleId,
+          phone: values.phone,
+          email: values.email,
+          address: values.address,
+          isFirstLogin: true,
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
 
-    // Sau khi thêm hoặc chỉnh sửa, gọi lại API để lấy dữ liệu mới
-    fetchUsers();
-    setModalVisible(false);  // Đóng modal sau khi thành công
-  } catch (error) {
-    message.error("Có lỗi khi lưu người dùng!");
-  }
-};
+        if (response.data) {
+          message.success("Thêm người dùng thành công");
+          fetchUsers();
+          setIsModalVisible(false);
+        }
+      } catch {
+        message.error("Thêm người dùng thất bại");
+      }
+    } else if (modalMode === "edit" && currentUser) {
+      try {
+        const token = localStorage.getItem("token");
+        const rest = { ...values };
+        delete rest.role;
+        const roleId = typeof rest.roleId === "string" ? parseInt(rest.roleId) : rest.roleId;
+        const response = await axios.put(`${apiUrl}/${currentUser.userId}`, {
+          ...rest,
+          roleId,
+          userId: currentUser.userId,
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (response.data) {
+          message.success("Cập nhật người dùng thành công");
+          fetchUsers();
+          setIsModalVisible(false);
+        }
+      } catch {
+        message.error("Cập nhật người dùng thất bại");
+      }
+    }
+  };
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
-    <div className={style.layoutContainer}>
+    <div className="userslist-container">
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-      <main className={style.layoutContent}>
-        <header className={style.dashboardHeaderBar}>
-          <div className={style.titleGroup}>
-            <h1>
-              <span className={style.textBlack}>Danh sách</span>
-              <span className={style.textAccent}> người dùng</span>
-            </h1>
-          </div>
-        </header>
-
-        <div className={style.header}>
-          <input
-            type="text"
+      <div className="main-content">
+        <header className="userslist-header">
+          <Input
             placeholder="Tìm kiếm người dùng..."
-            className={style.searchBar}
-            value={searchText}
+            prefix={<SearchOutlined />}
+            style={{ width: 300 }}
             onChange={(e) => setSearchText(e.target.value)}
+            allowClear
           />
-          <button className={style.addBtn} onClick={() => showModal("add")}>Thêm người dùng</button>
+        </header>
+        <div style={{ background: "#fff", padding: 20, borderRadius: 8 }}>
+          <Title level={3}>Danh sách người dùng</Title>
+          <Button type="primary" style={{ marginBottom: 16 }} onClick={() => showModal("add")}>Thêm người dùng</Button>
+          <Table
+            rowKey="userId"
+            dataSource={filteredUsers}
+            columns={columns}
+            loading={loading}
+            pagination={{
+              pageSize: 6,
+              total: filteredUsers.length,
+              showSizeChanger: false,
+              current: currentPage,
+              onChange: handlePageChange,
+            }}
+          />
         </div>
+      </div>
 
-        <table className={style.studentTable}>
-          <thead>
-            <tr>
-              <th>STT</th>
-              <th>Họ và tên</th>
-              <th>Email</th>
-              <th>Số điện thoại</th>
-              <th>Địa chỉ</th>
-              <th>Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.length > 0 ? (
-              filteredUsers.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage).map((user, index) => (
-                <tr key={user.userId || index}>
-                  <td>{(currentPage - 1) * usersPerPage + index + 1}</td>
-                  <td>{user.fullName}</td>
-                  <td>{user.email}</td>
-                  <td>{user.phone}</td>
-                  <td>{user.address}</td>
-                  <td>
-                    <button className={style.btn} onClick={() => showModal("edit", user)}>Sửa</button>
-                    <button className={style.btn} onClick={() => handleDelete(user.userId)}>Xóa</button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="6" style={{ textAlign: "center" }}>
-                  Không có dữ liệu người dùng
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-
-        <div className={style.pagination}>
-          {[...Array(Math.ceil(filteredUsers.length / usersPerPage))].map((_, index) => (
-            <button
-              key={index}
-              onClick={() => handlePageChange(index + 1)}
-              className={currentPage === index + 1 ? style.activePage : ""}
-            >
-              {index + 1}
-            </button>
-          ))}
-        </div>
-
-        {/* Modal thêm/sửa người dùng */}
-        <Modal
-  open={modalVisible}
-  title={modalMode === "add" ? "Thêm người dùng" : "Chỉnh sửa người dùng"}
-  onCancel={handleModalCancel}
-  onOk={() => modalForm.submit()}  // Khi nhấn Lưu hoặc Thêm sẽ gọi submit form
-  okText={modalMode === "add" ? "Thêm" : "Lưu"}
->
-  <Form form={modalForm} layout="vertical" onFinish={handleModalSubmit}>
-    <Form.Item name="fullName" label="Họ và tên" rules={[{ required: true, message: "Vui lòng nhập tên người dùng" }]}>
-      <Input />
-    </Form.Item>
-    <Form.Item name="email" label="Email" rules={[{ required: true, message: "Vui lòng nhập email" }, { type: "email", message: "Email không hợp lệ" }]}>
-      <Input />
-    </Form.Item>
-    <Form.Item name="phone" label="Số điện thoại">
-      <Input />
-    </Form.Item>
-    <Form.Item name="address" label="Địa chỉ" rules={[{ required: true, message: "Vui lòng nhập địa chỉ" }]}>
-      <Input />
-    </Form.Item>
-    <Form.Item name="roleId" label="Vai trò" rules={[{ required: true, message: "Vui lòng chọn vai trò" }]}> 
-      <Select> 
-        <Option value={1}>Manager</Option> 
-        <Option value={2}>Nurse</Option> 
-        <Option value={3}>Parent</Option> 
-      </Select> 
-    </Form.Item>
-    {modalMode === "add" && (
-      <>
-        <Form.Item name="username" label="Tên đăng nhập" rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập" }]}> 
-          <Input /> 
-        </Form.Item>
-        <Form.Item name="password" label="Mật khẩu" rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}> 
-          <Input.Password /> 
-        </Form.Item>
-      </>
-    )}
-  </Form>
-</Modal>
-      </main>
+      <Modal
+        title={modalMode === "add" ? "Thêm người dùng" : "Chỉnh sửa người dùng"}
+        open={isModalVisible}
+        onCancel={handleModalCancel}
+        onOk={() => form.submit()}
+        okText={modalMode === "add" ? "Thêm" : "Lưu"}
+      >
+        <Form form={form} layout="vertical" onFinish={handleFormSubmit} initialValues={{ status: "active", role: "Học sinh" }}>
+          <Form.Item name="fullName" label="Họ và tên" rules={[{ required: true, message: "Vui lòng nhập tên người dùng" }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="email" label="Email" rules={[{ required: true, message: "Vui lòng nhập email" }, { type: "email", message: "Email không hợp lệ" }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="phone" label="Số điện thoại"><Input /></Form.Item>
+          {modalMode === "add" && (
+            <Form.Item name="roleId" label="Vai trò" rules={[{ required: true, message: "Vui lòng chọn vai trò" }]}>
+              <Select>
+                <Option value={1}>Manager</Option>
+                <Option value={2}>Nurse</Option>
+                <Option value={3}>Parent</Option>
+              </Select>
+            </Form.Item>
+          )}
+          <Form.Item name="address" label="Địa chỉ" rules={[{ required: true, message: "Vui lòng nhập địa chỉ" }]}>
+            <Input />
+          </Form.Item>
+          {modalMode === "add" && (
+            <>
+              <Form.Item name="username" label="Tên đăng nhập" rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập" }]}>
+                <Input />
+              </Form.Item>
+              <Form.Item name="password" label="Mật khẩu" rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}>
+                <Input.Password />
+              </Form.Item>
+            </>
+          )}
+        </Form>
+      </Modal>
     </div>
   );
 };
