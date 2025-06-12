@@ -8,6 +8,7 @@ using SchoolMedicalManagement.Models.Request;
 using SchoolMedicalManagement.Models.Response;
 using SchoolMedicalManagement.Repository.Repository;
 using SchoolMedicalManagement.Service.Interface;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SchoolMedicalManagement.Service.Implement
 {
@@ -25,6 +26,8 @@ namespace SchoolMedicalManagement.Service.Implement
             return list.Select(h => new MedicalHistoryResponse
             {
                 HistoryId = h.HistoryId,
+                StudentId = h.Student.StudentId,
+                StudentName = h.Student.FullName,
                 DiseaseName = h.DiseaseName,
                 DiagnosedDate = h.DiagnosedDate,
                 Note = h.Note
@@ -44,6 +47,8 @@ namespace SchoolMedicalManagement.Service.Implement
                 Data = new MedicalHistoryResponse
                 {
                     HistoryId = data.HistoryId,
+                    StudentId = data.Student.StudentId,
+                    StudentName = data.Student.FullName,
                     DiseaseName = data.DiseaseName,
                     DiagnosedDate = data.DiagnosedDate,
                     Note = data.Note
@@ -67,7 +72,15 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 Status = "201",
                 Message = "Created",
-                Data = result
+                Data = new MedicalHistoryResponse
+                {
+                    HistoryId = entity.HistoryId,
+                    StudentId = entity.Student.StudentId,
+                    StudentName = entity.Student.FullName,
+                    DiseaseName = entity.DiseaseName,
+                    DiagnosedDate = entity.DiagnosedDate,
+                    Note = entity.Note
+                }
             };
         }
 
@@ -86,7 +99,15 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 Status = "200",
                 Message = "Updated",
-                Data = updated
+                Data = new MedicalHistoryResponse
+                {
+                    HistoryId = updated.HistoryId,
+                    StudentId = updated.Student.StudentId,
+                    StudentName = updated.Student.FullName,
+                    DiseaseName = updated.DiseaseName,
+                    DiagnosedDate = updated.DiagnosedDate,
+                    Note = updated.Note
+                }
             };
         }
 

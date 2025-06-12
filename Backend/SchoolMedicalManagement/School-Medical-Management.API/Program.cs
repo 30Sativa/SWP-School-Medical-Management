@@ -38,14 +38,14 @@ builder.Services.AddScoped<HealthProfileRepository>();
 builder.Services.AddScoped<HealthCheckCampaignRepository>();
 builder.Services.AddScoped<MedicalSupplyRepository>();
 builder.Services.AddScoped<MedicalEventRepository>();
-
+builder.Services.AddScoped<MedicalHistoryService>();
 builder.Services.AddScoped<HealthCheckSummaryRepository>();
-
 builder.Services.AddScoped<VaccinationCampaignRepository>();
-
 builder.Services.AddScoped<MedicalHistoryRepository>();
 
+
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IMedicalHistoryService, MedicalHistoryService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IHealthProfileService, HealthProfileService>();

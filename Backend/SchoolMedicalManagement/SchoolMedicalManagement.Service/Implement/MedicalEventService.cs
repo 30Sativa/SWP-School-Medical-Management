@@ -90,6 +90,7 @@ public class MedicalEventService : IMedicalEventService
             Message = "Đã xử lý sự kiện y tế thành công.",
             Data = new CreateMedicalEventResponse
             {
+                 EventId = createdEvent.EventId, 
                 StudentId = createdEvent.Student.StudentId,
                 StudentName = createdEvent.Student?.FullName,
                 ParentName = createdEvent.Student?.Parent?.FullName,
@@ -177,6 +178,7 @@ public class MedicalEventService : IMedicalEventService
 
         return listevent.Select(e => new CreateMedicalEventResponse
         {
+            EventId = e.EventId,
             StudentId = e.Student?.StudentId ?? 0,
             StudentName = e.Student?.FullName ?? "(Không rõ)",
             ParentName = e.Student?.Parent?.FullName ?? "(Không rõ)",
