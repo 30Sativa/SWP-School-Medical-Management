@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import Sidebar from "../../components/sb-Manager/Sidebar"; // ✅ Sử dụng lại Sidebar component
+import Sidebar from "../../components/sb-Manager/Sidebar";
 import "../../assets/css/ManagerDashboard.css";
 import {
   HeartOutlined,
@@ -9,12 +8,10 @@ import {
   ProfileOutlined,
 } from "@ant-design/icons";
 
-
 const ManagerDashboard = () => {
   const [stats, setStats] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // State cho sidebar
-  const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
     setTimeout(() => {
@@ -42,56 +39,48 @@ const ManagerDashboard = () => {
       {/* Main content */}
       <div className="main-content">
         {/* Header */}
-        <header className="header">
-          <div className="search-box">
-            <input type="text" placeholder="Tìm kiếm..." />
-          </div>
-          <div className="header-right">
-            
-            <button
-              className="icon-btn logout-btn"
-              title="Đăng xuất"
-              onClick={() => {
-                localStorage.clear();
-                navigate("/");
-              }}
-            >
-              Đăng xuất
-            </button>
+        <header>
+          <div className="dashboard-header-bar">
+            <div className="title-group">
+              <h1>
+                <span className="text-accent">|</span>
+                <span className="text-black">Dashboard</span>
+                <h5 className="text-welcome">Chào mừng trở lại!</h5>
+              </h1>
+            </div>
           </div>
         </header>
 
-        {/* Dashboard sections */}
-        <main className="dashboard-main">
-          {/* Welcome banner */}
-          <section className="welcome-banner">
-            <h1>Xin chào, Quản lý!</h1>
-            <p>Chào mừng quay trở lại với hệ thống quản lý học đường.</p>
-          </section>
-
-          {/* Stats cards */}
-          <section className="stats-cards">
-            {stats.map((stat, idx) => (
-              <div key={idx} className="stat-card">
-                <div className="stat-icon">{stat.icon}</div>
-                <p className="stat-title">{stat.title}</p>
-                <p className="stat-value">{stat.value}</p>
+        {/* Stats cards */}
+        <section className="stats-cards">
+          {stats.map((stat, idx) => (
+            <div key={idx} className="stat-card">
+              <div className="stat-icon">{stat.icon}</div>
+              <div className="stat-info">
+                <div className="stat-title">{stat.title}</div>
+                <div className="stat-value">{stat.value}</div>
               </div>
-            ))}
-          </section>
+            </div>
+          ))}
+        </section>
 
-          {/* Notifications */}
-          <section className="notifications">
+        {/* Thông báo mới */}
+        <section className="card-requests" style={{ marginTop: 32 }}>
+          <div className="request-header">
             <h2>Thông báo mới</h2>
+          </div>
+          <ul className="incident-list-ui">
             {notifications.map((note, idx) => (
-              <div key={idx} className="notification-item">
-                <h3>{note.title}</h3>
-                <p>{note.description}</p>
-                <span className="notification-time">{note.time}</span>
-              </div>
+              <li className="incident-card" key={idx}>
+                <div className="incident-content">
+                  <strong>{note.title}</strong>
+                  <p>{note.description}</p>
+                  <span className="incident-time">{note.time}</span>
+                </div>
+              </li>
             ))}
-          </section>
-        </main>
+          </ul>
+        </section>
       </div>
     </div>
   );

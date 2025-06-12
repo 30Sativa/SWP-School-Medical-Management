@@ -1,4 +1,4 @@
-/* ManagerDashboard.css - Phiên bản chỉnh sửa */
+/* ManagerDashboard.css - Style đồng bộ với NurseDashboard */
 
 html, body, #root {
   margin: 0;
@@ -13,8 +13,8 @@ html, body, #root {
 
 .manager-dashboard {
   display: flex;
-  height: 100vh;
-  
+  min-height: 100vh;
+  background: #f5f6fa;
 }
 
 /* Sidebar */
@@ -125,9 +125,10 @@ html, body, #root {
 
 /* Main content */
 .main-content {
-  flex-grow: 1;
-  padding: 24px;
-  background-color: #f9fafb;
+  flex: 1;
+  padding: 32px 24px 24px 24px;
+  min-height: 100vh;
+  background: #f9fafb;
   transition: margin-left 0.3s ease; /* Thêm hiệu ứng khi thu gọn sidebar */
 }
 
@@ -244,21 +245,21 @@ html, body, #root {
 }
 
 /* Stats Cards */
-.stats-cards {
+.stats-cards, .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 20px;
-  margin-bottom: 24px;
-  width: 100%;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
 }
 
 .stat-card {
-  background: white;
+  background: #fff;
   border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  transition: box-shadow 0.3s ease;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  padding: 24px 18px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
   cursor: default;
 }
 
@@ -266,16 +267,27 @@ html, body, #root {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.stat-icon {
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-info {
+  flex: 1;
+}
+
 .stat-title {
-  font-size: 14px;
-  color: #6b7280;
-  margin-bottom: 6px;
+  font-size: 15px;
+  color: #666;
+  margin-bottom: 4px;
 }
 
 .stat-value {
   font-size: 22px;
   font-weight: 700;
-  color: #111827;
+  color: #222;
 }
 
 /* Notifications */
@@ -321,16 +333,70 @@ html, body, #root {
   color: #9ca3af;
 }
 
-.logout-btn {
-  background-color: #ef4444;
-  color: white;
-  font-weight: 600;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+.card-requests {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  padding: 24px 18px;
+  margin-top: 32px;
 }
-.logout-btn:hover {
-  background-color: #dc2626;
+
+.request-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.incident-list-ui {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.incident-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.incident-card:last-child {
+  border-bottom: none;
+}
+
+.incident-content strong {
+  font-weight: 600;
+  color: #222;
+}
+
+.incident-content p {
+  margin: 4px 0 0 0;
+  color: #444;
+}
+
+.incident-time {
+  font-size: 13px;
+  color: #888;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .stats-cards, .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .main-content {
+    padding: 8px 2px;
+  }
+  .stats-cards, .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .card-requests {
+    padding: 12px 4px;
+  }
 }
