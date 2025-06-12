@@ -3,6 +3,8 @@ import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Login = () => {
   const [form, setForm] = useState({
@@ -39,7 +41,7 @@ const Login = () => {
       console.log("📥 Phản hồi từ server:", response.data);
 
       if (response.data.message?.toLowerCase().includes("login successful") && token) {
-        // Lưu token vào localStorage
+        
         localStorage.setItem("token", token);
         localStorage.setItem("userId", resData.userId);
 
@@ -55,43 +57,64 @@ const Login = () => {
           return;
         }
 
-        alert("✅ Đăng nhập thành công!");
+        toast.success("Đăng nhập thành công!", {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
 
-    
-        if (roleName === "Manager") {
-          navigate("/manager");
-        } else if (roleName === "Nurse") {
-          navigate("/nurse");
-        } else if (roleName === "Parent") {
-          try {
-            const studentRes = await axios.get(
-              "https://swp-school-medical-management.onrender.com/api/Student"
-            );
+  
+        setTimeout(() => {
+          if (roleName === "Manager") {
+            navigate("/manager");
+          } else if (roleName === "Nurse") {
+            navigate("/nurse");
+          } else if (roleName === "Parent") {
 
-            const student = studentRes.data.find(
-              (s) => s.parentId === resData.userId
-            );
-
-            if (student) {
-              localStorage.setItem("studentId", student.studentId);
-            } else {
-              alert("❗Không tìm thấy học sinh tương ứng với phụ huynh này!");
-            }
-            navigate("/parent");
-          } catch (studentError) {
-            console.error("Lỗi khi tìm học sinh:", studentError);
-            alert("Lỗi khi lấy dữ liệu học sinh!");
+            (async () => {
+              try {
+                const studentRes = await axios.get(
+                  "https://swp-school-medical-management.onrender.com/api/Student"
+                );
+                const student = studentRes.data.find(
+                  (s) => s.parentId === resData.userId
+                );
+                if (student) {
+                  localStorage.setItem("studentId", student.studentId);
+                } else {
+                  alert("❗Không tìm thấy học sinh tương ứng với phụ huynh này!");
+                }
+                navigate("/parent");
+              } catch (studentError) {
+                console.error("Lỗi khi tìm học sinh:", studentError);
+                alert("Lỗi khi lấy dữ liệu học sinh!");
+              }
+            })();
+          } else {
+            alert("❗ Vai trò không xác định!");
+            navigate("/");
           }
-        } else {
-          alert("❗ Vai trò không xác định!");
-          navigate("/");
-        }
+        }, 2000);
       } else {
         alert("Đăng nhập thất bại!");
       }
     } catch (error) {
       console.error("❌ Lỗi khi gọi API:", error);
-      alert("Lỗi kết nối đến server hoặc sai thông tin đăng nhập!");
+      toast.error("Lỗi kết nối đến server hoặc sai thông tin đăng nhập!", {
+        position: "top-center",
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
     } finally {
       setLoading(false);
     }
@@ -99,6 +122,7 @@ const Login = () => {
 
   return (
     <div className="login-page-wrapper">
+      <ToastContainer />
       <div className="login-container">
         <div className="left-section">
           <h1>Hệ thống quản lý sức khỏe học đường</h1>
