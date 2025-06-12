@@ -1,0 +1,172 @@
+﻿using Microsoft.AspNetCore.Http;
+using SchoolMedicalManagement.Models.Entity;
+using SchoolMedicalManagement.Models.Request;
+using SchoolMedicalManagement.Models.Response;
+using SchoolMedicalManagement.Repository.Repository;
+using SchoolMedicalManagement.Service.Interface;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace SchoolMedicalManagement.Service.Implement
+{
+    public class HealthProfileService : IHealthProfileService
+    {
+        private readonly HealthProfileRepository _healthProfileRepository;
+
+        public HealthProfileService(HealthProfileRepository healthProfileRepository)
+        {
+            _healthProfileRepository = healthProfileRepository;
+        }
+
+        // ✅ Lấy tất cả hồ sơ sức khỏe
+        public async Task<List<ManagerHealthProfileResponse>> GetAllHealthProfilesAsync()
+        {
+            var healthProfiles = await _healthProfileRepository.GetAllHealthProfile();
+            return healthProfiles.Select(hp => new ManagerHealthProfileResponse
+            {
+                ProfileId = hp.ProfileId,
+                StudentId = hp.StudentId ?? 0,
+                Height = hp.Height,
+                Weight = hp.Weight,
+                ChronicDiseases = hp.ChronicDiseases,
+                Allergies = hp.Allergies,
+                GeneralNote = hp.GeneralNote,
+                IsActive = hp.IsActive
+            }).ToList();
+        }
+
+        // ✅ Lấy 1 hồ sơ sức khỏe theo ID
+        public async Task<BaseResponse?> GetHealthProfileByIdAsync(int id)
+        {
+            var hp = await _healthProfileRepository.GetHealthProfileById(id);
+            if (hp == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Không tìm thấy hồ sơ sức khỏe với ID {id}.",
+                    Data = null
+                };
+            }
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy hồ sơ sức khỏe thành công.",
+                Data = new ManagerHealthProfileResponse
+                {
+                    ProfileId = hp.ProfileId,
+                    StudentId = hp.StudentId ?? 0,
+                    Height = hp.Height,
+                    Weight = hp.Weight,
+                    ChronicDiseases = hp.ChronicDiseases,
+                    Allergies = hp.Allergies,
+                    GeneralNote = hp.GeneralNote,
+                    IsActive = hp.IsActive
+                }
+            };
+        }
+
+        // ✅ Tạo hồ sơ sức khỏe mới
+        public async Task<BaseResponse?> CreateHealthProfileAsync(CreateHealthProfileRequest request)
+        {
+            var newProfile = new HealthProfile
+            {
+                StudentId = request.StudentId,
+                Height = request.Height,
+                Weight = request.Weight,
+                ChronicDiseases = request.ChronicDiseases,
+                Allergies = request.Allergies,
+                GeneralNote = request.GeneralNote,
+                IsActive = true
+            };
+
+            var created = await _healthProfileRepository.CreateHealthProfile(newProfile);
+
+            if (created == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Tạo hồ sơ sức khỏe thất bại.",
+                    Data = null
+                };
+            }
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Tạo hồ sơ sức khỏe thành công.",
+                Data = new ManagerHealthProfileResponse
+                {
+                    ProfileId = created.ProfileId,
+                    StudentId = created.StudentId ?? 0,
+                    Height = created.Height,
+                    Weight = created.Weight,
+                    ChronicDiseases = created.ChronicDiseases,
+                    Allergies = created.Allergies,
+                    GeneralNote = created.GeneralNote,
+                    IsActive = created.IsActive
+                }
+            };
+        }
+
+        // ✅ Cập nhật hồ sơ sức khỏe
+        public async Task<BaseResponse?> UpdateHealthProfileAsync(int id, UpdateHealthProfileRequest request)
+        {
+            var hp = await _healthProfileRepository.GetHealthProfileById(id);
+            if (hp == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Không tìm thấy hồ sơ sức khỏe với ID {id}.",
+                    Data = null
+                };
+            }
+
+            hp.Height = request.Height ?? hp.Height;
+            hp.Weight = request.Weight ?? hp.Weight;
+            hp.ChronicDiseases = request.ChronicDiseases ?? hp.ChronicDiseases;
+            hp.Allergies = request.Allergies ?? hp.Allergies;
+            hp.GeneralNote = request.GeneralNote ?? hp.GeneralNote;
+            hp.IsActive = request.IsActive ?? hp.IsActive;
+
+            var updated = await _healthProfileRepository.UpdateHealthProfile(hp);
+
+            if (updated == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Cập nhật hồ sơ sức khỏe thất bại.",
+                    Data = null
+                };
+            }
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Cập nhật hồ sơ sức khỏe thành công.",
+                Data = new ManagerHealthProfileResponse
+                {
+                    ProfileId = updated.ProfileId,
+                    StudentId = updated.StudentId ?? 0,
+                    Height = updated.Height,
+                    Weight = updated.Weight,
+                    ChronicDiseases = updated.ChronicDiseases,
+                    Allergies = updated.Allergies,
+                    GeneralNote = updated.GeneralNote,
+                    IsActive = updated.IsActive
+                }
+            };
+        }
+
+        // ✅ Xoá mềm hồ sơ
+        public async Task<bool> DeleteHealthProfileAsync(int id)
+        {
+            return await _healthProfileRepository.DeleteHealthProfile(id);
+        }
+    }
+}

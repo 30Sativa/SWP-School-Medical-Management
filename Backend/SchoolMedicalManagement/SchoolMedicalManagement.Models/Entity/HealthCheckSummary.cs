@@ -11,15 +11,15 @@ public partial class HealthCheckSummary
 
     public int? CampaignId { get; set; }
 
-    public string? BloodPressure { get; set; }
+    public decimal? BloodPressure { get; set; }
 
-    public string? HeartRate { get; set; }
+    public int? HeartRate { get; set; }
 
-    public string? Height { get; set; }
+    public decimal? Height { get; set; }
 
-    public string? Weight { get; set; }
+    public decimal? Weight { get; set; }
 
-    public string? Bmi { get; set; }
+    public decimal? Bmi { get; set; }
 
     public string? VisionSummary { get; set; }
 
@@ -39,9 +39,13 @@ public partial class HealthCheckSummary
 
     public string? FollowUpNote { get; set; }
 
-    public string? ConsentStatus { get; set; }
+    public int? ConsentStatusId { get; set; }
+
+    public bool? IsActive { get; set; }
 
     public virtual HealthCheckCampaign? Campaign { get; set; }
+
+    public virtual ConsentStatusType? ConsentStatus { get; set; }
 
     public virtual Student Student { get; set; } = null!;
 }

@@ -1,19 +1,26 @@
-﻿using SchoolMedicalManagement.Repository.Request;
-using SchoolMedicalManagement.Repository.Response;
+﻿using SchoolMedicalManagement.Models.Request;
+using SchoolMedicalManagement.Models.Response;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SchoolMedicalManagement.Service.Interface
 {
     public interface IUserService
     {
-        Task<List<UserListResponse>> GetAll();
-        Task<UserManagementResponse> GetUserById(int id);
+        // Lấy danh sách tất cả user đang hoạt động (IsActive = true)
+        Task<List<ListUserResponse>> GetAllUserAsync();
 
-        
+        // Lấy thông tin chi tiết user theo ID
+        Task<BaseResponse> GetUserByIdAsync(Guid id);
+
+        // Tạo mới user
+        Task<BaseResponse> CreateUserAsync(CreateUserRequest user);
+
+        // ✅ Xoá mềm user (IsActive = false)
+        Task<BaseResponse> SoftDeleteUserAsync(Guid id);
+
+        // Cập nhật thông tin user
+        Task<BaseResponse> UpdateUserAsync(Guid id, UpdateUserRequest user);
     }
-
 }

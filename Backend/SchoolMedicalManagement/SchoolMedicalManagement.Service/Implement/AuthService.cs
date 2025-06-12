@@ -9,14 +9,17 @@ using Azure.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SchoolMedicalManagement.Models.Entity;
+using SchoolMedicalManagement.Models.Utils;
 using SchoolMedicalManagement.Repository.Repository;
-using SchoolMedicalManagement.Repository.Request;
-using SchoolMedicalManagement.Repository.Response;
+using SchoolMedicalManagement.Models.Request;
+
 using SchoolMedicalManagement.Service.Interface;
+using SchoolMedicalManagement.Models.Response;
+using Microsoft.AspNetCore.Http;
 
 namespace SchoolMedicalManagement.Service.Implement
 {
-    public class AuthService : IAuthService
+    public class AuthService : IAuthService 
     {
         private readonly UserRepository _userRepository;
         private readonly IConfiguration _config;
@@ -29,44 +32,52 @@ namespace SchoolMedicalManagement.Service.Implement
 
 
         // First login change password
-        public async Task<UserChangePasswordResponse> ChangePasswordAfterFirstLogin(UserChangePasswordRequest userChangePasswordRequest)
+        public async Task<BaseResponse> ChangePasswordAfterFirstLogin(Guid id, ChangePasswordUserRequest Request)
         {
-            var user = await _userRepository.GetUserById(userChangePasswordRequest.UserId);
+            var user = await _userRepository.GetUserById(id);
             if (user == null || user.IsFirstLogin == false)
-                return null;
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Change password fail",
+                    Data = null
+                };
 
-            user.Password = userChangePasswordRequest.NewPassword;
+            user.Password = HashPassword.HashPasswordd(Request.NewPassword);
             user.IsFirstLogin = false;
 
             await _userRepository.UpdateAsync(user);
 
-            return new UserChangePasswordResponse
+            return new BaseResponse
             {
-                UserId = user.UserId,
-                FullName = user.FullName,
-                RoleName = user.Role.RoleName,
-                Email = user.Email,
-                Phone = user.Phone,
-                IsFirstLogin = user.IsFirstLogin.GetValueOrDefault() // GetValueOrDefault() sẽ trả về false nếu user.IsFirstLogin == null
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Password changed successfully.",
+                Data = new ChangePasswordUserResponse
+                {
+                    UserId = user.UserId,
+                    FullName = user.FullName,
+                    RoleName = user.Role.RoleName,
+                    Email = user.Email,
+                    Phone = user.Phone,
+                    IsFirstLogin = user.IsFirstLogin
+                }
             };
         }
 
-        public Task<UserChangePasswordResponse> ChangePasswordAfterFirstLogin(UserChangePasswordResponse request)
-        {
-            throw new NotImplementedException();
-        }
-
-
-
-
 
         //Login
-        public async Task<UserLoginResponse> Login(UserLoginRequest loginRequest)
+        public async Task<BaseResponse> Login(LoginUserRequest loginRequest)
         {
-            var user = await _userRepository.Login(loginRequest);
+            var user = await _userRepository.GetLoginUser(loginRequest);
 
-            if (user == null) return null;
-
+            if (user == null) {
+                return new BaseResponse{
+                    Status = StatusCodes.Status401Unauthorized.ToString(),
+                    Message = "Invalid username or password.",
+                    Data = null
+                }
+            ;
+            }
             var claims = new[]
             {
         new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
@@ -79,22 +90,23 @@ namespace SchoolMedicalManagement.Service.Implement
 
             var token = new JwtSecurityToken(
                 _config["Jwt:Issuer"],
-                _config["Jwt:Issuer"],
+                _config["Jwt:Audience"],
                 claims,
                 expires: DateTime.Now.AddHours(3),
                 signingCredentials: creds
             );
 
-            return new UserLoginResponse
+            return new BaseResponse
             {
-                UserId = user.UserId,
-                FullName = user.FullName,
-                Role = new Role()
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Login successful.",
+                Data = new LoginUserResponse
                 {
-                    RoleId = user.Role.RoleId,
-                    RoleName = user.Role.RoleName
-                },
-                Token = new JwtSecurityTokenHandler().WriteToken(token)
+                    UserId = user.UserId,
+                    FullName = user.FullName,
+                    RoleName = user.Role.RoleName,
+                    Token = new JwtSecurityTokenHandler().WriteToken(token)
+                }
             };
         }
     }
