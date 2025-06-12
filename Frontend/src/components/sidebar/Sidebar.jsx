@@ -26,7 +26,6 @@ const Sidebar = () => {
     >
       <button className={style.toggleBtn} onClick={toggleSidebar}>
         <Menu size={22} />
-        {isOpen && <span className={style.systemName}>EduHealth</span>}
       </button>
 
       <nav>
