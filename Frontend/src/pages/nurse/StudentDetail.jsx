@@ -52,19 +52,28 @@ const StudentDetail = () => {
     setFormData({
       fullName: student.fullName,
       dateOfBirth: student.dateOfBirth,
-      gender: student.gender,
-      parent: student.parent,
+      gender: student.genderName, // genderName for consistency
+      parent: student.parentName, // parentName for consistency
       class: student.class,
     });
     setShowForm(true);
   };
 
   const handleUpdate = () => {
+    const updatedData = {
+      studentId: student.studentId,
+      fullName: formData.fullName,
+      dateOfBirth: formData.dateOfBirth,
+      genderName: formData.gender, // genderName instead of gender
+      parentName: formData.parent, // parentName instead of parent
+      class: formData.class,
+    };
+
     axios
-      .put(`https://swp-school-medical-management.onrender.com/api/Student`, {
-        studentId: student.studentId,
-        ...formData,
-      })
+      .put(
+        "https://swp-school-medical-management.onrender.com/api/Student",
+        updatedData
+      )
       .then(() => {
         alert("Cập nhật thành công!");
         setStudent({ ...student, ...formData });
@@ -72,7 +81,9 @@ const StudentDetail = () => {
       })
       .catch((err) => {
         console.error("Lỗi cập nhật:", err);
-        alert("Cập nhật thất bại.");
+        const errorMessage =
+          err.response?.data?.message || "Cập nhật thất bại. Vui lòng thử lại!";
+        alert(errorMessage); // Show detailed error message
       });
   };
 
@@ -105,10 +116,10 @@ const StudentDetail = () => {
           <div className={style.rightPanel}>
             <div className={style.notebookBox}>
               <div className={style.line}>
-                <span>Phụ huynh:</span> {student.parent}
+                <span>Phụ huynh:</span> {student.parentName}
               </div>
               <div className={style.line}>
-                <span>Giới tính:</span> {student.gender}
+                <span>Giới tính:</span> {student.genderName}
               </div>
               <div className={style.line}>
                 <span>Ngày sinh:</span> {student.dateOfBirth}

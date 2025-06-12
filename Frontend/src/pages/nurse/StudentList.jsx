@@ -116,8 +116,8 @@ const StudentList = () => {
                   <td>{indexOfFirstStudent + index + 1}</td>
                   <td>{student.fullName}</td>
                   <td>{student.studentId}</td>
-                  <td>{student.class}</td>
-                  <td>{student.parent}</td>
+                  <td>{student.className}</td>
+                  <td>{student.parentName}</td>
                   <td>
                     <button
                       className={style.btn}
