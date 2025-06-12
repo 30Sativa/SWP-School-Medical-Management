@@ -9,7 +9,7 @@ namespace SchoolMedicalManagement.Models.Response
     public class MedicalHistoryResponse
     {
         public int HistoryId { get; set; }
-        public int StudentId { get; set; }
+        public int? StudentId { get; set; }
         public string StudentName { get; set; } = string.Empty;
         public string DiseaseName { get; set; } = string.Empty;
         public string? Note { get; set; }

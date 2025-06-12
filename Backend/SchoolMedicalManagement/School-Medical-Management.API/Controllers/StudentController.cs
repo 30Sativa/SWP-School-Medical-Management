@@ -73,7 +73,7 @@ namespace School_Medical_Management.API.Controllers
 
         // ✅ Sửa lại dùng StatusCode như các hàm khác
         [HttpGet("by-parent/{parentId}")]
-        public async Task<IActionResult> GetStudentsOfParent(int parentId)
+        public async Task<IActionResult> GetStudentsOfParent(Guid parentId)
         {
             var response = await _studentService.GetStudentsOfParent(parentId);
             return StatusCode(int.Parse(response.Status), response);

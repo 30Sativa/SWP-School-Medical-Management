@@ -16,7 +16,7 @@ namespace SchoolMedicalManagement.Models.Response
 
         public string? Description { get; set; }
 
-        public int? CreatedBy { get; set; }
+        public Guid? CreatedBy { get; set; }
 
         public string? CreateByName { get; set; }
     }

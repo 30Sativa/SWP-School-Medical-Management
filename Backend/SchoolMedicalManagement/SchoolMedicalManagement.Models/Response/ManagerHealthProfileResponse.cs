@@ -9,7 +9,7 @@ namespace SchoolMedicalManagement.Models.Response
     public class ManagerHealthProfileResponse
     {
         public int ProfileId { get; set; }                 // ID hồ sơ sức khỏe
-        public int StudentId { get; set; }                 // ID học sinh
+        public int? StudentId { get; set; }                 // ID học sinh
 
         public decimal? Height { get; set; }                // Chiều cao
         public decimal? Weight { get; set; }                // Cân nặng

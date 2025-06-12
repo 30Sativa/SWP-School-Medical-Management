@@ -43,6 +43,7 @@ builder.Services.AddScoped<HealthCheckSummaryRepository>();
 
 builder.Services.AddScoped<VaccinationCampaignRepository>();
 
+builder.Services.AddScoped<MedicalHistoryRepository>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -69,7 +70,7 @@ builder.Services.AddCors(options =>
 });
 
 //Database
-builder.Services.AddDbContext<SwpEduHealV1Context>(options =>
+builder.Services.AddDbContext<SwpEduHealV5Context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 

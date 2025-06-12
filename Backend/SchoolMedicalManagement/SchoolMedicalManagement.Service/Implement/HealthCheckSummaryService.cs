@@ -49,7 +49,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     ToothNotes = s.ToothNotes,
                     GeneralNote = s.GeneralNote,
                     FollowUpNote = s.FollowUpNote,
-                    ConsentStatus = s.ConsentStatus,
+                    ConsentStatusId = s.ConsentStatusId,
                     IsActive = s.IsActive
                 });
             }
@@ -93,7 +93,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     ToothNotes = s.ToothNotes,
                     GeneralNote = s.GeneralNote,
                     FollowUpNote = s.FollowUpNote,
-                    ConsentStatus = s.ConsentStatus,
+                    ConsentStatusId = s.ConsentStatusId,
                     IsActive = s.IsActive
                 }
             };
@@ -119,7 +119,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 ToothNotes = request.ToothNotes,
                 GeneralNote = request.GeneralNote,
                 FollowUpNote = request.FollowUpNote,
-                ConsentStatus = request.ConsentStatus,
+                ConsentStatusId = request.ConsentStatusId,
                 IsActive = request.IsActive ?? true
             };
 
@@ -185,7 +185,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     ToothNotes = created.ToothNotes,
                     GeneralNote = created.GeneralNote,
                     FollowUpNote = created.FollowUpNote,
-                    ConsentStatus = created.ConsentStatus,
+                    ConsentStatusId = created.ConsentStatusId,
                     IsActive = created.IsActive
                 }
             };
@@ -203,11 +203,11 @@ namespace SchoolMedicalManagement.Service.Implement
                     Data = null
                 };
             }
-            s.BloodPressure = string.IsNullOrEmpty(request.BloodPressure) ? s.BloodPressure : request.BloodPressure;
-            s.HeartRate = string.IsNullOrEmpty(request.HeartRate) ? s.HeartRate : request.HeartRate;
-            s.Height = string.IsNullOrEmpty(request.Height) ? s.Height : request.Height;
-            s.Weight = string.IsNullOrEmpty(request.Weight) ? s.Weight : request.Weight;
-            s.Bmi = string.IsNullOrEmpty(request.Bmi) ? s.Bmi : request.Bmi;
+            s.BloodPressure = request.BloodPressure ?? s.BloodPressure;
+            s.HeartRate = request.HeartRate ?? s.HeartRate;
+            s.Height = request.Height ?? s.Height;
+            s.Weight = request.Weight ?? s.Weight;
+            s.Bmi = request.Bmi ?? s.Bmi;
             s.VisionSummary = string.IsNullOrEmpty(request.VisionSummary) ? s.VisionSummary : request.VisionSummary;
             s.Ent = string.IsNullOrEmpty(request.Ent) ? s.Ent : request.Ent;
             s.EntNotes = string.IsNullOrEmpty(request.EntNotes) ? s.EntNotes : request.EntNotes;
@@ -217,7 +217,7 @@ namespace SchoolMedicalManagement.Service.Implement
             s.ToothNotes = string.IsNullOrEmpty(request.ToothNotes) ? s.ToothNotes : request.ToothNotes;
             s.GeneralNote = string.IsNullOrEmpty(request.GeneralNote) ? s.GeneralNote : request.GeneralNote;
             s.FollowUpNote = string.IsNullOrEmpty(request.FollowUpNote) ? s.FollowUpNote : request.FollowUpNote;
-            s.ConsentStatus = string.IsNullOrEmpty(request.ConsentStatus) ? s.ConsentStatus : request.ConsentStatus;
+            s.ConsentStatusId = request.ConsentStatusId ?? s.ConsentStatusId;
             s.IsActive = request.IsActive ?? s.IsActive;
 
 
@@ -256,7 +256,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     ToothNotes = updated.ToothNotes,
                     GeneralNote = updated.GeneralNote,
                     FollowUpNote = updated.FollowUpNote,
-                    ConsentStatus = updated.ConsentStatus,
+                    ConsentStatusId = updated.ConsentStatusId,
                     IsActive = updated.IsActive
                 }
             };

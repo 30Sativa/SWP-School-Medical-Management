@@ -40,8 +40,12 @@ public class MedicalEventController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteMedicalEvent([FromRoute] int id)
     {
-        var result = await _medicalEventService.DeleteMedicalEvent(id);
-        return StatusCode(int.Parse(result.Status), result);
+        var isDeleted = await _medicalEventService.DeleteMedicalEvent(id);
+        if (!isDeleted)
+        {
+            return NotFound($"Medical Event with ID {id} not found or could not be deleted.");
+        }
+        return Ok($"Medical Event with ID: {id} deleted successfully");
     }
 
     // Lấy danh sách sự kiện y tế đang hoạt động

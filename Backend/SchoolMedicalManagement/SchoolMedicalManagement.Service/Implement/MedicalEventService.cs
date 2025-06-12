@@ -157,7 +157,7 @@ public class MedicalEventService : IMedicalEventService
 
                 MedicalHistory = histories.Select(h => new MedicalHistoryResponse
                 {
-                    HistoryId = h.MedicalHistoryId,
+                    HistoryId = h.HistoryId,
                     StudentId = h.StudentId,
                     StudentName = h.Student?.FullName ?? "(Không rõ)",
                     DiseaseName = h.DiseaseName ?? "(Không rõ)",

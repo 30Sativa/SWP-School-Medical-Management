@@ -50,7 +50,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     SupplyID = created.SupplyId,
                     Name = created.Name,
-                    Quantity = created.Quantity,
+                    Quantity = created.Quantity.GetValueOrDefault(),
                     Unit = created.Unit,
                     ExpiryDate = created.ExpiryDate
                 }
@@ -64,7 +64,7 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 SupplyID = s.SupplyId,
                 Name = s.Name,
-                Quantity = s.Quantity,
+                Quantity = s.Quantity.GetValueOrDefault(),
                 Unit = s.Unit,
                 ExpiryDate = s.ExpiryDate
             }).ToList();
@@ -91,7 +91,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     SupplyID = supply.SupplyId,
                     Name = supply.Name,
-                    Quantity = supply.Quantity,
+                    Quantity = supply.Quantity.GetValueOrDefault(),
                     Unit = supply.Unit,
                     ExpiryDate = supply.ExpiryDate
                 }
@@ -100,7 +100,7 @@ namespace SchoolMedicalManagement.Service.Implement
 
         public async Task<BaseResponse> UpdateSupplyAsync(UpdateMedicalSupplyRequest request)
         {
-            var existing = await _medicalSupplyRepository.GetByIdMedicalSupply(request.SupplyID);
+            var existing = await _medicalSupplyRepository.GetByIdMedicalSupply(request.SupplyId);
             if (existing == null)
             {
                 return new BaseResponse
@@ -135,7 +135,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     SupplyID = updated.SupplyId,
                     Name = updated.Name,
-                    Quantity = updated.Quantity,
+                    Quantity = updated.Quantity.GetValueOrDefault(),
                     Unit = updated.Unit,
                     ExpiryDate = updated.ExpiryDate
                 }
