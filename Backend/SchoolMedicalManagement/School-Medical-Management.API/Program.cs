@@ -115,6 +115,36 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                context.Response.StatusCode = 401;
+                context.Response.ContentType = "application/json";
+
+                var message = context.Exception switch
+                {
+                    SecurityTokenExpiredException => "Token đã hết hạn.",
+                    _ => "Token không hợp lệ."
+                };
+
+                return context.Response.WriteAsync($"{{\"error\": \"{message}\"}}");
+            },
+            OnChallenge = context =>
+            {
+                context.HandleResponse(); // Ngăn ASP.NET trả lỗi mặc định
+                context.Response.StatusCode = 401;
+                context.Response.ContentType = "application/json";
+                return context.Response.WriteAsync("{\"error\": \"Bạn chưa đăng nhập hoặc token thiếu.\"}");
+            },
+            OnForbidden = context =>
+            {
+                context.Response.StatusCode = 403;
+                context.Response.ContentType = "application/json";
+                return context.Response.WriteAsync("{\"error\": \"Bạn không có quyền truy cập chức năng này.\"}");
+            }
+        };
     });
 
 var app = builder.Build();
