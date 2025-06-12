@@ -32,9 +32,11 @@ const UsersList = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setUsers(response.data);  // Assuming API returns an array of users
+      // Lọc bỏ user đã bị soft delete (isActive === false)
+      const activeUsers = response.data.filter((u) => u.isActive !== false);
+      setUsers(activeUsers);
       setLoading(false);
-    } catch (error) {
+    } catch {
       message.error("Failed to fetch users");
       setLoading(false);
     }
@@ -47,9 +49,10 @@ const UsersList = () => {
   // Filter users by search text
   const filteredUsers = users.filter(
     (user) =>
-      user.fullName.toLowerCase().includes(searchText.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchText.toLowerCase()) ||
-      user.phone.includes(searchText)
+      user.isActive !== false && // Ẩn user đã bị soft delete
+      (user.fullName.toLowerCase().includes(searchText.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchText.toLowerCase()) ||
+        user.phone.includes(searchText))
   );
 
   // Pagination handler
@@ -101,7 +104,7 @@ const UsersList = () => {
       render: (_, record) => (
         <>
           <Button type="link" icon={<EditOutlined />} onClick={() => showModal("edit", record)} />
-          <Button type="link" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.userId)} />
+          <Button type="link" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.userID)} />
         </>
       ),
     },
@@ -129,25 +132,50 @@ const showModal = (mode, user = null) => {
     modalForm.resetFields();
   };
 
-  // Xóa người dùng qua API
+  // Xóa người dùng qua API (soft delete)
   const handleDelete = async (userId) => {
+    let id = userId;
+    if (!id) {
+      id = localStorage.getItem("userId");
+    }
+    if (!id) {
+      message.error("Không tìm thấy userId để xóa!");
+      return;
+    }
+    // Tìm user object từ danh sách users
+    const userToDelete = users.find(u => u.userID === id || u.userId === id);
+    if (!userToDelete) {
+      message.error("Không tìm thấy thông tin người dùng để xóa!");
+      return;
+    }
     Modal.confirm({
       title: "Bạn có chắc muốn xóa người dùng này?",
       icon: <ExclamationCircleOutlined />,
       onOk: async () => {
         try {
           const token = localStorage.getItem("token");
-          const res = await axios.delete(`${apiUrl}/${userId}`, {
+          const realId = typeof id === "string" ? id.trim() : id;
+          // Chuẩn bị payload đầy đủ cho API update
+          const payload = {
+            userID: userToDelete.userID || userToDelete.userId,
+            fullName: userToDelete.fullName,
+            roleID: userToDelete.role?.roleId || userToDelete.roleID || userToDelete.roleId,
+            phone: userToDelete.phone,
+            email: userToDelete.email,
+            address: userToDelete.address,
+            isActive: false,
+          };
+          await axios.put(`${apiUrl}/${realId}`, payload, {
             headers: { Authorization: `Bearer ${token}` },
           });
-          if (res.status === 200 || res.status === 204) {
-            message.success("Xóa người dùng thành công");
-            fetchUsers();
+          message.success("Xóa người dùng thành công");
+          fetchUsers(); // Cập nhật lại danh sách
+        } catch (err) {
+          if (err.response && err.response.data && err.response.data.message) {
+            message.error("Xóa người dùng thất bại: " + err.response.data.message);
           } else {
-            message.error("Xóa người dùng thất bại (status: " + res.status + ")");
+            message.error("Xóa người dùng thất bại!");
           }
-        } catch (error) {
-          message.error("Xóa người dùng thất bại");
         }
       },
     });
@@ -157,37 +185,48 @@ const showModal = (mode, user = null) => {
 const handleModalSubmit = async (values) => {
   try {
     const token = localStorage.getItem("token");
-    
-    // Đảm bảo roleId được gửi đúng khi thêm hoặc chỉnh sửa
-    const dataToSend = {
-      username: values.username,
-      password: values.password,
-      fullName: values.fullName,
-      roleId: Number(values.roleId), // Chuyển roleId thành số
-      phone: values.phone,
-      email: values.email,
-      address: values.address,
-      isFirstLogin: true, // Cài đặt giá trị true cho lần đăng nhập đầu tiên
-    };
-
+    // Lấy đúng userId từ editingUser (API trả về userId, không phải userID)
+    let userID = editingUser?.userId || editingUser?.userID;
     if (modalMode === "add") {
       // Thêm người dùng mới
+      const dataToSend = {
+        username: values.username,
+        password: values.password,
+        fullName: values.fullName,
+        roleID: Number(values.roleId), // Đổi tên trường cho đúng chuẩn API
+        phone: values.phone,
+        email: values.email,
+        address: values.address,
+        isActive: true,
+        isFirstLogin: true,
+      };
       await axios.post(apiUrl, dataToSend, {
         headers: { Authorization: `Bearer ${token}` },
       });
       message.success("Thêm người dùng thành công");
     } else if (modalMode === "edit" && editingUser) {
       // Cập nhật người dùng
-      await axios.put(`${apiUrl}/${editingUser.userId}`, dataToSend, {
+      const editData = {
+        userID: userID, // Đúng tên trường
+        fullName: values.fullName,
+        roleID: Number(values.roleId),
+        phone: values.phone,
+        email: values.email,
+        address: values.address,
+        isActive: true,
+      };
+      if (!userID) {
+        message.error("Không tìm thấy userID để cập nhật!");
+        return;
+      }
+      await axios.put(`${apiUrl}/${userID}`, editData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       message.success("Cập nhật người dùng thành công");
     }
-
-    // Sau khi thêm hoặc chỉnh sửa, gọi lại API để lấy dữ liệu mới
     fetchUsers();
-    setModalVisible(false);  // Đóng modal sau khi thành công
-  } catch (error) {
+    setModalVisible(false);
+  } catch {
     message.error("Có lỗi khi lưu người dùng!");
   }
 };
@@ -231,19 +270,22 @@ const handleModalSubmit = async (values) => {
           </thead>
           <tbody>
             {filteredUsers.length > 0 ? (
-              filteredUsers.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage).map((user, index) => (
-                <tr key={user.userId || index}>
-                  <td>{(currentPage - 1) * usersPerPage + index + 1}</td>
-                  <td>{user.fullName}</td>
-                  <td>{user.email}</td>
-                  <td>{user.phone}</td>
-                  <td>{user.address}</td>
-                  <td>
-                    <button className={style.btn} onClick={() => showModal("edit", user)}>Sửa</button>
-                    <button className={style.btn} onClick={() => handleDelete(user.userId)}>Xóa</button>
-                  </td>
-                </tr>
-              ))
+              filteredUsers.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage).map((user, index) => {
+                const realUserId = user.userID;
+                return (
+                  <tr key={realUserId || index}>
+                    <td>{(currentPage - 1) * usersPerPage + index + 1}</td>
+                    <td>{user.fullName}</td>
+                    <td>{user.email}</td>
+                    <td>{user.phone}</td>
+                    <td>{user.address}</td>
+                    <td>
+                      <button className={style.btn} onClick={() => showModal("edit", user)}>Sửa</button>
+                      <button className={style.btn} onClick={() => handleDelete(realUserId)}>Xóa</button>
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td colSpan="6" style={{ textAlign: "center" }}>
@@ -299,7 +341,14 @@ const handleModalSubmit = async (values) => {
         <Form.Item name="username" label="Tên đăng nhập" rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập" }]}> 
           <Input /> 
         </Form.Item>
-        <Form.Item name="password" label="Mật khẩu" rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}> 
+        <Form.Item
+          name="password"
+          label="Mật khẩu"
+          rules={[
+            { required: true, message: "Vui lòng nhập mật khẩu" },
+            { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự" }
+          ]} 
+        > 
           <Input.Password /> 
         </Form.Item>
       </>
