@@ -40,8 +40,8 @@ const ChildCareHistory = () => {
       <Sidebar />
       <div className={styles.content}>
         <h2 className={styles.title}>Lịch Sử Chăm Sóc|</h2>
-        <p className={styles.subtitle}>Xin chào, đây là toàn bộ lịch sử chăm sóc sức khỏe cho học sinh</p>
-
+        <p className={styles.subtitle}>Xin chào, đây là lịch sử chăm sóc sức khỏe cho học sinh Trần Văn Hùng
+        </p>
         <div className={styles.historyList}>
           {careHistory.map((item, index) => (
             <div className={styles.historyCard} key={index}>

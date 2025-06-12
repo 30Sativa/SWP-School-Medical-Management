@@ -10,6 +10,8 @@ import ParentDashboard from "../pages/parent/ParentDashboard";
 import HealthProfile from "../pages/parent/HealthProfile";
 import SendMedicine from "../pages/parent/SendMedicine";
 import ChildCareHistory from "../pages/parent/ChildCareHistory";
+import NotificationAndReport from "../pages/parent/NotificationAndReport";
+
 const AppRouter = () => {
   return (
     <Routes>
@@ -24,6 +26,7 @@ const AppRouter = () => {
       <Route path="/healthprofile" element={<HealthProfile />} />
       <Route path="/sendmedicine" element={<SendMedicine />} />
       <Route path="/hisofcare" element={<ChildCareHistory />} />
+      <Route path="/notiAndRep" element={<NotificationAndReport />} />
       {/* Add more routes as needed */}
     </Routes>
   );
