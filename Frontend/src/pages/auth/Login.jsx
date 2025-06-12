@@ -2,6 +2,7 @@ import "../../assets/CSS/Login.css";
 import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 const Login = () => {
   const [form, setForm] = useState({
@@ -33,37 +34,54 @@ const Login = () => {
       );
 
       const resData = response.data?.data;
-      const roleName = resData?.role?.roleName;
+      const token = resData?.token;
 
       console.log("📥 Phản hồi từ server:", response.data);
 
-      if (response.data.message?.toLowerCase().includes("login successful")) {
-        localStorage.setItem("token", resData.token);
-        localStorage.setItem("userId", resData.userId); // 👈 THÊM DÒNG NÀY
-        localStorage.setItem("studentId", resData.studentId); // nếu có
+      if (response.data.message?.toLowerCase().includes("login successful") && token) {
+        // Lưu token vào localStorage
+        localStorage.setItem("token", token);
+        localStorage.setItem("userId", resData.userId);
+
+        let roleName = "";
+
+        try {
+          const decoded = jwtDecode(token); 
+          roleName = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+          console.log("Role:", roleName);
+        } catch (decodeError) {
+          console.error("❌ Lỗi giải mã token:", decodeError);
+          alert("Không xác định được vai trò người dùng.");
+          return;
+        }
+
         alert("✅ Đăng nhập thành công!");
 
-        // ✅ Điều hướng theo vai trò
+    
         if (roleName === "Manager") {
           navigate("/manager");
         } else if (roleName === "Nurse") {
           navigate("/nurse");
         } else if (roleName === "Parent") {
-          // Gọi danh sách học sinh - Giai phap tạm thời !!! Cần sửa gấp sau khi thêm parentId
-          const studentRes = await axios.get(
-            "https://swp-school-medical-management.onrender.com/api/Student"
-          );
+          try {
+            const studentRes = await axios.get(
+              "https://swp-school-medical-management.onrender.com/api/Student"
+            );
 
-          const student = studentRes.data.find(
-            (s) => s.parentId === resData.userId
-          );
+            const student = studentRes.data.find(
+              (s) => s.parentId === resData.userId
+            );
 
-          if (student) {
-            localStorage.setItem("studentId", student.studentId);
-          } else {
-            alert("❗Không tìm thấy học sinh tương ứng với phụ huynh này!");
+            if (student) {
+              localStorage.setItem("studentId", student.studentId);
+            } else {
+              alert("❗Không tìm thấy học sinh tương ứng với phụ huynh này!");
+            }
+            navigate("/parent");
+          } catch (studentError) {
+            console.error("Lỗi khi tìm học sinh:", studentError);
+            alert("Lỗi khi lấy dữ liệu học sinh!");
           }
-          navigate("/parent");
         } else {
           alert("❗ Vai trò không xác định!");
           navigate("/");
@@ -84,9 +102,7 @@ const Login = () => {
       <div className="login-container">
         <div className="left-section">
           <h1>Hệ thống quản lý sức khỏe học đường</h1>
-          <p>
-            Giải pháp toàn diện cho việc theo dõi và quản lý sức khỏe của bạn
-          </p>
+          <p>Giải pháp toàn diện cho việc theo dõi và quản lý sức khỏe của bạn</p>
           <div className="illustration"></div>
         </div>
         <div className="right-section">
