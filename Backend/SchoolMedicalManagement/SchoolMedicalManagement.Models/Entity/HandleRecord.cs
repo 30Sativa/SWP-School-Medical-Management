@@ -9,7 +9,7 @@ public partial class HandleRecord
 
     public int SupplyId { get; set; }
 
-    public int QuantityUsed { get; set; }
+    public int? QuantityUsed { get; set; }
 
     public string? Note { get; set; }
 

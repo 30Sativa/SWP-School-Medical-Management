@@ -4,10 +4,8 @@ using SchoolMedicalManagement.Models.Request;
 using SchoolMedicalManagement.Models.Response;
 using SchoolMedicalManagement.Repository.Repository;
 using SchoolMedicalManagement.Service.Interface;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SchoolMedicalManagement.Service.Implement
@@ -21,27 +19,24 @@ namespace SchoolMedicalManagement.Service.Implement
             _healthProfileRepository = healthProfileRepository;
         }
 
+        // ✅ Lấy tất cả hồ sơ sức khỏe
         public async Task<List<ManagerHealthProfileResponse>> GetAllHealthProfilesAsync()
         {
             var healthProfiles = await _healthProfileRepository.GetAllHealthProfile();
-            var result = new List<ManagerHealthProfileResponse>();
-            foreach (var hp in healthProfiles)
+            return healthProfiles.Select(hp => new ManagerHealthProfileResponse
             {
-                result.Add(new ManagerHealthProfileResponse
-                {
-                    ProfileId = hp.ProfileId,
-                    StudentId = hp.StudentId ?? 0,
-                    Height = hp.Height,
-                    Weight = hp.Weight,
-                    ChronicDiseases = hp.ChronicDiseases,
-                    Allergies = hp.Allergies,
-                    GeneralNote = hp.GeneralNote,
-                    IsActive = hp.IsActive
-                });
-            }
-            return result;
+                ProfileId = hp.ProfileId,
+                StudentId = hp.StudentId ?? 0,
+                Height = hp.Height,
+                Weight = hp.Weight,
+                ChronicDiseases = hp.ChronicDiseases,
+                Allergies = hp.Allergies,
+                GeneralNote = hp.GeneralNote,
+                IsActive = hp.IsActive
+            }).ToList();
         }
 
+        // ✅ Lấy 1 hồ sơ sức khỏe theo ID
         public async Task<BaseResponse?> GetHealthProfileByIdAsync(int id)
         {
             var hp = await _healthProfileRepository.GetHealthProfileById(id);
@@ -50,14 +45,15 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Health profile with ID {id} not found.",
+                    Message = $"Không tìm thấy hồ sơ sức khỏe với ID {id}.",
                     Data = null
                 };
             }
+
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Health profile found successfully.",
+                Message = "Lấy hồ sơ sức khỏe thành công.",
                 Data = new ManagerHealthProfileResponse
                 {
                     ProfileId = hp.ProfileId,
@@ -72,6 +68,7 @@ namespace SchoolMedicalManagement.Service.Implement
             };
         }
 
+        // ✅ Tạo hồ sơ sức khỏe mới
         public async Task<BaseResponse?> CreateHealthProfileAsync(CreateHealthProfileRequest request)
         {
             var newProfile = new HealthProfile
@@ -82,22 +79,25 @@ namespace SchoolMedicalManagement.Service.Implement
                 ChronicDiseases = request.ChronicDiseases,
                 Allergies = request.Allergies,
                 GeneralNote = request.GeneralNote,
-                IsActive = true // Mới tạo thì mặc định là true
+                IsActive = true
             };
+
             var created = await _healthProfileRepository.CreateHealthProfile(newProfile);
+
             if (created == null)
             {
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Create health profile failed.",
+                    Message = "Tạo hồ sơ sức khỏe thất bại.",
                     Data = null
                 };
             }
+
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Create health profile successfully.",
+                Message = "Tạo hồ sơ sức khỏe thành công.",
                 Data = new ManagerHealthProfileResponse
                 {
                     ProfileId = created.ProfileId,
@@ -112,6 +112,7 @@ namespace SchoolMedicalManagement.Service.Implement
             };
         }
 
+        // ✅ Cập nhật hồ sơ sức khỏe
         public async Task<BaseResponse?> UpdateHealthProfileAsync(int id, UpdateHealthProfileRequest request)
         {
             var hp = await _healthProfileRepository.GetHealthProfileById(id);
@@ -120,30 +121,34 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Health profile with ID {id} not found.",
+                    Message = $"Không tìm thấy hồ sơ sức khỏe với ID {id}.",
                     Data = null
                 };
             }
-            hp.Height = string.IsNullOrEmpty(request.Height) ? hp.Height : request.Height;
-            hp.Weight = string.IsNullOrEmpty(request.Weight) ? hp.Weight : request.Weight;
-            hp.ChronicDiseases = string.IsNullOrEmpty(request.ChronicDiseases) ? hp.ChronicDiseases : request.ChronicDiseases;
-            hp.Allergies = string.IsNullOrEmpty(request.Allergies) ? hp.Allergies : request.Allergies;
-            hp.GeneralNote = string.IsNullOrEmpty(request.GeneralNote) ? hp.GeneralNote : request.GeneralNote;
+
+            hp.Height = request.Height ?? hp.Height;
+            hp.Weight = request.Weight ?? hp.Weight;
+            hp.ChronicDiseases = request.ChronicDiseases ?? hp.ChronicDiseases;
+            hp.Allergies = request.Allergies ?? hp.Allergies;
+            hp.GeneralNote = request.GeneralNote ?? hp.GeneralNote;
             hp.IsActive = request.IsActive ?? hp.IsActive;
+
             var updated = await _healthProfileRepository.UpdateHealthProfile(hp);
+
             if (updated == null)
             {
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Update failed. Please check the request data.",
+                    Message = "Cập nhật hồ sơ sức khỏe thất bại.",
                     Data = null
                 };
             }
+
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Health profile updated successfully.",
+                Message = "Cập nhật hồ sơ sức khỏe thành công.",
                 Data = new ManagerHealthProfileResponse
                 {
                     ProfileId = updated.ProfileId,
@@ -158,6 +163,7 @@ namespace SchoolMedicalManagement.Service.Implement
             };
         }
 
+        // ✅ Xoá mềm hồ sơ
         public async Task<bool> DeleteHealthProfileAsync(int id)
         {
             return await _healthProfileRepository.DeleteHealthProfile(id);

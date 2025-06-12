@@ -15,5 +15,7 @@ public partial class MedicalHistory
 
     public string? Note { get; set; }
 
+    public bool IsActive { get; set; }
+
     public virtual Student? Student { get; set; }
 }

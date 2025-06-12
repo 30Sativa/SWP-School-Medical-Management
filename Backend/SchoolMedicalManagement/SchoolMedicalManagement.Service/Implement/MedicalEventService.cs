@@ -2,15 +2,18 @@
 using SchoolMedicalManagement.Models.Entity;
 using SchoolMedicalManagement.Models.Request;
 using SchoolMedicalManagement.Models.Response;
+using SchoolMedicalManagement.Repository.Repository;
 using SchoolMedicalManagement.Service.Interface;
 
 public class MedicalEventService : IMedicalEventService
 {
     private readonly MedicalEventRepository _medicalEventRepository;
+    private readonly MedicalHistoryRepository _medicalHistoryRepository;
 
-    public MedicalEventService(MedicalEventRepository medicalEventRepository)
+    public MedicalEventService(MedicalEventRepository medicalEventRepository, MedicalHistoryRepository medicalHistoryResponse)
     {
         _medicalEventRepository = medicalEventRepository;
+        _medicalHistoryRepository = medicalHistoryResponse;
     }
 
     // =============================
@@ -26,7 +29,6 @@ public class MedicalEventService : IMedicalEventService
                 var enough = await _medicalEventRepository.IsSupplyEnough(item.SupplyId, item.QuantityUsed);
                 if (!enough)
                 {
-                    // Nếu thiếu vật tư → trả lỗi
                     return new BaseResponse
                     {
                         Status = StatusCodes.Status400BadRequest.ToString(),
@@ -51,7 +53,6 @@ public class MedicalEventService : IMedicalEventService
             IsActive = true
         };
 
-        // Gọi repository để tạo trong DB
         var createdEvent = await _medicalEventRepository.CreateMedicalEvent(newEvent);
         if (createdEvent == null)
         {
@@ -63,17 +64,13 @@ public class MedicalEventService : IMedicalEventService
             };
         }
 
-        // B3: Nếu có danh sách vật tư sử dụng → ghi nhận và trừ tồn kho
+        // B3: Ghi nhận vật tư nếu có
         if (request.SuppliesUsed != null && request.SuppliesUsed.Any())
         {
             var handleRecords = new List<HandleRecord>();
-
             foreach (var item in request.SuppliesUsed)
             {
-                // Trừ tồn kho tương ứng
                 await _medicalEventRepository.AdjustSupplyQuantity(item.SupplyId, item.QuantityUsed);
-
-                // Ghi nhận vật tư đã dùng
                 handleRecords.Add(new HandleRecord
                 {
                     EventId = createdEvent.EventId,
@@ -86,7 +83,7 @@ public class MedicalEventService : IMedicalEventService
             await _medicalEventRepository.AddHandleRecordsAsync(handleRecords);
         }
 
-        // B4: Trả kết quả chi tiết sự kiện vừa tạo về cho frontend
+        // B4: Trả về sự kiện mới đã tạo
         return new BaseResponse
         {
             Status = StatusCodes.Status200OK.ToString(),
@@ -103,7 +100,14 @@ public class MedicalEventService : IMedicalEventService
                 HandledByName = createdEvent.HandledByNavigation?.FullName,
                 SeverityLevelName = createdEvent.Severity?.SeverityName,
                 Location = createdEvent.Location,
-                Notes = createdEvent.Notes
+                Notes = createdEvent.Notes,
+                SuppliesUsed = request.SuppliesUsed.Select(s => new SupplyUserResponse
+                {
+                    SupplyId = s.SupplyId,
+                    SupplyName = "", // frontend tự join nếu cần
+                    QuantityUsed = s.QuantityUsed,
+                    Note = s.Note
+                }).ToList()
             }
         };
     }
@@ -124,31 +128,42 @@ public class MedicalEventService : IMedicalEventService
             };
         }
 
-        // Trả chi tiết bao gồm học sinh, người xử lý, loại sự kiện, vật tư...
+        var histories = await _medicalHistoryRepository.GetAllByStudentIdMedicalHistory(getid.StudentId);
+
         return new BaseResponse
         {
             Status = StatusCodes.Status200OK.ToString(),
             Message = "Medical event retrieved successfully.",
             Data = new CreateMedicalEventResponse
             {
-                StudentId = getid.Student.StudentId,
-                StudentName = getid.Student?.FullName,
-                ParentName = getid.Student?.Parent?.FullName,
-                EventType = getid.EventType?.EventTypeName,
+                StudentId = getid.Student?.StudentId ?? 0,
+                StudentName = getid.Student?.FullName ?? "(Không rõ)",
+                ParentName = getid.Student?.Parent?.FullName ?? "(Không rõ)",
+                EventType = getid.EventType?.EventTypeName ?? "(Không rõ)",
                 EventDate = getid.EventDate,
-                Description = getid.Description,
+                Description = getid.Description ?? string.Empty,
                 HandledById = getid.HandledBy,
-                HandledByName = getid.HandledByNavigation?.FullName,
-                SeverityLevelName = getid.Severity?.SeverityName,
-                Location = getid.Location,
-                Notes = getid.Notes,
+                HandledByName = getid.HandledByNavigation?.FullName ?? "(Không rõ)",
+                SeverityLevelName = getid.Severity?.SeverityName ?? "(Không rõ)",
+                Location = getid.Location ?? string.Empty,
+                Notes = getid.Notes ?? string.Empty,
                 SuppliesUsed = getid.HandleRecords?.Select(hr => new SupplyUserResponse
                 {
                     SupplyId = hr.SupplyId,
                     SupplyName = hr.Supply?.Name ?? "(Không rõ)",
                     QuantityUsed = hr.QuantityUsed,
                     Note = hr.Note
-                }).ToList()
+                }).ToList() ?? new List<SupplyUserResponse>(),
+
+                MedicalHistory = histories.Select(h => new MedicalHistoryResponse
+                {
+                    HistoryId = h.MedicalHistoryId,
+                    StudentId = h.StudentId,
+                    StudentName = h.Student?.FullName ?? "(Không rõ)",
+                    DiseaseName = h.DiseaseName ?? "(Không rõ)",
+                    DiagnosedDate = h.DiagnosedDate,
+                    Note = h.Note ?? string.Empty
+                }).ToList() 
             }
         };
     }
@@ -160,7 +175,6 @@ public class MedicalEventService : IMedicalEventService
     {
         var listevent = await _medicalEventRepository.GetAllMedicalEvents();
 
-        // Trả về danh sách các sự kiện đang hoạt động
         return listevent.Select(e => new CreateMedicalEventResponse
         {
             StudentId = e.Student?.StudentId ?? 0,
@@ -180,7 +194,9 @@ public class MedicalEventService : IMedicalEventService
                 SupplyName = hr.Supply?.Name ?? "(Không rõ)",
                 QuantityUsed = hr.QuantityUsed,
                 Note = hr.Note
-            }).ToList() ?? new List<SupplyUserResponse>()
+            }).ToList() ?? new List<SupplyUserResponse>(),
+
+            MedicalHistory = new List<MedicalHistoryResponse>() // optional: để rõ ràng
         }).ToList();
     }
 
@@ -218,7 +234,7 @@ public class MedicalEventService : IMedicalEventService
             // Hoàn kho từ các vật tư cũ
             foreach (var old in oldRecords)
             {
-                await _medicalEventRepository.AdjustSupplyQuantity(old.SupplyId, -old.QuantityUsed);
+                await _medicalEventRepository.AdjustSupplyQuantity(old.SupplyId, -old.QuantityUsed.GetValueOrDefault());
             }
 
             // Xoá bản ghi vật tư cũ

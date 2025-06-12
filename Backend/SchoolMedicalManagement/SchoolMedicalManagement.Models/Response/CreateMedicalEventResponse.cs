@@ -30,6 +30,7 @@ namespace SchoolMedicalManagement.Models.Response
 
         // 📦 Danh sách vật tư y tế đã sử dụng
         public List<SupplyUserResponse> SuppliesUsed { get; set; } = new();
+        public List<MedicalHistoryResponse> MedicalHistory { get; set; } = new();
 
 
 

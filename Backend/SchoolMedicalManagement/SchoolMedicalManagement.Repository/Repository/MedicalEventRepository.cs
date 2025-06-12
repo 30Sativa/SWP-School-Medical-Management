@@ -15,6 +15,7 @@ public class MedicalEventRepository : GenericRepository<MedicalEvent>
             .Include(e => e.EventType)
             .Include(e => e.Severity)
             .Include(e => e.HandleRecords).ThenInclude(hr => hr.Supply)
+            .Include(e => e.Student.MedicalHistories)
             .FirstOrDefaultAsync(e => e.EventId == id && e.IsActive == true);
 
     // Đề xuất: lọc IsActive == true để tránh load những sự kiện đã xoá mềm
@@ -28,6 +29,7 @@ public class MedicalEventRepository : GenericRepository<MedicalEvent>
             .Include(e => e.Severity)
             .Include(e => e.HandleRecords)
                 .ThenInclude(hr => hr.Supply)
+            .Include(e => e.Student.MedicalHistories)
             .ToListAsync();
 
     // Tạo và trả về bản ghi đã tạo với đầy đủ liên kết

@@ -1,9 +1,6 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SchoolMedicalManagement.Models.Entity;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SchoolMedicalManagement.Repository.Repository
@@ -14,41 +11,42 @@ namespace SchoolMedicalManagement.Repository.Repository
         {
         }
 
-        // Get all health profiles
+        // ✅ Lấy tất cả hồ sơ sức khỏe (đang hoạt động)
         public async Task<List<HealthProfile>> GetAllHealthProfile()
-        => await _context.HealthProfiles
-            .Include(hp => hp.Student)
-            .ToListAsync();
+            => await _context.HealthProfiles
+                .Include(hp => hp.Student)
+                .Where(hp => hp.IsActive.GetValueOrDefault()) // ✅ Thêm điều kiện lọc nếu dùng soft delete
+                .ToListAsync();
 
-        // Get health profile by id
+        // ✅ Lấy 1 hồ sơ theo ID
         public async Task<HealthProfile?> GetHealthProfileById(int id)
-        => await _context.HealthProfiles
-            .Include(hp => hp.Student)
-            .FirstOrDefaultAsync(hp => hp.ProfileId == id);
-        
+            => await _context.HealthProfiles
+                .Include(hp => hp.Student)
+                .FirstOrDefaultAsync(hp => hp.ProfileId == id && hp.IsActive.GetValueOrDefault());
 
-        // Create a new health profile
+        // ✅ Tạo mới hồ sơ
         public async Task<HealthProfile?> CreateHealthProfile(HealthProfile healthProfile)
         {
+            healthProfile.IsActive = true; // đảm bảo trạng thái khi tạo mới
             await CreateAsync(healthProfile);
             return await GetHealthProfileById(healthProfile.ProfileId);
         }
 
-        // Update a health profile
+        // ✅ Cập nhật hồ sơ
         public async Task<HealthProfile?> UpdateHealthProfile(HealthProfile healthProfile)
         {
             await UpdateAsync(healthProfile);
             return await GetHealthProfileById(healthProfile.ProfileId);
         }
 
-        // Soft delete a health profile
+        // ✅ Xoá mềm hồ sơ
         public async Task<bool> DeleteHealthProfile(int id)
         {
             var healthProfile = await GetHealthProfileById(id);
             if (healthProfile == null)
-            {
                 return false;
-            }
+
+            healthProfile.IsActive = false;
             await UpdateAsync(healthProfile);
             return true;
         }
