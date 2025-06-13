@@ -27,6 +27,8 @@ const AppRouter = () => {
       <Route path="/healthprofile" element={<HealthProfile />} />
       <Route path="/logs" element={<LogsPage />} />
       <Route path="/sendmedicine" element={<SendMedicine />} />
+      <Route path="/hisofcare" element={<ChildCareHistory />} />
+      <Route path="/notiAndRep" element={<NotificationAndReport />} />
       {/* Add more routes as needed */}
 
       <Route path="/vaccines" element={<VaccinCampaign />} />
