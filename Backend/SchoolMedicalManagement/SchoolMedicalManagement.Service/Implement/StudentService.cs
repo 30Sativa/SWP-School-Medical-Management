@@ -60,6 +60,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     StudentId = student.StudentId,
                     FullName = student.FullName,
                     DateOfBirth = student.DateOfBirth,
+                    GenderId = student.GenderId,
                     GenderName = student.Gender.GenderName,
                     Class = student.Class,
                     ParentId = student.ParentId,
