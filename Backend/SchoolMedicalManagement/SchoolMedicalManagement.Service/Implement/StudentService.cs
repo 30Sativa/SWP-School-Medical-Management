@@ -157,10 +157,8 @@ namespace SchoolMedicalManagement.Service.Implement
 
             studentToUpdate.FullName = string.IsNullOrWhiteSpace(request.FullName) ? studentToUpdate.FullName : request.FullName;
             // Only update DateOfBirth if provided by frontend
-            if (request.DateOfBirth.HasValue && request.DateOfBirth.Value != default)
-            {
-                studentToUpdate.DateOfBirth = request.DateOfBirth.Value;
-            }
+            studentToUpdate.DateOfBirth = request.DateOfBirth != default ? DateOnly.FromDateTime(request.DateOfBirth) : studentToUpdate.DateOfBirth;
+
             studentToUpdate.Gender.GenderId = request.GenderId > 0 ? studentToUpdate.GenderId : request.GenderId;
             studentToUpdate.Class = string.IsNullOrWhiteSpace(request.ClassName) ? studentToUpdate.Class : request.ClassName;
             studentToUpdate.ParentId = request.ParentId ?? studentToUpdate.ParentId;
@@ -187,6 +185,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     Class = updated.Class,
                     DateOfBirth = updated.DateOfBirth,
                     GenderName = updated.Gender.GenderName,
+                    ParentId = updated.ParentId,
                     ParentName = updated.Parent.FullName
                 }
             };

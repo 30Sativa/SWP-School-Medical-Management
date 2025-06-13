@@ -16,7 +16,7 @@ namespace SchoolMedicalManagement.Models.Request
         public string FullName { get; set; } = null!;
 
         //[Required]
-        public DateOnly? DateOfBirth { get; set; }
+        public DateTime DateOfBirth { get; set; }
 
         public int GenderId { get; set; }
 
