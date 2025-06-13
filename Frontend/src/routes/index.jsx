@@ -12,7 +12,8 @@ import LogsPage from "../pages/manager/Logs";
 import SendMedicine from "../pages/parent/SendMedicine";
 
 import VaccinCampaign from "../pages/nurse/VaccinCampaign";
-
+import ChildCareHistory from "../pages/parent/ChildCareHistory";
+import NotificationAndReport from "../pages/parent/NotificationAndReport";
 const AppRouter = () => {
   return (
     <Routes>
@@ -32,6 +33,7 @@ const AppRouter = () => {
       {/* Add more routes as needed */}
 
       <Route path="/vaccines" element={<VaccinCampaign />} />
+      <Route path="/hisofcare" element={<ChildCareHistory />} />
 
     </Routes>
   );
