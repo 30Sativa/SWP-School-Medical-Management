@@ -131,7 +131,7 @@ namespace SchoolMedicalManagement.Service.Implement
 
         public async Task<BaseResponse> UpdateStudent(int id, UpdateStudentRequest request)
         {
-            var studentToUpdate = await _studentRepository.GetStudentById(request.StudentId);
+            var studentToUpdate = await _studentRepository.GetStudentById(id);
             if (studentToUpdate == null)
             {
                 return new BaseResponse
