@@ -69,6 +69,12 @@ namespace SchoolMedicalManagement.Repository.Repository
             return await _context.SaveChangesAsync() > 0;
         }
 
+        public  async Task<Student> UpdateStudent(int id, Student student)
+        {
+            await UpdateAsync(student);
+            return await GetStudentById(student.StudentId);
+        }
+
         // ✅ Lấy hồ sơ sức khỏe
         public async Task<HealthProfile?> GetHealthProfileByStudentId(int studentId)
         {
