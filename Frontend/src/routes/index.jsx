@@ -10,10 +10,10 @@ import ParentDashboard from "../pages/parent/ParentDashboard";
 import HealthProfile from "../pages/parent/HealthProfile";
 import LogsPage from "../pages/manager/Logs";
 import SendMedicine from "../pages/parent/SendMedicine";
-
 import VaccinCampaign from "../pages/nurse/VaccinCampaign";
 import ChildCareHistory from "../pages/parent/ChildCareHistory";
 import NotificationAndReport from "../pages/parent/NotificationAndReport";
+import Incident from "../pages/nurse/Incident";
 const AppRouter = () => {
   return (
     <Routes>
@@ -30,11 +30,8 @@ const AppRouter = () => {
       <Route path="/sendmedicine" element={<SendMedicine />} />
       <Route path="/hisofcare" element={<ChildCareHistory />} />
       <Route path="/notiAndRep" element={<NotificationAndReport />} />
-      {/* Add more routes as needed */}
-
+      <Route path="/incidents" element={<Incident />} />
       <Route path="/vaccines" element={<VaccinCampaign />} />
-      <Route path="/hisofcare" element={<ChildCareHistory />} />
-
     </Routes>
   );
 };

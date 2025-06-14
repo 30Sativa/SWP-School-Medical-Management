@@ -1,0 +1,403 @@
+.pageContainer {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f6fa;
+}
+
+.contentArea {
+  flex: 1;
+  padding: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.addButton {
+  background-color: #20b2aa;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filters select {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 14px;
+  color: #333;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease-in-out;
+  min-width: 120px;
+}
+
+.filters select:focus {
+  border-color: #20b2aa;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(77, 150, 255, 0.2);
+}
+
+.filters input[type="date"] {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: white;
+  color: #333;
+  min-width: 140px;
+  cursor: pointer;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.filters input[type="date"]:focus {
+  border-color: #4d96ff;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(77, 150, 255, 0.2);
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s ease-in-out;
+}
+
+.searchBox:focus-within {
+  border-color: #4d96ff;
+}
+
+.searchBox input {
+  border: none;
+  outline: none;
+  margin-left: 8px;
+  background: transparent;
+  width: 100%;
+  font-size: 14px;
+  color: #333;
+}
+
+.incidentTable {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+.incidentTable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.incidentTable th,
+.incidentTable td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.incidentTable th {
+  background-color: #f0f2f5;
+  font-weight: 600;
+}
+
+.tagRed {
+  background-color: #ff6b6b;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.tagBlue {
+  background-color: #20b2aa;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.tagGreen {
+  background-color: #20b2aa;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.tagYellow {
+  background-color: #f4c430;
+  color: black;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.tagOrange {
+  background-color: #ffa500;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.tagGray {
+  background-color: #a0aec0;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.summarySection {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.summaryCard {
+  background-color: #fffefc;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  flex: 1;
+  min-width: 320px;
+}
+
+.summaryCard h4,
+.chartCard h4 {
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.summaryCard p {
+  font-size: 14px;
+  margin: 4px 0;
+  color: #333;
+}
+
+.summaryCard .links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start; /* hoặc center nếu muốn căn giữa */
+  align-items: center;
+  margin-top: 12px;
+}
+
+.summaryCard .links a,
+.summaryCard .links button {
+  background-color: #20b2aa;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap; /* ✅ Giữ nút không bị xuống dòng */
+  flex-shrink: 0; /* ✅ Không bị co lại */
+  transition: background 0.2s;
+}
+
+.summaryCard .links a:hover,
+.summaryCard .links button:hover {
+  background-color: #20b2aa;
+}
+
+.chartCard {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  flex: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  min-width: 300px;
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.links a {
+  display: block;
+  color: #20b2aa;
+  text-decoration: none;
+  margin-top: 4px;
+}
+
+.viewDetail {
+  background-color: #20b2aa;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.viewDetail:hover {
+  background-color: #20b2aa;
+}
+
+.chartWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.pagination button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: white;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination .activePage {
+  background-color: #20b2aa;
+  color: white;
+  border-color: #20b2aa;
+}
+
+/* ...các phần CSS cũ ở trên vẫn giữ nguyên... */
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  width: 420px;
+  max-width: 90%;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease;
+}
+
+.modalContent h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.modalContent input,
+.modalContent textarea,
+.modalContent select {
+  width: 100%;
+  padding: 10px 12px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border 0.2s;
+}
+
+.modalContent input,
+.modalContent textarea,
+.modalContent select {
+  background-color: white; /* Thêm dòng này để đảm bảo nền trắng */
+  color: #333; /* Và chữ màu đen dễ đọc */
+}
+
+input, textarea, select {
+  background-color: white !important;
+  color: #333 !important;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modalActions button {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.editBtn {
+  background-color: #4d96ff;
+  color: white;
+}
+
+.deleteBtn {
+  background-color: #f56565;
+  color: white;
+}
+
+.closeBtn {
+  background-color: #a0aec0;
+  color: white;
+}
+
+.modalActions button:hover {
+  opacity: 0.9;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

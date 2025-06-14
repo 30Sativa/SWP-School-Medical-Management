@@ -9,8 +9,9 @@ import {
   Bell,
   LogOut,
   Menu,
+  AlertTriangle, // ✅ Thêm icon
 } from "lucide-react";
-import style from "./Sidebar.module.css"; // ✅ Import module
+import style from "./Sidebar.module.css";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -24,7 +25,6 @@ const Sidebar = () => {
         isOpen ? style.expanded : style.collapsed
       }`}
     >
-      {/* DÙNG navItem để đảm bảo icon và chữ thẳng hàng tuyệt đối */}
       <div className={style.navItem} onClick={toggleSidebar}>
         <Menu size={20} />
         {isOpen && <span className={style.systemName}>EduHealth</span>}
@@ -80,6 +80,18 @@ const Sidebar = () => {
           <Bell size={20} />
           <span>Thông báo</span>
         </NavLink>
+
+        {/* ✅ Mục Sự cố y tế */}
+        <NavLink
+          to="/incidents"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
+          <AlertTriangle size={20} />
+          <span>Sự cố y tế</span>
+        </NavLink>
+
         <button
           className={style.navItem}
           onClick={() => {
