@@ -42,6 +42,7 @@ builder.Services.AddScoped<MedicalHistoryService>();
 builder.Services.AddScoped<HealthCheckSummaryRepository>();
 builder.Services.AddScoped<VaccinationCampaignRepository>();
 builder.Services.AddScoped<MedicalHistoryRepository>();
+builder.Services.AddScoped<MedicationRequestRepository>();
 
 
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -52,7 +53,7 @@ builder.Services.AddScoped<IHealthProfileService, HealthProfileService>();
 builder.Services.AddScoped<IHealthCheckCampaignService, HealthCheckCampaignService>();
 builder.Services.AddScoped<IMedicalSupplyService, MedicalSupplyService>();
 builder.Services.AddScoped<IMedicalEventService, MedicalEventService>();
-
+builder.Services.AddScoped<IMedicationRequestService, MedicationRequestService>();
 builder.Services.AddScoped<IHealthCheckSummaryService, HealthCheckSummaryService>();
 
 builder.Services.AddScoped<IVaccinationCampaignService, VaccinationCampaignService>();
