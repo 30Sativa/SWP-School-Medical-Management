@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolMedicalManagement.Models.Request;
-using SchoolMedicalManagement.Service.Implement;
 using SchoolMedicalManagement.Service.Interface;
+using System;
+using System.Threading.Tasks;
 
 namespace School_Medical_Management.API.Controllers
 {
+    // Controller xử lý các request API liên quan đến chiến dịch tiêm chủng
     [Route("api/[controller]")]
     [ApiController]
     public class VaccinationCampaignController : ControllerBase
@@ -17,19 +19,89 @@ namespace School_Medical_Management.API.Controllers
             _vaccinationCampaignService = vaccinationCampaignService;
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetVaccinationCampaignById(int id)
+        // Lấy danh sách tất cả chiến dịch tiêm chủng
+        [HttpGet("campaigns")]
+        public async Task<IActionResult> GetVaccinationCampaigns()
         {
-            var vaccinationCampaign = await _vaccinationCampaignService.GetVaccinationCampaignAsync(id);
-            return StatusCode(int.Parse(vaccinationCampaign.Status), vaccinationCampaign);
+            var response = await _vaccinationCampaignService.GetVaccinationCampaignsAsync();
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateVaccinationCampaign(CreateVaccinationCampaignRequest request)
+        // Lấy thông tin chi tiết một chiến dịch tiêm chủng
+        [HttpGet("campaigns/{id}")]
+        public async Task<IActionResult> GetVaccinationCampaign([FromRoute] int id)
         {
-            var createdVaccinationCampaign = await _vaccinationCampaignService.CreateVaccinaCampaignAsync(request);
-            return StatusCode(int.Parse(createdVaccinationCampaign.Status), createdVaccinationCampaign);
+            var response = await _vaccinationCampaignService.GetVaccinationCampaignAsync(id);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
+
+        // Tạo mới một chiến dịch tiêm chủng
+        [HttpPost("campaigns")]
+        public async Task<IActionResult> CreateVaccinationCampaign([FromBody] CreateVaccinationCampaignRequest request)
+        {
+            var response = await _vaccinationCampaignService.CreateVaccinationCampaignAsync(request);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
+        // Lấy danh sách yêu cầu đồng ý của một chiến dịch
+        [HttpGet("campaigns/{id}/consent-requests")]
+        public async Task<IActionResult> GetCampaignConsentRequests([FromRoute] int id)
+        {
+            var response = await _vaccinationCampaignService.GetCampaignConsentRequestsAsync(id);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
+        // Lấy danh sách yêu cầu đã đồng ý
+        [HttpGet("campaigns/{id}/approved-consents")]
+        public async Task<IActionResult> GetApprovedConsentRequests([FromRoute] int id)
+        {
+            var response = await _vaccinationCampaignService.GetApprovedConsentRequestsAsync(id);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
+        // Lấy danh sách yêu cầu từ chối
+        [HttpGet("campaigns/{id}/declined-consents")]
+        public async Task<IActionResult> GetDeclinedConsentRequests([FromRoute] int id)
+        {
+            var response = await _vaccinationCampaignService.GetDeclinedConsentRequestsAsync(id);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
+
+        // Gửi phiếu đồng ý tiêm chủng cho phụ huynh
+        [HttpPost("campaigns/{campaignId}/send-consent/{studentId}")]
+        public async Task<IActionResult> SendConsentRequest([FromRoute] int campaignId, [FromRoute] int studentId, [FromQuery] Guid parentId)
+        {
+            var response = await _vaccinationCampaignService.SendConsentRequestAsync(campaignId, studentId, parentId);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
+        // Cập nhật trạng thái đồng ý của phụ huynh
+        [HttpPut("consent-requests/{id}")]
+        public async Task<IActionResult> UpdateConsentRequest([FromRoute] int id, [FromBody] UpdateConsentRequestRequest request)
+        {
+            var response = await _vaccinationCampaignService.UpdateConsentRequestAsync(id, request);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
+        // Lấy lịch sử tiêm chủng của một học sinh
+        [HttpGet("records/student/{studentId}")]
+        public async Task<IActionResult> GetStudentVaccinationRecords([FromRoute] int studentId)
+        {
+            var response = await _vaccinationCampaignService.GetStudentVaccinationRecordsAsync(studentId);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
+        // Ghi nhận kết quả tiêm chủng cho học sinh
+        [HttpPost("records")]
+        public async Task<IActionResult> CreateVaccinationRecord([FromBody] CreateVaccinationRecordRequest request)
+        {
+            var response = await _vaccinationCampaignService.CreateVaccinationRecordAsync(request);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
+
+    
 
     }
 }
