@@ -351,11 +351,26 @@ namespace SchoolMedicalManagement.Service.Implement
                 };
             }
 
+            // Get all consent requests for the campaign and find the one for this student
+            var consentRequests = await _campaignRepository.GetCampaignConsentRequests(request.CampaignId);
+            var consentRequest = consentRequests.FirstOrDefault(cr => cr.StudentId == request.StudentId);
+            
+            if (consentRequest == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = "Consent request not found for this student and campaign",
+                    Data = null
+                };
+            }
+
             var record = new VaccinationRecord
             {
                 StudentId = request.StudentId,
                 CampaignId = request.CampaignId,
                 ConsentStatusId = request.ConsentStatusId,
+                ConsentDate = consentRequest.ConsentDate, // Use the ConsentDate from consent request
                 VaccinationDate = request.VaccinationDate,
                 Result = request.Result,
                 FollowUpNote = request.FollowUpNote,
