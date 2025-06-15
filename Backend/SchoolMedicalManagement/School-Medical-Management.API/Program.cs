@@ -66,6 +66,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<INotificationTypeService, NotificationTypeService>();
 builder.Services.AddScoped<IBlogPostService, BlogPostService>();
 
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 // CORS
 builder.Services.AddCors(options =>
