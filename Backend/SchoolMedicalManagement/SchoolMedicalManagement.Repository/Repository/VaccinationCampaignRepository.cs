@@ -3,6 +3,7 @@ using SchoolMedicalManagement.Models.Entity;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using System;
 
 namespace SchoolMedicalManagement.Repository.Repository
 {
@@ -87,6 +88,18 @@ namespace SchoolMedicalManagement.Repository.Repository
             _context.VaccinationConsentRequests.Update(request);
             await _context.SaveChangesAsync();
             return await GetConsentRequestById(request.RequestId);
+        }
+
+        // Get total count of vaccination campaigns
+        public async Task<int> GetTotalVaccinationCampaignsCount()
+        {
+            return await _context.VaccinationCampaigns.CountAsync();
+        }
+
+        // Get count of active vaccination campaigns
+        public async Task<int> GetActiveVaccinationCampaignsCount()
+        {
+            return await _context.VaccinationCampaigns.CountAsync();
         }
     }
 }

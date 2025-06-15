@@ -54,5 +54,17 @@ namespace SchoolMedicalManagement.Repository.Repository
             }
             return await RemoveAsync(campaign);
         }
+
+        // Get total count of health check campaigns
+        public async Task<int> GetTotalHealthCheckCampaignsCount()
+        {
+            return await _context.HealthCheckCampaigns.CountAsync();
+        }
+
+        // Get count of active health check campaigns
+        public async Task<int> GetActiveHealthCheckCampaignsCount()
+        {
+            return await _context.HealthCheckCampaigns.CountAsync();
+        }
     }
 }

@@ -90,5 +90,13 @@ namespace SchoolMedicalManagement.Repository.Repository
                 .Where(h => h.IsActive == true)
                 .ToListAsync();
         }
+
+        // Get total count of active students
+        public async Task<int> GetTotalStudentsCount()
+        {
+            return await _context.Students
+                .Where(s => s.IsActive == true)
+                .CountAsync();
+        }
     }
 }
