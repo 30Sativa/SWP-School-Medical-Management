@@ -9,7 +9,10 @@ import {
   Bell,
   LogOut,
   Menu,
-  AlertTriangle, // ✅ Thêm icon
+  AlertTriangle,
+  Package,
+  HeartPulse,
+  BarChart2, // ✅ Thêm icon
 } from "lucide-react";
 import style from "./Sidebar.module.css";
 
@@ -40,7 +43,6 @@ const Sidebar = () => {
           <Home size={20} />
           <span>Trang chủ</span>
         </NavLink>
-
         <NavLink
           to="/students"
           className={({ isActive }) =>
@@ -50,7 +52,6 @@ const Sidebar = () => {
           <Users size={20} />
           <span>Danh sách học sinh</span>
         </NavLink>
-
         <NavLink
           to="/medicine"
           className={({ isActive }) =>
@@ -60,7 +61,6 @@ const Sidebar = () => {
           <ClipboardList size={20} />
           <span>Quản lý thuốc</span>
         </NavLink>
-
         <NavLink
           to="/vaccines"
           className={({ isActive }) =>
@@ -69,6 +69,15 @@ const Sidebar = () => {
         >
           <Syringe size={20} />
           <span>Tiêm chủng</span>
+        </NavLink>
+        <NavLink
+          to="/health-check"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
+          <HeartPulse size={20} />
+          <span>Sức khỏe định kỳ</span>
         </NavLink>
 
         <NavLink
@@ -80,7 +89,15 @@ const Sidebar = () => {
           <Bell size={20} />
           <span>Thông báo</span>
         </NavLink>
-
+        <NavLink
+          to="/supplies"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
+          <Package size={20} />
+          <span>Vật tư y tế</span>
+        </NavLink>
         {/* ✅ Mục Sự cố y tế */}
         <NavLink
           to="/incidents"
@@ -91,15 +108,23 @@ const Sidebar = () => {
           <AlertTriangle size={20} />
           <span>Sự cố y tế</span>
         </NavLink>
-
+        <NavLink
+          to="/report"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
+          <BarChart2 size={20} />
+          <span>Báo cáo thống kê</span>
+        </NavLink>
         <button
-          className={style.navItem}
+          className={`${style.navItem} ${style.logoutButton}`}
           onClick={() => {
             localStorage.clear();
             navigate("/");
           }}
         >
-          <LogOut size={20} />
+          <LogOut size={20} stroke="#fff" />
           <span>Đăng xuất</span>
         </button>
       </nav>

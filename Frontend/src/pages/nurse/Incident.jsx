@@ -44,29 +44,88 @@ const Incident = () => {
   const itemsPerPage = 5;
 
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [students, setStudents] = useState([]);
   const [newEvent, setNewEvent] = useState({
-    studentName: "",
-    parentName: "",
-    eventType: "Sốt",
-    severityLevelName: "Nhẹ",
-    eventDate: new Date().toISOString().slice(0, 16), // format yyyy-MM-ddTHH:mm
+    studentId: "",
+    eventTypeId: "",
+    severityId: "",
+    eventDate: new Date().toISOString().slice(0, 16),
     description: "",
-    handledByName: "",
+    handledByUserId: "",
+    location: "",
+    notes: "",
   });
 
+  const [users, setUsers] = useState([]);
+
+  const eventTypes = [
+    { id: "1", name: "Sốt" },
+    { id: "2", name: "Đau bụng" },
+    { id: "3", name: "Dị ứng" },
+    { id: "4", name: "Té ngã" },
+    { id: "5", name: "Tai nạn nhỏ" },
+  ];
+  const severityLevels = [
+    { id: "1", level: "Nhẹ" },
+    { id: "2", level: "Trung bình" },
+    { id: "3", level: "Nặng" },
+  ];
+
+  const getStaffName = (id, handledByName) => {
+    if (handledByName && handledByName !== "") return handledByName;
+    const user = users.find((u) => u.userId === id || u.userID === id);
+    if (user) return user.fullName;
+    if (id === localStorage.getItem("userId")) return "Bạn";
+    return "Không rõ";
+  };
+
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    console.log("🔑 Token:", token);
+    console.log("👤 UserId:", localStorage.getItem("userId"));
+
     axios
-      .get(
-        "https://swp-school-medical-management.onrender.com/api/MedicalEvent"
-      )
-      .then((res) => {
-        if (res.status === 200) {
-          setEvents(res.data);
-          setFilteredEvents(res.data);
-          updateStats(res.data);
-        }
+      .get("/api/MedicalEvent", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       })
-      .catch((err) => console.error("Lỗi khi tải dữ liệu:", err));
+      .then((res) => {
+        console.log("📥 Danh sách sự cố:", res.data);
+        setEvents(res.data);
+        setFilteredEvents(res.data);
+        updateStats(res.data);
+      })
+      .catch((err) => {
+        console.error("❌ Lỗi lấy danh sách sự cố:", err);
+      });
+
+    axios
+      .get("/api/Student", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        console.log("📥 Danh sách học sinh:", res.data);
+        setStudents(res.data);
+      })
+      .catch((err) => {
+        console.error("❌ Lỗi lấy danh sách học sinh:", err);
+      });
+
+    axios
+      .get("/api/User", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setUsers(res.data);
+      })
+      .catch((err) => {
+        console.error("❌ Lỗi lấy danh sách user:", err);
+      });
   }, []);
 
   useEffect(() => {
@@ -74,7 +133,7 @@ const Incident = () => {
       const matchType =
         eventTypeFilter === "Tất cả" || event.eventType === eventTypeFilter;
       const matchSearch = event.studentName
-        .toLowerCase()
+        ?.toLowerCase()
         .includes(search.toLowerCase());
       const matchDate =
         !dateFilter ||
@@ -87,8 +146,8 @@ const Incident = () => {
   }, [search, eventTypeFilter, dateFilter, events, groupBy]);
 
   const updateStats = (data) => {
-    const typeMap = {};
-    const dateMap = {};
+    const typeMap = {},
+      dateMap = {};
     let sent = 0,
       draft = 0,
       pending = 0;
@@ -101,7 +160,7 @@ const Incident = () => {
       else pending++;
 
       const d = dayjs(event.eventDate);
-      let groupKey =
+      const groupKey =
         groupBy === "day"
           ? d.format("YYYY-MM-DD")
           : groupBy === "week"
@@ -148,27 +207,86 @@ const Incident = () => {
   };
 
   const handleCreate = () => {
+    const currentUserId = localStorage.getItem("userId");
+    const token = localStorage.getItem("token");
+
+    // Kiểm tra các trường bắt buộc
+    if (
+      !newEvent.studentId ||
+      isNaN(Number(newEvent.studentId)) ||
+      Number(newEvent.studentId) === 0
+    ) {
+      alert("Vui lòng chọn học sinh!");
+      return;
+    }
+    if (
+      !newEvent.eventTypeId ||
+      isNaN(Number(newEvent.eventTypeId)) ||
+      Number(newEvent.eventTypeId) === 0
+    ) {
+      alert("Vui lòng chọn loại sự cố!");
+      return;
+    }
+    if (
+      !newEvent.severityId ||
+      isNaN(Number(newEvent.severityId)) ||
+      Number(newEvent.severityId) === 0
+    ) {
+      alert("Vui lòng chọn mức độ!");
+      return;
+    }
+    if (!newEvent.eventDate) {
+      alert("Vui lòng chọn thời gian!");
+      return;
+    }
+    if (!newEvent.description) {
+      alert("Vui lòng nhập mô tả!");
+      return;
+    }
+    if (!currentUserId) {
+      alert("Vui lòng đăng nhập lại!");
+      return;
+    }
+
     const payload = {
-      ...newEvent,
-      status: "Đã gửi", // bắt buộc nếu backend require
+      studentId: Number(newEvent.studentId),
+      eventTypeId: Number(newEvent.eventTypeId),
+      severityId: Number(newEvent.severityId),
+      eventDate: newEvent.eventDate,
+      description: newEvent.description,
+      handledByUserId: currentUserId,
+      status: "Đã gửi",
+      location: newEvent.location,
+      notes: newEvent.notes,
       suppliesUsed: [],
-      medicalHistory: [],
+      request: "",
     };
 
-    console.log("Sending payload:", payload); // debug
+    console.log("📤 Payload gửi API:", payload);
+    console.log("🔑 Token:", token);
 
     axios
-      .post(
-        "https://swp-school-medical-management.onrender.com/api/MedicalEvent",
-        payload
-      )
+      .post("/api/MedicalEvent", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
       .then((res) => {
-        setEvents((prev) => [...prev, res.data]);
+        console.log("✅ Tạo sự cố thành công:", res.data);
+        const added = {
+          ...res.data,
+          handledByName: "Bạn",
+        };
+        setEvents((prev) => [...prev, added]);
         setShowCreateForm(false);
       })
       .catch((err) => {
-        console.error("Create error:", err.response?.data || err.message);
-        alert("Lỗi khi tạo mới sự cố");
+        const errorDetail =
+          err.response?.data?.errors || err.response?.data || err.message;
+        console.error("❌ Lỗi tạo sự cố:", errorDetail);
+        alert(
+          "Lỗi khi tạo mới sự cố:\n" + JSON.stringify(errorDetail, null, 2)
+        );
       });
   };
 
@@ -397,7 +515,13 @@ const Incident = () => {
               <strong>Mô tả:</strong> {selectedEvent.description}
             </p>
             <p>
-              <strong>Người xử lý:</strong> {selectedEvent.handledByName}
+              <p>
+                <strong>Người xử lý:</strong>{" "}
+                {getStaffName(
+                  selectedEvent.handledByUserId,
+                  selectedEvent.handledByName
+                )}
+              </p>
             </p>
             <div className={style.modalActions}>
               <button
@@ -422,44 +546,49 @@ const Incident = () => {
         <div className={style.modalOverlay}>
           <div className={style.modalContent}>
             <h3>Tạo sự cố mới</h3>
-            <input
-              type="text"
-              placeholder="Học sinh"
-              value={newEvent.studentName}
-              onChange={(e) =>
-                setNewEvent({ ...newEvent, studentName: e.target.value })
-              }
-            />
-            <input
-              type="text"
-              placeholder="Phụ huynh"
-              value={newEvent.parentName}
-              onChange={(e) =>
-                setNewEvent({ ...newEvent, parentName: e.target.value })
-              }
-            />
+
             <select
-              value={newEvent.eventType}
+              value={newEvent.studentId}
               onChange={(e) =>
-                setNewEvent({ ...newEvent, eventType: e.target.value })
+                setNewEvent({ ...newEvent, studentId: Number(e.target.value) })
               }
             >
-              <option>Sốt</option>
-              <option>Đau bụng</option>
-              <option>Dị ứng</option>
-              <option>Té ngã</option>
-              <option>Tai nạn nhỏ</option>
+              <option value="">-- Chọn học sinh --</option>
+              {students.map((s) => (
+                <option key={s.studentId} value={s.studentId}>
+                  {s.fullName}
+                </option>
+              ))}
             </select>
+
             <select
-              value={newEvent.severityLevelName}
+              value={newEvent.eventTypeId}
               onChange={(e) =>
-                setNewEvent({ ...newEvent, severityLevelName: e.target.value })
+                setNewEvent({ ...newEvent, eventTypeId: e.target.value })
               }
             >
-              <option>Nhẹ</option>
-              <option>Trung bình</option>
-              <option>Nặng</option>
+              <option value="">-- Loại sự cố --</option>
+              {eventTypes.map((et) => (
+                <option key={et.id} value={et.id}>
+                  {et.name}
+                </option>
+              ))}
             </select>
+
+            <select
+              value={newEvent.severityId}
+              onChange={(e) =>
+                setNewEvent({ ...newEvent, severityId: e.target.value })
+              }
+            >
+              <option value="">-- Mức độ --</option>
+              {severityLevels.map((sl) => (
+                <option key={sl.id} value={sl.id}>
+                  {sl.level}
+                </option>
+              ))}
+            </select>
+
             <input
               type="datetime-local"
               value={newEvent.eventDate}
@@ -467,6 +596,16 @@ const Incident = () => {
                 setNewEvent({ ...newEvent, eventDate: e.target.value })
               }
             />
+
+            <input
+              type="text"
+              placeholder="Địa điểm xảy ra sự cố"
+              value={newEvent.location}
+              onChange={(e) =>
+                setNewEvent({ ...newEvent, location: e.target.value })
+              }
+            />
+
             <textarea
               placeholder="Mô tả"
               value={newEvent.description}
@@ -474,12 +613,12 @@ const Incident = () => {
                 setNewEvent({ ...newEvent, description: e.target.value })
               }
             />
-            <input
-              type="text"
-              placeholder="Người xử lý"
-              value={newEvent.handledByName}
+
+            <textarea
+              placeholder="Ghi chú"
+              value={newEvent.notes}
               onChange={(e) =>
-                setNewEvent({ ...newEvent, handledByName: e.target.value })
+                setNewEvent({ ...newEvent, notes: e.target.value })
               }
             />
 
