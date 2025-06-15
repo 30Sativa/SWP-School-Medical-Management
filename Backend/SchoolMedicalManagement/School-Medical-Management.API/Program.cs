@@ -44,6 +44,10 @@ builder.Services.AddScoped<VaccinationCampaignRepository>();
 builder.Services.AddScoped<MedicalHistoryRepository>();
 builder.Services.AddScoped<MedicationRequestRepository>();
 
+builder.Services.AddScoped<NotificationRepository>();
+builder.Services.AddScoped<NotificationTypeRepository>();
+
+builder.Services.AddScoped<BlogPostRepository>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMedicalHistoryService, MedicalHistoryService>();
@@ -57,6 +61,11 @@ builder.Services.AddScoped<IMedicationRequestService, MedicationRequestService>(
 builder.Services.AddScoped<IHealthCheckSummaryService, HealthCheckSummaryService>();
 
 builder.Services.AddScoped<IVaccinationCampaignService, VaccinationCampaignService>();
+
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<INotificationTypeService, NotificationTypeService>();
+builder.Services.AddScoped<IBlogPostService, BlogPostService>();
+
 
 // CORS
 builder.Services.AddCors(options =>
