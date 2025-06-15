@@ -16,8 +16,7 @@ namespace School_Medical_Management.API.Controllers
             _medicationRequestService = medicationRequestService;
         }
 
-
-        // ✅ Lấy danh sách đơn thuốc đang chờ duyệt
+        // ✅ 1. Lấy danh sách đơn thuốc đang chờ duyệt
         [HttpGet("pending")]
         public async Task<IActionResult> GetPendingRequests()
         {
@@ -31,7 +30,8 @@ namespace School_Medical_Management.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving requests: {ex.Message}");
             }
         }
-        // ✅ Xử lý đơn thuốc (duyệt hoặc từ chối)
+
+        // ✅ 2. Xử lý đơn thuốc (duyệt hoặc từ chối)
         [HttpPost("handle")]
         public async Task<IActionResult> HandleMedicationRequest([FromBody] UpdateMedicationRequestStatus request)
         {
@@ -39,17 +39,11 @@ namespace School_Medical_Management.API.Controllers
             {
                 return BadRequest("Invalid request data.");
             }
+
             try
             {
                 var result = await _medicationRequestService.HandleMedicationRequest(request);
-                if (result != null)
-                {
-                    return Ok("Request handled successfully.");
-                }
-                else
-                {
-                    return NotFound("Request not found or could not be updated.");
-                }
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -57,22 +51,44 @@ namespace School_Medical_Management.API.Controllers
             }
         }
 
-        // ✅ Tạo đơn thuốc mới
+        // ✅ 3. Tạo đơn thuốc mới (cho phép upload ảnh đơn thuốc)
         [HttpPost("create")]
-        public async Task<IActionResult> CreateMedicationRequest([FromBody] CreateMedicationRequest request, [FromQuery] Guid parentId)
+        public async Task<IActionResult> CreateMedicationRequest([FromForm] CreateMedicationRequest request, [FromQuery] Guid parentId)
         {
-            if (request == null || request.StudentID <= 0 || string.IsNullOrWhiteSpace(request.MedicationName) || string.IsNullOrWhiteSpace(request.Dosage) || string.IsNullOrWhiteSpace(request.Instructions))
+            if (request == null || request.StudentID <= 0 ||
+                string.IsNullOrWhiteSpace(request.MedicationName) ||
+                string.IsNullOrWhiteSpace(request.Dosage) ||
+                string.IsNullOrWhiteSpace(request.Instructions))
             {
-                return BadRequest("Invalid request data.");
+                return BadRequest("Invalid medication request data.");
             }
+
             try
             {
-                var response = await _medicationRequestService.CreateMedicationRequestAsync(request, parentId);
-                if (response.Status == StatusCodes.Status201Created.ToString())
+                // ✅ Xử lý lưu ảnh nếu có
+                string? imagePath = null;
+                if (request.ImageFile != null && request.ImageFile.Length > 0)
                 {
-                    return CreatedAtAction(nameof(GetPendingRequests), new { id = response.Data }, response.Data);
+                    var fileName = Guid.NewGuid() + Path.GetExtension(request.ImageFile.FileName);
+                    var savePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "medication", fileName);
+
+                    // Đảm bảo thư mục tồn tại
+                    Directory.CreateDirectory(Path.GetDirectoryName(savePath)!);
+
+                    using (var stream = new FileStream(savePath, FileMode.Create))
+                    {
+                        await request.ImageFile.CopyToAsync(stream);
+                    }
+
+                    // Gán đường dẫn để lưu trong DB
+                    imagePath = $"/uploads/medication/{fileName}";
                 }
-                return BadRequest(response.Message);
+
+                var response = await _medicationRequestService.CreateMedicationRequestAsync(request, parentId, imagePath);
+
+                return response.Status == StatusCodes.Status200OK.ToString()
+                    ? Ok(response)
+                    : BadRequest(response);
             }
             catch (Exception ex)
             {

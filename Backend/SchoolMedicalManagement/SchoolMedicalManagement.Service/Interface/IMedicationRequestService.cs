@@ -12,7 +12,8 @@ namespace SchoolMedicalManagement.Service.Interface
     {
         Task<List<MedicationRequestResponse>> GetPendingRequestsAsync();
         Task<BaseResponse> HandleMedicationRequest(UpdateMedicationRequestStatus request);
-        Task<BaseResponse> CreateMedicationRequestAsync(CreateMedicationRequest request, Guid parentId);
+        // ✅ sửa: thêm imagePath (nếu đang lưu ảnh thật từ controller)
+        Task<BaseResponse> CreateMedicationRequestAsync(CreateMedicationRequest request, Guid parentId, string? imagePath);
 
     }
 }

@@ -21,6 +21,8 @@ namespace SchoolMedicalManagement.Repository.Repository
             return await _context.MedicationRequests
                 .Where(r => r.StatusId == 1 && r.IsActive == true)
                 .Include(r => r.Student)  // nếu bạn cần thông tin học sinh
+                .Include(r => r.Status) // nếu bạn cần thông tin trạng thái
+                .Include(r => r.ReceivedByNavigation)
                 .ToListAsync();
         }
 
@@ -45,6 +47,7 @@ namespace SchoolMedicalManagement.Repository.Repository
             return await _context.MedicationRequests
                 .Where(r => r.StatusId == 2 && r.IsActive == true)
                 .Include(r => r.Student)  // nếu bạn cần thông tin học sinh
+                .Include(r => r.ReceivedByNavigation) // nếu bạn cần thông tin y tá đã duyệt
                 .ToListAsync();
         }
         // ✅ Lấy danh sách đơn thuốc đã từ chối
@@ -68,7 +71,10 @@ namespace SchoolMedicalManagement.Repository.Repository
         public async Task<int> CreateMedicalRequestAsync(MedicationRequest request)
         {
             _context.MedicationRequests.Add(request);
-            return await _context.SaveChangesAsync();
+             await _context.SaveChangesAsync();
+            return request.RequestId; // Trả về ID của đơn thuốc mới tạo
         }
+
+
     }
 }

@@ -15,5 +15,11 @@ namespace SchoolMedicalManagement.Models.Response
         public string Instructions { get; set; }
         public string Status { get; set; }
         public DateTime RequestDate { get; set; }
+
+        // ✅ thêm dòng này để trả về ảnh đơn thuốc
+        public string? ImagePath { get; set; }
+
+        // ✅ nếu dùng cho nurse hoặc admin
+        public string? ReceivedByName { get; set; }  // ví dụ: "Nguyễn Thị Yến (YT01)"
     }
 }

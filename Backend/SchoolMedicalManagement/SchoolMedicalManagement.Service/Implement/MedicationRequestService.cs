@@ -33,7 +33,9 @@ namespace SchoolMedicalManagement.Service.Implement
                 MedicationName = r.MedicationName,
                 Dosage = r.Dosage,
                 Instructions = r.Instructions,
-                Status = r.Status.StatusId == 1 ? "Chờ duyệt" : (r.Status.StatusId ==2 ? "Đã duyệt": "Từ chối"), 
+                Status = r.Status.StatusId == 1 ? "Chờ duyệt" : (r.Status.StatusId == 2 ? "Đã duyệt" : "Từ chối"),
+                ImagePath = r.ImagePath,
+                ReceivedByName = r.ReceivedByNavigation?.FullName,
                 RequestDate = r.RequestDate
             }).ToList();
         }
@@ -56,7 +58,17 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     Status = StatusCodes.Status200OK.ToString(),
                     Message = "Cập nhật trạng thái đơn thuốc thành công.",
-                    Data = null
+                    Data = new MedicationRequestResponse
+                    {
+                        RequestID = entity.RequestId,
+                        StudentName = entity.Student?.FullName ?? "Unknown",
+                        MedicationName = entity.MedicationName,
+                        Dosage = entity.Dosage,
+                        Instructions = entity.Instructions,
+                        Status = entity.Status.StatusId == 1 ? "Chờ duyệt" : (entity.Status.StatusId == 2 ? "Đã duyệt" : "Từ chối"),
+                        RequestDate = entity.RequestDate,
+                        ReceivedByName = entity.ReceivedByNavigation?.FullName // Thông tin y tá đã duyệt
+                    }
                 };
             }
             else
@@ -72,18 +84,9 @@ namespace SchoolMedicalManagement.Service.Implement
 
 
 
-        public async Task<BaseResponse> CreateMedicationRequestAsync(CreateMedicationRequest request, Guid parentId)
+        // ✅ Đã thêm imagePath
+        public async Task<BaseResponse> CreateMedicationRequestAsync(CreateMedicationRequest request, Guid parentId, string? imagePath)
         {
-            var requestExists = await _medicationRequestRepository.GetByIdMedical(request.StudentID);
-            if (requestExists != null)
-            {
-                return new BaseResponse
-                {
-                    Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Đơn thuốc đã tồn tại cho học sinh này.",
-                    Data = null
-                };
-            }
             var newRequest = new MedicationRequest
             {
                 StudentId = request.StudentID,
@@ -92,40 +95,29 @@ namespace SchoolMedicalManagement.Service.Implement
                 Dosage = request.Dosage,
                 Instructions = request.Instructions,
                 RequestDate = DateTime.Now,
-                StatusId = 1, // Chờ duyệt
-                IsActive = true
+                StatusId = 1,
+                IsActive = true,
+                ImagePath = imagePath,
             };
-            var response = await _medicationRequestRepository.CreateMedicalRequestAsync(newRequest);
-            if (response != null)
+
+            var result = await _medicationRequestRepository.CreateMedicalRequestAsync(newRequest);
+
+            return new BaseResponse
             {
-                return new BaseResponse
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Tạo đơn thuốc thành công.",
+                Data = new MedicationRequestResponse
                 {
-                    Status = StatusCodes.Status200OK.ToString(),
-                    Message = "Tạo đơn thuốc thành công.",
-                    Data = new MedicationRequestResponse
-                    {
-                        RequestID = newRequest.RequestId,
-                        StudentName = newRequest.Student?.FullName ?? "Unknown",
-                        MedicationName = newRequest.MedicationName,
-                        Dosage = newRequest.Dosage,
-                        Instructions = newRequest.Instructions,
-                        Status = "Chờ duyệt",
-                        RequestDate = newRequest.RequestDate
-                    }
-                };
-            }
-            else
-            {
-                return new BaseResponse
-                {
-                    Status = StatusCodes.Status500InternalServerError.ToString(),
-                    Message = "Lỗi khi tạo đơn thuốc.",
-                    Data = null
-                };
-            }
-
-
-
+                    RequestID = newRequest.RequestId,
+                    StudentName = newRequest.Student?.FullName ?? "Unknown",
+                    MedicationName = newRequest.MedicationName,
+                    Dosage = newRequest.Dosage,
+                    Instructions = newRequest.Instructions,
+                    Status = "Chờ duyệt",
+                    RequestDate = newRequest.RequestDate,
+                    ImagePath = newRequest.ImagePath
+                }
+            };
         }
     }
 }
