@@ -253,7 +253,7 @@ namespace SchoolMedicalManagement.Service.Implement
             }
 
             consentRequest.ConsentStatusId = request.ConsentStatusId;
-            consentRequest.ConsentDate = request.ConsentDate;
+            consentRequest.ConsentDate = DateTime.UtcNow;
 
             var updated = await _campaignRepository.UpdateConsentRequest(consentRequest);
             if (updated == null)

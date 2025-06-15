@@ -41,6 +41,7 @@ namespace SchoolMedicalManagement.Repository.Repository
             => await _context.VaccinationConsentRequests
                 .Include(c => c.Student)
                 .Include(c => c.Parent)
+                .Include(c => c.Campaign)
                 .Include(c => c.ConsentStatus)
                 .FirstOrDefaultAsync(c => c.RequestId == id);
 

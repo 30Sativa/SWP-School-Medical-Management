@@ -8,6 +8,6 @@ namespace SchoolMedicalManagement.Models.Request
         public int ConsentStatusId { get; set; }
 
         // Thời gian phụ huynh phản hồi
-        public DateTime ConsentDate { get; set; } = DateTime.UtcNow;
+        //public DateTime ConsentDate { get; set; } = DateTime.UtcNow;
     }
 } 
