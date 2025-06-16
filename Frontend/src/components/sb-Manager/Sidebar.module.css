@@ -67,6 +67,11 @@ nav {
   font-weight: bold;
   color: #ffffff;
 }
+.menuIcon {
+  color: white;
+  cursor: pointer;
+  flex-shrink: 0;
+}
 
 @media (max-width: 768px) {
   .sbSidebar {

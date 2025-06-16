@@ -13,6 +13,7 @@ const Sidebar = () => {
     <aside className={`${style.sbSidebar} ${isOpen ? style.expanded : style.collapsed}`}>
       <button className={style.toggleBtn} onClick={toggleSidebar}>
         <Menu size={22} />
+        {isOpen && <span className={style.systemName}>EduHealth</span>}
       </button>
       <nav>
         <NavLink to="/manager" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
