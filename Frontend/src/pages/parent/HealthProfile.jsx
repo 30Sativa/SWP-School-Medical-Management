@@ -55,7 +55,7 @@ const HealthProfile = () => {
           isActive: formData.isActive,
         }
       );
-      toast.success("✅ Cập nhật thành công!", {
+      toast.success("Cập nhật thành công!", {
         position: "top-center",
         autoClose: 1800,
         hideProgressBar: false,
