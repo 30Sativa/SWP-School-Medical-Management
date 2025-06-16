@@ -10,12 +10,16 @@ import ParentDashboard from "../pages/parent/ParentDashboard";
 import HealthProfile from "../pages/parent/HealthProfile";
 import LogsPage from "../pages/manager/Logs";
 import SendMedicine from "../pages/parent/SendMedicine";
-
 import VaccinCampaign from "../pages/nurse/VaccinCampaign";
 import ChildCareHistory from "../pages/parent/ChildCareHistory";
 import NotificationAndReport from "../pages/parent/NotificationAndReport";
+
 import Blog from "../pages/manager/Blog";
 import BlogCreate from "../pages/manager/BlogCreate";
+
+
+import Incident from "../pages/nurse/Incident";
+import MedicalSupplies from "../pages/nurse/MedicalSupplies";
 
 const AppRouter = () => {
   return (
@@ -39,6 +43,9 @@ const AppRouter = () => {
 
       <Route path="/vaccines" element={<VaccinCampaign />} />
       <Route path="/hisofcare" element={<ChildCareHistory />} />
+      <Route path="/incidents" element={<Incident />} />
+      <Route path="/vaccines" element={<VaccinCampaign />} />
+      <Route path="/supplies" element={<MedicalSupplies />} />
     </Routes>
   );
 };
