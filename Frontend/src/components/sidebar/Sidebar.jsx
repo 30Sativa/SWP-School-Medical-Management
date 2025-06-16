@@ -12,11 +12,10 @@ import {
   AlertTriangle,
   Package,
   HeartPulse,
-
   BarChart2,
   User, // ✅ Thêm icon
 
-  BarChart2, // ✅ Thêm icon
+  
 
 } from "lucide-react";
 import style from "./Sidebar.module.css";
