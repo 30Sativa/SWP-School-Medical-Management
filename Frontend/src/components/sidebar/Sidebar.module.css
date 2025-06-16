@@ -80,3 +80,18 @@ nav {
   color: white;
   white-space: nowrap;
 }
+
+.logoutButton {
+  background-color: #000 !important;
+  color: #fff !important;
+  border: none;
+  margin-top: 16px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.logoutButton:hover {
+  background-color: #333 !important;
+  cursor: pointer;
+}
+
