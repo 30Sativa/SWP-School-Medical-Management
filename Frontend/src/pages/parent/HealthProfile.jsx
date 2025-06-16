@@ -5,283 +5,200 @@ import axios from "axios";
 
 const HealthProfile = () => {
   const [profile, setProfile] = useState(null);
-  const [studentName, setStudentName] = useState("");
-  const [studentInfo, setStudentInfo] = useState({});
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchHealthProfile = async () => {
       try {
-        const userId = localStorage.getItem("userId");
-        const studentRes = await axios.get(
-          "https://swp-school-medical-management.onrender.com/api/Student"
+        const response = await axios.get(
+          "https://swp-school-medical-management.onrender.com/api/HealthProfile/1"
         );
-        const student = studentRes.data.find(
-          (s) => String(s.parentId) === String(userId)
-        );
-
-        if (!student) throw new Error("Không tìm thấy học sinh!");
-
-        setStudentName(student.fullName);
-        setStudentInfo({
-          gender: student.gender,
-          age:
-            new Date().getFullYear() -
-            new Date(student.dateOfBirth).getFullYear(),
-          class: student.class,
-        });
-
-        localStorage.setItem("studentId", student.studentId);
-
-        const profileRes = await axios.get(
-          "https://swp-school-medical-management.onrender.com/api/HealthProfile"
-        );
-        const studentProfile = profileRes.data.find(
-          (p) => p.studentId === student.studentId
-        );
-
-        setProfile(studentProfile);
-        setFormData(studentProfile);
+        const data = {
+          ...response.data.data,
+          vision: "10/10",
+          hearing: "Bình thường",
+          exercise: "3 buổi/tuần",
+          doctorNote: "Ăn uống đầy đủ, ngủ đủ giấc",
+        };
+        setProfile(data);
+        setFormData(data);
       } catch (error) {
-        console.error("Lỗi khi gọi API hồ sơ sức khỏe:", error);
+        console.error("Lỗi khi tải dữ liệu:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProfile();
+    fetchHealthProfile();
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const parsedValue = name === "isActive" ? value === "true" : value;
-    setFormData({ ...formData, [name]: parsedValue });
+    setFormData({ ...formData, [name]: value });
   };
 
-  const handleUpdate = async () => {
+  const handleSave = async () => {
     try {
       await axios.put(
         `https://swp-school-medical-management.onrender.com/api/HealthProfile/${profile.profileId}`,
         {
-          ...formData,
           studentId: profile.studentId,
+          height: formData.height,
+          weight: formData.weight,
+          chronicDiseases: formData.chronicDiseases,
+          allergies: formData.allergies,
+          generalNote: formData.generalNote,
+          isActive: formData.isActive,
         }
       );
       alert("Cập nhật thành công!");
-      setProfile(formData);
+      setProfile({ ...profile, ...formData });
       setIsEditing(false);
     } catch (error) {
-      console.error("Cập nhật thất bại:", error);
-      alert("Đã xảy ra lỗi khi cập nhật!");
+      console.error("Lỗi cập nhật:", error);
+      alert("Cập nhật thất bại!");
     }
   };
 
   if (loading) return <p>Đang tải dữ liệu...</p>;
-
-  if (!profile)
-    return (
-      <div>
-        <p>Không có hồ sơ sức khỏe.</p>
-        <button onClick={() => alert("Chuyển tới trang tạo hồ sơ")}>
-          Tạo hồ sơ mới
-        </button>
-      </div>
-    );
+  if (!profile) return <p>Không có hồ sơ sức khỏe.</p>;
 
   return (
     <div className={styles.container}>
       <Sidebar />
-      <main className={styles.content}>
-        <header>
-          <div className={styles["dashboard-header-bar"]}>
-            <div className={styles["title-group"]}>
-              <h1>
-                <span className={styles["text-accent"]}>|</span>
-                <span className={styles["text-black"]}>Hồ sơ</span>
-                <span className={styles["text-accent"]}> sức khỏe</span>
-              </h1>
-            </div>
-          </div>
-        </header>
+      <div className={styles.content}>
+        <h2 className={styles.title}>
+          <span className={styles.accent}>|</span> Hồ sơ{" "}
+          <span className={styles.greenText}>sức khỏe học sinh</span>
+        </h2>
 
-        <div style={{ display: "flex", gap: "20px" }}>
-          <div className={`${styles.card} ${styles["profile-card"]}`}>
-            <img
-              className={styles.avatar}
-              src="https://i.pravatar.cc/100"
-              alt="User"
-            />
-            <h3>{studentName || "Thông tin học sinh"}</h3>
+        <div className={styles.profileWrapper}>
+          <div className={styles.leftPanel}>
+            <img src="https://i.pravatar.cc/120" alt="avatar" className={styles.avatar} />
+            <h3 className={styles.name}>Lê Trần Đức Thắng</h3>
 
-            <div className={styles["info-section"]}>
-              {isEditing ? (
-                <>
-                  <div className={styles.inputGroup}>
-                    <label>Chiều cao</label>
-                    <input
-                      className={styles.input}
-                      name="height"
-                      value={formData.height}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className={styles.inputGroup}>
-                    <label>Cân nặng</label>
-                    <input
-                      className={styles.input}
-                      name="weight"
-                      value={formData.weight}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className={styles.inputGroup}>
-                    <label>Bệnh mãn tính</label>
-                    <input
-                      className={styles.input}
-                      name="chronicDiseases"
-                      value={formData.chronicDiseases}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className={styles.inputGroup}>
-                    <label>Dị ứng</label>
-                    <input
-                      className={styles.input}
-                      name="allergies"
-                      value={formData.allergies}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className={styles.inputGroup}>
-                    <label>Ghi chú</label>
-                    <textarea
-                      className={styles.textarea}
-                      name="generalNote"
-                      value={formData.generalNote}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className={styles.inputGroup}>
-                    <label>Trạng thái</label>
-                    <select
-                      className={styles.select}
-                      name="isActive"
-                      value={formData.isActive}
-                      onChange={handleChange}
-                    >
+            <div className={styles.infoBlock}>
+              <div className={styles.infoItem}>
+                <span>Chiều cao:</span>
+                <span>
+                  {isEditing ? (
+                    <input name="height" value={formData.height} onChange={handleChange} />
+                  ) : (
+                    `${profile.height} cm`
+                  )}
+                </span>
+              </div>
+              <div className={styles.infoItem}>
+                <span>Cân nặng:</span>
+                <span>
+                  {isEditing ? (
+                    <input name="weight" value={formData.weight} onChange={handleChange} />
+                  ) : (
+                    `${profile.weight} kg`
+                  )}
+                </span>
+              </div>
+              <div className={styles.infoItem}>
+                <span>Bệnh mãn tính:</span>
+                <span>
+                  {isEditing ? (
+                    <input name="chronicDiseases" value={formData.chronicDiseases} onChange={handleChange} />
+                  ) : (
+                    profile.chronicDiseases
+                  )}
+                </span>
+              </div>
+              <div className={styles.infoItem}>
+                <span>Dị ứng:</span>
+                <span>
+                  {isEditing ? (
+                    <input name="allergies" value={formData.allergies} onChange={handleChange} />
+                  ) : (
+                    profile.allergies
+                  )}
+                </span>
+              </div>
+              <div className={styles.infoItem}>
+                <span>Ghi chú:</span>
+                <span>
+                  {isEditing ? (
+                    <input name="generalNote" value={formData.generalNote} onChange={handleChange} />
+                  ) : (
+                    profile.generalNote
+                  )}
+                </span>
+              </div>
+              <div className={styles.infoItem}>
+                <span>Trạng thái:</span>
+                <span>
+                  {isEditing ? (
+                    <select name="isActive" value={formData.isActive} onChange={handleChange}>
                       <option value={true}>Đang hoạt động</option>
                       <option value={false}>Ngừng hoạt động</option>
                     </select>
-                  </div>
-                  <div className={styles.buttonRow}>
-                    <button
-                      className={styles["cancel-button"]}
-                      onClick={() => setIsEditing(false)}
-                    >
-                      Huỷ
-                    </button>
-                    <button
-                      className={styles["save-button"]}
-                      onClick={handleUpdate}
-                    >
-                      Lưu
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <p>
-                    <strong>Chiều cao:</strong> {profile.height}
-                  </p>
-                  <p>
-                    <strong>Cân nặng:</strong> {profile.weight}
-                  </p>
-                  <p>
-                    <strong>Bệnh mãn tính:</strong> {profile.chronicDiseases}
-                  </p>
-                  <p>
-                    <strong>Dị ứng:</strong> {profile.allergies}
-                  </p>
-                  <p>
-                    <strong>Ghi chú:</strong> {profile.generalNote}
-                  </p>
-                  <p>
-                    <strong>Trạng thái:</strong>{" "}
-                    {profile.isActive ? "Đang hoạt động" : "Ngừng hoạt động"}
-                  </p>
-                </>
-              )}
+                  ) : profile.isActive ? (
+                    "Đang hoạt động"
+                  ) : (
+                    "Ngừng hoạt động"
+                  )}
+                </span>
+              </div>
             </div>
 
-            {!isEditing && (
-              <button
-                className={styles["update-btn"]}
-                onClick={() => setIsEditing(true)}
-              >
+            {!isEditing ? (
+              <button className={styles.updateButton} onClick={() => setIsEditing(true)}>
                 Cập nhật
               </button>
+            ) : (
+              <>
+                <button className={styles.updateButton} onClick={handleSave}>Lưu</button>
+                <button className={styles.updateButton} onClick={() => setIsEditing(false)}>Huỷ</button>
+              </>
             )}
           </div>
 
-          <div className={styles["card-group"]}>
-            <div className={`${styles.card} ${styles["vitals-card"]}`}>
-              <div className={styles["vital-box"]}>
-                <div className={styles["vital-icon"]}>👤</div>
-                <div className={styles["vital-title"]}>Giới tính</div>
-                <div className={styles["vital-value"]}>
-                  {studentInfo.gender}
-                </div>
+          <div className={styles.rightPanel}>
+            <div className={styles.basicInfoRow}>
+              <div className={styles.basicInfoBox}>
+                <div className={styles.basicIcon}>👩‍⚕️</div>
+                <div className={styles.basicLabel}>Giới tính</div>
+                <div className={styles.basicValue}>Nữ</div>
               </div>
-              <div className={styles["vital-box"]}>
-                <div className={styles["vital-icon"]}>🎂</div>
-                <div className={styles["vital-title"]}>Tuổi</div>
-                <div className={styles["vital-value"]}>{studentInfo.age}</div>
+              <div className={styles.basicInfoBox}>
+                <div className={styles.basicIcon}>🎂</div>
+                <div className={styles.basicLabel}>Tuổi</div>
+                <div className={styles.basicValue}>9</div>
               </div>
-              <div className={styles["vital-box"]}>
-                <div className={styles["vital-icon"]}>🏫</div>
-                <div className={styles["vital-title"]}>Lớp</div>
-                <div className={styles["vital-value"]}>{studentInfo.class}</div>
+              <div className={styles.basicInfoBox}>
+                <div className={styles.basicIcon}>🏫</div>
+                <div className={styles.basicLabel}>Lớp</div>
+                <div className={styles.basicValue}>Mẫu giáo</div>
               </div>
             </div>
 
-            <div className={`${styles.card} ${styles["report-card"]}`}>
-              <div className={styles["report-header"]}>
-                🧪 <span>Test Reports</span>
-              </div>
-              <ul className={styles["report-list"]}>
-                <li>
-                  CT Scan - Full Body <span>(12th Feb 2020)</span>
-                </li>
-                <li>
-                  Creatine Kinase T <span>(12th Feb 2020)</span>
-                </li>
-                <li>
-                  Eye Fluorescein Test <span>(12th Feb 2020)</span>
-                </li>
+            <div className={styles.infoBox}>
+              <h4>🩺 Test Reports</h4>
+              <ul className={styles.reportList}>
+                <li>CT Scan - Full Body <span>(12th Feb 2020)</span></li>
+                <li>Creatine Kinase T <span>(12th Feb 2020)</span></li>
+                <li>Eye Fluorescein Test <span>(12th Feb 2020)</span></li>
               </ul>
             </div>
 
-            <div className={`${styles.card} ${styles["prescription-card"]}`}>
-              <div className={styles["report-header"]}>
-                💊 <span>Prescriptions</span>
-              </div>
-              <button className={styles["add-btn"]}>
-                + Add a prescription
-              </button>
-              <ul className={styles["report-list"]}>
-                <li>
-                  <strong>Heart Diseases</strong> – 25th Oct 2019 – 3 months
-                </li>
-                <li>
-                  <strong>Skin Care</strong> – 8th Aug 2019 – 2 months
-                </li>
+            <div className={styles.infoBox}>
+              <h4>💊 Prescriptions</h4>
+              <p className={styles.addPrescription}>+ Add a prescription</p>
+              <ul className={styles.reportList}>
+                <li><b>Heart Diseases</b> – 25th Oct 2019 – 3 months</li>
+                <li><b>Skin Care</b> – 8th Aug 2019 – 2 months</li>
               </ul>
             </div>
           </div>
+
         </div>
-      </main>
+      </div>
     </div>
   );
 };
