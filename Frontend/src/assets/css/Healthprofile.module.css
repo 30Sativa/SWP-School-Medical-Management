@@ -1,204 +1,292 @@
-
 .container {
   display: flex;
   min-height: 100vh;
+  background: linear-gradient(120deg, #f0f4ff 0%, #e0f7fa 100%);
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
 }
 
 .content {
-  flex-grow: 1;
-  padding: 24px;
-  background-color: #f9fafb;
-}
-
-.dashboard-header-bar {
-  margin-bottom: 24px;
-}
-
-.title-group h1 {
-  font-size: 50px;
-  font-weight: bold;
-  color: #0f172a;
-}
-
-.text-accent {
-  color: #14b8a6;
-}
-
-.text-black {
-  color: #0f172a;
-}
-
-.card {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-.card-group {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
   flex: 1;
+  padding: 48px 5vw 48px 5vw;
 }
 
-.profile-card {
-  width: 320px;
+.title {
+  font-size: 1.8rem;      
+  font-weight: 700;       
+  color: #20b2aa;
+  margin-bottom: 24px;  
+  letter-spacing: 0.5px; 
+  text-shadow: 0 1px 4px rgba(11, 133, 122, 0.05);
+  text-align: left;      
+  max-width: 400px;      
+  white-space: normal;    
+}
+
+.accent {
+  color: #0ea5e9;
+  margin-right: 8px;
+}
+
+.greenText {
+  color: #10b981;
+}
+
+/* THÔNG TIN CƠ BẢN */
+.basicInfoRow {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: space-around;
+  background: linear-gradient(90deg, #fff 70%, #e0f2fe 100%);
+  border-radius: 24px;
+  box-shadow: 0 6px 24px rgba(14, 42, 71, 0.08);
+  padding: 32px 0;
+  margin-bottom: 36px;
+  gap: 24px;
+  border: 1.5px solid #e0e7ef;
+  transition: box-shadow 0.3s;
+}
+
+.basicInfoRow:hover {
+  box-shadow: 0 10px 32px rgba(14, 42, 71, 0.13);
+}
+
+.basicInfoBox {
+  text-align: center;
+  min-width: 120px;
+}
+
+.basicIcon {
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  color: #0ea5e9;
+  filter: drop-shadow(0 2px 6px #bae6fd);
+}
+
+.basicLabel {
+  font-weight: 600;
+  color: #0284c7;
+  margin-bottom: 6px;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+}
+
+.basicValue {
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: #1e293b;
+}
+
+/* THÔNG TIN CHÍNH & TEST REPORT */
+.profileWrapper {
+  display: flex;
+  justify-content: space-between;
+  gap: 36px;
+  flex-wrap: wrap;
+}
+
+/* Bên trái (hồ sơ sức khỏe) */
+.leftPanel {
+  background: #fff;
+  border-radius: 24px;
+  padding: 36px 28px 32px 28px;
+  width: 370px;
+  min-width: 270px;
+  box-shadow: 0 8px 32px rgba(14, 42, 71, 0.13);
+  text-align: center;
+  border: 1.5px solid #e0e7ef;
+  transition: box-shadow 0.3s, border-color 0.3s;
+}
+
+.leftPanel:hover {
+  box-shadow: 0 12px 40px rgba(14, 42, 71, 0.18);
+  border-color: #bae6fd;
 }
 
 .avatar {
-  width: 100px;
-  height: 100px;
+  width: 112px;
+  height: 112px;
   border-radius: 50%;
-  margin-bottom: 8px;
+  margin-bottom: 18px;
+  border: 4px solid #0ea5e9;
+  box-shadow: 0 4px 16px #bae6fd80;
+  object-fit: cover;
+  background: #f0f9ff;
 }
 
-.info-section p {
-  margin: 10px 0;
-  padding-bottom: 8px;
-  border-bottom: 1px dashed #ccc; /* dòng ngắt giống trang vở */
-  font-size: 15px;
+.name {
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #0e2a47;
+  margin-bottom: 18px;
+  letter-spacing: 0.5px;
 }
 
-.info-section strong {
-  display: inline-block;
-  width: 130px;
-  color: #333;
+.infoBlock {
+  text-align: left;
+  font-size: 1rem;
+  color: #334155;
+  margin-top: 10px;
 }
 
-.info-section input,
-.info-section textarea,
-.info-section select {
-  width: 100%;
-  padding: 8px 12px;
-  margin: 6px 0;
+.infoItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; 
+  margin-bottom: 14px;
+  font-weight: 500;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed #e0e7ef;
+}
+
+.infoItem:last-child {
+  border-bottom: none;
+}
+
+.updateButton {
+  margin-top: 24px;
+  padding: 12px 36px;
+  background: linear-gradient(90deg, #0ea5e9 60%, #38bdf8 100%);
+  color: #fff;
+  font-weight: 700;
   border: none;
-  border-bottom: 1px solid #ccc;
-  border-radius: 0;
-  background-color: #fff;   /* trắng nền */
-  color: #111;              /* đen chữ rõ ràng */
-  font-size: 15px;
-  outline: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px #bae6fd80;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
 }
 
-.inputGroup {
+.updateButton:hover {
+  background: linear-gradient(90deg, #0284c7 60%, #0ea5e9 100%);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 20px #38bdf880;
+}
+
+/* Bên phải (test reports + prescriptions) */
+.rightPanel {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  margin-bottom: 12px;
+  gap: 24px;
+  min-width: 320px;
 }
 
-.inputGroup label {
-  font-weight: 500;
-  font-size: 14px;
-  color: #1e293b;
-  margin-bottom: 4px;
+.infoBox {
+  background: #fff;
+  border-radius: 20px;
+  padding: 28px 32px;
+  box-shadow: 0 4px 20px rgba(14, 42, 71, 0.10);
+  border: 1.5px solid #e0e7ef;
+  transition: box-shadow 0.3s, border-color 0.3s;
 }
 
-.input, .textarea, .select {
-  padding: 8px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 14px;
-  background-color: white;
-  color: #1e293b;
+.infoBox:hover {
+  box-shadow: 0 8px 32px rgba(14, 42, 71, 0.15);
+  border-color: #bae6fd;
 }
 
-.textarea {
-  resize: vertical;
-  min-height: 80px;
+.infoBox h4 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0e2a47;
+  margin-bottom: 18px;
+  letter-spacing: 0.5px;
 }
 
-.select {
-  appearance: none;
-}
-
-.buttonRow {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.update-btn,
-.save-button,
-.cancel-button {
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.update-btn {
-  background-color: #14b8a6;
-  color: white;
-  margin-top: 16px;
-}
-
-.save-button {
-  background-color: #14b8a6;
-  color: white;
-}
-
-.cancel-button {
-  background-color: #e2e8f0;
-  color: #1e293b;
-}
-
-.vitals-card {
-   display: flex;
-  justify-content: space-around;
-  padding: 20px;
-  border-radius: 12px;
-  background-color: white;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
-}
-
-.vital-box {
-  text-align: center;
-}
-
-.vital-icon {
-  font-size: 20px;
-  margin-bottom: 4px;
-}
-
-.vital-title {
-  font-weight: 600;
-  color: #14b8a6;
-  margin-bottom: 2px;
-}
-
-.vital-value {
-  font-size: 15px;
-  color: #1e293b;
-}
-
-.report-header {
-  font-weight: 600;
-  font-size: 16px;
-  margin-bottom: 12px;
-  color: #1e293b;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.report-list {
-  padding-left: 16px;
-  font-size: 14px;
+.reportList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 1rem;
   color: #334155;
 }
 
-.add-btn {
-  background: none;
-  border: none;
-  color: #14b8a6;
+.reportList li {
+  margin-bottom: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.2s;
+}
+
+.reportList li:last-child {
+  border-bottom: none;
+}
+
+.reportList li span {
+  color: #64748b;
+  font-size: 0.93rem;
+  margin-left: 8px;
+}
+
+.addPrescription {
+  color: #0ea5e9;
   font-weight: 600;
   cursor: pointer;
-  margin-bottom: 8px;
+  margin-bottom: 15px;
+  transition: color 0.2s;
+  display: inline-block;
+}
+
+.addPrescription:hover {
+  color: #0284c7;
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .profileWrapper {
+    flex-direction: column;
+    gap: 28px;
+  }
+  .leftPanel {
+    width: 100%;
+    min-width: unset;
+    margin-bottom: 12px;
+  }
+  .rightPanel {
+    min-width: unset;
+  }
+}
+
+@media (max-width: 700px) {
+  .content {
+    padding: 24px 2vw;
+  }
+  .title {
+    font-size: 1.5rem;
+    margin-bottom: 18px;
+  }
+  .basicInfoRow {
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px 0;
+  }
+  .profileWrapper {
+    gap: 16px;
+  }
+  .leftPanel, .infoBox {
+    padding: 18px 10px;
+    border-radius: 14px;
+  }
+  .onlineStatus {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #22c55e;
+  box-shadow: 0 0 6px #22c55e80;
+  margin-bottom: 6px;
+}
+
+.statusText {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
 }
