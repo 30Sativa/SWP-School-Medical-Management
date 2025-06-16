@@ -12,13 +12,35 @@ import {
   AlertTriangle,
   Package,
   HeartPulse,
+
+  BarChart2,
+  User, // ✅ Thêm icon
+
   BarChart2, // ✅ Thêm icon
+
 } from "lucide-react";
 import style from "./Sidebar.module.css";
+import { useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
   const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        const name =
+          decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"];
+        setUsername(name);
+      } catch (error) {
+        console.error("❌ Lỗi giải mã token:", error);
+      }
+    }
+  }, []);
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
@@ -28,6 +50,15 @@ const Sidebar = () => {
         isOpen ? style.expanded : style.collapsed
       }`}
     >
+      {isOpen && (
+        <div className={style.profileBox}>
+          <div className={style.avatar}>
+            <User size={18} stroke="#20b2aa" />
+          </div>
+          <div className={style.profileName}>{username || "Người dùng"}</div>
+        </div>
+      )}
+
       <div className={style.navItem} onClick={toggleSidebar}>
         <Menu size={20} />
         {isOpen && <span className={style.systemName}>EduHealth</span>}
