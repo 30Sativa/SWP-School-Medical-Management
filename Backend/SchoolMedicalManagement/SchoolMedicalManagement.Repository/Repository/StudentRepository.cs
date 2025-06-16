@@ -41,6 +41,7 @@ namespace SchoolMedicalManagement.Repository.Repository
         {
             return await _context.Students
                 .Include(s => s.Parent)
+                .Include(s => s.Gender)
                 .Where(s => s.ParentId == parentId && s.IsActive == true)
                 .ToListAsync();
         }
