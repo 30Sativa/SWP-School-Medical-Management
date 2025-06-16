@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/sb-Parent/Sidebar";
 import styles from "../../assets/css/HealthProfile.module.css";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const HealthProfile = () => {
   const [profile, setProfile] = useState(null);
@@ -53,12 +55,25 @@ const HealthProfile = () => {
           isActive: formData.isActive,
         }
       );
-      alert("Cập nhật thành công!");
+      toast.success("✅ Cập nhật thành công!", {
+        position: "top-center",
+        autoClose: 1800,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
       setProfile({ ...profile, ...formData });
       setIsEditing(false);
     } catch (error) {
       console.error("Lỗi cập nhật:", error);
-      alert("Cập nhật thất bại!");
+      toast.error("❌ Cập nhật thất bại!", {
+        position: "top-center",
+        autoClose: 1800,
+        theme: "colored",
+      });
     }
   };
 
@@ -67,6 +82,7 @@ const HealthProfile = () => {
 
   return (
     <div className={styles.container}>
+      <ToastContainer />
       <Sidebar />
       <div className={styles.content}>
         <h2 className={styles.title}>
