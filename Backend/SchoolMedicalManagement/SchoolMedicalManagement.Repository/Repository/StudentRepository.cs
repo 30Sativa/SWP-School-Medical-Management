@@ -41,6 +41,7 @@ namespace SchoolMedicalManagement.Repository.Repository
         {
             return await _context.Students
                 .Include(s => s.Parent)
+                .Include(s => s.Gender)
                 .Where(s => s.ParentId == parentId && s.IsActive == true)
                 .ToListAsync();
         }
@@ -69,6 +70,12 @@ namespace SchoolMedicalManagement.Repository.Repository
             return await _context.SaveChangesAsync() > 0;
         }
 
+        public  async Task<Student> UpdateStudent(int id, Student student)
+        {
+            await UpdateAsync(student);
+            return await GetStudentById(student.StudentId);
+        }
+
         // ✅ Lấy hồ sơ sức khỏe
         public async Task<HealthProfile?> GetHealthProfileByStudentId(int studentId)
         {
@@ -83,6 +90,14 @@ namespace SchoolMedicalManagement.Repository.Repository
             return await _context.HealthProfiles
                 .Where(h => h.IsActive == true)
                 .ToListAsync();
+        }
+
+        // Get total count of active students
+        public async Task<int> GetTotalStudentsCount()
+        {
+            return await _context.Students
+                .Where(s => s.IsActive == true)
+                .CountAsync();
         }
     }
 }

@@ -18,7 +18,7 @@ namespace SchoolMedicalManagement.Service.Interface
         Task<BaseResponse> CreateStudent(CreateStudentRequest request);
 
         // Cập nhật học sinh
-        Task<bool> UpdateStudent(UpdateStudentRequest request);
+        Task<BaseResponse> UpdateStudent(int id, UpdateStudentRequest request);
 
         // Xóa mềm học sinh
         Task<bool> DeleteStudent(int studentId);

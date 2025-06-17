@@ -105,6 +105,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     UserId = user.UserId,
                     FullName = user.FullName,
                     RoleName = user.Role.RoleName,
+                    IsFirstLogin = user.IsFirstLogin,
                     Token = new JwtSecurityTokenHandler().WriteToken(token)
                 }
             };

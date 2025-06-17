@@ -21,7 +21,7 @@ public partial class User
 
     public string? Address { get; set; }
 
-    public bool? IsFirstLogin { get; set; }
+    public bool IsFirstLogin { get; set; }
 
     public bool? IsActive { get; set; }
 

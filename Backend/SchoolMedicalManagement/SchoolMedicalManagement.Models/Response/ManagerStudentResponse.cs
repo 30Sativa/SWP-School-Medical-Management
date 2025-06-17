@@ -15,7 +15,7 @@ namespace SchoolMedicalManagement.Models.Response
 
         public DateOnly? DateOfBirth { get; set; }  
 
-        public int? GenderId { get; set; }         // ✔️ có thể chuẩn hóa thêm nếu cần
+        //public int? GenderId { get; set; }         // ✔️ có thể chuẩn hóa thêm nếu cần
 
         public string? GenderName { get; set; }
         public string? Class { get; set; }

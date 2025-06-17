@@ -42,7 +42,12 @@ builder.Services.AddScoped<MedicalHistoryService>();
 builder.Services.AddScoped<HealthCheckSummaryRepository>();
 builder.Services.AddScoped<VaccinationCampaignRepository>();
 builder.Services.AddScoped<MedicalHistoryRepository>();
+builder.Services.AddScoped<MedicationRequestRepository>();
 
+builder.Services.AddScoped<NotificationRepository>();
+builder.Services.AddScoped<NotificationTypeRepository>();
+
+builder.Services.AddScoped<BlogPostRepository>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMedicalHistoryService, MedicalHistoryService>();
@@ -52,10 +57,16 @@ builder.Services.AddScoped<IHealthProfileService, HealthProfileService>();
 builder.Services.AddScoped<IHealthCheckCampaignService, HealthCheckCampaignService>();
 builder.Services.AddScoped<IMedicalSupplyService, MedicalSupplyService>();
 builder.Services.AddScoped<IMedicalEventService, MedicalEventService>();
-
+builder.Services.AddScoped<IMedicationRequestService, MedicationRequestService>();
 builder.Services.AddScoped<IHealthCheckSummaryService, HealthCheckSummaryService>();
 
 builder.Services.AddScoped<IVaccinationCampaignService, VaccinationCampaignService>();
+
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<INotificationTypeService, NotificationTypeService>();
+builder.Services.AddScoped<IBlogPostService, BlogPostService>();
+
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -115,11 +126,42 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                context.Response.StatusCode = 401;
+                context.Response.ContentType = "application/json";
+
+                var message = context.Exception switch
+                {
+                    SecurityTokenExpiredException => "Token đã hết hạn.",
+                    _ => "Token không hợp lệ."
+                };
+
+                return context.Response.WriteAsync($"{{\"error\": \"{message}\"}}");
+            },
+            OnChallenge = context =>
+            {
+                context.HandleResponse(); // Ngăn ASP.NET trả lỗi mặc định
+                context.Response.StatusCode = 401;
+                context.Response.ContentType = "application/json";
+                return context.Response.WriteAsync("{\"error\": \"Bạn chưa đăng nhập hoặc token thiếu.\"}");
+            },
+            OnForbidden = context =>
+            {
+                context.Response.StatusCode = 403;
+                context.Response.ContentType = "application/json";
+                return context.Response.WriteAsync("{\"error\": \"Bạn không có quyền truy cập chức năng này.\"}");
+            }
+        };
     });
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseStaticFiles();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors("AllowAllOrigins");
