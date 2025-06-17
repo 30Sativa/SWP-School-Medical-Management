@@ -1,0 +1,215 @@
+.layoutContainer {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.mainContent {
+  flex: 1;
+  padding: 40px;
+  background-color: #f5f8fc;
+}
+
+.pageTitle {
+  font-size: 28px;
+  font-weight: bold;
+  color: #20b2aa;
+  margin-bottom: 24px;
+}
+.pageTitle span {
+  color: #000;
+}
+
+.contentWrapper {
+  display: flex;
+  gap: 40px;
+}
+
+.leftPanel {
+  width: 280px;
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 16px;
+}
+
+.label {
+  color: #555;
+  margin-top: 8px;
+}
+
+.rightPanel {
+  flex: 1;
+}
+
+.notebookBox {
+  background: white;
+  border-radius: 12px;
+  padding: 24px 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  font-size: 17px;
+  line-height: 2.5;
+}
+
+.line {
+  border-bottom: 1px dashed #ccc;
+  padding: 8px 0;
+  display: flex;
+  justify-content: space-between;
+  color: #333;
+}
+
+.line span {
+  font-weight: 600;
+  margin-right: 20px;
+}
+
+.backContainer {
+  margin-top: 32px;
+  text-align: center;
+}
+
+.backBtn {
+  background-color: transparent;
+  color: #20b2aa;
+  font-weight: 500;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+}
+.backBtn:hover {
+  text-decoration: underline;
+}
+
+.loading {
+  padding: 50px;
+  font-size: 18px;
+  text-align: center;
+}
+
+.actionRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.editBtn,
+.deleteBtn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+}
+
+.editBtn {
+  background-color: #20b2aa;
+  color: white;
+}
+
+.deleteBtn {
+  background-color: #e53935;
+  color: white;
+}
+
+.editBtn:hover {
+  background-color: #20b2aa;
+}
+
+.deleteBtn:hover {
+  background-color: #c62828;
+}
+
+/* Modal overlay nền mờ */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+/* Hộp modal chính */
+.modal {
+  background: white;
+  padding: 24px;
+  border-radius: 10px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal h3 {
+  margin-bottom: 8px;
+  color: #20b2aa;
+  font-size: 20px;
+}
+
+.modal input {
+  padding: 10px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: white; /* ✅ Nền trắng */
+  color: #333; /* Văn bản dễ nhìn */
+}
+
+/* Nút hành động trong modal */
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.modalActions button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.modalActions button:first-child {
+  background-color: #eee;
+  color: #333;
+}
+
+.modalActions button:last-child {
+  background-color: #20b2aa;
+  color: white;
+}
+
+.textBlack {
+  color: #111827;
+}
+
+.textAccent {
+  color: #20b2aa;
+}
+
+.titleGroup h1 {
+  font-size: 50px;
+  margin-bottom: 30px;
+}

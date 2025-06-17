@@ -1,0 +1,245 @@
+.logsPage {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f6fa;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background-color: #00b5b8;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.sidebarLogo {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: flex;
+}
+
+.sidebarLogo img {
+  width: 37px;
+  height: 41px;
+}
+
+.sidebarLogo span {
+  display: block;
+  font-size: 18px;
+  text-align: center;
+}
+
+/* Main Content */
+.mainContent {
+  flex: 1;
+  padding: 0 0 32px 0;
+  min-height: 100vh;
+  background: #f9fafb;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-sizing: border-box;
+}
+
+.logsMain {
+  width: 100%;
+  max-width: none;
+  margin: 0; /* Xóa margin-top để loại bỏ khoảng trắng thừa phía trên */
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(32, 178, 170, 0.1);
+  padding: 24px 32px 24px 32px; /* Giảm padding-top từ 32px xuống 24px */
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Header */
+.dashboardHeaderBar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+  padding: 8px 0 0 0; /* Giảm padding-top từ 20px xuống 8px */
+  margin: 0 0 12px 0;
+}
+
+.titleGroup {
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.titleGroup h1 {
+  font-size: 2.2rem; /* Đồng bộ size với các trang khác, chỉnh lại nếu cần */
+  font-weight: bold;
+  margin: 0;
+  color: #111827;
+}
+
+.textAccent {
+  color: #00b5b8;
+}
+
+.textBlack {
+  color: #111827;
+}
+
+.textWelcome {
+  font-size: 18px;
+  color: #20b2aa;
+  margin-top: 4px;
+}
+
+.headerLeft {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-bottom: 0;
+  padding-left: 0;
+}
+
+/* Search Bar */
+.searchBar {
+  margin-bottom: 32px;
+}
+
+.searchContainer {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.searchInput {
+  border: none;
+  outline: none;
+  padding: 8px 12px;
+  width: 300px;
+  font-size: 14px;
+}
+
+/* Logs List */
+.logsList {
+  width: 100%;
+}
+
+.logsUl {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.logItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  background: #f8fafb;
+  border-radius: 12px;
+  box-shadow: 0 1px 6px rgba(32, 178, 170, 0.06);
+  padding: 18px 20px;
+  transition: box-shadow 0.2s, background 0.2s;
+  border-left: 4px solid #e0e0e0;
+  position: relative;
+}
+
+.logItem:last-child {
+  border-bottom: none;
+}
+
+.logItemHover {
+  background: #e6f7fa;
+  box-shadow: 0 4px 16px rgba(32, 178, 170, 0.13);
+  border-left: 4px solid #20b2aa;
+}
+
+.logTime {
+  font-size: 0.98rem;
+  color: #888;
+  margin-left: 12px;
+  min-width: 110px;
+  text-align: right;
+}
+
+.logIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: #eafaf1;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(32, 178, 170, 0.07);
+}
+
+.logDetails {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.logAction {
+  font-size: 1.08rem;
+  color: #222;
+}
+
+.logUser {
+  color: #20b2aa;
+  font-weight: 500;
+}
+
+/* Log Types */
+.logItem.info {
+  background-color: #e6f4ff;
+}
+
+.logItem.view {
+  background-color: #f0f9ff;
+}
+
+.logItem.warning {
+  background-color: #fef2f2;
+}
+
+/* Title and List Styles */
+.logsTitle {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #20b2aa;
+  margin-bottom: 18px;
+  margin-top: 0;
+  text-align: left;
+}
+
+/* Responsive Styles */
+@media (max-width: 1100px) {
+  .logsMain {
+    max-width: 100%;
+    padding: 18px 4px 18px 4px;
+  }
+}
+
+@media (max-width: 700px) {
+  .logsMain {
+    margin-top: 12px;
+    margin-bottom: 12px;
+    padding: 8px 2px 8px 2px;
+  }
+  .dashboardHeaderBar h1 {
+    font-size: 1.5rem;
+  }
+}

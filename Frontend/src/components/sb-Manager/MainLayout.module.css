@@ -1,0 +1,12 @@
+.layoutContainer {
+  display: flex;
+  min-height: 100vh; /* ✅ sửa từ height -> min-height */
+  width: 100%;
+}
+
+.layoutContent {
+  flex: 1;
+  background-color: #f9fafb;
+  overflow-y: auto;
+  padding: 24px;
+}
