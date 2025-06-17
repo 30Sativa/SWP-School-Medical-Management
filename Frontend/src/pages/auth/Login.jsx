@@ -19,95 +19,49 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const { username, password } = form;
+  e.preventDefault();
+  const { username, password } = form;
 
-    if (!username || !password) {
-      alert("Vui lòng nhập đầy đủ tài khoản và mật khẩu!");
-      return;
-    }
+  if (!username || !password) {
+    alert("Vui lòng nhập đầy đủ tài khoản và mật khẩu!");
+    return;
+  }
 
-    try {
-      setLoading(true);
-      console.log("🔁 Đang gửi request đăng nhập...");
-      const response = await axios.post(
-        "https://swp-school-medical-management.onrender.com/api/User/login",
-        { username, password }
-      );
+  try {
+    setLoading(true);
+    console.log("🔁 Đang gửi request đăng nhập...");
+    const response = await axios.post(
+      "https://swp-school-medical-management.onrender.com/api/User/login",
+      { username, password }
+    );
 
-      const resData = response.data?.data;
-      const token = resData?.token;
+    const resData = response.data?.data;
+    const token = resData?.token;
 
-      console.log("📥 Phản hồi từ server:", response.data);
+    console.log("📥 Phản hồi từ server:", response.data);
 
-      if (response.data.message?.toLowerCase().includes("login successful") && token) {
-        
-        localStorage.setItem("token", token);
-        localStorage.setItem("userId", resData.userId);
+    if (response.data.message?.toLowerCase().includes("login successful") && token) {
+      
+      localStorage.setItem("token", token);
+      localStorage.setItem("userId", resData.userId);
 
-        let roleName = "";
+      let roleName = "";
 
-        try {
-          const decoded = jwtDecode(token); 
-          roleName = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-          console.log("Role:", roleName);
-        } catch (decodeError) {
-          console.error("❌ Lỗi giải mã token:", decodeError);
-          alert("Không xác định được vai trò người dùng.");
-          return;
-        }
-
-        toast.success("Đăng nhập thành công!", {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        });
-
-  
-        setTimeout(() => {
-          if (roleName === "Manager") {
-            navigate("/manager");
-          } else if (roleName === "Nurse") {
-            navigate("/nurse");
-          } else if (roleName === "Parent") {
-
-            (async () => {
-              try {
-                const studentRes = await axios.get(
-                  "https://swp-school-medical-management.onrender.com/api/Student"
-                );
-                const student = studentRes.data.find(
-                  (s) => s.parentId === resData.userId
-                );
-                if (student) {
-                  localStorage.setItem("studentId", student.studentId);
-                } else {
-                  alert("❗Không tìm thấy học sinh tương ứng với phụ huynh này!");
-                }
-                navigate("/parent");
-              } catch (studentError) {
-                console.error("Lỗi khi tìm học sinh:", studentError);
-                alert("Lỗi khi lấy dữ liệu học sinh!");
-              }
-            })();
-          } else {
-            alert("❗ Vai trò không xác định!");
-            navigate("/");
-          }
-        }, 2000);
-      } else {
-        alert("Đăng nhập thất bại!");
+      try {
+        const decoded = jwtDecode(token); 
+        roleName = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+        console.log("Role:", roleName);
+      } catch (decodeError) {
+        console.error("❌ Lỗi giải mã token:", decodeError);
+        alert("Không xác định được vai trò người dùng.");
+        return;
       }
-    } catch (error) {
-      console.error("❌ Lỗi khi gọi API:", error);
-      toast.error("Lỗi kết nối đến server hoặc sai thông tin đăng nhập!", {
+
+      localStorage.setItem("role", roleName);
+
+      toast.success("Đăng nhập thành công!", {
         position: "top-center",
-        autoClose: 2500,
+        autoClose: 1500,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -115,10 +69,42 @@ const Login = () => {
         progress: undefined,
         theme: "colored",
       });
-    } finally {
-      setLoading(false);
+      setTimeout(() => {
+        console.log("Role for redirect:", roleName, "isFirstLogin:", resData.isFirstLogin, "resData:", resData);
+        if (roleName === "Parent" && resData.isFirstLogin) {
+          navigate("/firstlogin");
+          return;
+        }
+        if (roleName === "Manager") {
+          navigate("/manager");
+        } else if (roleName === "Nurse") {
+          navigate("/nurse");
+        } else if (roleName === "Parent") {
+          navigate("/parent");
+        } else {
+          alert("❗ Vai trò không xác định!");
+          navigate("/");
+        }
+      }, 1600);
+    } else {
+      alert("Đăng nhập thất bại!");
     }
-  };
+  } catch (error) {
+    console.error("❌ Lỗi khi gọi API:", error);
+    toast.error("Lỗi kết nối đến server hoặc sai thông tin đăng nhập!", {
+      position: "top-center",
+      autoClose: 2500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="login-page-wrapper">
