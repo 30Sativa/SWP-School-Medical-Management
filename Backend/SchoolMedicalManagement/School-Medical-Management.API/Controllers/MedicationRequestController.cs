@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Azure;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolMedicalManagement.Models.Request;
 using SchoolMedicalManagement.Service.Interface;
@@ -94,6 +95,27 @@ namespace School_Medical_Management.API.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, $"Error creating request: {ex.Message}");
             }
+        }
+
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllMedicalRequests()
+        {
+            try
+            {
+                var requests = await _medicationRequestService.GetAllMedicalRequest();
+                return Ok(requests);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving all requests: {ex.Message}");
+            }
+        }
+
+        [HttpGet("student/{StudentId}")]
+        public async Task<IActionResult> GetMedicalRequestByStudent(string studentId)
+        {
+            var reponse = await _medicationRequestService.GetMedicalRequestByStudentId(studentId);
+            return StatusCode(int.Parse(reponse.Status), reponse);
         }
     }
 }

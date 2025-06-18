@@ -119,5 +119,61 @@ namespace SchoolMedicalManagement.Service.Implement
                 }
             };
         }
+
+        public async Task<List<MedicationRequestResponse>> GetAllMedicalRequest()
+        {
+            var list = await _medicationRequestRepository.GetAllRequestsAsync();
+            List<MedicationRequestResponse> responseList = new List<MedicationRequestResponse>();
+            foreach (var item in list)
+            {
+                responseList.Add(new MedicationRequestResponse
+                {
+                    RequestID = item.RequestId,
+                    StudentName = item.Student?.FullName ?? "Unknown",
+                    ParentName = item.Parent?.FullName ?? "Unknown",
+                    MedicationName = item.MedicationName,
+                    Dosage = item.Dosage,
+                    Instructions = item.Instructions,
+                    Status = item.Status.StatusId == 1 ? "Chờ duyệt" : (item.Status.StatusId == 2 ? "Đã duyệt" : "Từ chối"),
+                    ImagePath = item.ImagePath,
+                    ReceivedByName = item.ReceivedByNavigation?.FullName,
+                    RequestDate = item.RequestDate
+                });
+            }
+            return responseList; 
+        }
+
+        public async Task<BaseResponse> GetMedicalRequestByStudentId(string studentid)
+        {
+            var response = await _medicationRequestRepository.GetRequestByStudentIdAsync(studentid);
+
+            if(response == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = "Ko tim thay",
+                    Data = null
+                };
+            }
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "thanh cobng",
+                Data = new MedicationRequestResponse
+                {
+                    RequestID = response.RequestId,
+                    StudentName = response.Student?.FullName ?? "Unknown",
+                    ParentName = response.Parent?.FullName ?? "Unknown",
+                    MedicationName = response.MedicationName,
+                    Dosage = response.Dosage,
+                    Instructions = response.Instructions,
+                    Status = response.Status.StatusId == 1 ? "Chờ duyệt" : (response.Status.StatusId == 2 ? "Đã duyệt" : "Từ chối"),
+                    ImagePath = response.ImagePath,
+                    ReceivedByName = response.ReceivedByNavigation?.FullName,
+                    RequestDate = response.RequestDate
+                }
+            };
+        }
     }
 }

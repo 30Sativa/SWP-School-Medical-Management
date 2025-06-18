@@ -76,5 +76,30 @@ namespace SchoolMedicalManagement.Repository.Repository
         }
 
 
+        // ✅ Lấy tất cả danh sách 
+
+        public Task<List<MedicationRequest>> GetAllRequestsAsync()
+        {
+            return _context.MedicationRequests
+                .Include(r => r.Student)
+                .Include(r => r.Status)
+                .Include(r => r.ReceivedByNavigation)
+                .Where(r => r.IsActive == true)
+                .ToListAsync();
+        }
+
+
+        // ✅ lấy theo studentid
+
+        public Task<MedicationRequest?> GetRequestByStudentIdAsync(string studentId)
+        {
+            return _context.MedicationRequests
+                .Include(e => e.Student)
+                .Include(e => e.Status)
+                .FirstOrDefaultAsync(e => e.StudentId.Equals(studentId));
+        }
+
+
+
     }
 }

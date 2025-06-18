@@ -15,5 +15,9 @@ namespace SchoolMedicalManagement.Service.Interface
         // ✅ sửa: thêm imagePath (nếu đang lưu ảnh thật từ controller)
         Task<BaseResponse> CreateMedicationRequestAsync(CreateMedicationRequest request, Guid parentId, string? imagePath);
 
+        Task<List<MedicationRequestResponse>> GetAllMedicalRequest();
+
+        Task<BaseResponse> GetMedicalRequestByStudentId(string studentid);
+
     }
 }

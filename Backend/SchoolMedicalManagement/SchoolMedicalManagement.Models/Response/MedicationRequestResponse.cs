@@ -10,6 +10,7 @@ namespace SchoolMedicalManagement.Models.Response
     {
         public int RequestID { get; set; }
         public string StudentName { get; set; }
+        public string ParentName { get; set; }
         public string MedicationName { get; set; }
         public string Dosage { get; set; }
         public string Instructions { get; set; }
