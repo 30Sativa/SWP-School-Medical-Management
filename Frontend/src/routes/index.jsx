@@ -20,6 +20,7 @@ import BlogCreate from "../pages/manager/BlogCreate";
 import Incident from "../pages/nurse/Incident";
 import MedicalSupplies from "../pages/nurse/MedicalSupplies";
 import FirstLogin from "../pages/auth/FirstLogin";
+import SendNotifications from "../pages/manager/SendNotifications";
 
 const AppRouter = () => {
   return (
@@ -40,6 +41,7 @@ const AppRouter = () => {
       <Route path="/blog" element={<Blog />} />
       <Route path="/blog/create" element={<BlogCreate />} />
       <Route path="/firstlogin" element={<FirstLogin />} />
+      <Route path="/sendnotifications" element={<SendNotifications />} />
       {/* Add more routes as needed */}
 
       <Route path="/vaccines" element={<VaccinCampaign />} />

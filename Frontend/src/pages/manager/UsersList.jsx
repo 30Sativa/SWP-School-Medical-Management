@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Input, Table, message, Modal, Form, Select, Typography, Avatar, Tag } from "antd";
-import { SearchOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { SearchOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { Edit2, Trash2 } from "lucide-react";
 import Sidebar from "../../components/sb-Manager/Sidebar";
 import style from "../../assets/css/userList.module.css";  // Import CSS riêng cho UserList
 import axios from "axios";
@@ -102,10 +103,14 @@ const UsersList = () => {
       title: "Hành động",
       key: "action",
       render: (_, record) => (
-        <>
-          <Button type="link" icon={<EditOutlined />} onClick={() => showModal("edit", record)} />
-          <Button type="link" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.userID)} />
-        </>
+        <div className={style.actionGroup}>
+          <button className={style.editBtn} onClick={() => showModal("edit", record)}>
+            <Edit2 size={16} /> Sửa
+          </button>
+          <button className={style.deleteBtn} onClick={() => handleDelete(record.userID)}>
+            <Trash2 size={16} /> Xóa
+          </button>
+        </div>
       ),
     },
   ];
@@ -280,8 +285,14 @@ const handleModalSubmit = async (values) => {
                     <td>{user.phone}</td>
                     <td>{user.address}</td>
                     <td>
-                      <button className={style.btn} onClick={() => showModal("edit", user)}>Sửa</button>
-                      <button className={style.btn} onClick={() => handleDelete(realUserId)}>Xóa</button>
+                      <div className={style.actionGroup}>
+                        <button className={style.editBtn} onClick={() => showModal("edit", user)}>
+                          <Edit2 size={16} /> Sửa
+                        </button>
+                        <button className={style.deleteBtn} onClick={() => handleDelete(realUserId)}>
+                          <Trash2 size={16} /> Xóa
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );

@@ -154,7 +154,10 @@ const Blog = () => {
                   <span className={blogStyle.blogAuthor}>Tác giả: {blog.authorName}</span>
                 </div>
                 <h2 className={blogStyle.blogTitle}>{blog.title}</h2>
-                <p className={blogStyle.blogDesc}>{blog.content}</p>
+                <div
+                  className={blogStyle.blogDesc}
+                  dangerouslySetInnerHTML={{ __html: blog.content }}
+                />
                 <div className={blogStyle.blogActionsRow}>
                   <div className={blogStyle.blogActionIcons}>
                     <EditOutlined style={{color: '#6a8dff', fontSize: 20, cursor: 'pointer'}} onClick={() => handleEdit(blog.postId)} />
