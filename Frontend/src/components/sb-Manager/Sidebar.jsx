@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Home, Users, ClipboardList, Rss, Flag, LogOut, Menu } from "lucide-react";
+import { Home, Users, ClipboardList, Rss, Flag, LogOut, Menu, Bell, ClipboardPlus } from "lucide-react";
 import style from "./Sidebar.module.css";
 
 const Sidebar = () => {
@@ -35,6 +35,14 @@ const Sidebar = () => {
         <NavLink to="/reports" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
           <Flag size={20} />
           <span>Báo cáo thống kê</span>
+        </NavLink>
+        <NavLink to="/sendnotifications" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
+          <Bell size={20} />
+          <span>Gửi thông báo</span>
+        </NavLink>
+        <NavLink to="/vaccinecampaign" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
+          <ClipboardPlus size={20} />
+          <span>Tạo chiến dịch tiêm chủng</span>
         </NavLink>
         <button
           className={style.navItem}

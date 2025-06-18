@@ -1,0 +1,114 @@
+/* SendNotification.module.css - đồng bộ style hiện đại, bo góc, shadow, màu chủ đạo, responsive */
+
+.container {
+  display: flex;
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+.mainContent {
+  flex: 1;
+  padding: 0 0 32px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.headerBar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px 0 0 20px;
+  margin-bottom: 0;
+}
+
+.titleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.textBlack {
+  color: #222;
+  font-weight: 700;
+  font-size: 3rem;
+}
+.textAccent {
+  color: #20b2aa;
+  font-weight: 700;
+  font-size: 3rem;
+  margin-left: 6px;
+}
+
+.cardSection {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin-top: 18px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(32,178,170,0.13);
+  padding: 32px 32px 24px 32px;
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  transition: box-shadow 0.2s;
+}
+
+.input, .textarea {
+  width: 100%;
+  padding: 14px 12px;
+  border-radius: 10px;
+  border: 1.5px solid #38b2ac;
+  font-size: 16px;
+  outline: none;
+  background: #f8fafc;
+  box-shadow: 0 1px 6px rgba(32,178,170,0.07);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input:focus, .textarea:focus {
+  border-color: #20b2aa;
+  box-shadow: 0 0 0 2px rgba(32,178,170,0.13);
+}
+
+.button {
+  width: 100%;
+  background: linear-gradient(90deg,#20b2aa,#38b2ac);
+  color: #fff;
+  font-weight: 700;
+  font-size: 17px;
+  border-radius: 10px;
+  padding: 14px 0;
+  margin-top: 8px;
+  box-shadow: 0 2px 12px rgba(32,178,170,0.13);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.button:disabled {
+  background: #b2dfdb;
+  cursor: not-allowed;
+}
+
+@media (max-width: 700px) {
+  .card {
+    padding: 16px 6px 16px 6px;
+    border-radius: 10px;
+  }
+  .mainContent {
+    padding: 0 0 12px 0;
+  }
+  .headerBar h1 {
+    font-size: 1.5rem;
+  }
+}
