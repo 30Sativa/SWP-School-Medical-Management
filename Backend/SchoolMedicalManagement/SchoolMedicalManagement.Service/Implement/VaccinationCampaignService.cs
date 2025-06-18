@@ -39,15 +39,68 @@ namespace SchoolMedicalManagement.Service.Implement
                 Description = c.Description,
                 CreatedBy = c.CreatedBy,
                 CreatedByName = c.CreatedByNavigation?.FullName,
-                                         //Nếu consent list khác null thì .Lấy count nếu null thì l
-                TotalConsentRequests = c.VaccinationConsentRequests?.Count ?? 0, //Trả về tổng số đồng ý tiêm chủng
-                TotalVaccinationRecords = c.VaccinationRecords?.Count ?? 0 // Trả về tổng số bản ghi trong đợt tiêm
+                StatusId = c.StatusId,
+                StatusName = c.Status?.StatusName,
+                TotalConsentRequests = c.VaccinationConsentRequests?.Count ?? 0,
+                TotalVaccinationRecords = c.VaccinationRecords?.Count ?? 0
             }).ToList();
 
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
                 Message = "Successfully get list vaccination campaigns",
+                Data = response
+            };
+        }
+
+        // Lấy danh sách chiến dịch tiêm chủng đang hoạt động
+        public async Task<BaseResponse> GetActiveVaccinationCampaignsAsync()
+        {
+            var campaigns = await _campaignRepository.GetAllActiveCampaigns();
+            var response = campaigns.Select(c => new VaccinationCampaignResponse
+            {
+                CampaignId = c.CampaignId,
+                VaccineName = c.VaccineName,
+                Date = c.Date,
+                Description = c.Description,
+                CreatedBy = c.CreatedBy,
+                CreatedByName = c.CreatedByNavigation?.FullName,
+                StatusId = c.StatusId,
+                StatusName = c.Status?.StatusName,
+                TotalConsentRequests = c.VaccinationConsentRequests?.Count ?? 0,
+                TotalVaccinationRecords = c.VaccinationRecords?.Count ?? 0
+            }).ToList();
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Successfully get list active vaccination campaigns",
+                Data = response
+            };
+        }
+
+        // Lấy danh sách chiến dịch theo trạng thái
+        public async Task<BaseResponse> GetVaccinationCampaignsByStatusAsync(int statusId)
+        {
+            var campaigns = await _campaignRepository.GetCampaignsByStatus(statusId);
+            var response = campaigns.Select(c => new VaccinationCampaignResponse
+            {
+                CampaignId = c.CampaignId,
+                VaccineName = c.VaccineName,
+                Date = c.Date,
+                Description = c.Description,
+                CreatedBy = c.CreatedBy,
+                CreatedByName = c.CreatedByNavigation?.FullName,
+                StatusId = c.StatusId,
+                StatusName = c.Status?.StatusName,
+                TotalConsentRequests = c.VaccinationConsentRequests?.Count ?? 0,
+                TotalVaccinationRecords = c.VaccinationRecords?.Count ?? 0
+            }).ToList();
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = $"Successfully get vaccination campaigns with status ID {statusId}",
                 Data = response
             };
         }
@@ -74,6 +127,8 @@ namespace SchoolMedicalManagement.Service.Implement
                 Description = campaign.Description,
                 CreatedBy = campaign.CreatedBy,
                 CreatedByName = campaign.CreatedByNavigation?.FullName,
+                StatusId = campaign.StatusId,
+                StatusName = campaign.Status?.StatusName,
                 TotalConsentRequests = campaign.VaccinationConsentRequests?.Count ?? 0,
                 TotalVaccinationRecords = campaign.VaccinationRecords?.Count ?? 0
             };
@@ -94,7 +149,8 @@ namespace SchoolMedicalManagement.Service.Implement
                 VaccineName = request.VaccineName,
                 Date = request.Date,
                 Description = request.Description,
-                CreatedBy = request.CreatedBy
+                CreatedBy = request.CreatedBy,
+                StatusId = request.StatusId ?? 1 // Default to status 1 if not provided
             };
 
             var created = await _campaignRepository.CreateCampaign(campaign);
@@ -119,7 +175,9 @@ namespace SchoolMedicalManagement.Service.Implement
                     Date = created.Date,
                     Description = created.Description,
                     CreatedBy = created.CreatedBy,
-                    CreatedByName = created.CreatedByNavigation?.FullName
+                    CreatedByName = created.CreatedByNavigation?.FullName,
+                    StatusId = created.StatusId,
+                    StatusName = created.Status?.StatusName
                 }
             };
         }
@@ -411,84 +469,289 @@ namespace SchoolMedicalManagement.Service.Implement
         }
 
         // Lấy danh sách yêu cầu đã đồng ý của một chiến dịch
-    public async Task<BaseResponse> GetApprovedConsentRequestsAsync(int campaignId)
-    {
-        var campaign = await _campaignRepository.GetCampaignById(campaignId);
-        if (campaign == null)
+        public async Task<BaseResponse> GetApprovedConsentRequestsAsync(int campaignId)
         {
+            var campaign = await _campaignRepository.GetCampaignById(campaignId);
+            if (campaign == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Không tìm thấy chiến dịch tiêm chủng với ID {campaignId}",
+                    Data = null
+                };
+            }
+
+            var consentRequests = await _campaignRepository.GetCampaignConsentRequests(campaignId);
+            var approvedRequests = consentRequests
+                .Where(cr => cr.ConsentStatusId == 2) // 2: Đồng ý
+                .Select(cr => new ConsentRequestResponse
+                {
+                    RequestId = cr.RequestId,
+                    StudentId = cr.StudentId,
+                    StudentName = cr.Student?.FullName,
+                    CampaignId = cr.CampaignId,
+                    CampaignName = cr.Campaign?.VaccineName,
+                    ParentId = cr.ParentId,
+                    ParentName = cr.Parent?.FullName,
+                    RequestDate = cr.RequestDate,
+                    ConsentStatusId = cr.ConsentStatusId,
+                    ConsentStatusName = cr.ConsentStatus?.ConsentStatusName,
+                    ConsentDate = cr.ConsentDate
+                }).ToList();
+
             return new BaseResponse
             {
-                Status = StatusCodes.Status404NotFound.ToString(),
-                Message = $"Không tìm thấy chiến dịch tiêm chủng với ID {campaignId}",
-                Data = null
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách yêu cầu đã đồng ý thành công",
+                Data = approvedRequests
             };
         }
 
-        var consentRequests = await _campaignRepository.GetCampaignConsentRequests(campaignId);
-        var approvedRequests = consentRequests
-            .Where(cr => cr.ConsentStatusId == 2) // 2: Đồng ý
-            .Select(cr => new ConsentRequestResponse
+        // Lấy danh sách yêu cầu từ chối của một chiến dịch
+        public async Task<BaseResponse> GetDeclinedConsentRequestsAsync(int campaignId)
+        {
+            var campaign = await _campaignRepository.GetCampaignById(campaignId);
+            if (campaign == null)
             {
-                RequestId = cr.RequestId,
-                StudentId = cr.StudentId,
-                StudentName = cr.Student?.FullName,
-                CampaignId = cr.CampaignId,
-                CampaignName = cr.Campaign?.VaccineName,
-                ParentId = cr.ParentId,
-                ParentName = cr.Parent?.FullName,
-                RequestDate = cr.RequestDate,
-                ConsentStatusId = cr.ConsentStatusId,
-                ConsentStatusName = cr.ConsentStatus?.ConsentStatusName,
-                ConsentDate = cr.ConsentDate
-            }).ToList();
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Không tìm thấy chiến dịch tiêm chủng với ID {campaignId}",
+                    Data = null
+                };
+            }
 
-        return new BaseResponse
-        {
-            Status = StatusCodes.Status200OK.ToString(),
-            Message = "Lấy danh sách yêu cầu đã đồng ý thành công",
-            Data = approvedRequests
-        };
-    }
+            var consentRequests = await _campaignRepository.GetCampaignConsentRequests(campaignId);
+            var declinedRequests = consentRequests
+                .Where(cr => cr.ConsentStatusId == 3) // 3: Từ chối
+                .Select(cr => new ConsentRequestResponse
+                {
+                    RequestId = cr.RequestId,
+                    StudentId = cr.StudentId,
+                    StudentName = cr.Student?.FullName,
+                    CampaignId = cr.CampaignId,
+                    CampaignName = cr.Campaign?.VaccineName,
+                    ParentId = cr.ParentId,
+                    ParentName = cr.Parent?.FullName,
+                    RequestDate = cr.RequestDate,
+                    ConsentStatusId = cr.ConsentStatusId,
+                    ConsentStatusName = cr.ConsentStatus?.ConsentStatusName,
+                    ConsentDate = cr.ConsentDate
+                }).ToList();
 
-         // Lấy danh sách yêu cầu từ chối của một chiến dịch
-    public async Task<BaseResponse> GetDeclinedConsentRequestsAsync(int campaignId)
-    {
-        var campaign = await _campaignRepository.GetCampaignById(campaignId);
-        if (campaign == null)
-        {
             return new BaseResponse
             {
-                Status = StatusCodes.Status404NotFound.ToString(),
-                Message = $"Không tìm thấy chiến dịch tiêm chủng với ID {campaignId}",
-                Data = null
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách yêu cầu từ chối thành công",
+                Data = declinedRequests
             };
         }
 
-        var consentRequests = await _campaignRepository.GetCampaignConsentRequests(campaignId);
-        var declinedRequests = consentRequests
-            .Where(cr => cr.ConsentStatusId == 3) // 3: Từ chối
-            .Select(cr => new ConsentRequestResponse
+        // Cập nhật chiến dịch tiêm chủng
+        public async Task<BaseResponse> UpdateVaccinationCampaignAsync(UpdateVaccinationCampaignRequest request)
+        {
+            var campaign = await _campaignRepository.GetCampaignById(request.CampaignId);
+            if (campaign == null)
             {
-                RequestId = cr.RequestId,
-                StudentId = cr.StudentId,
-                StudentName = cr.Student?.FullName,
-                CampaignId = cr.CampaignId,
-                CampaignName = cr.Campaign?.VaccineName,
-                ParentId = cr.ParentId,
-                ParentName = cr.Parent?.FullName,
-                RequestDate = cr.RequestDate,
-                ConsentStatusId = cr.ConsentStatusId,
-                ConsentStatusName = cr.ConsentStatus?.ConsentStatusName,
-                ConsentDate = cr.ConsentDate
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Vaccination campaign with ID {request.CampaignId} not found",
+                    Data = null
+                };
+            }
+
+            // Cập nhật thông tin chiến dịch
+            campaign.VaccineName = request.VaccineName;
+            campaign.Date = request.Date;
+            campaign.Description = request.Description;
+            campaign.StatusId = request.StatusId;
+
+            var updated = await _campaignRepository.UpdateCampaign(campaign);
+            if (updated == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Failed to update vaccination campaign",
+                    Data = null
+                };
+            }
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Successfully updated vaccination campaign",
+                Data = new VaccinationCampaignResponse
+                {
+                    CampaignId = updated.CampaignId,
+                    VaccineName = updated.VaccineName,
+                    Date = updated.Date,
+                    Description = updated.Description,
+                    CreatedBy = updated.CreatedBy,
+                    CreatedByName = updated.CreatedByNavigation?.FullName,
+                    StatusId = updated.StatusId,
+                    StatusName = updated.Status?.StatusName
+                }
+            };
+        }
+
+        // Vô hiệu hóa chiến dịch tiêm chủng (chuyển từ đang hoạt động sang đã kết thúc)
+        public async Task<BaseResponse> DeactivateVaccinationCampaignAsync(int campaignId)
+        {
+            var updated = await _campaignRepository.DeactivateCampaign(campaignId);
+            if (updated == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Campaign not found or is not active",
+                    Data = null
+                };
+            }
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Successfully deactivated vaccination campaign",
+                Data = new VaccinationCampaignResponse
+                {
+                    CampaignId = updated.CampaignId,
+                    VaccineName = updated.VaccineName,
+                    Date = updated.Date,
+                    Description = updated.Description,
+                    CreatedBy = updated.CreatedBy,
+                    CreatedByName = updated.CreatedByNavigation?.FullName,
+                    StatusId = updated.StatusId,
+                    StatusName = updated.Status?.StatusName
+                }
+            };
+        }
+
+        // Kích hoạt lại chiến dịch tiêm chủng (chuyển từ đã kết thúc sang đang hoạt động)
+        public async Task<BaseResponse> ActivateVaccinationCampaignAsync(int campaignId)
+        {
+            var updated = await _campaignRepository.ActivateCampaign(campaignId);
+            if (updated == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Campaign not found or is not closed",
+                    Data = null
+                };
+            }
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Successfully activated vaccination campaign",
+                Data = new VaccinationCampaignResponse
+                {
+                    CampaignId = updated.CampaignId,
+                    VaccineName = updated.VaccineName,
+                    Date = updated.Date,
+                    Description = updated.Description,
+                    CreatedBy = updated.CreatedBy,
+                    CreatedByName = updated.CreatedByNavigation?.FullName,
+                    StatusId = updated.StatusId,
+                    StatusName = updated.Status?.StatusName
+                }
+            };
+        }
+
+        // Lấy thống kê chiến dịch tiêm chủng
+        public async Task<BaseResponse> GetCampaignStatisticsAsync()
+        {
+            var statistics = await _campaignRepository.GetCampaignStatistics();
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Successfully retrieved campaign statistics",
+                Data = statistics
+            };
+        }
+
+        // Lấy danh sách chiến dịch theo khoảng thời gian
+        public async Task<BaseResponse> GetCampaignsByDateRangeAsync(DateOnly startDate, DateOnly endDate)
+        {
+            var campaigns = await _campaignRepository.GetCampaignsByDateRange(startDate, endDate);
+            var response = campaigns.Select(c => new VaccinationCampaignResponse
+            {
+                CampaignId = c.CampaignId,
+                VaccineName = c.VaccineName,
+                Date = c.Date,
+                Description = c.Description,
+                CreatedBy = c.CreatedBy,
+                CreatedByName = c.CreatedByNavigation?.FullName,
+                StatusId = c.StatusId,
+                StatusName = c.Status?.StatusName,
+                TotalConsentRequests = c.VaccinationConsentRequests?.Count ?? 0,
+                TotalVaccinationRecords = c.VaccinationRecords?.Count ?? 0
             }).ToList();
 
-        return new BaseResponse
-        {
-            Status = StatusCodes.Status200OK.ToString(),
-            Message = "Lấy danh sách yêu cầu từ chối thành công",
-            Data = declinedRequests
-        };
-    }
-}
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = $"Successfully get campaigns from {startDate:dd/MM/yyyy} to {endDate:dd/MM/yyyy}",
+                Data = response
+            };
+        }
 
+        // Lấy danh sách chiến dịch theo người tạo
+        public async Task<BaseResponse> GetCampaignsByCreatorAsync(Guid creatorId)
+        {
+            var campaigns = await _campaignRepository.GetCampaignsByCreator(creatorId);
+            var response = campaigns.Select(c => new VaccinationCampaignResponse
+            {
+                CampaignId = c.CampaignId,
+                VaccineName = c.VaccineName,
+                Date = c.Date,
+                Description = c.Description,
+                CreatedBy = c.CreatedBy,
+                CreatedByName = c.CreatedByNavigation?.FullName,
+                StatusId = c.StatusId,
+                StatusName = c.Status?.StatusName,
+                TotalConsentRequests = c.VaccinationConsentRequests?.Count ?? 0,
+                TotalVaccinationRecords = c.VaccinationRecords?.Count ?? 0
+            }).ToList();
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Successfully get campaigns by creator",
+                Data = response
+            };
+        }
+
+        // Kiểm tra trạng thái chiến dịch
+        public async Task<BaseResponse> CheckCampaignStatusAsync(int campaignId)
+        {
+            var status = await _campaignRepository.GetCampaignStatus(campaignId);
+            if (!status.HasValue)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Campaign with ID {campaignId} not found",
+                    Data = null
+                };
+            }
+
+            var statusName = status.Value switch
+            {
+                1 => "Đang hoạt động",
+                2 => "Đã kết thúc",
+                _ => "Không xác định"
+            };
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Successfully retrieved campaign status",
+                Data = new { CampaignId = campaignId, StatusId = status.Value, StatusName = statusName }
+            };
+        }
+    }
 }

@@ -13,11 +13,26 @@ namespace SchoolMedicalManagement.Service.Interface
         // Lấy danh sách chiến dịch tiêm chủng
         Task<BaseResponse> GetVaccinationCampaignsAsync();
 
+        // Lấy danh sách chiến dịch tiêm chủng đang hoạt động
+        Task<BaseResponse> GetActiveVaccinationCampaignsAsync();
+
+        // Lấy danh sách chiến dịch tiêm chủng theo trạng thái
+        Task<BaseResponse> GetVaccinationCampaignsByStatusAsync(int statusId);
+
         // Lấy chi tiết một chiến dịch tiêm chủng
         Task<BaseResponse> GetVaccinationCampaignAsync(int campaignId);
 
         // Tạo mới chiến dịch tiêm chủng
         Task<BaseResponse> CreateVaccinationCampaignAsync(CreateVaccinationCampaignRequest request);
+
+        // Cập nhật chiến dịch tiêm chủng
+        Task<BaseResponse> UpdateVaccinationCampaignAsync(UpdateVaccinationCampaignRequest request);
+
+        // Vô hiệu hóa chiến dịch tiêm chủng
+        Task<BaseResponse> DeactivateVaccinationCampaignAsync(int campaignId);
+
+        // Kích hoạt lại chiến dịch tiêm chủng
+        Task<BaseResponse> ActivateVaccinationCampaignAsync(int campaignId);
 
         // Lấy danh sách tất cả yêu cầu xác nhận của một chiến dịch
         Task<BaseResponse> GetCampaignConsentRequestsAsync(int campaignId);
@@ -39,5 +54,17 @@ namespace SchoolMedicalManagement.Service.Interface
 
          // Lấy danh sách học sinh từ chối tiêm của một chiến dịch
         Task<BaseResponse> GetDeclinedConsentRequestsAsync(int campaignId);
+
+        // Lấy thống kê chiến dịch tiêm chủng
+        Task<BaseResponse> GetCampaignStatisticsAsync();
+
+        // Lấy danh sách chiến dịch theo khoảng thời gian
+        Task<BaseResponse> GetCampaignsByDateRangeAsync(DateOnly startDate, DateOnly endDate);
+
+        // Lấy danh sách chiến dịch theo người tạo
+        Task<BaseResponse> GetCampaignsByCreatorAsync(Guid creatorId);
+
+        // Kiểm tra trạng thái chiến dịch
+        Task<BaseResponse> CheckCampaignStatusAsync(int campaignId);
     }
 }

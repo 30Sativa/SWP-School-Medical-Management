@@ -49,7 +49,6 @@ namespace SchoolMedicalManagement.Service.Implement
                     ToothNotes = s.ToothNotes,
                     GeneralNote = s.GeneralNote,
                     FollowUpNote = s.FollowUpNote,
-                    ConsentStatusId = s.ConsentStatusId,
                     IsActive = s.IsActive
                 });
             }
@@ -93,7 +92,6 @@ namespace SchoolMedicalManagement.Service.Implement
                     ToothNotes = s.ToothNotes,
                     GeneralNote = s.GeneralNote,
                     FollowUpNote = s.FollowUpNote,
-                    ConsentStatusId = s.ConsentStatusId,
                     IsActive = s.IsActive
                 }
             };
@@ -119,7 +117,6 @@ namespace SchoolMedicalManagement.Service.Implement
                 ToothNotes = request.ToothNotes,
                 GeneralNote = request.GeneralNote,
                 FollowUpNote = request.FollowUpNote,
-                ConsentStatusId = request.ConsentStatusId,
                 IsActive = request.IsActive ?? true
             };
 
@@ -185,7 +182,6 @@ namespace SchoolMedicalManagement.Service.Implement
                     ToothNotes = created.ToothNotes,
                     GeneralNote = created.GeneralNote,
                     FollowUpNote = created.FollowUpNote,
-                    ConsentStatusId = created.ConsentStatusId,
                     IsActive = created.IsActive
                 }
             };
@@ -217,7 +213,6 @@ namespace SchoolMedicalManagement.Service.Implement
             s.ToothNotes = string.IsNullOrEmpty(request.ToothNotes) ? s.ToothNotes : request.ToothNotes;
             s.GeneralNote = string.IsNullOrEmpty(request.GeneralNote) ? s.GeneralNote : request.GeneralNote;
             s.FollowUpNote = string.IsNullOrEmpty(request.FollowUpNote) ? s.FollowUpNote : request.FollowUpNote;
-            s.ConsentStatusId = request.ConsentStatusId ?? s.ConsentStatusId;
             s.IsActive = request.IsActive ?? s.IsActive;
 
 
@@ -256,7 +251,6 @@ namespace SchoolMedicalManagement.Service.Implement
                     ToothNotes = updated.ToothNotes,
                     GeneralNote = updated.GeneralNote,
                     FollowUpNote = updated.FollowUpNote,
-                    ConsentStatusId = updated.ConsentStatusId,
                     IsActive = updated.IsActive
                 }
             };

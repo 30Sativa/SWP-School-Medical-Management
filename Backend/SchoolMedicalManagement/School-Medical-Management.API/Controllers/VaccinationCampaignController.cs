@@ -27,6 +27,22 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
+        // Lấy danh sách chiến dịch tiêm chủng đang hoạt động
+        [HttpGet("campaigns/active")]
+        public async Task<IActionResult> GetActiveVaccinationCampaigns()
+        {
+            var response = await _vaccinationCampaignService.GetActiveVaccinationCampaignsAsync();
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
+        // Lấy danh sách chiến dịch tiêm chủng theo trạng thái
+        [HttpGet("campaigns/status/{statusId}")]
+        public async Task<IActionResult> GetVaccinationCampaignsByStatus([FromRoute] int statusId)
+        {
+            var response = await _vaccinationCampaignService.GetVaccinationCampaignsByStatusAsync(statusId);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
         // Lấy thông tin chi tiết một chiến dịch tiêm chủng
         [HttpGet("campaigns/{id}")]
         public async Task<IActionResult> GetVaccinationCampaign([FromRoute] int id)
@@ -40,6 +56,30 @@ namespace School_Medical_Management.API.Controllers
         public async Task<IActionResult> CreateVaccinationCampaign([FromBody] CreateVaccinationCampaignRequest request)
         {
             var response = await _vaccinationCampaignService.CreateVaccinationCampaignAsync(request);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
+        // Cập nhật một chiến dịch tiêm chủng
+        [HttpPut("campaigns")]
+        public async Task<IActionResult> UpdateVaccinationCampaign([FromBody] UpdateVaccinationCampaignRequest request)
+        {
+            var response = await _vaccinationCampaignService.UpdateVaccinationCampaignAsync(request);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
+        // Vô hiệu hóa một chiến dịch tiêm chủng
+        [HttpPut("campaigns/{id}/deactivate")]
+        public async Task<IActionResult> DeactivateVaccinationCampaign([FromRoute] int id)
+        {
+            var response = await _vaccinationCampaignService.DeactivateVaccinationCampaignAsync(id);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
+        // Kích hoạt lại một chiến dịch tiêm chủng
+        [HttpPut("campaigns/{id}/activate")]
+        public async Task<IActionResult> ActivateVaccinationCampaign([FromRoute] int id)
+        {
+            var response = await _vaccinationCampaignService.ActivateVaccinationCampaignAsync(id);
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 

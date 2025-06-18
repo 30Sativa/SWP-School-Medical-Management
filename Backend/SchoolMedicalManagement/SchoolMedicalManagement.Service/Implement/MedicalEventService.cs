@@ -128,8 +128,12 @@ public class MedicalEventService : IMedicalEventService
                 Data = null
             };
         }
-
-        var histories = await _medicalHistoryRepository.GetAllByStudentIdMedicalHistory(getid.StudentId);
+        // kiểm tra xem StudentId có tồn tại không trước khi gọi method:
+        var histories = new List<MedicalHistory>();
+        if (getid.StudentId.HasValue)
+        {
+            histories = await _medicalHistoryRepository.GetAllByStudentIdMedicalHistory(getid.StudentId.Value);
+        }
 
         return new BaseResponse
         {
