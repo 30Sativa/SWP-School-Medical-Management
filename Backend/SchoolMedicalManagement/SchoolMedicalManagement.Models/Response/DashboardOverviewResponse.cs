@@ -26,6 +26,11 @@ namespace SchoolMedicalManagement.Models.Response
         // Số lượng chiến dịch tiêm chủng đang diễn ra
         public int ActiveVaccinationCampaigns { get; set; }
 
+        // Thống kê chi tiết chiến dịch tiêm chủng theo trạng thái
+        public int NotStartedVaccinationCampaigns { get; set; }
+        public int CompletedVaccinationCampaigns { get; set; }
+        public int CancelledVaccinationCampaigns { get; set; }
+
         // Tổng số chiến dịch khám sức khỏe
         public int TotalHealthCheckCampaigns { get; set; }
 

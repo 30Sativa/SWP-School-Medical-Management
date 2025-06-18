@@ -12,14 +12,14 @@ namespace SchoolMedicalManagement.Repository.Repository
     {
         public VaccinationCampaignRepository(SwpEduHealV5Context context) : base(context) { }
 
-        // Lấy danh sách tất cả chiến dịch tiêm chủng đang hoạt động
+        // Lấy danh sách tất cả chiến dịch tiêm chủng đang diễn ra
         public async Task<List<VaccinationCampaign>> GetAllActiveCampaigns()
             => await _context.VaccinationCampaigns
                 .Include(c => c.CreatedByNavigation)
                 .Include(c => c.Status)
                 .Include(c => c.VaccinationConsentRequests)
                 .Include(c => c.VaccinationRecords)
-                .Where(c => c.StatusId == 1) // 1: Đang hoạt động
+                .Where(c => c.StatusId == 2) // 2: Đang diễn ra
                 .ToListAsync();
 
         // Lấy danh sách tất cả chiến dịch tiêm chủng (bao gồm cả đã đóng)
@@ -119,16 +119,28 @@ namespace SchoolMedicalManagement.Repository.Repository
             return await _context.VaccinationCampaigns.CountAsync();
         }
 
-        // Get count of active vaccination campaigns (StatusId = 1)
+        // Get count of active vaccination campaigns (StatusId = 2 - Đang diễn ra)
         public async Task<int> GetActiveVaccinationCampaignsCount()
         {
-            return await _context.VaccinationCampaigns.Where(c => c.StatusId == 1).CountAsync();
+            return await _context.VaccinationCampaigns.Where(c => c.StatusId == 2).CountAsync();
         }
 
-        // Get count of closed vaccination campaigns (StatusId = 2)
-        public async Task<int> GetClosedVaccinationCampaignsCount()
+        // Get count of completed vaccination campaigns (StatusId = 3 - Đã hoàn thành)
+        public async Task<int> GetCompletedVaccinationCampaignsCount()
         {
-            return await _context.VaccinationCampaigns.Where(c => c.StatusId == 2).CountAsync();
+            return await _context.VaccinationCampaigns.Where(c => c.StatusId == 3).CountAsync();
+        }
+
+        // Get count of cancelled vaccination campaigns (StatusId = 4 - Đã huỷ)
+        public async Task<int> GetCancelledVaccinationCampaignsCount()
+        {
+            return await _context.VaccinationCampaigns.Where(c => c.StatusId == 4).CountAsync();
+        }
+
+        // Get count of not started vaccination campaigns (StatusId = 1 - Chưa bắt đầu)
+        public async Task<int> GetNotStartedVaccinationCampaignsCount()
+        {
+            return await _context.VaccinationCampaigns.Where(c => c.StatusId == 1).CountAsync();
         }
 
         // Cập nhật chiến dịch tiêm chủng
@@ -139,33 +151,44 @@ namespace SchoolMedicalManagement.Repository.Repository
             return affected > 0 ? await GetCampaignById(campaign.CampaignId) : null;
         }
 
-        // Vô hiệu hóa chiến dịch (chuyển StatusId từ 1 sang 2)
+        // Vô hiệu hóa chiến dịch (chuyển StatusId từ 2 sang 3 - Đang diễn ra → Đã hoàn thành)
         public async Task<VaccinationCampaign?> DeactivateCampaign(int campaignId)
-        {
-            var campaign = await GetCampaignById(campaignId);
-            if (campaign == null || campaign.StatusId != 1)
-            {
-                return null; // Không tìm thấy hoặc không phải trạng thái đang hoạt động
-            }
-
-            campaign.StatusId = 2; // Chuyển sang "Đã kết thúc"
-            return await UpdateCampaign(campaign);
-        }
-
-        // Kích hoạt lại chiến dịch (chuyển StatusId từ 2 sang 1)
-        public async Task<VaccinationCampaign?> ActivateCampaign(int campaignId)
         {
             var campaign = await GetCampaignById(campaignId);
             if (campaign == null || campaign.StatusId != 2)
             {
-                return null; // Không tìm thấy hoặc không phải trạng thái đã kết thúc
+                return null; // Không tìm thấy hoặc không phải trạng thái đang diễn ra
             }
 
-            campaign.StatusId = 1; // Chuyển sang "Đang hoạt động"
+            campaign.StatusId = 3; // Chuyển sang "Đã hoàn thành"
             return await UpdateCampaign(campaign);
         }
 
-        // Kiểm tra trạng thái chiến dịch
+        // Kích hoạt lại chiến dịch (chuyển StatusId từ 3 sang 2 - Đã hoàn thành → Đang diễn ra)
+        public async Task<VaccinationCampaign?> ActivateCampaign(int campaignId)
+        {
+            var campaign = await GetCampaignById(campaignId);
+            if (campaign == null || campaign.StatusId != 3)
+            {
+                return null; // Không tìm thấy hoặc không phải trạng thái đã hoàn thành
+            }
+
+            campaign.StatusId = 2; // Chuyển sang "Đang diễn ra"
+            return await UpdateCampaign(campaign);
+        }
+
+        // Kiểm tra trạng thái chiến dịch - Chưa bắt đầu
+        public async Task<bool> IsCampaignNotStarted(int campaignId)
+        {
+            var campaign = await _context.VaccinationCampaigns
+                .Where(c => c.CampaignId == campaignId)
+                .Select(c => c.StatusId)
+                .FirstOrDefaultAsync();
+            
+            return campaign == 1; // Trả về true nếu StatusId = 1 (Chưa bắt đầu)
+        }
+
+        // Kiểm tra trạng thái chiến dịch - Đang diễn ra
         public async Task<bool> IsCampaignActive(int campaignId)
         {
             var campaign = await _context.VaccinationCampaigns
@@ -173,18 +196,29 @@ namespace SchoolMedicalManagement.Repository.Repository
                 .Select(c => c.StatusId)
                 .FirstOrDefaultAsync();
             
-            return campaign == 1; // Trả về true nếu StatusId = 1 (Đang hoạt động)
+            return campaign == 2; // Trả về true nếu StatusId = 2 (Đang diễn ra)
         }
 
-        // Kiểm tra trạng thái chiến dịch
-        public async Task<bool> IsCampaignClosed(int campaignId)
+        // Kiểm tra trạng thái chiến dịch - Đã hoàn thành
+        public async Task<bool> IsCampaignCompleted(int campaignId)
         {
             var campaign = await _context.VaccinationCampaigns
                 .Where(c => c.CampaignId == campaignId)
                 .Select(c => c.StatusId)
                 .FirstOrDefaultAsync();
             
-            return campaign == 2; // Trả về true nếu StatusId = 2 (Đã kết thúc)
+            return campaign == 3; // Trả về true nếu StatusId = 3 (Đã hoàn thành)
+        }
+
+        // Kiểm tra trạng thái chiến dịch - Đã huỷ
+        public async Task<bool> IsCampaignCancelled(int campaignId)
+        {
+            var campaign = await _context.VaccinationCampaigns
+                .Where(c => c.CampaignId == campaignId)
+                .Select(c => c.StatusId)
+                .FirstOrDefaultAsync();
+            
+            return campaign == 4; // Trả về true nếu StatusId = 4 (Đã huỷ)
         }
 
         // Lấy trạng thái hiện tại của chiến dịch
@@ -194,18 +228,6 @@ namespace SchoolMedicalManagement.Repository.Repository
                 .Where(c => c.CampaignId == campaignId)
                 .Select(c => c.StatusId)
                 .FirstOrDefaultAsync();
-        }
-
-        // Lấy danh sách chiến dịch theo khoảng thời gian
-        public async Task<List<VaccinationCampaign>> GetCampaignsByDateRange(DateOnly startDate, DateOnly endDate)
-        {
-            return await _context.VaccinationCampaigns
-                .Include(c => c.CreatedByNavigation)
-                .Include(c => c.Status)
-                .Include(c => c.VaccinationConsentRequests)
-                .Include(c => c.VaccinationRecords)
-                .Where(c => c.Date >= startDate && c.Date <= endDate)
-                .ToListAsync();
         }
 
         // Lấy danh sách chiến dịch theo người tạo
@@ -218,25 +240,6 @@ namespace SchoolMedicalManagement.Repository.Repository
                 .Include(c => c.VaccinationRecords)
                 .Where(c => c.CreatedBy == creatorId)
                 .ToListAsync();
-        }
-
-        // Lấy thống kê chiến dịch
-        public async Task<object> GetCampaignStatistics()
-        {
-            var totalCampaigns = await _context.VaccinationCampaigns.CountAsync();
-            var activeCampaigns = await _context.VaccinationCampaigns.Where(c => c.StatusId == 1).CountAsync();
-            var closedCampaigns = await _context.VaccinationCampaigns.Where(c => c.StatusId == 2).CountAsync();
-            var campaignsThisMonth = await _context.VaccinationCampaigns
-                .Where(c => c.Date >= DateOnly.FromDateTime(DateTime.Now.AddDays(-30)))
-                .CountAsync();
-
-            return new
-            {
-                TotalCampaigns = totalCampaigns,
-                ActiveCampaigns = activeCampaigns,
-                ClosedCampaigns = closedCampaigns,
-                CampaignsThisMonth = campaignsThisMonth
-            };
         }
     }
 }

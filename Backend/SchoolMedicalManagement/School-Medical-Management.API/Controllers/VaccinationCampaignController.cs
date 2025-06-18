@@ -140,8 +140,21 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
+        // Lấy danh sách chiến dịch theo người tạo
+        [HttpGet("campaigns/creator/{creatorId}")]
+        public async Task<IActionResult> GetCampaignsByCreator([FromRoute] Guid creatorId)
+        {
+            var response = await _vaccinationCampaignService.GetCampaignsByCreatorAsync(creatorId);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
 
-    
+        // Kiểm tra trạng thái chiến dịch
+        [HttpGet("campaigns/{id}/status")]
+        public async Task<IActionResult> CheckCampaignStatus([FromRoute] int id)
+        {
+            var response = await _vaccinationCampaignService.CheckCampaignStatusAsync(id);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
 
     }
 }

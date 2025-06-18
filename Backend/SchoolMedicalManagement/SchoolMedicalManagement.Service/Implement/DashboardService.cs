@@ -45,9 +45,12 @@ namespace SchoolMedicalManagement.Service.Implement
                     // Get user counts by role
                     TotalUsers = await GetUserCountsByRole(),
 
-                    // Get campaign counts
+                    // Get campaign counts - sử dụng các method thống kê mới
                     TotalVaccinationCampaigns = await _vaccinationCampaignRepository.GetTotalVaccinationCampaignsCount(),
-                    ActiveVaccinationCampaigns = await _vaccinationCampaignRepository.GetActiveVaccinationCampaignsCount(),
+                    ActiveVaccinationCampaigns = await _vaccinationCampaignRepository.GetActiveVaccinationCampaignsCount(), // StatusId = 2 (Đang diễn ra)
+                    NotStartedVaccinationCampaigns = await _vaccinationCampaignRepository.GetNotStartedVaccinationCampaignsCount(), // StatusId = 1 (Chưa bắt đầu)
+                    CompletedVaccinationCampaigns = await _vaccinationCampaignRepository.GetCompletedVaccinationCampaignsCount(), // StatusId = 3 (Đã hoàn thành)
+                    CancelledVaccinationCampaigns = await _vaccinationCampaignRepository.GetCancelledVaccinationCampaignsCount(), // StatusId = 4 (Đã huỷ)
                     TotalHealthCheckCampaigns = await _healthCheckCampaignRepository.GetTotalHealthCheckCampaignsCount(),
                     ActiveHealthCheckCampaigns = await _healthCheckCampaignRepository.GetActiveHealthCheckCampaignsCount(),
                 };
@@ -80,6 +83,38 @@ namespace SchoolMedicalManagement.Service.Implement
                 Parent = users.Count(u => u.RoleId == 3), // Assuming 3 is Parent role ID
                 Total = users.Count
             };
+        }
+
+        // Method mới để lấy thống kê chi tiết chiến dịch tiêm chủng
+        public async Task<BaseResponse?> GetVaccinationCampaignStatisticsAsync()
+        {
+            try
+            {
+                var statistics = new
+                {
+                    TotalCampaigns = await _vaccinationCampaignRepository.GetTotalVaccinationCampaignsCount(),
+                    NotStartedCampaigns = await _vaccinationCampaignRepository.GetNotStartedVaccinationCampaignsCount(),
+                    ActiveCampaigns = await _vaccinationCampaignRepository.GetActiveVaccinationCampaignsCount(),
+                    CompletedCampaigns = await _vaccinationCampaignRepository.GetCompletedVaccinationCampaignsCount(),
+                    CancelledCampaigns = await _vaccinationCampaignRepository.GetCancelledVaccinationCampaignsCount()
+                };
+                
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status200OK.ToString(),
+                    Message = "Vaccination campaign statistics retrieved successfully.",
+                    Data = statistics
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status500InternalServerError.ToString(),
+                    Message = "An error occurred while retrieving vaccination campaign statistics.",
+                    Data = null
+                };
+            }
         }
     }
 } 

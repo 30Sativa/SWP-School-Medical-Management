@@ -25,5 +25,12 @@ namespace School_Medical_Management.API.Controllers
             var response = await _dashboardService.GetDashboardOverviewAsync();
             return StatusCode(int.Parse(response?.Status ?? "200"), response);
         }
+
+        [HttpGet("vaccination-campaigns/statistics")]
+        public async Task<IActionResult> GetVaccinationCampaignStatistics()
+        {
+            var response = await _dashboardService.GetVaccinationCampaignStatisticsAsync();
+            return StatusCode(int.Parse(response?.Status ?? "200"), response);
+        }
     }
 } 

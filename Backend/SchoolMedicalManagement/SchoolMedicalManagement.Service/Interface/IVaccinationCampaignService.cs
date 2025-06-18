@@ -52,14 +52,8 @@ namespace SchoolMedicalManagement.Service.Interface
         // Lấy danh sách yêu cầu đã đồng ý của một chiến dịch
         Task<BaseResponse> GetApprovedConsentRequestsAsync(int campaignId);
 
-         // Lấy danh sách học sinh từ chối tiêm của một chiến dịch
+        // Lấy danh sách yêu cầu từ chối
         Task<BaseResponse> GetDeclinedConsentRequestsAsync(int campaignId);
-
-        // Lấy thống kê chiến dịch tiêm chủng
-        Task<BaseResponse> GetCampaignStatisticsAsync();
-
-        // Lấy danh sách chiến dịch theo khoảng thời gian
-        Task<BaseResponse> GetCampaignsByDateRangeAsync(DateOnly startDate, DateOnly endDate);
 
         // Lấy danh sách chiến dịch theo người tạo
         Task<BaseResponse> GetCampaignsByCreatorAsync(Guid creatorId);
