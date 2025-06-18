@@ -19,6 +19,8 @@ public partial class SwpEduHealV5Context : DbContext
 
     public virtual DbSet<BlogPost> BlogPosts { get; set; }
 
+    public virtual DbSet<CampaignStatus> CampaignStatuses { get; set; }
+
     public virtual DbSet<ConsentStatusType> ConsentStatusTypes { get; set; }
 
     public virtual DbSet<GenderType> GenderTypes { get; set; }
@@ -65,13 +67,13 @@ public partial class SwpEduHealV5Context : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=DESKTOP-C4ONNIO\\SQLEXPRESS;Database=SWP_EduHeal_V5;User Id=sa;Password=12345;TrustServerCertificate=true;Encrypt=false;");
+        => optionsBuilder.UseSqlServer("Data Source=172.177.156.252,1433;Database=SWP_EduHeal_V5;User Id=sa;Password=Yasuo123k@;TrustServerCertificate=true;Encrypt=false;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AuditLog>(entity =>
         {
-            entity.HasKey(e => e.LogId).HasName("PK__AuditLog__5E5499A83B938F24");
+            entity.HasKey(e => e.LogId).HasName("PK__AuditLog__5E5499A81F71A801");
 
             entity.ToTable("AuditLog");
 
@@ -87,12 +89,12 @@ public partial class SwpEduHealV5Context : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.AuditLogs)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__AuditLog__UserID__17036CC0");
+                .HasConstraintName("FK__AuditLog__UserID__1CBC4616");
         });
 
         modelBuilder.Entity<BlogPost>(entity =>
         {
-            entity.HasKey(e => e.PostId).HasName("PK__BlogPost__AA1260383C8EB5DE");
+            entity.HasKey(e => e.PostId).HasName("PK__BlogPost__AA126038510D947D");
 
             entity.ToTable("BlogPost");
 
@@ -103,16 +105,28 @@ public partial class SwpEduHealV5Context : DbContext
 
             entity.HasOne(d => d.Author).WithMany(p => p.BlogPosts)
                 .HasForeignKey(d => d.AuthorId)
-                .HasConstraintName("FK__BlogPost__Author__0D7A0286");
+                .HasConstraintName("FK__BlogPost__Author__1332DBDC");
+        });
+
+        modelBuilder.Entity<CampaignStatus>(entity =>
+        {
+            entity.HasKey(e => e.StatusId).HasName("PK__Campaign__C8EE2043EE5795CC");
+
+            entity.ToTable("CampaignStatus");
+
+            entity.HasIndex(e => e.StatusName, "UQ__Campaign__05E7698A46744871").IsUnique();
+
+            entity.Property(e => e.StatusId).HasColumnName("StatusID");
+            entity.Property(e => e.StatusName).HasMaxLength(50);
         });
 
         modelBuilder.Entity<ConsentStatusType>(entity =>
         {
-            entity.HasKey(e => e.ConsentStatusId).HasName("PK__ConsentS__D91383D6E982F5DF");
+            entity.HasKey(e => e.ConsentStatusId).HasName("PK__ConsentS__D91383D6323AC32C");
 
             entity.ToTable("ConsentStatusType");
 
-            entity.HasIndex(e => e.ConsentStatusName, "UQ__ConsentS__98BB55AE57EE3F51").IsUnique();
+            entity.HasIndex(e => e.ConsentStatusName, "UQ__ConsentS__98BB55AEC63A47B2").IsUnique();
 
             entity.Property(e => e.ConsentStatusId).HasColumnName("ConsentStatusID");
             entity.Property(e => e.ConsentStatusName).HasMaxLength(50);
@@ -120,11 +134,11 @@ public partial class SwpEduHealV5Context : DbContext
 
         modelBuilder.Entity<GenderType>(entity =>
         {
-            entity.HasKey(e => e.GenderId).HasName("PK__GenderTy__4E24E817EFB18C2B");
+            entity.HasKey(e => e.GenderId).HasName("PK__GenderTy__4E24E817CCAD7266");
 
             entity.ToTable("GenderType");
 
-            entity.HasIndex(e => e.GenderName, "UQ__GenderTy__F7C17715C5B1FEB0").IsUnique();
+            entity.HasIndex(e => e.GenderName, "UQ__GenderTy__F7C17715CB2E98D1").IsUnique();
 
             entity.Property(e => e.GenderId).HasColumnName("GenderID");
             entity.Property(e => e.GenderName).HasMaxLength(20);
@@ -132,7 +146,7 @@ public partial class SwpEduHealV5Context : DbContext
 
         modelBuilder.Entity<HandleRecord>(entity =>
         {
-            entity.HasKey(e => new { e.EventId, e.SupplyId }).HasName("PK__Handle_R__8E891EB84E3A537A");
+            entity.HasKey(e => new { e.EventId, e.SupplyId }).HasName("PK__Handle_R__8E891EB88168EA79");
 
             entity.ToTable("Handle_Record");
 
@@ -154,21 +168,28 @@ public partial class SwpEduHealV5Context : DbContext
 
         modelBuilder.Entity<HealthCheckCampaign>(entity =>
         {
-            entity.HasKey(e => e.CampaignId).HasName("PK__HealthCh__3F5E8D796D658C76");
+            entity.HasKey(e => e.CampaignId).HasName("PK__HealthCh__3F5E8D79A43240DC");
 
             entity.ToTable("HealthCheckCampaign");
 
             entity.Property(e => e.CampaignId).HasColumnName("CampaignID");
+            entity.Property(e => e.StatusId)
+                .HasDefaultValue(1)
+                .HasColumnName("StatusID");
             entity.Property(e => e.Title).HasMaxLength(100);
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.HealthCheckCampaigns)
                 .HasForeignKey(d => d.CreatedBy)
-                .HasConstraintName("FK__HealthChe__Creat__03F0984C");
+                .HasConstraintName("FK__HealthChe__Creat__09A971A2");
+
+            entity.HasOne(d => d.Status).WithMany(p => p.HealthCheckCampaigns)
+                .HasForeignKey(d => d.StatusId)
+                .HasConstraintName("FK__HealthChe__Statu__0A9D95DB");
         });
 
         modelBuilder.Entity<HealthCheckSummary>(entity =>
         {
-            entity.HasKey(e => e.RecordId).HasName("PK__HealthCh__FBDF78C97EAC0EB5");
+            entity.HasKey(e => e.RecordId).HasName("PK__HealthCh__FBDF78C9CBB1D261");
 
             entity.ToTable("HealthCheckSummary");
 
@@ -178,7 +199,6 @@ public partial class SwpEduHealV5Context : DbContext
                 .HasColumnType("decimal(4, 2)")
                 .HasColumnName("BMI");
             entity.Property(e => e.CampaignId).HasColumnName("CampaignID");
-            entity.Property(e => e.ConsentStatusId).HasColumnName("ConsentStatusID");
             entity.Property(e => e.Ent)
                 .HasMaxLength(50)
                 .HasColumnName("ENT");
@@ -193,25 +213,21 @@ public partial class SwpEduHealV5Context : DbContext
 
             entity.HasOne(d => d.Campaign).WithMany(p => p.HealthCheckSummaries)
                 .HasForeignKey(d => d.CampaignId)
-                .HasConstraintName("FK__HealthChe__Campa__08B54D69");
-
-            entity.HasOne(d => d.ConsentStatus).WithMany(p => p.HealthCheckSummaries)
-                .HasForeignKey(d => d.ConsentStatusId)
-                .HasConstraintName("FK__HealthChe__Conse__09A971A2");
+                .HasConstraintName("FK__HealthChe__Campa__0F624AF8");
 
             entity.HasOne(d => d.Student).WithMany(p => p.HealthCheckSummaries)
                 .HasForeignKey(d => d.StudentId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__HealthChe__Stude__07C12930");
+                .HasConstraintName("FK__HealthChe__Stude__0E6E26BF");
         });
 
         modelBuilder.Entity<HealthProfile>(entity =>
         {
-            entity.HasKey(e => e.ProfileId).HasName("PK__HealthPr__290C88843DAAA708");
+            entity.HasKey(e => e.ProfileId).HasName("PK__HealthPr__290C8884513D44C4");
 
             entity.ToTable("HealthProfile");
 
-            entity.HasIndex(e => e.StudentId, "UQ__HealthPr__32C52A780891CB29").IsUnique();
+            entity.HasIndex(e => e.StudentId, "UQ__HealthPr__32C52A78C079A8EE").IsUnique();
 
             entity.Property(e => e.ProfileId).HasColumnName("ProfileID");
             entity.Property(e => e.CreatedDate)
@@ -230,7 +246,7 @@ public partial class SwpEduHealV5Context : DbContext
 
         modelBuilder.Entity<MedicalEvent>(entity =>
         {
-            entity.HasKey(e => e.EventId).HasName("PK__MedicalE__7944C870E34E092C");
+            entity.HasKey(e => e.EventId).HasName("PK__MedicalE__7944C870134A0C05");
 
             entity.ToTable("MedicalEvent");
 
@@ -261,11 +277,11 @@ public partial class SwpEduHealV5Context : DbContext
 
         modelBuilder.Entity<MedicalEventType>(entity =>
         {
-            entity.HasKey(e => e.EventTypeId).HasName("PK__MedicalE__A9216B1FA3CD40D2");
+            entity.HasKey(e => e.EventTypeId).HasName("PK__MedicalE__A9216B1F7DD9984D");
 
             entity.ToTable("MedicalEventType");
 
-            entity.HasIndex(e => e.EventTypeName, "UQ__MedicalE__29BD765FD5DCF834").IsUnique();
+            entity.HasIndex(e => e.EventTypeName, "UQ__MedicalE__29BD765F6235E681").IsUnique();
 
             entity.Property(e => e.EventTypeId).HasColumnName("EventTypeID");
             entity.Property(e => e.EventTypeName).HasMaxLength(100);
@@ -273,13 +289,12 @@ public partial class SwpEduHealV5Context : DbContext
 
         modelBuilder.Entity<MedicalHistory>(entity =>
         {
-            entity.HasKey(e => e.HistoryId).HasName("PK__MedicalH__4D7B4ADD68B701ED");
+            entity.HasKey(e => e.HistoryId).HasName("PK__MedicalH__4D7B4ADDC2B91918");
 
             entity.ToTable("MedicalHistory");
 
             entity.Property(e => e.HistoryId).HasColumnName("HistoryID");
             entity.Property(e => e.DiseaseName).HasMaxLength(100);
-            entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.StudentId).HasColumnName("StudentID");
 
             entity.HasOne(d => d.Student).WithMany(p => p.MedicalHistories)
@@ -289,7 +304,7 @@ public partial class SwpEduHealV5Context : DbContext
 
         modelBuilder.Entity<MedicalSupply>(entity =>
         {
-            entity.HasKey(e => e.SupplyId).HasName("PK__MedicalS__7CDD6C8ECD9FE443");
+            entity.HasKey(e => e.SupplyId).HasName("PK__MedicalS__7CDD6C8E2A9C27B8");
 
             entity.Property(e => e.SupplyId).HasColumnName("SupplyID");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
@@ -299,7 +314,7 @@ public partial class SwpEduHealV5Context : DbContext
 
         modelBuilder.Entity<MedicationRequest>(entity =>
         {
-            entity.HasKey(e => e.RequestId).HasName("PK__Medicati__33A8519A5F83E849");
+            entity.HasKey(e => e.RequestId).HasName("PK__Medicati__33A8519A0025A29D");
 
             entity.ToTable("MedicationRequest");
 
@@ -336,11 +351,11 @@ public partial class SwpEduHealV5Context : DbContext
 
         modelBuilder.Entity<MedicationRequestStatus>(entity =>
         {
-            entity.HasKey(e => e.StatusId).HasName("PK__Medicati__C8EE2043A72E9B3A");
+            entity.HasKey(e => e.StatusId).HasName("PK__Medicati__C8EE2043FFED433A");
 
             entity.ToTable("MedicationRequestStatus");
 
-            entity.HasIndex(e => e.StatusName, "UQ__Medicati__05E7698AC5355861").IsUnique();
+            entity.HasIndex(e => e.StatusName, "UQ__Medicati__05E7698A4C341622").IsUnique();
 
             entity.Property(e => e.StatusId).HasColumnName("StatusID");
             entity.Property(e => e.StatusName).HasMaxLength(50);
@@ -348,7 +363,7 @@ public partial class SwpEduHealV5Context : DbContext
 
         modelBuilder.Entity<Notification>(entity =>
         {
-            entity.HasKey(e => e.NotificationId).HasName("PK__Notifica__20CF2E3271432CF7");
+            entity.HasKey(e => e.NotificationId).HasName("PK__Notifica__20CF2E32C5E791A2");
 
             entity.ToTable("Notification");
 
@@ -364,21 +379,21 @@ public partial class SwpEduHealV5Context : DbContext
             entity.HasOne(d => d.Receiver).WithMany(p => p.Notifications)
                 .HasForeignKey(d => d.ReceiverId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Notificat__Recei__123EB7A3");
+                .HasConstraintName("FK__Notificat__Recei__17F790F9");
 
             entity.HasOne(d => d.Type).WithMany(p => p.Notifications)
                 .HasForeignKey(d => d.TypeId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Notificat__TypeI__1332DBDC");
+                .HasConstraintName("FK__Notificat__TypeI__18EBB532");
         });
 
         modelBuilder.Entity<NotificationType>(entity =>
         {
-            entity.HasKey(e => e.TypeId).HasName("PK__Notifica__516F03950BB774BA");
+            entity.HasKey(e => e.TypeId).HasName("PK__Notifica__516F0395DE3AFDA6");
 
             entity.ToTable("NotificationType");
 
-            entity.HasIndex(e => e.TypeName, "UQ__Notifica__D4E7DFA83F45CDF6").IsUnique();
+            entity.HasIndex(e => e.TypeName, "UQ__Notifica__D4E7DFA808E32C56").IsUnique();
 
             entity.Property(e => e.TypeId).HasColumnName("TypeID");
             entity.Property(e => e.TypeName).HasMaxLength(50);
@@ -386,7 +401,7 @@ public partial class SwpEduHealV5Context : DbContext
 
         modelBuilder.Entity<ParentFeedback>(entity =>
         {
-            entity.HasKey(e => e.FeedbackId).HasName("PK__ParentFe__6A4BEDF68EB9BE29");
+            entity.HasKey(e => e.FeedbackId).HasName("PK__ParentFe__6A4BEDF607DDC567");
 
             entity.ToTable("ParentFeedback");
 
@@ -400,16 +415,16 @@ public partial class SwpEduHealV5Context : DbContext
 
             entity.HasOne(d => d.Parent).WithMany(p => p.ParentFeedbacks)
                 .HasForeignKey(d => d.ParentId)
-                .HasConstraintName("FK__ParentFee__Paren__1AD3FDA4");
+                .HasConstraintName("FK__ParentFee__Paren__208CD6FA");
         });
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__Role__8AFACE3A14C22738");
+            entity.HasKey(e => e.RoleId).HasName("PK__Role__8AFACE3AC74CC56F");
 
             entity.ToTable("Role");
 
-            entity.HasIndex(e => e.RoleName, "UQ__Role__8A2B6160021259BF").IsUnique();
+            entity.HasIndex(e => e.RoleName, "UQ__Role__8A2B6160CA415DE8").IsUnique();
 
             entity.Property(e => e.RoleId).HasColumnName("RoleID");
             entity.Property(e => e.RoleName).HasMaxLength(50);
@@ -417,11 +432,11 @@ public partial class SwpEduHealV5Context : DbContext
 
         modelBuilder.Entity<SeverityLevel>(entity =>
         {
-            entity.HasKey(e => e.SeverityId).HasName("PK__Severity__C618A9510A73C9F9");
+            entity.HasKey(e => e.SeverityId).HasName("PK__Severity__C618A951EB7E41F5");
 
             entity.ToTable("SeverityLevel");
 
-            entity.HasIndex(e => e.SeverityName, "UQ__Severity__5A5FB2BCFFDDF40C").IsUnique();
+            entity.HasIndex(e => e.SeverityName, "UQ__Severity__5A5FB2BCF6F4B6D3").IsUnique();
 
             entity.Property(e => e.SeverityId).HasColumnName("SeverityID");
             entity.Property(e => e.SeverityName).HasMaxLength(50);
@@ -429,7 +444,7 @@ public partial class SwpEduHealV5Context : DbContext
 
         modelBuilder.Entity<Student>(entity =>
         {
-            entity.HasKey(e => e.StudentId).HasName("PK__Student__32C52A79A30D1907");
+            entity.HasKey(e => e.StudentId).HasName("PK__Student__32C52A79994F96C5");
 
             entity.ToTable("Student");
 
@@ -452,9 +467,9 @@ public partial class SwpEduHealV5Context : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__Users__1788CCAC0EDCACC4");
+            entity.HasKey(e => e.UserId).HasName("PK__Users__1788CCACC90105C0");
 
-            entity.HasIndex(e => e.Username, "UQ__Users__536C85E4C919047F").IsUnique();
+            entity.HasIndex(e => e.Username, "UQ__Users__536C85E4D319E3A1").IsUnique();
 
             entity.Property(e => e.UserId)
                 .HasDefaultValueSql("(newsequentialid())")
@@ -484,21 +499,28 @@ public partial class SwpEduHealV5Context : DbContext
 
         modelBuilder.Entity<VaccinationCampaign>(entity =>
         {
-            entity.HasKey(e => e.CampaignId).HasName("PK__Vaccinat__3F5E8D795F13F9FD");
+            entity.HasKey(e => e.CampaignId).HasName("PK__Vaccinat__3F5E8D793CE5915B");
 
             entity.ToTable("VaccinationCampaign");
 
             entity.Property(e => e.CampaignId).HasColumnName("CampaignID");
+            entity.Property(e => e.StatusId)
+                .HasDefaultValue(1)
+                .HasColumnName("StatusID");
             entity.Property(e => e.VaccineName).HasMaxLength(100);
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.VaccinationCampaigns)
                 .HasForeignKey(d => d.CreatedBy)
-                .HasConstraintName("FK__Vaccinati__Creat__75A278F5");
+                .HasConstraintName("FK__Vaccinati__Creat__797309D9");
+
+            entity.HasOne(d => d.Status).WithMany(p => p.VaccinationCampaigns)
+                .HasForeignKey(d => d.StatusId)
+                .HasConstraintName("FK__Vaccinati__Statu__7A672E12");
         });
 
         modelBuilder.Entity<VaccinationConsentRequest>(entity =>
         {
-            entity.HasKey(e => e.RequestId).HasName("PK__Vaccinat__33A8519A2718EB29");
+            entity.HasKey(e => e.RequestId).HasName("PK__Vaccinat__33A8519A44B6F91F");
 
             entity.ToTable("VaccinationConsentRequest");
 
@@ -513,26 +535,26 @@ public partial class SwpEduHealV5Context : DbContext
             entity.HasOne(d => d.Campaign).WithMany(p => p.VaccinationConsentRequests)
                 .HasForeignKey(d => d.CampaignId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Vaccinati__Campa__797309D9");
+                .HasConstraintName("FK__Vaccinati__Campa__7E37BEF6");
 
             entity.HasOne(d => d.ConsentStatus).WithMany(p => p.VaccinationConsentRequests)
                 .HasForeignKey(d => d.ConsentStatusId)
-                .HasConstraintName("FK__Vaccinati__Conse__7B5B524B");
+                .HasConstraintName("FK__Vaccinati__Conse__00200768");
 
             entity.HasOne(d => d.Parent).WithMany(p => p.VaccinationConsentRequests)
                 .HasForeignKey(d => d.ParentId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Vaccinati__Paren__7A672E12");
+                .HasConstraintName("FK__Vaccinati__Paren__7F2BE32F");
 
             entity.HasOne(d => d.Student).WithMany(p => p.VaccinationConsentRequests)
                 .HasForeignKey(d => d.StudentId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Vaccinati__Stude__787EE5A0");
+                .HasConstraintName("FK__Vaccinati__Stude__7D439ABD");
         });
 
         modelBuilder.Entity<VaccinationRecord>(entity =>
         {
-            entity.HasKey(e => e.RecordId).HasName("PK__Vaccinat__FBDF78C9C7D4B97D");
+            entity.HasKey(e => e.RecordId).HasName("PK__Vaccinat__FBDF78C9330221F4");
 
             entity.ToTable("VaccinationRecord");
 
@@ -546,15 +568,15 @@ public partial class SwpEduHealV5Context : DbContext
 
             entity.HasOne(d => d.Campaign).WithMany(p => p.VaccinationRecords)
                 .HasForeignKey(d => d.CampaignId)
-                .HasConstraintName("FK__Vaccinati__Campa__00200768");
+                .HasConstraintName("FK__Vaccinati__Campa__04E4BC85");
 
             entity.HasOne(d => d.ConsentStatus).WithMany(p => p.VaccinationRecords)
                 .HasForeignKey(d => d.ConsentStatusId)
-                .HasConstraintName("FK__Vaccinati__Conse__01142BA1");
+                .HasConstraintName("FK__Vaccinati__Conse__05D8E0BE");
 
             entity.HasOne(d => d.Student).WithMany(p => p.VaccinationRecords)
                 .HasForeignKey(d => d.StudentId)
-                .HasConstraintName("FK__Vaccinati__Stude__7F2BE32F");
+                .HasConstraintName("FK__Vaccinati__Stude__03F0984C");
         });
 
         OnModelCreatingPartial(modelBuilder);

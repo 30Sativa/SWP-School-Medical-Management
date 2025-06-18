@@ -39,13 +39,9 @@ public partial class HealthCheckSummary
 
     public string? FollowUpNote { get; set; }
 
-    public int? ConsentStatusId { get; set; }
-
     public bool? IsActive { get; set; }
 
     public virtual HealthCheckCampaign? Campaign { get; set; }
-
-    public virtual ConsentStatusType? ConsentStatus { get; set; }
 
     public virtual Student Student { get; set; } = null!;
 }
