@@ -158,3 +158,50 @@
   padding-left: 10px; /* Khoảng cách giữa nội dung và cạnh */
   padding-right: 10px;
 }
+
+/* Action Group */
+.actionGroup {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.editBtn {
+  background: #20b2aa;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 14px 5px 10px;
+  font-size: 15px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 4px rgba(32,178,170,0.08);
+  cursor: pointer;
+}
+.editBtn:hover {
+  background: #178d89;
+}
+
+.deleteBtn {
+  background: #fff0f0;
+  color: #e11d48;
+  border: 1px solid #ffe4e6;
+  border-radius: 6px;
+  padding: 5px 14px 5px 10px;
+  font-size: 15px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 4px rgba(225,29,72,0.08);
+  cursor: pointer;
+}
+.deleteBtn:hover {
+  background: #ffe4e6;
+  color: #be123c;
+}
