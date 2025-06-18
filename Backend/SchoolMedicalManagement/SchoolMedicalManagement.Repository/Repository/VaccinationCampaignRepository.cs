@@ -241,5 +241,49 @@ namespace SchoolMedicalManagement.Repository.Repository
                 .Where(c => c.CreatedBy == creatorId)
                 .ToListAsync();
         }
+
+        // Lấy danh sách học sinh theo lớp
+        public async Task<List<Student>> GetStudentsByClass(string className)
+            => await _context.Students
+                .Include(s => s.Parent)
+                .Include(s => s.Gender)
+                .Where(s => s.Class == className && s.IsActive == true)
+                .ToListAsync();
+
+        // Lấy tất cả học sinh có phụ huynh
+        public async Task<List<Student>> GetStudentsWithParents()
+            => await _context.Students
+                .Include(s => s.Parent)
+                .Include(s => s.Gender)
+                .Where(s => s.ParentId != null && s.IsActive == true)
+                .ToListAsync();
+
+        // Lấy học sinh theo danh sách ID
+        public async Task<List<Student>> GetStudentsByIds(List<int> studentIds)
+            => await _context.Students
+                .Include(s => s.Parent)
+                .Include(s => s.Gender)
+                .Where(s => studentIds.Contains(s.StudentId) && s.IsActive == true)
+                .ToListAsync();
+
+        // Kiểm tra phiếu đồng ý đã tồn tại
+        public async Task<bool> ConsentRequestExists(int campaignId, int studentId)
+            => await _context.VaccinationConsentRequests
+                .AnyAsync(cr => cr.CampaignId == campaignId && cr.StudentId == studentId);
+
+        // Tạo nhiều phiếu đồng ý cùng lúc
+        public async Task<List<VaccinationConsentRequest>> CreateMultipleConsentRequests(List<VaccinationConsentRequest> requests)
+        {
+            await _context.VaccinationConsentRequests.AddRangeAsync(requests);
+            await _context.SaveChangesAsync();
+            
+            var requestIds = requests.Select(r => r.RequestId).ToList();
+            return await _context.VaccinationConsentRequests
+                .Include(c => c.Student)
+                .Include(c => c.Parent)
+                .Include(c => c.ConsentStatus)
+                .Where(c => requestIds.Contains(c.RequestId))
+                .ToListAsync();
+        }
     }
 }

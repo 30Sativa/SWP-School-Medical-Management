@@ -46,13 +46,13 @@ namespace SchoolMedicalManagement.Service.Interface
         // Lấy lịch sử tiêm chủng của học sinh
         Task<BaseResponse> GetStudentVaccinationRecordsAsync(int studentId);
 
-        // Ghi nhận kết quả tiêm chủng
+        // Ghi nhận kết quả tiêm chủng cho học sinh
         Task<BaseResponse> CreateVaccinationRecordAsync(CreateVaccinationRecordRequest request);
 
         // Lấy danh sách yêu cầu đã đồng ý của một chiến dịch
         Task<BaseResponse> GetApprovedConsentRequestsAsync(int campaignId);
 
-        // Lấy danh sách yêu cầu từ chối
+        // Lấy danh sách học sinh từ chối tiêm của một chiến dịch
         Task<BaseResponse> GetDeclinedConsentRequestsAsync(int campaignId);
 
         // Lấy danh sách chiến dịch theo người tạo
@@ -60,5 +60,14 @@ namespace SchoolMedicalManagement.Service.Interface
 
         // Kiểm tra trạng thái chiến dịch
         Task<BaseResponse> CheckCampaignStatusAsync(int campaignId);
+
+        // Gửi phiếu đồng ý theo lớp học
+        Task<BaseResponse> SendConsentRequestsByClassAsync(int campaignId, SendConsentByClassRequest request);
+
+        // Gửi phiếu đồng ý cho tất cả phụ huynh
+        Task<BaseResponse> SendConsentRequestsToAllParentsAsync(int campaignId);
+
+        // Gửi phiếu đồng ý theo danh sách học sinh
+        Task<BaseResponse> SendConsentRequestsBulkAsync(int campaignId, SendConsentBulkRequest request);
     }
 }

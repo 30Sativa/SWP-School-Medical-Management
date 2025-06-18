@@ -761,5 +761,310 @@ namespace SchoolMedicalManagement.Service.Implement
                 Data = new { CampaignId = campaignId, StatusId = status.Value, StatusName = statusName }
             };
         }
+
+        // Gửi phiếu đồng ý theo lớp học
+        public async Task<BaseResponse> SendConsentRequestsByClassAsync(int campaignId, SendConsentByClassRequest request)
+        {
+            var campaign = await _campaignRepository.GetCampaignById(campaignId);
+            if (campaign == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Không tìm thấy chiến dịch tiêm chủng với ID {campaignId}",
+                    Data = null
+                };
+            }
+
+            // Lấy tất cả học sinh trong lớp
+            var students = await _campaignRepository.GetStudentsByClass(request.ClassName);
+            if (!students.Any())
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Không tìm thấy học sinh nào trong lớp {request.ClassName}",
+                    Data = null
+                };
+            }
+
+            var response = new BulkConsentResponse
+            {
+                TotalStudents = students.Count
+            };
+
+            var consentRequests = new List<VaccinationConsentRequest>();
+
+            foreach (var student in students)
+            {
+                try
+                {
+                    // Kiểm tra học sinh có phụ huynh không
+                    if (student.ParentId == null)
+                    {
+                        response.FailedCount++;
+                        response.FailedReasons.Add($"Học sinh {student.FullName} không có phụ huynh");
+                        continue;
+                    }
+
+                    // Kiểm tra phiếu đồng ý đã tồn tại chưa
+                    var exists = await _campaignRepository.ConsentRequestExists(campaignId, student.StudentId);
+                    if (exists)
+                    {
+                        response.FailedCount++;
+                        response.FailedReasons.Add($"Học sinh {student.FullName} đã có phiếu đồng ý");
+                        continue;
+                    }
+
+                    // Tạo phiếu đồng ý mới
+                    var consentRequest = new VaccinationConsentRequest
+                    {
+                        CampaignId = campaignId,
+                        StudentId = student.StudentId,
+                        ParentId = student.ParentId.Value,
+                        RequestDate = DateTime.UtcNow,
+                        ConsentStatusId = 1 // Chờ xác nhận
+                    };
+
+                    consentRequests.Add(consentRequest);
+                    response.SuccessCount++;
+                }
+                catch (Exception ex)
+                {
+                    response.FailedCount++;
+                    response.FailedReasons.Add($"Lỗi khi xử lý học sinh {student.FullName}: {ex.Message}");
+                }
+            }
+
+            // Tạo tất cả phiếu đồng ý cùng lúc
+            if (consentRequests.Any())
+            {
+                var createdRequests = await _campaignRepository.CreateMultipleConsentRequests(consentRequests);
+                response.CreatedRequests = createdRequests.Select(cr => new ConsentRequestResponse
+                {
+                    RequestId = cr.RequestId,
+                    StudentId = cr.StudentId,
+                    StudentName = cr.Student?.FullName,
+                    CampaignId = cr.CampaignId,
+                    CampaignName = cr.Campaign?.VaccineName,
+                    ParentId = cr.ParentId,
+                    ParentName = cr.Parent?.FullName,
+                    RequestDate = cr.RequestDate,
+                    ConsentStatusId = cr.ConsentStatusId,
+                    ConsentStatusName = cr.ConsentStatus?.ConsentStatusName
+                }).ToList();
+            }
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = $"Gửi phiếu đồng ý thành công cho {response.SuccessCount}/{response.TotalStudents} học sinh trong lớp {request.ClassName}",
+                Data = response
+            };
+        }
+
+        // Gửi phiếu đồng ý cho tất cả phụ huynh
+        public async Task<BaseResponse> SendConsentRequestsToAllParentsAsync(int campaignId)
+        {
+            var campaign = await _campaignRepository.GetCampaignById(campaignId);
+            if (campaign == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Không tìm thấy chiến dịch tiêm chủng với ID {campaignId}",
+                    Data = null
+                };
+            }
+
+            // Lấy tất cả học sinh có phụ huynh
+            var students = await _campaignRepository.GetStudentsWithParents();
+            if (!students.Any())
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = "Không tìm thấy học sinh nào có phụ huynh",
+                    Data = null
+                };
+            }
+
+            var response = new BulkConsentResponse
+            {
+                TotalStudents = students.Count
+            };
+
+            var consentRequests = new List<VaccinationConsentRequest>();
+
+            foreach (var student in students)
+            {
+                try
+                {
+                    // Kiểm tra phiếu đồng ý đã tồn tại chưa
+                    var exists = await _campaignRepository.ConsentRequestExists(campaignId, student.StudentId);
+                    if (exists)
+                    {
+                        response.FailedCount++;
+                        response.FailedReasons.Add($"Học sinh {student.FullName} đã có phiếu đồng ý");
+                        continue;
+                    }
+
+                    // Tạo phiếu đồng ý mới
+                    var consentRequest = new VaccinationConsentRequest
+                    {
+                        CampaignId = campaignId,
+                        StudentId = student.StudentId,
+                        ParentId = student.ParentId.Value,
+                        RequestDate = DateTime.UtcNow,
+                        ConsentStatusId = 1 // Chờ xác nhận
+                    };
+
+                    consentRequests.Add(consentRequest);
+                    response.SuccessCount++;
+                }
+                catch (Exception ex)
+                {
+                    response.FailedCount++;
+                    response.FailedReasons.Add($"Lỗi khi xử lý học sinh {student.FullName}: {ex.Message}");
+                }
+            }
+
+            // Tạo tất cả phiếu đồng ý cùng lúc
+            if (consentRequests.Any())
+            {
+                var createdRequests = await _campaignRepository.CreateMultipleConsentRequests(consentRequests);
+                response.CreatedRequests = createdRequests.Select(cr => new ConsentRequestResponse
+                {
+                    RequestId = cr.RequestId,
+                    StudentId = cr.StudentId,
+                    StudentName = cr.Student?.FullName,
+                    CampaignId = cr.CampaignId,
+                    CampaignName = cr.Campaign?.VaccineName,
+                    ParentId = cr.ParentId,
+                    ParentName = cr.Parent?.FullName,
+                    RequestDate = cr.RequestDate,
+                    ConsentStatusId = cr.ConsentStatusId,
+                    ConsentStatusName = cr.ConsentStatus?.ConsentStatusName
+                }).ToList();
+            }
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = $"Gửi phiếu đồng ý thành công cho {response.SuccessCount}/{response.TotalStudents} học sinh",
+                Data = response
+            };
+        }
+
+        // Gửi phiếu đồng ý theo danh sách học sinh
+        public async Task<BaseResponse> SendConsentRequestsBulkAsync(int campaignId, SendConsentBulkRequest request)
+        {
+            var campaign = await _campaignRepository.GetCampaignById(campaignId);
+            if (campaign == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Không tìm thấy chiến dịch tiêm chủng với ID {campaignId}",
+                    Data = null
+                };
+            }
+
+            if (!request.StudentIds.Any())
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Danh sách học sinh không được để trống",
+                    Data = null
+                };
+            }
+
+            // Lấy học sinh theo danh sách ID
+            var students = await _campaignRepository.GetStudentsByIds(request.StudentIds);
+            if (!students.Any())
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = "Không tìm thấy học sinh nào trong danh sách",
+                    Data = null
+                };
+            }
+
+            var response = new BulkConsentResponse
+            {
+                TotalStudents = students.Count
+            };
+
+            var consentRequests = new List<VaccinationConsentRequest>();
+
+            foreach (var student in students)
+            {
+                try
+                {
+                    // Kiểm tra học sinh có phụ huynh không
+                    if (student.ParentId == null)
+                    {
+                        response.FailedCount++;
+                        response.FailedReasons.Add($"Học sinh {student.FullName} không có phụ huynh");
+                        continue;
+                    }
+
+                    // Kiểm tra phiếu đồng ý đã tồn tại chưa
+                    var exists = await _campaignRepository.ConsentRequestExists(campaignId, student.StudentId);
+                    if (exists)
+                    {
+                        response.FailedCount++;
+                        response.FailedReasons.Add($"Học sinh {student.FullName} đã có phiếu đồng ý");
+                        continue;
+                    }
+
+                    // Tạo phiếu đồng ý mới
+                    var consentRequest = new VaccinationConsentRequest
+                    {
+                        CampaignId = campaignId,
+                        StudentId = student.StudentId,
+                        ParentId = student.ParentId.Value,
+                        RequestDate = DateTime.UtcNow,
+                        ConsentStatusId = 1 // Chờ xác nhận
+                    };
+
+                    consentRequests.Add(consentRequest);
+                    response.SuccessCount++;
+                }
+                catch (Exception ex)
+                {
+                    response.FailedCount++;
+                    response.FailedReasons.Add($"Lỗi khi xử lý học sinh {student.FullName}: {ex.Message}");
+                }
+            }
+
+            // Tạo tất cả phiếu đồng ý cùng lúc
+            if (consentRequests.Any())
+            {
+                var createdRequests = await _campaignRepository.CreateMultipleConsentRequests(consentRequests);
+                response.CreatedRequests = createdRequests.Select(cr => new ConsentRequestResponse
+                {
+                    RequestId = cr.RequestId,
+                    StudentId = cr.StudentId,
+                    StudentName = cr.Student?.FullName,
+                    CampaignId = cr.CampaignId,
+                    CampaignName = cr.Campaign?.VaccineName,
+                    ParentId = cr.ParentId,
+                    ParentName = cr.Parent?.FullName,
+                    RequestDate = cr.RequestDate,
+                    ConsentStatusId = cr.ConsentStatusId,
+                    ConsentStatusName = cr.ConsentStatus?.ConsentStatusName
+                }).ToList();
+            }
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = $"Gửi phiếu đồng ý thành công cho {response.SuccessCount}/{response.TotalStudents} học sinh",
+                Data = response
+            };
+        }
     }
 }

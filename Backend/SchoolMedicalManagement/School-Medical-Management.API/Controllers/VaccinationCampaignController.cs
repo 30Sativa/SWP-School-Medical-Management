@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolMedicalManagement.Models.Request;
+using SchoolMedicalManagement.Models.Response;
 using SchoolMedicalManagement.Service.Interface;
 using System;
 using System.Threading.Tasks;
@@ -107,12 +108,35 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-
         // Gửi phiếu đồng ý tiêm chủng cho phụ huynh
         [HttpPost("campaigns/{campaignId}/send-consent/{studentId}")]
         public async Task<IActionResult> SendConsentRequest([FromRoute] int campaignId, [FromRoute] int studentId, [FromQuery] Guid parentId)
         {
             var response = await _vaccinationCampaignService.SendConsentRequestAsync(campaignId, studentId, parentId);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
+        // Gửi phiếu đồng ý theo lớp học
+        [HttpPost("campaigns/{campaignId}/send-consent-by-class")]
+        public async Task<IActionResult> SendConsentRequestsByClass([FromRoute] int campaignId, [FromBody] SendConsentByClassRequest request)
+        {
+            var response = await _vaccinationCampaignService.SendConsentRequestsByClassAsync(campaignId, request);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
+        // Gửi phiếu đồng ý cho tất cả phụ huynh
+        [HttpPost("campaigns/{campaignId}/send-consent-to-all-parents")]
+        public async Task<IActionResult> SendConsentRequestsToAllParents([FromRoute] int campaignId)
+        {
+            var response = await _vaccinationCampaignService.SendConsentRequestsToAllParentsAsync(campaignId);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
+        // Gửi phiếu đồng ý theo danh sách học sinh
+        [HttpPost("campaigns/{campaignId}/send-consent-bulk")]
+        public async Task<IActionResult> SendConsentRequestsBulk([FromRoute] int campaignId, [FromBody] SendConsentBulkRequest request)
+        {
+            var response = await _vaccinationCampaignService.SendConsentRequestsBulkAsync(campaignId, request);
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
