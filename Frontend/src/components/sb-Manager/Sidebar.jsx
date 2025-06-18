@@ -40,9 +40,9 @@ const Sidebar = () => {
           <Bell size={20} />
           <span>Gửi thông báo</span>
         </NavLink>
-        <NavLink to="/vaccinecampaign" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
+        <NavLink to="/vaccination-campaigns" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
           <ClipboardPlus size={20} />
-          <span>Tạo chiến dịch tiêm chủng</span>
+          <span>Chiến dịch tiêm chủng</span>
         </NavLink>
         <button
           className={style.navItem}

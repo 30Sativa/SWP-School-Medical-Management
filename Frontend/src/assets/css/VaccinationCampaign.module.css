@@ -1,0 +1,114 @@
+.headerBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 0 18px 0;
+  background: none;
+}
+
+.headerTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+}
+
+.createBtn {
+  background: #1677ff !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  font-weight: 600;
+  font-size: 1.05rem;
+  padding: 8px 20px;
+  box-shadow: 0 2px 8px rgba(22,119,255,0.08);
+  transition: background 0.2s;
+}
+.createBtn:hover {
+  background: #0056b3 !important;
+}
+
+.table {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  padding: 0 0 8px 0;
+  margin-top: 18px;
+}
+
+.modalForm .ant-modal-content {
+  border-radius: 14px;
+  padding: 24px 24px 12px 24px;
+}
+
+.input, .ant-input, .ant-select-selector, .ant-picker {
+  border-radius: 8px !important;
+  font-size: 1rem;
+  padding: 8px 12px;
+}
+
+.ant-form-item-label > label {
+  font-weight: 600;
+  color: #1677ff;
+}
+
+.ant-btn {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.ant-btn[shape="circle"] {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 1px 4px rgba(22,119,255,0.07);
+  transition: background 0.2s;
+}
+
+.ant-btn[shape="circle"]:hover {
+  background: #e6f0ff;
+}
+
+.ant-table-thead > tr > th {
+  font-weight: 700;
+  font-size: 1.05rem;
+  background: #f5f6fa;
+  color: #1677ff;
+}
+
+.ant-table-tbody > tr > td {
+  font-size: 1rem;
+  color: #222;
+}
+
+.ant-modal-footer .ant-btn-primary {
+  background: #1677ff;
+  border: none;
+}
+
+.ant-modal-footer .ant-btn-primary:hover {
+  background: #0056b3;
+}
+
+.selectCustom .ant-select-selector {
+  border-radius: 8px !important;
+  font-size: 1rem;
+  padding: 8px 12px;
+  background: #f8fafb;
+  border: 1.5px solid #dbeafe;
+  box-shadow: 0 1px 6px rgba(22,119,255,0.07);
+  transition: border 0.2s;
+}
+.selectCustom .ant-select-selector:focus, .selectCustom .ant-select-selector:hover {
+  border: 1.5px solid #1677ff;
+}
+.selectCustom .ant-select-selection-item {
+  font-weight: 500;
+  color: #1677ff;
+}
+.selectCustom .ant-select-arrow {
+  color: #1677ff;
+  font-size: 18px;
+}

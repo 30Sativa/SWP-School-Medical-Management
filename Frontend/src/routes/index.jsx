@@ -21,6 +21,7 @@ import Incident from "../pages/nurse/Incident";
 import MedicalSupplies from "../pages/nurse/MedicalSupplies";
 import FirstLogin from "../pages/auth/FirstLogin";
 import SendNotifications from "../pages/manager/SendNotifications";
+import VaccinationCampaign from "../pages/manager/VaccinationCampaign";
 
 const AppRouter = () => {
   return (
@@ -49,6 +50,7 @@ const AppRouter = () => {
       <Route path="/incidents" element={<Incident />} />
       <Route path="/vaccines" element={<VaccinCampaign />} />
       <Route path="/supplies" element={<MedicalSupplies />} />
+      <Route path="/vaccination-campaigns" element={<VaccinationCampaign />} />
     </Routes>
   );
 };
