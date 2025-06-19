@@ -46,6 +46,7 @@ builder.Services.AddScoped<MedicationRequestRepository>();
 
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationTypeRepository>();
+builder.Services.AddScoped<MedicalEventTypeRepository>();
 
 builder.Services.AddScoped<BlogPostRepository>();
 
@@ -64,6 +65,7 @@ builder.Services.AddScoped<IVaccinationCampaignService, VaccinationCampaignServi
 
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<INotificationTypeService, NotificationTypeService>();
+builder.Services.AddScoped<IMedicalEventTypeService, MedicalEventTypeService>();
 builder.Services.AddScoped<IBlogPostService, BlogPostService>();
 
 builder.Services.AddScoped<IDashboardService, DashboardService>();
