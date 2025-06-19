@@ -19,5 +19,10 @@ namespace SchoolMedicalManagement.Service.Interface
 
         Task<BaseResponse> GetMedicalRequestByStudentId(string studentid);
 
+        // Get medication requests by parent ID
+        Task<List<MedicationRequestResponse>> GetRequestsByParentIdAsync(Guid parentId);
+
+        // Get medication request by ID
+        Task<BaseResponse> GetRequestByIdAsync(int requestId);
     }
 }

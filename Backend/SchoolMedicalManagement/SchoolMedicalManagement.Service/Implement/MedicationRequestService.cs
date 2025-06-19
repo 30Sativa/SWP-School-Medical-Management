@@ -14,7 +14,6 @@ namespace SchoolMedicalManagement.Service.Implement
 {
     public class MedicationRequestService : IMedicationRequestService
     {
-
         private readonly MedicationRequestRepository _medicationRequestRepository;
 
         public MedicationRequestService(MedicationRequestRepository medicationRequestRepository)
@@ -30,6 +29,7 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 RequestID = r.RequestId,
                 StudentName = r.Student?.FullName ?? "Unknown",
+                ParentName = r.Parent?.FullName ?? "Unknown",
                 MedicationName = r.MedicationName,
                 Dosage = r.Dosage,
                 Instructions = r.Instructions,
@@ -62,6 +62,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     {
                         RequestID = entity.RequestId,
                         StudentName = entity.Student?.FullName ?? "Unknown",
+                        ParentName = entity.Parent?.FullName ?? "Unknown",
                         MedicationName = entity.MedicationName,
                         Dosage = entity.Dosage,
                         Instructions = entity.Instructions,
@@ -110,6 +111,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     RequestID = newRequest.RequestId,
                     StudentName = newRequest.Student?.FullName ?? "Unknown",
+                    ParentName = newRequest.Parent?.FullName ?? "Unknown",
                     MedicationName = newRequest.MedicationName,
                     Dosage = newRequest.Dosage,
                     Instructions = newRequest.Instructions,
@@ -152,14 +154,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = "Ko tim thay",
+                    Message = "Không tìm thấy yêu cầu thuốc cho học sinh này",
                     Data = null
                 };
             }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "thanh cobng",
+                Message = "Lấy thông tin yêu cầu thuốc thành công",
                 Data = new MedicationRequestResponse
                 {
                     RequestID = response.RequestId,
@@ -172,6 +174,59 @@ namespace SchoolMedicalManagement.Service.Implement
                     ImagePath = response.ImagePath,
                     ReceivedByName = response.ReceivedByNavigation?.FullName,
                     RequestDate = response.RequestDate
+                }
+            };
+        }
+
+        public async Task<List<MedicationRequestResponse>> GetRequestsByParentIdAsync(Guid parentId)
+        {
+            var requests = await _medicationRequestRepository.GetRequestsByParentIdAsync(parentId);
+
+            return requests.Select(r => new MedicationRequestResponse
+            {
+                RequestID = r.RequestId,
+                StudentName = r.Student?.FullName ?? "Unknown",
+                ParentName = r.Parent?.FullName ?? "Unknown",
+                MedicationName = r.MedicationName,
+                Dosage = r.Dosage,
+                Instructions = r.Instructions,
+                Status = r.Status?.StatusId == 1 ? "Chờ duyệt" : (r.Status?.StatusId == 2 ? "Đã duyệt" : "Từ chối"),
+                ImagePath = r.ImagePath,
+                ReceivedByName = r.ReceivedByNavigation?.FullName,
+                RequestDate = r.RequestDate
+            }).ToList();
+        }
+
+        public async Task<BaseResponse> GetRequestByIdAsync(int requestId)
+        {
+            var request = await _medicationRequestRepository.GetByIdMedical(requestId);
+
+            if (request == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = "Không tìm thấy yêu cầu thuốc",
+                    Data = null
+                };
+            }
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy thông tin yêu cầu thuốc thành công",
+                Data = new MedicationRequestResponse
+                {
+                    RequestID = request.RequestId,
+                    StudentName = request.Student?.FullName ?? "Unknown",
+                    ParentName = request.Parent?.FullName ?? "Unknown",
+                    MedicationName = request.MedicationName,
+                    Dosage = request.Dosage,
+                    Instructions = request.Instructions,
+                    Status = request.Status?.StatusId == 1 ? "Chờ duyệt" : (request.Status?.StatusId == 2 ? "Đã duyệt" : "Từ chối"),
+                    ImagePath = request.ImagePath,
+                    ReceivedByName = request.ReceivedByNavigation?.FullName,
+                    RequestDate = request.RequestDate
                 }
             };
         }

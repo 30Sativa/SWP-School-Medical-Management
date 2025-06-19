@@ -23,6 +23,7 @@ namespace SchoolMedicalManagement.Repository.Repository
                 .Include(r => r.Student)  // nếu bạn cần thông tin học sinh
                 .Include(r => r.Status) // nếu bạn cần thông tin trạng thái
                 .Include(r => r.ReceivedByNavigation)
+                .Include(r => r.Parent) // thêm thông tin phụ huynh
                 .ToListAsync();
         }
 
@@ -30,6 +31,10 @@ namespace SchoolMedicalManagement.Repository.Repository
         public async Task<MedicationRequest?> GetByIdMedical(int id)
         {
             return await _context.MedicationRequests
+                .Include(r => r.Student)
+                .Include(r => r.Status)
+                .Include(r => r.Parent)
+                .Include(r => r.ReceivedByNavigation)
                 .FirstOrDefaultAsync(r => r.RequestId == id && r.IsActive == true);
         }
 
@@ -64,6 +69,9 @@ namespace SchoolMedicalManagement.Repository.Repository
             return await _context.MedicationRequests
                 .Where(r => r.ParentId == parentId && r.IsActive == true)
                 .Include(r => r.Student)  // nếu bạn cần thông tin học sinh
+                .Include(r => r.Status)
+                .Include(r => r.Parent)
+                .Include(r => r.ReceivedByNavigation)
                 .ToListAsync();
         }
 
@@ -83,6 +91,7 @@ namespace SchoolMedicalManagement.Repository.Repository
             return _context.MedicationRequests
                 .Include(r => r.Student)
                 .Include(r => r.Status)
+                .Include(r => r.Parent)
                 .Include(r => r.ReceivedByNavigation)
                 .Where(r => r.IsActive == true)
                 .ToListAsync();
@@ -93,10 +102,18 @@ namespace SchoolMedicalManagement.Repository.Repository
 
         public Task<MedicationRequest?> GetRequestByStudentIdAsync(string studentId)
         {
-            return _context.MedicationRequests
-                .Include(e => e.Student)
-                .Include(e => e.Status)
-                .FirstOrDefaultAsync(e => e.StudentId.Equals(studentId));
+            int studentIdInt;
+            if (int.TryParse(studentId, out studentIdInt))
+            {
+                return _context.MedicationRequests
+                    .Include(e => e.Student)
+                    .Include(e => e.Status)
+                    .Include(e => e.Parent)
+                    .Include(e => e.ReceivedByNavigation)
+                    .Where(e => e.IsActive == true)
+                    .FirstOrDefaultAsync(e => e.StudentId == studentIdInt);
+            }
+            return Task.FromResult<MedicationRequest?>(null);
         }
 
 

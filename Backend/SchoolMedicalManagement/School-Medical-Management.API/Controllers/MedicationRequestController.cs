@@ -111,11 +111,48 @@ namespace School_Medical_Management.API.Controllers
             }
         }
 
-        [HttpGet("student/{StudentId}")]
+        [HttpGet("student/{studentId}")]
         public async Task<IActionResult> GetMedicalRequestByStudent(string studentId)
         {
-            var reponse = await _medicationRequestService.GetMedicalRequestByStudentId(studentId);
-            return StatusCode(int.Parse(reponse.Status), reponse);
+            try
+            {
+                var response = await _medicationRequestService.GetMedicalRequestByStudentId(studentId);
+                return StatusCode(int.Parse(response.Status), response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving student requests: {ex.Message}");
+            }
+        }
+
+        // Get medication requests by parent ID
+        [HttpGet("parent/{parentId}")]
+        public async Task<IActionResult> GetRequestsByParent(Guid parentId)
+        {
+            try
+            {
+                var requests = await _medicationRequestService.GetRequestsByParentIdAsync(parentId);
+                return Ok(requests);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving parent requests: {ex.Message}");
+            }
+        }
+
+        // Get medication request by ID
+        [HttpGet("{requestId}")]
+        public async Task<IActionResult> GetRequestById(int requestId)
+        {
+            try
+            {
+                var response = await _medicationRequestService.GetRequestByIdAsync(requestId);
+                return StatusCode(int.Parse(response.Status), response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving request: {ex.Message}");
+            }
         }
     }
 }
