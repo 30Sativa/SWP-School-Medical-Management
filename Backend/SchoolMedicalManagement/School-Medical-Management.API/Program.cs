@@ -7,7 +7,7 @@ using SchoolMedicalManagement.Service.Implement;
 using SchoolMedicalManagement.Service.Interface;
 using Microsoft.EntityFrameworkCore;
 using SchoolMedicalManagement.Models.Entity;
-
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +51,7 @@ builder.Services.AddScoped<MedicalEventTypeRepository>();
 builder.Services.AddScoped<BlogPostRepository>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+
 builder.Services.AddScoped<IMedicalHistoryService, MedicalHistoryService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
@@ -70,6 +71,9 @@ builder.Services.AddScoped<IBlogPostService, BlogPostService>();
 
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 
+builder.Services.AddScoped<IOtpService, OtpService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 // CORS
 builder.Services.AddCors(options =>
 {
@@ -86,6 +90,12 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<SwpEduHealV5Context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Redis đăng ký dịch vụ IDistributedCache (Redis cache) để lưu OTP
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration["Redis:ConnectionString"];
+    options.InstanceName = "SchoolMedicalManagement_";
+});
 
 // Swagger And Authentication
 builder.Services.AddSwaggerGen(option =>
