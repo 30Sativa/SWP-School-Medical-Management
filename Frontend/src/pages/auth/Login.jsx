@@ -1,4 +1,4 @@
-import "../../assets/CSS/Login.css";
+import "../../assets/CSS/Login.css"; 
 import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -41,9 +41,9 @@ const Login = () => {
       console.log("📥 Phản hồi từ server:", response.data);
 
       if (response.data.message?.toLowerCase().includes("login successful") && token) {
-        
         localStorage.setItem("token", token);
         localStorage.setItem("userId", resData.userId);
+        localStorage.setItem("parentId", resData.userId); // 🟢 Sửa tại đây
 
         let roleName = "";
 
@@ -68,14 +68,12 @@ const Login = () => {
           theme: "colored",
         });
 
-  
         setTimeout(() => {
           if (roleName === "Manager") {
             navigate("/manager");
           } else if (roleName === "Nurse") {
             navigate("/nurse");
           } else if (roleName === "Parent") {
-
             (async () => {
               try {
                 const studentRes = await axios.get(
