@@ -78,5 +78,29 @@ namespace School_Medical_Management.API.Controllers
             var response = await _authService.ChangePasswordAfterFirstLogin(id, request);
             return StatusCode(int.Parse(response.Status), response);
         }
+
+        // Gửi OTP quên mật khẩu đến email
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            var response = await _authService.ForgotPasswordAsync(request);
+            return StatusCode(int.Parse(response.Status), response);
+        }
+
+        // Xác thực OTP người dùng nhập
+        [HttpPost("verify-otp")]
+        public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpRequest request)
+        {
+            var response = await _authService.VerifyOtpAsync(request);
+            return StatusCode(int.Parse(response.Status), response);
+        }
+
+        // Đặt lại mật khẩu sau khi xác thực OTP thành công
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            var response = await _authService.ResetPasswordAsync(request);
+            return StatusCode(int.Parse(response.Status), response);
+        }
     }
 }
