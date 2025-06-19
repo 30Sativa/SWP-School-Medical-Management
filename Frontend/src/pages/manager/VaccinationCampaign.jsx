@@ -6,6 +6,7 @@ import { Table, Button, Modal, Form, Input, DatePicker, Select, message, Spin } 
 import { PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import axios from "axios";
 import dayjs from "dayjs";
+import { Edit2, Trash2, Plus } from "lucide-react";
 
 const apiUrl = "https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns";
 
@@ -25,6 +26,9 @@ const VaccinationCampaign = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form] = Form.useForm();
+  const [searchText, setSearchText] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const campaignsPerPage = 8;
 
   // Fetch campaigns
   const fetchCampaigns = async () => {
@@ -48,6 +52,17 @@ const VaccinationCampaign = () => {
   // Chỉ hiển thị các chiến dịch chưa bị huỷ (statusId !== 4)
   const activeCampaigns = campaigns.filter(c => c.statusId !== 4);
 
+  // Lọc và phân trang
+  const filteredCampaigns = activeCampaigns.filter(
+    (c) =>
+      c.vaccineName.toLowerCase().includes(searchText.toLowerCase()) ||
+      c.description?.toLowerCase().includes(searchText.toLowerCase())
+  );
+  const paginatedCampaigns = filteredCampaigns.slice(
+    (currentPage - 1) * campaignsPerPage,
+    currentPage * campaignsPerPage
+  );
+
   // CRUD Handlers
   const handleCreate = () => {
     setEditing(null);
@@ -62,24 +77,7 @@ const VaccinationCampaign = () => {
     setModalOpen(true);
   };
 
-  const handleDelete = (id) => {
-    Modal.confirm({
-      title: "Bạn có chắc muốn xoá chiến dịch này?",
-      icon: <ExclamationCircleOutlined />,
-      onOk: async () => {
-        setLoading(true);
-        try {
-          await axios.delete(`${apiUrl}/${id}`);
-          message.success("Đã xoá chiến dịch!");
-          fetchCampaigns();
-        } catch {
-          message.error("Xoá thất bại!");
-        } finally {
-          setLoading(false);
-        }
-      },
-    });
-  };
+  
 
   const handleModalOk = async () => {
     try {
@@ -111,7 +109,7 @@ const VaccinationCampaign = () => {
       }
       setModalOpen(false);
       fetchCampaigns();
-    } catch (err) {
+    } catch  {
       // Validation error
     } finally {
       setLoading(false);
@@ -184,25 +182,88 @@ const VaccinationCampaign = () => {
   return (
     <div className={style.layoutContainer}>
       <Sidebar />
-      <main className={style.layoutContent + ' ' + campaignStyle.vaccinationMain}>
-        <header className={campaignStyle.headerBar}>
-          <h1 className={campaignStyle.headerTitle}>Quản lý Chiến dịch Tiêm chủng</h1>
-          <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate} className={campaignStyle.createBtn}>
-            Thêm chiến dịch
-          </Button>
+      <main className={style.layoutContent}>
+        <header className={campaignStyle.dashboardHeaderBar}>
+          <div className={campaignStyle.titleGroup}>
+            <h1>
+              <span className={campaignStyle.textBlack}>Danh sách</span>
+              <span className={campaignStyle.textAccent}> chiến dịch tiêm chủng</span>
+            </h1>
+          </div>
         </header>
-        <section className={campaignStyle.statsRow}>
-          {/* Có thể thêm các stat-card như dashboard nếu muốn */}
-        </section>
-        <Spin spinning={loading} tip="Đang tải...">
-          <Table
-            columns={columns}
-            dataSource={activeCampaigns}
-            rowKey="campaignId"
-            pagination={{ pageSize: 6 }}
-            className={campaignStyle.table}
+        <div className={campaignStyle.header}>
+          <input
+            type="text"
+            placeholder="Tìm kiếm chiến dịch..."
+            className={campaignStyle.searchBar}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
           />
-        </Spin>
+          <button className={campaignStyle.addBtn} onClick={handleCreate}>
+            <Plus size={16} style={{ marginRight: 6, marginBottom: -2 }} /> Thêm chiến dịch
+          </button>
+        </div>
+        <table className={campaignStyle.studentTable}>
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Tên vắc xin</th>
+              <th>Ngày tổ chức</th>
+              <th>Mô tả</th>
+              <th>Người tạo</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedCampaigns.length > 0 ? (
+              paginatedCampaigns.map((c, idx) => (
+                <tr key={c.campaignId}>
+                  <td>{(currentPage - 1) * campaignsPerPage + idx + 1}</td>
+                  <td>{c.vaccineName}</td>
+                  <td>{c.date}</td>
+                  <td>{c.description}</td>
+                  <td>{c.createdByName}</td>
+                  <td>{c.statusName}</td>
+                  <td>
+                    <div className={campaignStyle.actionGroup}>
+                      <button className={campaignStyle.editBtn} onClick={() => handleEdit(c)}>
+                        <Edit2 size={16} /> Sửa
+                      </button>
+                      {c.statusId === 2 && (
+                        <button className={campaignStyle.deleteBtn} onClick={() => handleDeactivate(c.campaignId)}>
+                          <Trash2 size={16} /> Ẩn
+                        </button>
+                      )}
+                      {c.statusId === 3 && (
+                        <button className={campaignStyle.editBtn} onClick={() => handleActivate(c.campaignId)}>
+                          <Plus size={16} /> Kích hoạt
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" style={{ textAlign: "center" }}>
+                  Không có dữ liệu chiến dịch
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+        <div className={campaignStyle.pagination}>
+          {[...Array(Math.ceil(filteredCampaigns.length / campaignsPerPage))].map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentPage(index + 1)}
+              className={currentPage === index + 1 ? campaignStyle.activePage : ""}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
         <Modal
           title={editing ? "Cập nhật chiến dịch" : "Thêm chiến dịch mới"}
           open={modalOpen}
