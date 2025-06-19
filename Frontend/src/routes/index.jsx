@@ -22,7 +22,8 @@ import MedicalSupplies from "../pages/nurse/MedicalSupplies";
 import FirstLogin from "../pages/auth/FirstLogin";
 import SendNotifications from "../pages/manager/SendNotifications";
 import VaccinationCampaign from "../pages/manager/VaccinationCampaign";
-
+import CampaignDetail from "../pages/nurse/CampaignDetail";
+import VaccinationResultPage from "../pages/nurse/VaccinationResultPage";
 const AppRouter = () => {
   return (
     <Routes>
@@ -51,6 +52,8 @@ const AppRouter = () => {
       <Route path="/vaccines" element={<VaccinCampaign />} />
       <Route path="/supplies" element={<MedicalSupplies />} />
       <Route path="/vaccination-campaigns" element={<VaccinationCampaign />} />
+      <Route path="/vaccines/:id" element={<CampaignDetail />} />
+      <Route path="/vaccines/:id/result" element={<VaccinationResultPage />} />
     </Routes>
   );
 };
