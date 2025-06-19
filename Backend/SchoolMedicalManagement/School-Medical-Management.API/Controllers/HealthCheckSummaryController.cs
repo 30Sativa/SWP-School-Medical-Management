@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace School_Medical_Management.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/health-checks/summaries")]
     [ApiController]
     public class HealthCheckSummaryController : ControllerBase
     {
@@ -67,5 +67,16 @@ namespace School_Medical_Management.API.Controllers
             }
             return Ok($"Delete Health check summary with ID: {id} successfully");
         }
+
+        [HttpGet("student/{studentId}")]
+        public async Task<IActionResult> GetHealthCheckSummariesByStudentId([FromRoute] int studentId)
+        {
+            var response = await _healthCheckSummaryService.GetHealthCheckSummariesByStudentIdAsync(studentId);
+            if (response == null || response.Data == null)
+            {
+                return NotFound(response?.Message ?? $"No health check summaries found for student with ID {studentId}.");
+            }
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
     }
-} 
+}

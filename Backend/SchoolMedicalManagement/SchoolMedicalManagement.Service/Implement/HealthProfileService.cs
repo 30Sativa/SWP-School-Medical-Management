@@ -168,5 +168,88 @@ namespace SchoolMedicalManagement.Service.Implement
         {
             return await _healthProfileRepository.DeleteHealthProfile(id);
         }
+
+        // ✅ Lấy hồ sơ sức khỏe theo StudentId
+        public async Task<BaseResponse?> GetHealthProfileByStudentIdAsync(int studentId)
+        {
+            var hp = await _healthProfileRepository.GetHealthProfileByStudentId(studentId);
+            if (hp == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Không tìm thấy hồ sơ sức khỏe cho học sinh với ID {studentId}.",
+                    Data = null
+                };
+            }
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy hồ sơ sức khỏe thành công.",
+                Data = new ManagerHealthProfileResponse
+                {
+                    ProfileId = hp.ProfileId,
+                    StudentId = hp.StudentId ?? 0,
+                    Height = hp.Height,
+                    Weight = hp.Weight,
+                    ChronicDiseases = hp.ChronicDiseases,
+                    Allergies = hp.Allergies,
+                    GeneralNote = hp.GeneralNote,
+                    IsActive = hp.IsActive
+                }
+            };
+        }
+
+        // ✅ Cập nhật hồ sơ sức khỏe theo StudentId
+        public async Task<BaseResponse?> UpdateHealthProfileByStudentIdAsync(int studentId, UpdateHealthProfileRequest request)
+        {
+            var hp = await _healthProfileRepository.GetHealthProfileByStudentId(studentId);
+            if (hp == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Không tìm thấy hồ sơ sức khỏe cho học sinh với ID {studentId}.",
+                    Data = null
+                };
+            }
+
+            hp.Height = request.Height ?? hp.Height;
+            hp.Weight = request.Weight ?? hp.Weight;
+            hp.ChronicDiseases = request.ChronicDiseases ?? hp.ChronicDiseases;
+            hp.Allergies = request.Allergies ?? hp.Allergies;
+            hp.GeneralNote = request.GeneralNote ?? hp.GeneralNote;
+            hp.IsActive = request.IsActive ?? hp.IsActive;
+
+            var updated = await _healthProfileRepository.UpdateHealthProfile(hp);
+
+            if (updated == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Cập nhật hồ sơ sức khỏe thất bại.",
+                    Data = null
+                };
+            }
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Cập nhật hồ sơ sức khỏe thành công.",
+                Data = new ManagerHealthProfileResponse
+                {
+                    ProfileId = updated.ProfileId,
+                    StudentId = updated.StudentId ?? 0,
+                    Height = updated.Height,
+                    Weight = updated.Weight,
+                    ChronicDiseases = updated.ChronicDiseases,
+                    Allergies = updated.Allergies,
+                    GeneralNote = updated.GeneralNote,
+                    IsActive = updated.IsActive
+                }
+            };
+        }
     }
 }

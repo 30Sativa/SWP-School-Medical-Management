@@ -260,5 +260,65 @@ namespace SchoolMedicalManagement.Service.Implement
         {
             return await _summaryRepository.DeleteHealthCheckSummary(id);
         }
+
+        public async Task<BaseResponse?> GetHealthCheckSummariesByStudentIdAsync(int studentId)
+        {
+            var student = await _studentRepository.GetStudentById(studentId);
+            if (student == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Student with ID {studentId} not found.",
+                    Data = null
+                };
+            }
+
+            var summaries = await _summaryRepository.GetHealthCheckSummariesByStudentId(studentId);
+            if (summaries == null || summaries.Count == 0)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"No health check summaries found for student with ID {studentId}.",
+                    Data = null
+                };
+            }
+
+            var result = new List<HealthCheckSummaryManagementResponse>();
+            foreach (var s in summaries)
+            {
+                result.Add(new HealthCheckSummaryManagementResponse
+                {
+                    RecordId = s.RecordId,
+                    StudentId = s.StudentId,
+                    StudentName = s.Student?.FullName,
+                    CampaignId = s.CampaignId,
+                    CampaignTitle = s.Campaign?.Title,
+                    BloodPressure = s.BloodPressure,
+                    HeartRate = s.HeartRate,
+                    Height = s.Height,
+                    Weight = s.Weight,
+                    Bmi = s.Bmi,
+                    VisionSummary = s.VisionSummary,
+                    Ent = s.Ent,
+                    EntNotes = s.EntNotes,
+                    Mouth = s.Mouth,
+                    Throat = s.Throat,
+                    ToothDecay = s.ToothDecay,
+                    ToothNotes = s.ToothNotes,
+                    GeneralNote = s.GeneralNote,
+                    FollowUpNote = s.FollowUpNote,
+                    IsActive = s.IsActive
+                });
+            }
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Health check summaries retrieved successfully.",
+                Data = result
+            };
+        }
     }
-} 
+}
