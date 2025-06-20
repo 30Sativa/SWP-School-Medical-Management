@@ -148,8 +148,8 @@ namespace SchoolMedicalManagement.Service.Implement
             };
         }
 
-        // Xác thực OTP người dùng nhập
-        public async Task<BaseResponse> VerifyOtpAsync(VerifyOtpRequest request)
+        // Gộp xác thực OTP và đặt lại mật khẩu
+        public async Task<BaseResponse> VerifyOtpAndResetPasswordAsync(VerifyOtpAndResetPasswordRequest request)
         {
             // Kiểm tra email hợp lệ
             var user = await _userRepository.GetUserByEmail(request.Email);
@@ -171,30 +171,6 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
                     Message = "OTP không hợp lệ hoặc đã hết hạn.",
-                    Data = null
-                };
-            }
-
-            // Xác thực thành công, có thể cho phép đổi mật khẩu
-            return new BaseResponse
-            {
-                Status = StatusCodes.Status200OK.ToString(),
-                Message = "OTP hợp lệ. Bạn có thể đặt lại mật khẩu.",
-                Data = null
-            };
-        }
-
-        // Đặt lại mật khẩu sau khi xác thực OTP thành công
-        public async Task<BaseResponse> ResetPasswordAsync(ResetPasswordRequest request)
-        {
-            // Kiểm tra email hợp lệ
-            var user = await _userRepository.GetUserByEmail(request.Email);
-            if (user == null || user.IsActive == false)
-            {
-                return new BaseResponse
-                {
-                    Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = "Email không tồn tại hoặc tài khoản không hoạt động.",
                     Data = null
                 };
             }

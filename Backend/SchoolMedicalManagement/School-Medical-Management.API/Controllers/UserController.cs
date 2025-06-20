@@ -87,19 +87,11 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status), response);
         }
 
-        // Xác thực OTP người dùng nhập
-        [HttpPost("verify-otp")]
-        public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpRequest request)
+        // Gộp xác thực OTP và đặt lại mật khẩu
+        [HttpPost("verify-otp-reset-password")]
+        public async Task<IActionResult> VerifyOtpAndResetPassword([FromBody] VerifyOtpAndResetPasswordRequest request)
         {
-            var response = await _authService.VerifyOtpAsync(request);
-            return StatusCode(int.Parse(response.Status), response);
-        }
-
-        // Đặt lại mật khẩu sau khi xác thực OTP thành công
-        [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
-        {
-            var response = await _authService.ResetPasswordAsync(request);
+            var response = await _authService.VerifyOtpAndResetPasswordAsync(request);
             return StatusCode(int.Parse(response.Status), response);
         }
     }
