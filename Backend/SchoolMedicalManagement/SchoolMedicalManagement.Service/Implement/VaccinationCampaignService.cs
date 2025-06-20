@@ -1066,5 +1066,80 @@ namespace SchoolMedicalManagement.Service.Implement
                 Data = response
             };
         }
+
+        // Lấy phiếu đồng ý tiêm chủng theo requestId
+        public async Task<BaseResponse> GetConsentRequestByIdAsync(int requestId)
+        {
+            var consentRequest = await _campaignRepository.GetConsentRequestById(requestId);
+            if (consentRequest == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Consent request with ID {requestId} not found",
+                    Data = null
+                };
+            }
+
+            var response = new ConsentRequestResponse
+            {
+                RequestId = consentRequest.RequestId,
+                StudentId = consentRequest.StudentId,
+                StudentName = consentRequest.Student?.FullName,
+                CampaignId = consentRequest.CampaignId,
+                CampaignName = consentRequest.Campaign?.VaccineName,
+                ParentId = consentRequest.ParentId,
+                ParentName = consentRequest.Parent?.FullName,
+                RequestDate = consentRequest.RequestDate,
+                ConsentStatusId = consentRequest.ConsentStatusId,
+                ConsentStatusName = consentRequest.ConsentStatus?.ConsentStatusName,
+                ConsentDate = consentRequest.ConsentDate
+            };
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Successfully retrieved consent request",
+                Data = response
+            };
+        }
+
+        // Lấy tất cả phiếu đồng ý tiêm chủng của một học sinh
+        public async Task<BaseResponse> GetConsentRequestsByStudentIdAsync(int studentId)
+        {
+            var student = await _studentRepository.GetStudentById(studentId);
+            if (student == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Student with ID {studentId} not found",
+                    Data = null
+                };
+            }
+
+            var consentRequests = await _campaignRepository.GetConsentRequestsByStudentId(studentId);
+            var response = consentRequests.Select(cr => new ConsentRequestResponse
+            {
+                RequestId = cr.RequestId,
+                StudentId = cr.StudentId,
+                StudentName = cr.Student?.FullName,
+                CampaignId = cr.CampaignId,
+                CampaignName = cr.Campaign?.VaccineName,
+                ParentId = cr.ParentId,
+                ParentName = cr.Parent?.FullName,
+                RequestDate = cr.RequestDate,
+                ConsentStatusId = cr.ConsentStatusId,
+                ConsentStatusName = cr.ConsentStatus?.ConsentStatusName,
+                ConsentDate = cr.ConsentDate
+            }).ToList();
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Successfully retrieved consent requests by studentId",
+                Data = response
+            };
+        }
     }
 }

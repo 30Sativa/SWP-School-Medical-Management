@@ -285,5 +285,15 @@ namespace SchoolMedicalManagement.Repository.Repository
                 .Where(c => requestIds.Contains(c.RequestId))
                 .ToListAsync();
         }
+
+        // Lấy tất cả phiếu đồng ý tiêm chủng của một học sinh
+        public async Task<List<VaccinationConsentRequest>> GetConsentRequestsByStudentId(int studentId)
+            => await _context.VaccinationConsentRequests
+                .Include(c => c.Student)
+                .Include(c => c.Parent)
+                .Include(c => c.Campaign)
+                .Include(c => c.ConsentStatus)
+                .Where(c => c.StudentId == studentId)
+                .ToListAsync();
     }
 }
