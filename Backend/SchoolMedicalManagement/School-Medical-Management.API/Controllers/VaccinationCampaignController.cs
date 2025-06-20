@@ -180,5 +180,21 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
+        // Lấy phiếu đồng ý tiêm chủng theo requestId
+        [HttpGet("consent-requests/{requestId}")]
+        public async Task<IActionResult> GetConsentRequestById([FromRoute] int requestId)
+        {
+            var response = await _vaccinationCampaignService.GetConsentRequestByIdAsync(requestId);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
+        // Lấy tất cả phiếu đồng ý tiêm chủng của một học sinh
+        [HttpGet("consent-requests/student/{studentId}")]
+        public async Task<IActionResult> GetConsentRequestsByStudentId([FromRoute] int studentId)
+        {
+            var response = await _vaccinationCampaignService.GetConsentRequestsByStudentIdAsync(studentId);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
     }
 }
