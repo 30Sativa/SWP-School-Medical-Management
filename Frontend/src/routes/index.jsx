@@ -24,6 +24,9 @@ import SendNotifications from "../pages/manager/SendNotifications";
 import VaccinationCampaign from "../pages/manager/VaccinationCampaign";
 import CampaignDetail from "../pages/nurse/CampaignDetail";
 import VaccinationResultPage from "../pages/nurse/VaccinationResultPage";
+import ForgotPassword from "../pages/auth/ForgotPassword";
+import ResetPassword from "../pages/auth/ResetPassword";
+
 const AppRouter = () => {
   return (
     <Routes>
@@ -44,6 +47,8 @@ const AppRouter = () => {
       <Route path="/blog/create" element={<BlogCreate />} />
       <Route path="/firstlogin" element={<FirstLogin />} />
       <Route path="/sendnotifications" element={<SendNotifications />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       {/* Add more routes as needed */}
       <Route path="/medicine" element={<MedicationHandle />} />
       <Route path="/vaccines" element={<VaccinCampaign />} />

@@ -168,7 +168,7 @@ const Login = () => {
                 />
               </div>
               <div className="forgot-password">
-                <a href="#">Quên mật khẩu?</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); navigate("/forgot-password"); }}>Quên mật khẩu?</a>
               </div>
               <button type="submit" className="login-btn" disabled={loading}>
                 {loading ? "Đang đăng nhập..." : "Đăng nhập"}
