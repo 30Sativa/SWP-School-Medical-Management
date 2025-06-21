@@ -158,6 +158,7 @@ public class MedicalEventService : IMedicalEventService
                     SupplyId = hr.SupplyId,
                     SupplyName = hr.Supply?.Name ?? "(Không rõ)",
                     QuantityUsed = hr.QuantityUsed,
+                    Unit = hr.Supply?.Unit ?? "(Không rõ)",
                     Note = hr.Note
                 }).ToList() ?? new List<SupplyUserResponse>(),
 
@@ -200,6 +201,7 @@ public class MedicalEventService : IMedicalEventService
                 SupplyId = hr.SupplyId,
                 SupplyName = hr.Supply?.Name ?? "(Không rõ)",
                 QuantityUsed = hr.QuantityUsed,
+                Unit = hr.Supply?.Unit ?? "(Không rõ)",
                 Note = hr.Note
             }).ToList() ?? new List<SupplyUserResponse>(),
 
@@ -313,6 +315,7 @@ public class MedicalEventService : IMedicalEventService
                     SupplyId = r.SupplyId,
                     SupplyName = r.Supply?.Name ?? "",
                     QuantityUsed = r.QuantityUsed,
+                    Unit = r.Supply?.Unit ?? "",
                     Note = r.Note
                 }).ToList()
             }
