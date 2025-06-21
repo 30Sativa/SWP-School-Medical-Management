@@ -199,7 +199,6 @@ const HealthProfile = () => {
                       onChange={handleChange}
                     >
                       <option value={true}>Đang hoạt động</option>
-                      <option value={false}>Ngừng hoạt động</option>
                     </select>
                   ) : profile.isActive ? (
                     "Đang hoạt động"
