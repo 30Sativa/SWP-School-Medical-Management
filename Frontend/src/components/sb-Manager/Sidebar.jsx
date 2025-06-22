@@ -44,6 +44,10 @@ const Sidebar = () => {
           <ClipboardPlus size={20} />
           <span>Chiến dịch tiêm chủng</span>
         </NavLink>
+        <NavLink to="/health-check-campaign" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
+          <ClipboardPlus size={25} />
+          <span >Chiến dịch kiểm tra sức khỏe</span>
+        </NavLink>
         <button
           className={style.navItem}
           onClick={() => {
