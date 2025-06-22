@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Sidebar from "../../components/sb-Parent/Sidebar";
 import styles from "../../assets/css/SendMedicine.module.css";
 import { FiInfo, FiEdit, FiClipboard } from "react-icons/fi";
@@ -14,9 +14,15 @@ const SendMedicine = () => {
   const [history, setHistory] = useState([]);
   const [studentName, setStudentName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showAll, setShowAll] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
 
   const studentId = localStorage.getItem("studentId");
   const parentId = localStorage.getItem("parentId");
+
+  const historyEndRef = useRef(null);
+  const historyTopRef = useRef(null);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -77,7 +83,8 @@ const SendMedicine = () => {
       );
       const all = res.data;
       const filtered = all.filter(
-        (item) => item.studentName?.toLowerCase().trim() === name?.toLowerCase().trim()
+        (item) =>
+          item.studentName?.toLowerCase().trim() === name?.toLowerCase().trim()
       );
       const sorted = filtered.sort(
         (a, b) => new Date(b.requestDate) - new Date(a.requestDate)
@@ -91,6 +98,12 @@ const SendMedicine = () => {
   useEffect(() => {
     if (studentId) fetchHistory();
   }, [studentId]);
+
+  const filteredHistory = history.filter((item) =>
+    `${item.medicationName} ${item.instructions}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className={styles.container}>
@@ -164,30 +177,104 @@ const SendMedicine = () => {
 
           <div className={styles.historySection}>
             <div className={styles.historyHeader}>
-              <span>Lịch sử gửi thuốc</span>
-              <button className={styles.reviewBtn}>Xem tất cả</button>
+              <span>Lịch sử gửi thuốc {history.length > 0 && `(${history.length})`}</span>
+              <button
+                className={styles.reviewBtn}
+                onClick={() => setShowPopup(true)}
+              >
+                Xem thêm
+              </button>
             </div>
 
-            {history.map((item, index) => (
-              <div key={index} className={styles.historyItem}>
+            <input
+              type="text"
+              placeholder="🔍 Tìm theo tên thuốc hoặc ghi chú..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={styles.searchBox}
+            />
+
+            {(showAll ? filteredHistory : filteredHistory.slice(0, 3)).map((item, index) => (
+              <div
+                key={index}
+                className={`${styles.historyItem} ${styles.fadeIn}`}
+                ref={index === 0 ? historyTopRef : null}
+              >
                 <h4>{item.medicationName}</h4>
                 <p>📅 {new Date(item.requestDate).toLocaleDateString("vi-VN")}</p>
                 <p>💊 {item.dosage}</p>
                 <p>📝 {item.instructions}</p>
                 {item.imagePath && (
                   <p>
-                    📎 File: <a href={`https://swp-school-medical-management.onrender.com${item.imagePath}`} target="_blank" rel="noopener noreferrer">Xem file</a>
+                    📄 File:{" "}
+                    <a
+                      href={`https://swp-school-medical-management.onrender.com${item.imagePath}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontWeight: 600, color: "#2563eb", textDecoration: "underline" }}
+                    >
+                      Xem file
+                    </a>
                   </p>
                 )}
                 <div className={styles.statusRow}>
-                  <span className={styles[item.status === "Đã duyệt" ? "done" : "pending"]}>
-                    {item.status}
+                  <span className={`${styles.status} ${item.status === "Đã duyệt" ? styles.done : item.status === "Chờ duyệt" ? styles.pending : styles.reject}`}>
+                    {item.status === "Đã duyệt" ? "Đã duyệt" : item.status === "Chờ duyệt" ? "Chờ duyệt" : "Từ chối"}
                   </span>
                 </div>
               </div>
             ))}
+            <div ref={historyEndRef} />
           </div>
         </div>
+
+        {showPopup && (
+          <div className={styles.popupOverlay}>
+            <div className={styles.popupContent}>
+              <div className={styles.popupHeader}>
+                <span>Lịch sử gửi thuốc ({filteredHistory.length})</span>
+                <button className={styles.closeBtn} onClick={() => setShowPopup(false)}>✖</button>
+              </div>
+            
+              <input
+                type="text"
+                placeholder="🔍 Tìm theo tên thuốc hoặc ghi chú..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={styles.searchBox}
+                style={{ marginBottom: 18 }}
+              />
+              <div className={styles.popupBody}>
+                {filteredHistory.map((item, index) => (
+                  <div key={index} className={styles.historyItem}>
+                    <h4>{item.medicationName}</h4>
+                    <p>📅 {new Date(item.requestDate).toLocaleDateString("vi-VN")}</p>
+                    <p>💊 {item.dosage}</p>
+                    <p>📝 {item.instructions}</p>
+                    {item.imagePath && (
+   <p>
+                    📄 File:{" "}
+                    <a
+                      href={`https://swp-school-medical-management.onrender.com${item.imagePath}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontWeight: 600, color: "#2563eb", textDecoration: "underline" }}
+                    >
+                      Xem file
+                    </a>
+                  </p>
+                    )}
+                    <div className={styles.statusRow}>
+                      <span className={`${styles.status} ${item.status === "Đã duyệt" ? styles.done : item.status === "Chờ duyệt" ? styles.pending : styles.reject}`}>
+                        {item.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
