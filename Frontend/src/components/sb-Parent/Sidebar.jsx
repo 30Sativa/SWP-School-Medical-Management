@@ -71,7 +71,7 @@ const Sidebar = () => {
         </NavLink>
 
         <NavLink
-          to="/notiAndRep"
+          to="/notification"
           className={({ isActive }) =>
             `${styles.navItem} ${isActive ? styles.active : ""}`
           }

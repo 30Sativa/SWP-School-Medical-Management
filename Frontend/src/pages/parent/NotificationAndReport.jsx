@@ -6,70 +6,54 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const NotificationAndReport = () => {
-  const [notifications, setNotifications] = useState([]);
   const [consentRequests, setConsentRequests] = useState([]);
   const [declineReason, setDeclineReason] = useState("");
   const [selectedRequestId, setSelectedRequestId] = useState(null);
 
   const studentId = localStorage.getItem("studentId");
-  const parentId = localStorage.getItem("parentId");
   const parentName = localStorage.getItem("parentName") || "Phụ huynh";
 
   useEffect(() => {
-    const dummyData = [
-      {
-        title: "Health Schedule Notification",
-        date: "2025-06-12",
-        content: `⚕️ THÔNG BÁO VỀ LỊCH KHÁM SỨC KHỎE ĐỊNH KỲ CHO HỌC SINH...`,
-        type: "notification",
-      },
-      {
-        title: "Vaccination Schedule",
-        date: "2025-06-15",
-        content: `📢 LỊCH TIÊM VẮC-XIN BỔ SUNG...`,
-        type: "report",
-      },
-    ];
-    setNotifications(dummyData);
     fetchConsentRequests();
   }, []);
 
   const fetchConsentRequests = async () => {
     try {
-      const campaignId = 1; // tạm thời gán cố định cho bản demo
       const res = await axios.get(
-        `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaignId}/consent-requests`
+        `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/consent-requests/student/${studentId}`
       );
-      const allData = res.data?.data;
-      if (!Array.isArray(allData)) {
-        console.warn("❗ Dữ liệu phiếu đồng ý không đúng định dạng:", allData);
-        setConsentRequests([]);
-      } else {
-        const filtered = allData.filter(
-          (item) => item.parentId === parentId && item.consentStatusName === "Chờ xác nhận"
-        );
-        setConsentRequests(filtered);
-      }
+      const data = res.data?.data || [];
+      const filtered = data.filter(
+        (item) => item.consentStatusName === "Chờ xác nhận"
+      );
+      setConsentRequests(filtered);
     } catch (err) {
       console.error("Không lấy được danh sách phiếu đồng ý:", err);
-      setConsentRequests([]);
+      toast.error("Lỗi khi tải dữ liệu phiếu đồng ý.");
     }
   };
 
-  const handleConsent = async (id, agree) => {
+  const handleConsent = async (requestId, agree) => {
+    if (!agree && declineReason.trim() === "") {
+      toast.warning("Vui lòng nhập lý do từ chối.");
+      return;
+    }
+
     try {
       const payload = {
-        consentGiven: agree,
-        reason: agree ? null : declineReason,
+        consentStatusId: agree ? 2 : 3,
+        consentReason: agree ? null : declineReason,
       };
+
       await axios.put(
-        `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/consent-requests/${id}`,
+        `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/consent-requests/${requestId}`,
         payload
       );
+
       toast.success("Phản hồi thành công!");
       fetchConsentRequests();
-      setDeclineReason("");
       setSelectedRequestId(null);
+      setDeclineReason("");
     } catch (err) {
       console.error("Lỗi khi gửi phản hồi:", err);
       toast.error("Không thể gửi phản hồi!");
@@ -82,23 +66,9 @@ const NotificationAndReport = () => {
       <Sidebar />
       <div className={styles.content}>
         <h2 className={styles.title}>Thông Báo & Phản Hồi</h2>
-        <p className={styles.subtitle}>Xin chào, bạn đang đăng nhập với tư cách {parentName}</p>
-
-        <div className={styles.listWrapper}>
-          {notifications.map((item, index) => (
-            <div
-              className={`${styles.card} ${item.type === "report" ? styles.reportCard : styles.notifyCard}`}
-              key={index}
-            >
-              <h3>{item.title}</h3>
-              <p>
-                <strong>Ngày:</strong> {item.date}
-              </p>
-              <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{item.content}</pre>
-              <button className={styles.replyButton}>Reply</button>
-            </div>
-          ))}
-        </div>
+        <p className={styles.subtitle}>
+          Xin chào, bạn đang đăng nhập với tư cách {parentName}
+        </p>
 
         <div className={styles.listWrapper}>
           <h3>📋 Phiếu đồng ý tham gia chiến dịch y tế</h3>
@@ -109,19 +79,28 @@ const NotificationAndReport = () => {
               <div className={styles.card} key={item.requestId}>
                 <h4>{item.campaignName}</h4>
                 <p>
-                  <strong>Ngày:</strong> {new Date(item.requestDate).toLocaleDateString("vi-VN")}
-                </p>
-                <p>
                   <strong>Học sinh:</strong> {item.studentName}
                 </p>
+                <p>
+                  <strong>Ngày gửi:</strong>{" "}
+                  {new Date(item.requestDate).toLocaleDateString("vi-VN")}
+                </p>
+
                 <div className={styles.responseActions}>
-                  <button className={styles.approve} onClick={() => handleConsent(item.requestId, true)}>
+                  <button
+                    className={styles.approve}
+                    onClick={() => handleConsent(item.requestId, true)}
+                  >
                     ✅ Đồng ý
                   </button>
-                  <button className={styles.decline} onClick={() => setSelectedRequestId(item.requestId)}>
+                  <button
+                    className={styles.decline}
+                    onClick={() => setSelectedRequestId(item.requestId)}
+                  >
                     ❌ Từ chối
                   </button>
                 </div>
+
                 {selectedRequestId === item.requestId && (
                   <div className={styles.reasonBox}>
                     <textarea
@@ -129,7 +108,10 @@ const NotificationAndReport = () => {
                       value={declineReason}
                       onChange={(e) => setDeclineReason(e.target.value)}
                     />
-                    <button onClick={() => handleConsent(item.requestId, false)} className={styles.confirmDecline}>
+                    <button
+                      className={styles.confirmDecline}
+                      onClick={() => handleConsent(item.requestId, false)}
+                    >
                       Gửi lý do
                     </button>
                   </div>

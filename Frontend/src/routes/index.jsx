@@ -42,7 +42,7 @@ const AppRouter = () => {
       <Route path="/logs" element={<LogsPage />} />
       <Route path="/sendmedicine" element={<SendMedicine />} />
       <Route path="/hisofcare" element={<ChildCareHistory />} />
-      <Route path="/notiAndRep" element={<NotificationAndReport />} />
+      <Route path="/notification" element={<NotificationAndReport />} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/blog/create" element={<BlogCreate />} />
       <Route path="/firstlogin" element={<FirstLogin />} />
