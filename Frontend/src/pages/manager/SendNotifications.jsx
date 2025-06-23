@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Sidebar from "../../components/sb-Manager/Sidebar";
 import styles from "../../assets/css/SendNotification.module.css";
 import { Bell, Trash2, Plus, Filter, X, Search } from "lucide-react";
+import { Pagination, Select } from 'antd';
 
 const API_BASE = "/api"; // Sử dụng proxy để tránh lỗi CORS
 
@@ -300,18 +301,59 @@ const SendNotifications = () => {
                 placeholder="Nhập nội dung thông báo"
                 rows={3}
               />
-              <select
-                className={styles.input}
-                value={receiverId}
-                onChange={e => setReceiverId(e.target.value)}
-              >
-                <option value="">Chọn phụ huynh</option>
-                {parents.filter(p => p.roleName === "Parent").map(p => (
-                  <option key={p.userID} value={p.userID}>
-                    {p.fullName || p.username || p.email}
-                  </option>
-                ))}
-              </select>
+              <div style={{position:'relative', marginBottom: 2}}>
+                <Select
+                  showSearch
+                  allowClear
+                  className={styles.input}
+                  placeholder="Chọn phụ huynh"
+                  value={receiverId || undefined}
+                  onChange={v => setReceiverId(v)}
+                  filterOption={(input, option) => {
+                    // Lấy text từ fullName, username, email để search
+                    const p = parents.find(par => String(par.userID) === String(option.value));
+                    if (!p) return false;
+                    const searchStr = [p.fullName, p.username, p.email].filter(Boolean).join(' ').toLowerCase();
+                    return searchStr.includes(input.toLowerCase());
+                  }}
+                  optionFilterProp="children"
+                  style={{
+                    width: '100%',
+                    borderRadius: 10,
+                    fontSize: 16,
+                    background: '#f9fefe',
+                    border: '2px solid #23b7b7',
+                    boxShadow: '0 2px 12px #23b7b71a',
+                    padding: '2px 8px',
+                    minHeight: 44,
+                    transition: 'border-color 0.2s',
+                  }}
+                  dropdownStyle={{ borderRadius: 12, boxShadow: '0 4px 24px #0002', padding: 0 }}
+                  dropdownClassName={styles.dropdownCustom}
+                  size="large"
+                  notFoundContent={<span style={{color:'#888'}}>Không tìm thấy phụ huynh</span>}
+                >
+                  <Select.Option value="">Chọn phụ huynh</Select.Option>
+                  {parents.filter(p => p.roleName === "Parent").map(p => (
+                    <Select.Option key={p.userID} value={p.userID}>
+                      <div style={{display:'flex',alignItems:'center',gap:8}}>
+                        <span style={{fontWeight:500}}>{p.fullName || p.username || p.email}</span>
+                        {p.email && <span style={{color:'#888',fontSize:13}}>{p.email}</span>}
+                      </div>
+                    </Select.Option>
+                  ))}
+                </Select>
+                <style>{`
+                  .${styles.input} .ant-select-selector {
+                    border: none !important;
+                    box-shadow: none !important;
+                    background: transparent !important;
+                  }
+                  .${styles.input}:hover, .${styles.input}:focus-within {
+                    border-color: #1ca7a7 !important;
+                  }
+                `}</style>
+              </div>
               <select
                 className={styles.input}
                 value={typeId || ""}
@@ -390,7 +432,7 @@ const SendNotifications = () => {
             <tbody>
               {notifications.length === 0 ? (
                 <tr key="no-data"><td colSpan={6} style={{textAlign: 'center'}}>Không có thông báo</td></tr>
-              ) : notifications.slice((page-1)*pageSize, page*pageSize).map(n => {
+              ) : notifications.map(n => {
                 const parent = parents.find(p => String(p.userID) === String(n.receiverId));
                 return (
                   <tr key={n.id || n.notificationId || n._id} style={{transition:'background 0.15s'}} className={styles.tableRow}>
@@ -407,10 +449,21 @@ const SendNotifications = () => {
               })}
             </tbody>
           </table>
-          <div className={styles.pagination}>
-            <button disabled={page <= 1} onClick={() => setPage(page-1)}>Trước</button>
-            <span style={{margin: '0 8px'}}>Trang {page}/{totalPages}</span>
-            <button disabled={page >= totalPages} onClick={() => setPage(page+1)}>Sau</button>
+          <div style={{display:'flex',justifyContent:'flex-end',marginTop:18,marginRight:24}}>
+            <Pagination
+              current={page}
+              pageSize={pageSize}
+              total={allNotifications.filter(n => {
+                if (selectedCategory && n.typeId !== selectedCategory) return false;
+                if (search.trim()) {
+                  const s = search.trim().toLowerCase();
+                  return (n.title && n.title.toLowerCase().includes(s)) || (n.message && n.message.toLowerCase().includes(s));
+                }
+                return true;
+              }).length}
+              onChange={p => setPage(p)}
+              showSizeChanger={false}
+            />
           </div>
         </section>
         {/* Popup/modal cho CRUD notification & category */}

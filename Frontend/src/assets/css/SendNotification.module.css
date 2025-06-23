@@ -149,7 +149,7 @@
 }
 .table th {
   background: #f5f6fa; /* đồng bộ VaccinationCampaign */
-  color: #1677ff;
+  color: #000000;
   font-weight: 700;
   border-bottom: 2px solid #e0e7ef;
 }
