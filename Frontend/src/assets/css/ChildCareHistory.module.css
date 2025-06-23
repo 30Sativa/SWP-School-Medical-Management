@@ -9,17 +9,29 @@
   padding: 40px 60px;
 }
 
+/* Tiêu đề trang chính */
 .title {
   font-size: 32px;
   font-weight: 700;
-  color: #1e3a8a;
   margin-bottom: 10px;
+
+  background: linear-gradient(to right, #4338ca, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #1e3a8a; 
 }
 
+/* Dòng phụ đề */
 .subtitle {
-  font-size: 16px;
-  color: #475569;
+  font-size: 17px;
+  font-weight: 500;
   margin-bottom: 30px;
+  line-height: 1.6;
+
+  background: linear-gradient(to right, #4f46e5, #3b82f6); 
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #4f46e5;
 }
 
 .historyList {

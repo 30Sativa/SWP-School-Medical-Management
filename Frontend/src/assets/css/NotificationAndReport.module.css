@@ -271,6 +271,19 @@
     font-size: 1.3rem;
   }
 }
+.subtitle {
+  font-size: 17px;
+  font-weight: 500;
+  margin-bottom: 30px;
+  line-height: 1.6;
+
+  background: linear-gradient(to right, #4f46e5, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  color: #4f46e5;
+}
+
 
 @media (max-width: 600px) {
   .content {
