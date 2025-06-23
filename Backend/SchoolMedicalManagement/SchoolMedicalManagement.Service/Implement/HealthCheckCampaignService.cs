@@ -187,5 +187,27 @@ namespace SchoolMedicalManagement.Service.Implement
         {
             return await _campaignRepository.DeleteHealthCheckCampaign(id);
         }
+
+        public async Task<List<HealthCheckCampaignManagementResponse>> GetHealthCheckCampaignsByStatusAsync(int statusId)
+        {
+            var campaigns = await _campaignRepository.GetAllHealthCheckCampaigns();
+            var filtered = campaigns.Where(c => c.StatusId == statusId).ToList();
+            var result = new List<HealthCheckCampaignManagementResponse>();
+            foreach (var c in filtered)
+            {
+                result.Add(new HealthCheckCampaignManagementResponse
+                {
+                    CampaignId = c.CampaignId,
+                    Title = c.Title,
+                    Date = c.Date,
+                    Description = c.Description,
+                    CreatedBy = c.CreatedBy,
+                    CreatedByName = c.CreatedByNavigation?.FullName,
+                    StatusId = c.StatusId,
+                    StatusName = c.Status?.StatusName
+                });
+            }
+            return result;
+        }
     }
 }

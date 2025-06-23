@@ -11,6 +11,7 @@ namespace SchoolMedicalManagement.Service.Interface
     public interface IHealthCheckCampaignService
     {
         Task<List<HealthCheckCampaignManagementResponse>> GetAllHealthCheckCampaignsAsync();
+        Task<List<HealthCheckCampaignManagementResponse>> GetHealthCheckCampaignsByStatusAsync(int statusId);
         Task<BaseResponse?> GetHealthCheckCampaignByIdAsync(int id);
         Task<BaseResponse?> CreateHealthCheckCampaignAsync(CreateHealthCheckCampaignRequest campaign);
         Task<BaseResponse?> UpdateHealthCheckCampaignAsync(int id, UpdateHealthCheckCampaignRequest campaign);
