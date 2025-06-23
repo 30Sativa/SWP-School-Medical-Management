@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Sidebar from "../../components/sidebar/Sidebar";
 import style from "../../assets/css/MedicationHandle.module.css";
+import { Paperclip } from "lucide-react";
 
 const MedicationHandle = () => {
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -84,6 +85,7 @@ const MedicationHandle = () => {
           <th>Tên thuốc</th>
           <th>Liều dùng</th>
           <th>Hướng dẫn</th>
+          <th>Ảnh thuốc</th> {/* thêm cột mới */}
           <th>Ngày yêu cầu</th>
           <th>Trạng thái</th>
           <th>Y tá xác nhận</th>
@@ -98,6 +100,20 @@ const MedicationHandle = () => {
             <td>{req.medicationName}</td>
             <td>{req.dosage}</td>
             <td>{req.instructions}</td>
+            <td>
+              {req.imagePath ? (
+                <a
+                  href={`https://swp-school-medical-management.onrender.com${req.imagePath}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={style.attachmentLink}
+                >
+                  <Paperclip size={18} />
+                </a>
+              ) : (
+                <span className={style.nullText}>-</span>
+              )}
+            </td>
             <td>{new Date(req.requestDate).toLocaleString()}</td>
             <td>
               <span

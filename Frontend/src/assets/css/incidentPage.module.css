@@ -139,7 +139,7 @@
 }
 
 .tagGreen {
-  background-color: #20b2aa;
+  background-color: #20b249;
   color: white;
   padding: 2px 8px;
   border-radius: 6px;
@@ -147,15 +147,15 @@
 }
 
 .tagYellow {
-  background-color: #f4c430;
-  color: black;
+  background-color: #ffe920;
+  color: white;
   padding: 2px 8px;
   border-radius: 6px;
   font-size: 12px;
 }
 
 .tagOrange {
-  background-color: #ffa500;
+  background-color: #ffcc66;
   color: white;
   padding: 2px 8px;
   border-radius: 6px;
@@ -261,6 +261,23 @@
   background-color: #20b2aa;
 }
 
+.viewHistory {
+  margin-left: 10px;
+  background-color: #20b2aa;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.viewHistory:hover {
+  background-color: #20b2aa;
+}
+
 .chartWrapper {
   display: flex;
   justify-content: center;
@@ -350,7 +367,9 @@
   color: #333; /* Và chữ màu đen dễ đọc */
 }
 
-input, textarea, select {
+input,
+textarea,
+select {
   background-color: white !important;
   color: #333 !important;
 }
@@ -359,17 +378,14 @@ input, textarea, select {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: 15px;
 }
 
 .modalActions button {
-  padding: 8px 14px;
-  border-radius: 6px;
+  padding: 8px 16px;
   border: none;
-  font-size: 14px;
-  font-weight: 500;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background 0.2s;
 }
 
 .editBtn {
@@ -391,6 +407,37 @@ input, textarea, select {
   opacity: 0.9;
 }
 
+.detailTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.detailTable th,
+.detailTable td {
+  border: 1px solid #ccc;
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.detailTable th {
+  background-color: #f0f0f0;
+  font-weight: 600;
+}
+
+.detailTable tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.sectionTitle {
+  margin: 16px 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #20b2aa;
+  padding-bottom: 4px;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -400,4 +447,15 @@ input, textarea, select {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+.modalContent textarea {
+  min-height: 80px;
+}
+
+.infoLabel {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: 500;
+  color: #333;
 }
