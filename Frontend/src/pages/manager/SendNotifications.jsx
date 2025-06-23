@@ -29,7 +29,7 @@ const SendNotifications = () => {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const pageSize = 10; // Số lượng thông báo mỗi trang
+  const pageSize = 5; // Số lượng thông báo mỗi trang (giảm từ 10 xuống 5)
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -93,19 +93,17 @@ const SendNotifications = () => {
         (n.message && n.message.toLowerCase().includes(s))
       );
     }
-    setNotifications(filtered);
-    setTotalPages(Math.max(1, Math.ceil(filtered.length / pageSize)));
-    setPage(1);
-  }, [allNotifications, selectedCategory, search]);
-
-  // Khi đổi trang, không cần fetch lại, chỉ hiển thị slice dữ liệu
-  useEffect(() => {
-    setNotifications(prev => {
-      const start = (page - 1) * pageSize;
-      const end = start + pageSize;
-      return allNotifications.slice(start, end);
-    });
-  }, [page, allNotifications]);
+    const maxPage = Math.max(1, Math.ceil(filtered.length / pageSize));
+    setTotalPages(maxPage);
+    // Nếu page vượt quá tổng số trang sau khi lọc, reset về trang cuối cùng
+    if (page > maxPage) {
+      setPage(maxPage);
+      // Không setNotifications ở đây để tránh hiển thị trống khi vừa chuyển trang
+      return;
+    }
+    // CHỈ slice khi page <= maxPage
+    setNotifications(filtered.slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize));
+  }, [allNotifications, selectedCategory, search, page]);
 
   // Khi mở modal edit category
   useEffect(() => {
@@ -283,88 +281,65 @@ const SendNotifications = () => {
             </h1>
           </div>
         </header>
-        {/* Form nhập thông tin dạng table */}
+        {/* Form nhập thông tin dạng card hiện đại */}
         <section className={styles.cardSection}>
-          <table className={styles.formTable}>
-            <thead>
-              <tr>
-                <th>Tiêu đề</th>
-                <th>Nội dung</th>
-                <th>Gửi đến phụ huynh</th>
-                <th>Loại thông báo</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={e => setTitle(e.target.value)}
-                    className={styles.input}
-                    placeholder="Nhập tiêu đề thông báo"
-                    autoFocus
-                  />
-                </td>
-                <td>
-                  <textarea
-                    value={content}
-                    onChange={e => setContent(e.target.value)}
-                    className={styles.textarea}
-                    placeholder="Nhập nội dung thông báo"
-                  />
-                </td>
-                <td>
-                  <select
-                    className={styles.input}
-                    value={receiverId}
-                    onChange={e => setReceiverId(e.target.value)}
-                  >
-                    <option value="">Chọn phụ huynh</option>
-                    {parents.filter(p => p.roleName === "Parent").map(p => (
-                      <option key={p.userID} value={p.userID}>
-                        {p.fullName || p.username || p.email}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td>
-                  <select
-                    className={styles.input}
-                    value={typeId || ""}
-                    onChange={e => setTypeId(Number(e.target.value))}
-                    required
-                  >
-                    <option value="">Chọn loại thông báo</option>
-                    {categories.map(cat => (
-                      <option key={cat.typeId || cat.id} value={cat.typeId}>{cat.typeName}</option>
-                    ))}
-                  </select>
-                </td>
-                <td>
-                  <button
-                    type="button"
-                    className={styles.button}
-                    style={{minWidth: 120}}
-                    disabled={loading}
-                    onClick={handleSend}
-                  >
-                    <Bell size={20} style={{marginRight: 4, marginBottom: -2}}/>
-                    {loading ? "Đang gửi..." : "Gửi thông báo"}
-                  </button>
-                </td>
-              </tr>
+          <form className={styles.card} onSubmit={handleSend}>
+            <div style={{display:'flex',flexDirection:'column',gap:18}}>
+              <input
+                type="text"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                className={styles.input}
+                placeholder="Nhập tiêu đề thông báo"
+                autoFocus
+              />
+              <textarea
+                value={content}
+                onChange={e => setContent(e.target.value)}
+                className={styles.textarea}
+                placeholder="Nhập nội dung thông báo"
+                rows={3}
+              />
+              <select
+                className={styles.input}
+                value={receiverId}
+                onChange={e => setReceiverId(e.target.value)}
+              >
+                <option value="">Chọn phụ huynh</option>
+                {parents.filter(p => p.roleName === "Parent").map(p => (
+                  <option key={p.userID} value={p.userID}>
+                    {p.fullName || p.username || p.email}
+                  </option>
+                ))}
+              </select>
+              <select
+                className={styles.input}
+                value={typeId || ""}
+                onChange={e => setTypeId(Number(e.target.value))}
+                required
+              >
+                <option value="">Chọn loại thông báo</option>
+                {categories.map(cat => (
+                  <option key={cat.typeId || cat.id} value={cat.typeId}>{cat.typeName}</option>
+                ))}
+              </select>
               {(error || success) && (
-                <tr>
-                  <td colSpan={5} style={{textAlign:'center'}}>
-                    {error && <div style={{color: "#e53e3e", marginBottom: 6, fontWeight: 500}}>{error}</div>}
-                    {success && <div style={{color: "#059669", marginBottom: 6, fontWeight: 500}}>{success}</div>}
-                  </td>
-                </tr>
+                <div style={{textAlign:'center'}}>
+                  {error && <div style={{color: "#e53e3e", marginBottom: 6, fontWeight: 500}}>{error}</div>}
+                  {success && <div style={{color: "#059669", marginBottom: 6, fontWeight: 500}}>{success}</div>}
+                </div>
               )}
-            </tbody>
-          </table>
+              <button
+                type="submit"
+                className={styles.button}
+                style={{minWidth: 120, alignSelf:'center'}}
+                disabled={loading}
+              >
+                <Bell size={20} style={{marginRight: 4, marginBottom: -2}}/>
+                {loading ? "Đang gửi..." : "Gửi thông báo"}
+              </button>
+            </div>
+          </form>
         </section>
         {/* Danh sách thông báo xuống dưới */}
         <section className={styles.listSection}>
@@ -404,12 +379,12 @@ const SendNotifications = () => {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Tiêu đề</th>
-                <th>Nội dung</th>
-                <th>Loại</th>
-                <th>Phụ huynh nhận</th>
-                <th>Ngày gửi</th>
-                <th>Thao tác</th>
+                <th style={{minWidth:120}}>Tiêu đề</th>
+                <th style={{minWidth:180}}>Nội dung</th>
+                <th style={{minWidth:120}}>Loại</th>
+                <th style={{minWidth:140}}>Phụ huynh nhận</th>
+                <th style={{minWidth:120}}>Ngày gửi</th>
+                <th style={{textAlign:'center',minWidth:80}}>Thao tác</th>
               </tr>
             </thead>
             <tbody>
@@ -418,14 +393,14 @@ const SendNotifications = () => {
               ) : notifications.slice((page-1)*pageSize, page*pageSize).map(n => {
                 const parent = parents.find(p => String(p.userID) === String(n.receiverId));
                 return (
-                  <tr key={n.id || n.notificationId || n._id}>
-                    <td>{n.title}</td>
-                    <td>{n.message}</td>
+                  <tr key={n.id || n.notificationId || n._id} style={{transition:'background 0.15s'}} className={styles.tableRow}>
+                    <td style={{maxWidth:180,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}} title={n.title}>{n.title}</td>
+                    <td style={{maxWidth:260,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}} title={n.message}>{n.message}</td>
                     <td>{categories.find(c => c.typeId === n.typeId)?.typeName || n.typeName || ''}</td>
                     <td>{parent ? (parent.fullName || parent.username || parent.email) : n.receiverId || ''}</td>
-                    <td>{n.sentDate ? new Date(n.sentDate).toLocaleString() : ""}</td>
-                    <td>
-                      <button className={styles.iconBtn} onClick={() => { setDeleteId(n.id || n.notificationId); setShowDeleteModal(true); }}><Trash2 size={16}/></button>
+                    <td style={{whiteSpace:'nowrap'}}>{n.sentDate ? new Date(n.sentDate).toLocaleString() : ""}</td>
+                    <td style={{textAlign:'center'}}>
+                      <button className={styles.iconBtn} style={{border:'none'}} title="Xóa" onClick={() => { setDeleteId(n.id || n.notificationId); setShowDeleteModal(true); }}><Trash2 size={16}/></button>
                     </td>
                   </tr>
                 );
