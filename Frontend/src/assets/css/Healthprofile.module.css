@@ -121,6 +121,9 @@
 }
 
 .infoBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   text-align: left;
   font-size: 1rem;
   color: #334155;
@@ -129,8 +132,8 @@
 
 .infoItem {
   display: flex;
-  justify-content: space-between;
-  align-items: center; 
+  align-items: center;
+  gap: 12px;
   margin-bottom: 14px;
   font-weight: 500;
   padding-bottom: 6px;
@@ -139,6 +142,17 @@
 
 .infoItem:last-child {
   border-bottom: none;
+}
+
+.infoItem > span:first-child {
+  min-width: 110px;
+  color: #334155;
+  font-weight: 500;
+}
+
+.infoItem > span:last-child {
+  flex: 1;
+  display: flex;
 }
 
 .updateButton {
@@ -231,6 +245,104 @@
   text-decoration: underline;
 }
 
+/* Tóm tắt sức khỏe */
+.healthSummaryCard {
+  background: #f8fafc;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(30, 58, 138, 0.06);
+  padding: 16px 18px 12px 18px;
+  margin-bottom: 16px;
+  border-left: 4px solid #0ea5e9;
+  border-right: 1px solid #e0e7ef;
+  border-top: 1px solid #e0e7ef;
+  border-bottom: 1px solid #e0e7ef;
+  transition: box-shadow 0.18s, border-color 0.18s;
+  position: relative;
+}
+
+.healthSummaryCard:hover {
+  box-shadow: 0 6px 18px rgba(30, 58, 138, 0.11);
+  border-left: 4px solid #38bdf8;
+}
+
+.healthSummaryTitle {
+  font-weight: 600;
+  color: #0e2a47;
+  font-size: 1.04rem;
+  margin-bottom: 7px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.healthSummaryRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 3px;
+  font-size: 0.98rem;
+  color: #334155;
+}
+
+.healthSummaryLabel {
+  font-weight: 500;
+  color: #0284c7;
+  margin-right: 3px;
+}
+
+.healthSummaryValue {
+  color: #0ea5e9;
+  font-weight: 500;
+}
+
+.followNote {
+  margin-top: 7px;
+  padding: 8px 12px;
+  background: #f1f5f9;
+  border-radius: 7px;
+  color: #2563eb;
+  font-size: 0.97rem;
+  border-left: 3px solid #0ea5e9;
+}
+
+/* Input Fields */
+.inputField,
+.inputField:focus,
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+  width: 100%;
+  padding: 9px 14px;
+  border: 1.5px solid #c7d2fe;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: #f8fafc;
+  color: #1e293b;
+  transition: border 0.18s, box-shadow 0.18s;
+  box-shadow: 0 1px 4px rgba(99, 102, 241, 0.06);
+  outline: none;
+  resize: none;
+}
+
+.inputField:focus {
+  border: 2px solid #6366f1;
+  background: #fff;
+  box-shadow: 0 2px 8px #6366f133;
+}
+
+input[type="text"]:disabled,
+input[type="number"]:disabled,
+textarea:disabled,
+select:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
 /* Responsive */
 @media (max-width: 1100px) {
   .profileWrapper {
@@ -289,4 +401,11 @@
   font-weight: 500;
 }
 
+}
+
+.editActionRow {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  justify-content: center
 }

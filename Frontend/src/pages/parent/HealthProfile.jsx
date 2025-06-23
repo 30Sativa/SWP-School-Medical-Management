@@ -11,6 +11,7 @@ const HealthProfile = () => {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
+  const [healthSummaries, setHealthSummaries] = useState([]);
 
   const studentId = localStorage.getItem("studentId");
   const token = localStorage.getItem("token");
@@ -47,8 +48,25 @@ const HealthProfile = () => {
       }
     };
 
+    const fetchSummaries = async () => {
+      try {
+        const res = await axios.get(
+          "https://swp-school-medical-management.onrender.com/api/health-checks/summaries",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const filtered = res.data.filter(
+          (item) => item.studentId === parseInt(studentId)
+        );
+        const sorted = filtered.sort((a, b) => b.recordId - a.recordId);
+        setHealthSummaries(sorted.slice(0, 2));
+      } catch (err) {
+        console.error("Lỗi khi tải lịch sử khám:", err);
+      }
+    };
+
     if (studentId && token) {
       fetchData();
+      fetchSummaries();
     } else {
       toast.error("Thiếu studentId hoặc token!");
       setLoading(false);
@@ -127,6 +145,7 @@ const HealthProfile = () => {
                       name="height"
                       value={formData.height}
                       onChange={handleChange}
+                      className={styles.inputField} 
                     />
                   ) : (
                     `${profile.height} cm`
@@ -141,6 +160,7 @@ const HealthProfile = () => {
                       name="weight"
                       value={formData.weight}
                       onChange={handleChange}
+                      className={styles.inputField} 
                     />
                   ) : (
                     `${profile.weight} kg`
@@ -155,6 +175,7 @@ const HealthProfile = () => {
                       name="chronicDiseases"
                       value={formData.chronicDiseases}
                       onChange={handleChange}
+                      className={styles.inputField}
                     />
                   ) : (
                     profile.chronicDiseases
@@ -169,6 +190,7 @@ const HealthProfile = () => {
                       name="allergies"
                       value={formData.allergies}
                       onChange={handleChange}
+                      className={styles.inputField}
                     />
                   ) : (
                     profile.allergies
@@ -183,6 +205,7 @@ const HealthProfile = () => {
                       name="generalNote"
                       value={formData.generalNote}
                       onChange={handleChange}
+                      className={styles.inputField}
                     />
                   ) : (
                     profile.generalNote
@@ -192,20 +215,7 @@ const HealthProfile = () => {
               <div className={styles.infoItem}>
                 <span>Trạng thái:</span>
                 <span>
-                  {isEditing ? (
-                    <select
-                      name="isActive"
-                      value={formData.isActive}
-                      onChange={handleChange}
-                    >
-                      <option value={true}>Đang hoạt động</option>
-                      <option value={false}>Ngừng hoạt động</option>
-                    </select>
-                  ) : profile.isActive ? (
-                    "Đang hoạt động"
-                  ) : (
-                    "Ngừng hoạt động"
-                  )}
+                  {profile.isActive ? "Đang hoạt động" : "Ngừng hoạt động"}
                 </span>
               </div>
             </div>
@@ -218,7 +228,7 @@ const HealthProfile = () => {
                 Cập nhật
               </button>
             ) : (
-              <>
+              <div className={styles.editActionRow}>
                 <button className={styles.updateButton} onClick={handleSave}>
                   Lưu
                 </button>
@@ -228,7 +238,7 @@ const HealthProfile = () => {
                 >
                   Huỷ
                 </button>
-              </>
+              </div>
             )}
           </div>
 
@@ -256,25 +266,61 @@ const HealthProfile = () => {
             </div>
 
             <div className={styles.infoBox}>
-              <h4>🩺 Test Reports</h4>
-              <ul className={styles.reportList}>
-                <li>CT Scan - Full Body <span>(12th Feb 2020)</span></li>
-                <li>Creatine Kinase T <span>(12th Feb 2020)</span></li>
-                <li>Eye Fluorescein Test <span>(12th Feb 2020)</span></li>
-              </ul>
+              <h4>🩺 Lịch sử khám sức khỏe</h4>
+              {healthSummaries.length === 0 ? (
+                <p>Không có dữ liệu khám sức khỏe.</p>
+              ) : (
+                <div>
+                  {healthSummaries.map((item, index) => (
+                    <div key={index} className={styles.healthSummaryCard}>
+                      <div className={styles.healthSummaryTitle}>
+                        <span>📅</span>
+                        {item.campaignTitle}
+                      </div>
+                      <div className={styles.healthSummaryRow}>
+                        <span className={styles.healthSummaryLabel}>Chiều cao:</span>
+                        <span className={styles.healthSummaryValue}>{item.height} cm</span>
+                        <span className={styles.healthSummaryLabel}>Cân nặng:</span>
+                        <span className={styles.healthSummaryValue}>{item.weight} kg</span>
+                        <span className={styles.healthSummaryLabel}>Huyết áp:</span>
+                        <span className={styles.healthSummaryValue}>{item.bloodPressure}</span>
+                      </div>
+                      <div className={styles.healthSummaryRow}>
+                        <span className={styles.healthSummaryLabel}>Thị lực:</span>
+                        <span className={styles.healthSummaryValue}>{item.visionSummary}</span>
+                        <span className={styles.healthSummaryLabel}>Tai mũi họng:</span>
+                        <span className={styles.healthSummaryValue}>{item.ent}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className={styles.infoBox}>
-              <h4>💊 Prescriptions</h4>
-              <p className={styles.addPrescription}>+ Add a prescription</p>
-              <ul className={styles.reportList}>
-                <li>
-                  <b>Heart Diseases</b> – 25th Oct 2019 – 3 months
-                </li>
-                <li>
-                  <b>Skin Care</b> – 8th Aug 2019 – 2 months
-                </li>
-              </ul>
+              <h4>📋 Ghi chú theo dõi</h4>
+              {healthSummaries.length === 0 ? (
+                <p>Không có ghi chú theo dõi.</p>
+              ) : (
+                <div>
+                  {healthSummaries.map((item, index) => (
+                    <div key={index} className={styles.healthSummaryCard}>
+                      <div className={styles.healthSummaryTitle}>
+                        <span>📝</span>
+                        {item.campaignTitle}
+                      </div>
+                      <div className={styles.healthSummaryRow}>
+                        <span className={styles.healthSummaryLabel}>🧠 Tổng quát:</span>
+                        <span className={styles.healthSummaryValue}>{item.generalNote}</span>
+                      </div>
+                      <div className={styles.followNote}>
+                        <span className={styles.healthSummaryLabel}>🩹 Theo dõi:</span>
+                        {item.followUpNote}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -284,3 +330,4 @@ const HealthProfile = () => {
 };
 
 export default HealthProfile;
+
