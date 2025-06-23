@@ -26,6 +26,7 @@ import CampaignDetail from "../pages/nurse/CampaignDetail";
 import VaccinationResultPage from "../pages/nurse/VaccinationResultPage";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
+import HealthCheckCampaign from "../pages/manager/HealthCheckCampaign";
 
 const AppRouter = () => {
   return (
@@ -59,6 +60,7 @@ const AppRouter = () => {
       <Route path="/vaccination-campaigns" element={<VaccinationCampaign />} />
       <Route path="/vaccines/:id" element={<CampaignDetail />} />
       <Route path="/vaccines/:id/result" element={<VaccinationResultPage />} />
+      <Route path="/health-check-campaign" element={<HealthCheckCampaign />}/>
     </Routes>
   );
 };

@@ -1,3 +1,6 @@
+/* ĐỒNG BỘ TOÀN BỘ STYLE VỚI VaccinationCampaign.module.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
 .headerBar {
   display: flex;
   justify-content: space-between;
@@ -31,7 +34,7 @@
   background: #fff;
   border-radius: 14px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  padding: -1px 0 8px 0;
+  padding: 0 0 8px 0;
   margin-top: 18px;
 }
 
@@ -100,7 +103,6 @@
   border: 1.5px solid #dbeafe;
   box-shadow: 0 1px 6px rgba(22,119,255,0.07);
   transition: border 0.2s;
-  padding-right: 5px;
 }
 .selectCustom .ant-select-selector:focus, .selectCustom .ant-select-selector:hover {
   border: 1.5px solid #1677ff;
@@ -113,7 +115,6 @@
   color: #1677ff;
   font-size: 18px;
 }
-
 
 .layoutContainer {
   display: flex;
@@ -180,6 +181,8 @@
   background-color: white;
   border-radius: 6px;
   overflow: hidden;
+  /* Đảm bảo không có border ngoài cùng */
+  border: none;
 }
 .studentTable th,
 .studentTable td {
@@ -190,6 +193,9 @@
 .studentTable th {
   background-color: #f4f4f4;
   font-weight: 600;
+}
+.studentTable tr:last-child td {
+  border-bottom: none !important;
 }
 .actionGroup {
   display: flex;

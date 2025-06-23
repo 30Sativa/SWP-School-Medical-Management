@@ -83,6 +83,8 @@ const Login = () => {
               navigate("/firstlogin");
               return;
             }
+            // Lưu parentId vào localStorage
+            localStorage.setItem("parentId", resData.userId);
             // Xử lý lấy student và redirect sau khi có dữ liệu
             (async () => {
               try {

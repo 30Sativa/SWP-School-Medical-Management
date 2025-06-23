@@ -1,20 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Home, Users, ClipboardList, Rss, Flag, LogOut, Menu, Bell, ClipboardPlus } from "lucide-react";
+import { Home, Users, ClipboardList, Rss, Flag, LogOut, Menu, Bell, ClipboardPlus, User } from "lucide-react";
 import style from "./Sidebar.module.css";
+import { jwtDecode } from "jwt-decode";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
   const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        const name = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"];
+        setUsername(name);
+      } catch {
+        setUsername("");
+      }
+    }
+  }, []);
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   return (
     <aside className={`${style.sbSidebar} ${isOpen ? style.expanded : style.collapsed}`}>
-      <button className={style.toggleBtn} onClick={toggleSidebar}>
-        <Menu size={22} />
-        {isOpen && <span className={style.systemName}>EduHealth</span>}
-      </button>
+      {isOpen && (
+        <div className={style.profileBox}>
+          <div className={style.avatar}>
+            <User size={18} stroke="#20b2aa" />
+          </div>
+          <div className={style.profileName}>{username || "Người dùng"}</div>
+        </div>
+      )}
+      <div className={style.sidebarHeader}>
+        <button className={style.toggleBtn} onClick={toggleSidebar}>
+          <Menu size={22} />
+          {isOpen && <span className={style.systemName}>EduHealth</span>}
+        </button>
+      </div>
       <nav>
         <NavLink to="/manager" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
           <Home size={20} />
@@ -44,14 +69,18 @@ const Sidebar = () => {
           <ClipboardPlus size={20} />
           <span>Chiến dịch tiêm chủng</span>
         </NavLink>
+        <NavLink to="/health-check-campaign" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
+          <ClipboardPlus size={25} />
+          <span >Chiến dịch kiểm tra sức khỏe</span>
+        </NavLink>
         <button
-          className={style.navItem}
+          className={`${style.navItem} ${style.logoutButton}`}
           onClick={() => {
             localStorage.clear();
             navigate("/");
           }}
         >
-          <LogOut size={20} />
+          <LogOut size={20} stroke="#fff" />
           <span>Đăng xuất</span>
         </button>
       </nav>

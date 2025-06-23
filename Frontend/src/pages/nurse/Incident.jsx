@@ -21,6 +21,7 @@ import { Search, Plus } from "lucide-react";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 dayjs.extend(isoWeek);
+import Select from "react-select";
 
 const COLORS = ["#F4C430", "#FF6B6B", "#4D96FF", "#9AE6B4", "#FFA500"];
 
@@ -42,8 +43,10 @@ const Incident = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const itemsPerPage = 5;
-
+  const [selectedMedicalHistory, setSelectedMedicalHistory] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
   const [students, setStudents] = useState([]);
   const [newEvent, setNewEvent] = useState({
     studentId: "",
@@ -55,14 +58,16 @@ const Incident = () => {
     location: "",
     notes: "",
   });
+  const [supplies, setSupplies] = useState([]);
+  const [suppliesUsed, setSuppliesUsed] = useState([]);
 
   const [users, setUsers] = useState([]);
 
   const eventTypes = [
     { id: "1", name: "Sốt" },
-    { id: "2", name: "Đau bụng" },
+    { id: "2", name: "Té ngã" },
     { id: "3", name: "Dị ứng" },
-    { id: "4", name: "Té ngã" },
+    { id: "4", name: "Đau bụng" },
     { id: "5", name: "Tai nạn nhỏ" },
   ];
   const severityLevels = [
@@ -70,6 +75,23 @@ const Incident = () => {
     { id: "2", level: "Trung bình" },
     { id: "3", level: "Nặng" },
   ];
+
+  const fetchEvents = () => {
+    const token = localStorage.getItem("token");
+    axios
+      .get("/api/MedicalEvent", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        console.log("📥 Danh sách sự cố:", res.data);
+        setEvents(res.data);
+      })
+      .catch((err) => {
+        console.error("❌ Lỗi lấy danh sách sự cố:", err);
+      });
+  };
 
   const getStaffName = (id, handledByName) => {
     if (handledByName && handledByName !== "") return handledByName;
@@ -84,21 +106,7 @@ const Incident = () => {
     console.log("🔑 Token:", token);
     console.log("👤 UserId:", localStorage.getItem("userId"));
 
-    axios
-      .get("/api/MedicalEvent", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        console.log("📥 Danh sách sự cố:", res.data);
-        setEvents(res.data);
-        setFilteredEvents(res.data);
-        updateStats(res.data);
-      })
-      .catch((err) => {
-        console.error("❌ Lỗi lấy danh sách sự cố:", err);
-      });
+    fetchEvents();
 
     axios
       .get("/api/Student", {
@@ -126,7 +134,34 @@ const Incident = () => {
       .catch((err) => {
         console.error("❌ Lỗi lấy danh sách user:", err);
       });
+
+    axios
+      .get("/api/MedicalSupplies", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      })
+      .then((res) => setSupplies(res.data))
+      .catch((err) => console.error("❌ Lỗi lấy vật tư:", err));
   }, []);
+
+  useEffect(() => {
+    if (selectedEvent?.studentId) {
+      axios
+        .get(`/api/MedicalHistory/student/${selectedEvent.studentId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        })
+        .then((res) => {
+          setSelectedMedicalHistory(res.data);
+        })
+        .catch((err) => {
+          console.error("❌ Lỗi lấy tiền sử bệnh:", err);
+          setSelectedMedicalHistory([]);
+        });
+    } else {
+      setSelectedMedicalHistory([]);
+    }
+  }, [selectedEvent]);
 
   useEffect(() => {
     const filtered = events.filter((event) => {
@@ -258,8 +293,19 @@ const Incident = () => {
       status: "Đã gửi",
       location: newEvent.location,
       notes: newEvent.notes,
-      suppliesUsed: [],
-      request: "",
+      suppliesUsed: suppliesUsed
+        .filter(
+          (item) =>
+            item.supplyID &&
+            !isNaN(parseInt(item.supplyID, 10)) &&
+            Number(item.quantityUsed) > 0
+        )
+        .map((item) => ({
+          supplyID: parseInt(item.supplyID, 10),
+          quantityUsed: Number(item.quantityUsed),
+          note: item.note || "",
+        })),
+      request: "Không có yêu cầu đặc biệt",
     };
 
     console.log("📤 Payload gửi API:", payload);
@@ -279,6 +325,18 @@ const Incident = () => {
         };
         setEvents((prev) => [...prev, added]);
         setShowCreateForm(false);
+        setNewEvent({
+          studentId: "",
+          eventTypeId: "",
+          severityId: "",
+          eventDate: new Date().toISOString().slice(0, 16),
+          description: "",
+          handledByUserId: "",
+          location: "",
+          notes: "",
+        });
+        setSuppliesUsed([]);
+        fetchEvents();
       })
       .catch((err) => {
         const errorDetail =
@@ -291,9 +349,62 @@ const Incident = () => {
   };
 
   const handleEdit = (event) => {
-    // Ví dụ mở form hoặc điều hướng tới trang chỉnh sửa
-    console.log("Chỉnh sửa:", event);
-    alert("Tính năng Chỉnh sửa đang được phát triển!");
+    const suppliesWithId = (event.suppliesUsed || []).map((used) => {
+      const supplyData = supplies.find((s) => s.name === used.supplyName);
+      return {
+        ...used,
+        supplyID: used.supplyID || supplyData?.supplyID,
+      };
+    });
+    setEditingEvent({ ...event, suppliesUsed: suppliesWithId });
+    setShowEditForm(true);
+    setSelectedEvent(null); // Close detail view
+  };
+
+  const handleUpdate = () => {
+    if (!editingEvent) return;
+
+    const token = localStorage.getItem("token");
+    const payload = {
+      ...editingEvent,
+      severityId: Number(editingEvent.severityId),
+      description: editingEvent.description,
+      location: editingEvent.location,
+      notes: editingEvent.notes,
+      suppliesUsed: (editingEvent.suppliesUsed || [])
+        .filter(
+          (item) =>
+            item.supplyID &&
+            !isNaN(parseInt(item.supplyID, 10)) &&
+            Number(item.quantityUsed) > 0
+        )
+        .map((item) => ({
+          supplyID: parseInt(item.supplyID, 10),
+          quantityUsed: Number(item.quantityUsed),
+          note: item.note || "",
+        })),
+    };
+
+    console.log("📤 Payload cập nhật:", payload);
+
+    axios
+      .put(`/api/MedicalEvent/${editingEvent.eventId}`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        console.log("✅ Cập nhật sự cố thành công:", res.data);
+        fetchEvents();
+        setShowEditForm(false);
+        setEditingEvent(null);
+      })
+      .catch((err) => {
+        const errorDetail =
+          err.response?.data?.errors || err.response?.data || err.message;
+        console.error("❌ Lỗi cập nhật sự cố:", errorDetail);
+        alert(
+          "Lỗi khi cập nhật sự cố:\n" + JSON.stringify(errorDetail, null, 2)
+        );
+      });
   };
 
   const handleDelete = (id) => {
@@ -377,10 +488,19 @@ const Incident = () => {
                   </td>
                   <td>{new Date(event.eventDate).toLocaleString()}</td>
                   <td>
-                    <span className={style.tagGray}>
+                    <span
+                      className={
+                        event.severityLevelName === "Nhẹ"
+                          ? style.tagYellow
+                          : event.severityLevelName === "Trung bình"
+                          ? style.tagOrange
+                          : style.tagRed
+                      }
+                    >
                       {event.severityLevelName}
                     </span>
                   </td>
+
                   <td>
                     <button
                       className={style.viewDetail}
@@ -456,9 +576,6 @@ const Incident = () => {
             <p>
               Đang chờ xử lý: <strong>{summary.pending}</strong>
             </p>
-            <p>
-              Lưu nháp: <strong>{summary.draft}</strong>
-            </p>
             <div className={style.links}>
               <button onClick={handleExportExcel}>Xuất dữ liệu Excel</button>
             </div>
@@ -495,34 +612,126 @@ const Incident = () => {
         <div className={style.modalOverlay}>
           <div className={style.modalContent}>
             <h3>Chi tiết sự cố</h3>
-            <p>
-              <strong>Học sinh:</strong> {selectedEvent.studentName}
-            </p>
-            <p>
-              <strong>Phụ huynh:</strong> {selectedEvent.parentName}
-            </p>
-            <p>
-              <strong>Loại sự cố:</strong> {selectedEvent.eventType}
-            </p>
-            <p>
-              <strong>Mức độ:</strong> {selectedEvent.severityLevelName}
-            </p>
-            <p>
-              <strong>Thời gian:</strong>{" "}
-              {new Date(selectedEvent.eventDate).toLocaleString()}
-            </p>
-            <p>
-              <strong>Mô tả:</strong> {selectedEvent.description}
-            </p>
-            <p>
-              <p>
-                <strong>Người xử lý:</strong>{" "}
-                {getStaffName(
-                  selectedEvent.handledByUserId,
-                  selectedEvent.handledByName
-                )}
-              </p>
-            </p>
+            <table className={style.detailTable}>
+              <tbody>
+                <tr>
+                  <td>
+                    <strong>Học sinh:</strong>
+                  </td>
+                  <td>{selectedEvent.studentName}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Phụ huynh:</strong>
+                  </td>
+                  <td>{selectedEvent.parentName}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Loại sự cố:</strong>
+                  </td>
+                  <td>{selectedEvent.eventType}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Mức độ:</strong>
+                  </td>
+                  <td>{selectedEvent.severityLevelName}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Thời gian:</strong>
+                  </td>
+                  <td>{new Date(selectedEvent.eventDate).toLocaleString()}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Địa điểm:</strong>
+                  </td>
+                  <td>{selectedEvent.location || "Không rõ"}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Mô tả:</strong>
+                  </td>
+                  <td>{selectedEvent.description}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Ghi chú:</strong>
+                  </td>
+                  <td>{selectedEvent.notes || "Không có"}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Người xử lý:</strong>
+                  </td>
+                  <td>
+                    {getStaffName(
+                      selectedEvent.handledByUserId,
+                      selectedEvent.handledByName
+                    )}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            {selectedEvent.suppliesUsed?.length > 0 && (
+              <>
+                <p>
+                  <h4 className={style.sectionTitle}>Vật tư đã sử dụng:</h4>
+                </p>
+                <table className={style.detailTable}>
+                  <thead>
+                    <tr>
+                      <th>Tên vật tư</th>
+                      <th>Số lượng</th>
+                      <th>Ghi chú</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedEvent.suppliesUsed.map((supply, index) => (
+                      <tr key={index}>
+                        <td>{supply.supplyName}</td>
+                        <td>
+                          {supply.quantityUsed} {supply.unit || ""}
+                        </td>
+                        <td>{supply.note || "Không ghi chú"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            )}
+
+            {selectedMedicalHistory.length > 0 && (
+              <>
+                <p>
+                  <h4 className={style.sectionTitle}>Tiền sử bệnh:</h4>
+                </p>
+                <table className={style.detailTable}>
+                  <thead>
+                    <tr>
+                      <th>Bệnh</th>
+                      <th>Ghi chú</th>
+                      <th>Ngày chẩn đoán</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedMedicalHistory.map((mh) => (
+                      <tr key={mh.historyId}>
+                        <td>{mh.diseaseName}</td>
+                        <td>{mh.note || "Không ghi chú"}</td>
+                        <td>
+                          {new Date(mh.diagnosedDate).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            )}
+
             <div className={style.modalActions}>
               <button
                 className={style.editBtn}
@@ -541,25 +750,20 @@ const Incident = () => {
           </div>
         </div>
       )}
-
       {showCreateForm && (
         <div className={style.modalOverlay}>
           <div className={style.modalContent}>
             <h3>Tạo sự cố mới</h3>
-
-            <select
-              value={newEvent.studentId}
-              onChange={(e) =>
-                setNewEvent({ ...newEvent, studentId: Number(e.target.value) })
+            <Select
+              options={students.map((s) => ({
+                value: s.studentId,
+                label: s.fullName,
+              }))}
+              placeholder="Tìm học sinh..."
+              onChange={(selectedOption) =>
+                setNewEvent({ ...newEvent, studentId: selectedOption.value })
               }
-            >
-              <option value="">-- Chọn học sinh --</option>
-              {students.map((s) => (
-                <option key={s.studentId} value={s.studentId}>
-                  {s.fullName}
-                </option>
-              ))}
-            </select>
+            />
 
             <select
               value={newEvent.eventTypeId}
@@ -622,11 +826,238 @@ const Incident = () => {
               }
             />
 
+            <h4 className={style.sectionTitle}>Vật tư đã sử dụng:</h4>
+            {suppliesUsed.map((s, index) => (
+              <div
+                key={index}
+                style={{ display: "flex", gap: "8px", marginBottom: "8px" }}
+              >
+                <select
+                  value={s.supplyID}
+                  onChange={(e) => {
+                    const updated = [...suppliesUsed];
+                    updated[index].supplyID = e.target.value;
+                    setSuppliesUsed(updated);
+                  }}
+                >
+                  <option value="">-- Chọn vật tư --</option>
+                  {supplies.map((supply) => (
+                    <option key={supply.supplyID} value={supply.supplyID}>
+                      {supply.name}
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  type="number"
+                  placeholder="Số lượng"
+                  value={s.quantityUsed}
+                  onChange={(e) => {
+                    const updated = [...suppliesUsed];
+                    updated[index].quantityUsed = e.target.value;
+                    setSuppliesUsed(updated);
+                  }}
+                  style={{ width: "80px" }}
+                />
+
+                <input
+                  type="text"
+                  placeholder="Ghi chú"
+                  value={s.note}
+                  onChange={(e) => {
+                    const updated = [...suppliesUsed];
+                    updated[index].note = e.target.value;
+                    setSuppliesUsed(updated);
+                  }}
+                />
+
+                <button
+                  onClick={() => {
+                    const updated = [...suppliesUsed];
+                    updated.splice(index, 1);
+                    setSuppliesUsed(updated);
+                  }}
+                >
+                  ❌
+                </button>
+              </div>
+            ))}
+
+            <button
+              onClick={() =>
+                setSuppliesUsed([
+                  ...suppliesUsed,
+                  { supplyID: "", quantityUsed: 1, note: "" },
+                ])
+              }
+              style={{ marginBottom: "10px" }}
+            >
+              + Thêm vật tư
+            </button>
+
             <div className={style.modalActions}>
-              <button onClick={handleCreate}>Tạo</button>
+              <button className={style.tagBlue} onClick={handleCreate}>
+                Tạo
+              </button>
+
               <button
                 className={style.closeBtn}
                 onClick={() => setShowCreateForm(false)}
+              >
+                Huỷ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showEditForm && editingEvent && (
+        <div className={style.modalOverlay}>
+          <div className={style.modalContent}>
+            <h3>Chỉnh sửa sự cố</h3>
+
+            <label className={style.infoLabel}>
+              Học sinh: <strong>{editingEvent.studentName}</strong>
+            </label>
+            <label className={style.infoLabel}>
+              Loại sự cố: <strong>{editingEvent.eventType}</strong>
+            </label>
+
+            <select
+              value={editingEvent.severityId}
+              onChange={(e) =>
+                setEditingEvent({ ...editingEvent, severityId: e.target.value })
+              }
+            >
+              <option value="">-- Mức độ --</option>
+              {severityLevels.map((sl) => (
+                <option key={sl.id} value={sl.id}>
+                  {sl.level}
+                </option>
+              ))}
+            </select>
+
+            <input
+              type="text"
+              placeholder="Địa điểm xảy ra sự cố"
+              value={editingEvent.location}
+              onChange={(e) =>
+                setEditingEvent({ ...editingEvent, location: e.target.value })
+              }
+            />
+
+            <textarea
+              placeholder="Mô tả"
+              value={editingEvent.description}
+              onChange={(e) =>
+                setEditingEvent({
+                  ...editingEvent,
+                  description: e.target.value,
+                })
+              }
+            />
+
+            <textarea
+              placeholder="Ghi chú"
+              value={editingEvent.notes}
+              onChange={(e) =>
+                setEditingEvent({ ...editingEvent, notes: e.target.value })
+              }
+            />
+
+            <h4 className={style.sectionTitle}>Vật tư đã sử dụng:</h4>
+            {(editingEvent.suppliesUsed || []).map((s, index) => (
+              <div
+                key={index}
+                style={{ display: "flex", gap: "8px", marginBottom: "8px" }}
+              >
+                <select
+                  value={s.supplyID}
+                  onChange={(e) => {
+                    const updated = [...editingEvent.suppliesUsed];
+                    updated[index].supplyID = e.target.value;
+                    setEditingEvent({
+                      ...editingEvent,
+                      suppliesUsed: updated,
+                    });
+                  }}
+                >
+                  <option value="">-- Chọn vật tư --</option>
+                  {supplies.map((supply) => (
+                    <option key={supply.supplyID} value={supply.supplyID}>
+                      {supply.name}
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  type="number"
+                  placeholder="Số lượng"
+                  value={s.quantityUsed}
+                  onChange={(e) => {
+                    const updated = [...editingEvent.suppliesUsed];
+                    updated[index].quantityUsed = e.target.value;
+                    setEditingEvent({
+                      ...editingEvent,
+                      suppliesUsed: updated,
+                    });
+                  }}
+                  style={{ width: "80px" }}
+                />
+
+                <input
+                  type="text"
+                  placeholder="Ghi chú"
+                  value={s.note}
+                  onChange={(e) => {
+                    const updated = [...editingEvent.suppliesUsed];
+                    updated[index].note = e.target.value;
+                    setEditingEvent({
+                      ...editingEvent,
+                      suppliesUsed: updated,
+                    });
+                  }}
+                />
+
+                <button
+                  onClick={() => {
+                    const updated = [...editingEvent.suppliesUsed];
+                    updated.splice(index, 1);
+                    setEditingEvent({
+                      ...editingEvent,
+                      suppliesUsed: updated,
+                    });
+                  }}
+                >
+                  ❌
+                </button>
+              </div>
+            ))}
+
+            <button
+              onClick={() =>
+                setEditingEvent({
+                  ...editingEvent,
+                  suppliesUsed: [
+                    ...(editingEvent.suppliesUsed || []),
+                    { supplyID: "", quantityUsed: 1, note: "" },
+                  ],
+                })
+              }
+              style={{ marginBottom: "10px" }}
+            >
+              + Thêm vật tư
+            </button>
+
+            <div className={style.modalActions}>
+              <button className={style.tagBlue} onClick={handleUpdate}>
+                Cập nhật
+              </button>
+              <button
+                className={style.closeBtn}
+                onClick={() => {
+                  setShowEditForm(false);
+                  setEditingEvent(null);
+                }}
               >
                 Huỷ
               </button>
