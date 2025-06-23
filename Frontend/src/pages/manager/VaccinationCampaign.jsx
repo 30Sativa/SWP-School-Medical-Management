@@ -198,6 +198,21 @@ const VaccinationCampaign = () => {
             className={campaignStyle.searchBar}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
+            style={{
+              border: '2px solid #23b7b7',
+              borderRadius: 12,
+              padding: '10px 16px',
+              fontSize: 16,
+              outline: 'none',
+              boxShadow: '0 2px 12px #23b7b71a',
+              background: '#f9fefe',
+              transition: 'border-color 0.2s',
+              marginRight: 16,
+              width: 320,
+              maxWidth: '100%',
+            }}
+            onFocus={e => e.target.style.borderColor = '#1890ff'}
+            onBlur={e => e.target.style.borderColor = '#23b7b7'}
           />
           <button className={campaignStyle.addBtn} onClick={handleCreate}>
             <Plus size={16} style={{ marginRight: 6, marginBottom: -2 }} /> Thêm chiến dịch
@@ -295,7 +310,20 @@ const VaccinationCampaign = () => {
                 getPopupContainer={trigger => trigger.parentNode}
                 disabled={editing && (editing.statusId === 4)}
                 className={campaignStyle.input + ' ' + campaignStyle.selectCustom}
-                dropdownStyle={{ borderRadius: 10, boxShadow: '0 2px 12px rgba(22,119,255,0.10)' }}
+                dropdownStyle={{ borderRadius: 12, boxShadow: '0 4px 24px #23b7b71a', padding: 0, }}
+                size="large"
+                placeholder="Chọn trạng thái chiến dịch"
+                style={{
+                  
+                  borderRadius: 12,
+                  fontSize: 16,
+                  background: '#f9fefe',
+                  minHeight: 44,
+                  boxShadow: '0 2px 12px #23b7b71a',
+                  transition: 'border-color 0.2s',
+                  
+                }}
+                notFoundContent={<span style={{color:'#888'}}>Không có trạng thái</span>}
               /> 
             </Form.Item>
           </Form>

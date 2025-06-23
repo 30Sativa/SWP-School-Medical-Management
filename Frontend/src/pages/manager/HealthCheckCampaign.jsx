@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import styles from "../../assets/css/HealthCheckCampaign.module.css";
+// import styles from "../../assets/css/HealthCheckCampaign.module.css";
 import campaignStyle from "../../assets/css/VaccinationCampaign.module.css";
 import Sidebar from "../../components/sb-Manager/Sidebar";
 import { Modal, Form as AntForm, Input, DatePicker, message } from "antd";
@@ -140,7 +140,21 @@ const HealthCheckCampaign = () => {
             className={campaignStyle.searchBar}
             value={searchText}
             onChange={(e) => { setSearchText(e.target.value); setCurrentPage(1); }}
-            style={{ marginRight: 12 }}
+            style={{
+              border: '2px solid #23b7b7',
+              borderRadius: 12,
+              padding: '10px 16px',
+              fontSize: 16,
+              outline: 'none',
+              boxShadow: '0 2px 12px #23b7b71a',
+              background: '#f9fefe',
+              transition: 'border-color 0.2s',
+              marginRight: 16,
+              width: 320,
+              maxWidth: '100%',
+            }}
+            onFocus={e => e.target.style.borderColor = '#1890ff'}
+            onBlur={e => e.target.style.borderColor = '#23b7b7'}
           />
           <button className={campaignStyle.addBtn} onClick={() => openModal()}>
             <Plus size={16} style={{ marginRight: 6, marginBottom: -2 }} /> Thêm chiến dịch

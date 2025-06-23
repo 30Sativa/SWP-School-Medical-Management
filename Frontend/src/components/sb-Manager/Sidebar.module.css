@@ -6,11 +6,9 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh; /* ✅ Đổi thành min-height để match nội dung dài */
-  transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
+  transition: width 0.3s ease;
   overflow: hidden;
-  box-shadow: 2px 0 8px rgba(32,178,170,0.08);
 }
-
 
 .sbSidebar.expanded {
   width: 220px;
@@ -25,14 +23,19 @@
   border: none;
   color: white;
   cursor: pointer;
-  padding: 8px;
-  margin-bottom: 24px;
-  font-size: 22px;
-  align-self: flex-start;
-  transition: color 0.2s;
+  padding: 10px 12px;
+  font-size: 20px;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: background-color 0.2s;
 }
+
 .toggleBtn:hover {
-  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.12);
 }
 
 nav {
@@ -50,12 +53,11 @@ nav {
   text-decoration: none;
   font-weight: 500;
   border-radius: 8px;
-  transition: background-color 0.2s, color 0.2s;
+  transition: background-color 0.2s ease;
 }
 
 .navItem:hover {
-  background-color: rgba(255, 255, 255, 0.18);
-  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.12);
 }
 
 .sbSidebar.collapsed .navItem span {
@@ -63,32 +65,86 @@ nav {
 }
 
 .navItem.active {
-  background-color: rgba(255, 255, 255, 0.22);
+  background-color: rgba(255, 255, 255, 0.15);
   font-weight: bold;
-  color: #ffffff;
 }
+
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 48px;
+  padding: 13px 12px 10px 0px;
+  margin-bottom: 8px;
+}
+
 .menuIcon {
   color: white;
   cursor: pointer;
   flex-shrink: 0;
 }
 
-@media (max-width: 768px) {
-  .sbSidebar {
-    width: 100vw !important;
-    min-height: 56px;
-    flex-direction: row;
-    padding: 8px 4px;
-  }
-  .sbSidebar.expanded, .sbSidebar.collapsed {
-    width: 100vw !important;
-  }
-  nav {
-    flex-direction: row;
-    gap: 6px;
-  }
-  .navItem {
-    padding: 8px 6px;
-    font-size: 15px;
-  }
+.systemName {
+  font-size: 17px;
+  font-weight: 600;
+  color: white;
+  white-space: nowrap;
 }
+
+.logoutButton {
+  background-color: #000 !important;
+  color: #fff !important;
+  border: none;
+  margin-top: 16px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.logoutButton:hover {
+  background-color: #333 !important;
+  cursor: pointer;
+}
+
+.toggleBtn:focus,
+.navItem:focus,
+.logoutButton:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.profileBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 8px 0 16px;
+  padding: 10px 0;
+  color: white;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: white; /* ✅ avatar trắng */
+  color: #20b2aa; /* ✅ chữ xanh nổi bật */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-bottom: 6px;
+  font-size: 18px;
+}
+
+.avatarIcon {
+  font-size: 18px;
+}
+
+.profileName {
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+
