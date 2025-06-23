@@ -10,6 +10,13 @@ import { Plus, Edit2, Trash2 } from "lucide-react";
 const API_BASE = "/api";
 const PAGE_SIZE = 8;
 
+const statusOptions = [
+  { value: 1, label: "Chưa bắt đầu" },
+  { value: 2, label: "Đang diễn ra" },
+  { value: 3, label: "Đã hoàn thành" },
+  { value: 4, label: "Đã huỷ" },
+];
+
 const HealthCheckCampaign = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +55,7 @@ const HealthCheckCampaign = () => {
           title: pendingCampaign.title,
           description: pendingCampaign.description,
           date: pendingCampaign.date ? dayjs(pendingCampaign.date) : null,
+          statusId: pendingCampaign.statusId,
         });
       } else {
         formAntd.resetFields();
@@ -78,6 +86,7 @@ const HealthCheckCampaign = () => {
         description: values.description,
         date: dayjs(dateValue).format("YYYY-MM-DD"),
         createdBy: getCurrentUserId(),
+        statusId: Number(values.statusId),
       };
       if (pendingCampaign) {
         await axios.put(
@@ -169,14 +178,15 @@ const HealthCheckCampaign = () => {
                 <th>Mô tả</th>
                 <th>Ngày tạo</th>
                 <th>Người tạo</th>
+                <th>Trạng thái</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={6} style={{ textAlign: 'center' }}>Đang tải...</td></tr>
+                <tr><td colSpan={7} style={{ textAlign: 'center' }}>Đang tải...</td></tr>
               ) : pagedCampaigns.length === 0 ? (
-                <tr><td colSpan={6} style={{ textAlign: 'center' }}>Không có dữ liệu</td></tr>
+                <tr><td colSpan={7} style={{ textAlign: 'center' }}>Không có dữ liệu</td></tr>
               ) : (
                 pagedCampaigns.map((c, idx) => (
                   <tr key={c.campaignId}>
@@ -185,6 +195,7 @@ const HealthCheckCampaign = () => {
                     <td>{c.description}</td>
                     <td>{c.date ? dayjs(c.date).format("YYYY-MM-DD") : ""}</td>
                     <td>{c.createdByName}</td>
+                    <td>{c.statusName}</td>
                     <td>
                       <div className={campaignStyle.actionGroup}>
                         <button className={campaignStyle.editBtn} onClick={() => openModal(c)}>
@@ -241,6 +252,14 @@ const HealthCheckCampaign = () => {
                 disabledDate={current => current && current < dayjs().startOf('day')} 
                 className={campaignStyle.input}
               />
+            </AntForm.Item>
+            <AntForm.Item name="statusId" label="Trạng thái" rules={[{ required: true, message: "Vui lòng chọn trạng thái!" }]}> 
+              <select className={campaignStyle.input} style={{ width: '100%', borderRadius: 12, minHeight: 44, fontSize: 16 }}>
+                <option value="" disabled>Chọn trạng thái</option>
+                {statusOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
             </AntForm.Item>
           </AntForm>
         </Modal>
