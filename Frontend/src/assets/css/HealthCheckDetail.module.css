@@ -1,0 +1,177 @@
+.container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.title {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.backButton {
+  background-color: #f0f0f0;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.backButton:hover {
+  background-color: #e0e0e0;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.table th,
+.table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 10px;
+}
+
+.viewButton,
+.editButton {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.viewButton {
+  background-color: #007bff;
+  color: white;
+}
+
+.viewButton:hover {
+  background-color: #0056b3;
+}
+
+.editButton {
+  background-color: #28a745;
+  color: white;
+}
+
+.editButton:hover {
+  background-color: #218838;
+}
+
+.pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.pagination button {
+  margin: 0 5px;
+  padding: 6px 10px;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.activePage {
+  background-color: #007bff !important;
+  color: white !important;
+}
+
+.saveForm {
+  display: grid;
+  grid-template-columns: max-content 1fr max-content 1fr;
+  gap: 12px 24px;
+  align-items: center;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  background: #f8fafd;
+  border-radius: 8px;
+  padding: 20px 18px 16px 18px;
+  box-shadow: 0 2px 8px #0001;
+}
+
+.saveForm label {
+  min-width: 110px;
+  font-weight: 500;
+  color: #008080;
+  margin-right: 4px;
+  justify-self: end;
+}
+
+.saveForm input[type='text'],
+.saveForm input[type='number'] {
+  padding: 6px 10px;
+  border: 1px solid #b0b0b0;
+  border-radius: 4px;
+  min-width: 120px;
+  font-size: 15px;
+  margin-right: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.saveForm .saveButton,
+.saveForm button[type='button'] {
+  grid-column: span 2;
+  margin-top: 12px;
+  margin-right: 8px;
+  min-width: 100px;
+}
+
+.saveForm .saveButton {
+  background: #2ecc40;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 7px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.saveForm .saveButton:hover {
+  background: #27ae60;
+}
+
+.saveForm button[type='button'] {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 7px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.saveForm button[type='button']:hover {
+  background: #c0392b;
+}
+
+/* Để nút Lưu và Hủy nằm cùng hàng, căn phải */
+.saveForm .form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}

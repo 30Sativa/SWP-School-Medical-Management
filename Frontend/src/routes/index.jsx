@@ -27,7 +27,9 @@ import VaccinationResultPage from "../pages/nurse/VaccinationResultPage";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
 import HealthCheckCampaign from "../pages/manager/HealthCheckCampaign";
-
+import HealthCheckList from "../pages/nurse/HealthCheckList";
+import HealthCheckDetail from "../pages/nurse/HealthCheckDetail";
+import HealthCheckRecord from "../pages/nurse/HealthCheckRecord";
 const AppRouter = () => {
   return (
     <Routes>
@@ -60,7 +62,10 @@ const AppRouter = () => {
       <Route path="/vaccination-campaigns" element={<VaccinationCampaign />} />
       <Route path="/vaccines/:id" element={<CampaignDetail />} />
       <Route path="/vaccines/:id/result" element={<VaccinationResultPage />} />
-      <Route path="/health-check-campaign" element={<HealthCheckCampaign />}/>
+      <Route path="/health-check-campaign" element={<HealthCheckCampaign />} />
+      <Route path="/health-check" element={<HealthCheckList />} />
+      <Route path="/healthcheck/:campaignId" element={<HealthCheckDetail />} />
+      <Route path="/health-record/:recordId" element={<HealthCheckRecord />} />
     </Routes>
   );
 };
