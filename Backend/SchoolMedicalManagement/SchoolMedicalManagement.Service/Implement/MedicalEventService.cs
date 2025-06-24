@@ -330,4 +330,62 @@ public class MedicalEventService : IMedicalEventService
         var affected = await _medicalEventRepository.DeleteMedicalEvent(eventId);
         return affected > 0;
     }
+
+    public async Task<BaseResponse?> GetMedicalEventsByStudentId(int studentId)
+    {
+        var events = await _medicalEventRepository.GetMedicalEventByStudentID(studentId);
+        if (events == null)
+        {
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status404NotFound.ToString(),
+                Message = "Không tìm thấy sự kiện y tế cho học sinh này.",
+                Data = null
+            };
+        }
+        var histories = new List<MedicalHistory>();
+        if (events.StudentId.HasValue)
+        {
+            histories = await _medicalHistoryRepository.GetAllByStudentIdMedicalHistory(events.StudentId.Value);
+        }
+
+        return new BaseResponse
+        {
+            Status = StatusCodes.Status200OK.ToString(),
+            Message = "Medical event retrieved successfully.",
+            Data = new CreateMedicalEventResponse
+            {
+                EventId = events.EventId,
+                StudentId = events.Student?.StudentId ?? 0,
+                StudentName = events.Student?.FullName ?? "(Không rõ)",
+                ParentName = events.Student?.Parent?.FullName ?? "(Không rõ)",
+                EventType = events.EventType?.EventTypeName ?? "(Không rõ)",
+                EventDate = events.EventDate,
+                Description = events.Description ?? string.Empty,
+                HandledById = events.HandledBy,
+                HandledByName = events.HandledByNavigation?.FullName ?? "(Không rõ)",
+                SeverityLevelName = events.Severity?.SeverityName ?? "(Không rõ)",
+                Location = events.Location ?? string.Empty,
+                Notes = events.Notes ?? string.Empty,
+                SuppliesUsed = events.HandleRecords?.Select(hr => new SupplyUserResponse
+                {
+                    SupplyId = hr.SupplyId,
+                    SupplyName = hr.Supply?.Name ?? "(Không rõ)",
+                    QuantityUsed = hr.QuantityUsed,
+                    Unit = hr.Supply?.Unit ?? "(Không rõ)",
+                    Note = hr.Note
+                }).ToList() ?? new List<SupplyUserResponse>(),
+
+                MedicalHistory = histories.Select(h => new MedicalHistoryResponse
+                {
+                    HistoryId = h.HistoryId,
+                    StudentId = h.StudentId,
+                    StudentName = h.Student?.FullName ?? "(Không rõ)",
+                    DiseaseName = h.DiseaseName ?? "(Không rõ)",
+                    DiagnosedDate = h.DiagnosedDate,
+                    Note = h.Note ?? string.Empty
+                }).ToList()
+            }
+        };
+    }
 }
