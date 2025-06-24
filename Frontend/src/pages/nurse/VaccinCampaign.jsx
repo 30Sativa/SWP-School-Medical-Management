@@ -10,7 +10,7 @@ const VaccinCampaign = () => {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [filterStatus, setFilterStatus] = useState("Tất cả trạng thái");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3;
+  const itemsPerPage = 5;
 
   useEffect(() => {
     const fetchCampaigns = async () => {
@@ -101,32 +101,42 @@ const VaccinCampaign = () => {
             </select>
           </div>
 
-          {/* LIST */}
+          {/* TABLE */}
           {campaigns.length === 0 ? (
             <p style={{ padding: "1rem" }}>Không có dữ liệu chiến dịch.</p>
           ) : (
-            <div className={style.campaignGrid}>
-              {currentCampaigns.map((c) => (
-                <div className={style.campaignCard} key={c.id}>
-                  <div className={style.cardHeader}>
-                    <h3>{c.vaccineName}</h3>
-                    <span
-                      className={`${style.statusBadge} ${
-                        style[`status-${c.status.replace(/\s/g, "-")}`]
-                      }`}
-                    >
-                      {c.status}
-                    </span>
-                  </div>
-                  <p className={style.vaccineType}>{c.description}</p>
-                  <p className={style.date}>Ngày tiêm: {c.date}</p>
-
-                  <Link to={`/vaccines/${c.id}`}>
-                    <button className={style.btnDetail}>Xem chi tiết</button>
-                  </Link>
-                </div>
-              ))}
-            </div>
+            <table className={style.campaignTable}>
+              <thead>
+                <tr>
+                  <th>Tên vaccine</th>
+                  <th>Ngày tiêm</th>
+                  <th>Mô tả</th>
+                  <th>Trạng thái</th>
+                  <th>Chi tiết</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentCampaigns.map((c) => (
+                  <tr key={c.id}>
+                    <td>{c.vaccineName}</td>
+                    <td>{c.date}</td>
+                    <td>{c.description}</td>
+                    <td>
+                      <span
+                        className={`${style.statusBadge} ${style[`status-${c.status.replace(/\s/g, "-")}`]}`}
+                      >
+                        {c.status}
+                      </span>
+                    </td>
+                    <td>
+                      <Link to={`/vaccines/${c.id}`}>
+                        <button className={style.btnDetail}>Xem chi tiết</button>
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
 
           {/* PAGINATION */}

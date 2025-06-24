@@ -1,206 +1,165 @@
-.campaignPage {
-  padding: 32px;
-  background-color: #f9fafb;
-  min-height: 100vh;
-}
-
+/* === Header === */
 .pageHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
+  margin-bottom: 20px;
+  font-size: 2rem;
+  font-weight: 700;
 }
 
 .pageHeader h1 {
+  text-align: center;
+}
+
+.textBlack {
+  color: #222;
   font-size: 36px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: #111827;
 }
 
-.schoolYear {
-  color: #6b7280;
-  font-size: 14px;
+.textAccent {
+  color: #20b2aa;
+  font-size: 36px;
 }
 
-.btnCreate {
-  background-color: #20b2aa;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 10px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.btnCreate:hover {
-  background-color: #159c94;
-}
-
+/* === Filter Row === */
 .filterRow {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
+  margin-bottom: 20px;
 }
 
 .searchBox {
   display: flex;
   align-items: center;
   background-color: white;
-  border: 1px solid #d1d5db;
-  padding: 8px 14px;
-  border-radius: 10px;
-  width: 280px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  padding: 5px;
+  border-radius: 8px;
 }
 
 .searchBox input {
   border: none;
-  outline: none;
-  margin-left: 10px;
-  width: 100%;
-  font-size: 14px;
   background-color: transparent;
-  color: #111827;
+  font-size: 1rem;
+  padding-left: 8px;
+  width: 250px;
+}
+
+.searchBox input:focus {
+  outline: none;
+  border-color: #20b2aa;
 }
 
 .filterDropdown {
-  padding: 8px 14px;
-  border-radius: 10px;
-  border: 1px solid #d1d5db;
-  font-size: 14px;
-  background: white;
-  color: #111827;
-  cursor: pointer;
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background-color: #f4f4f4;
+  color: #333;
 }
 
-.campaignGrid {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+/* === Table === */
+.campaignTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.campaignCard {
-  background-color: white;
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
-  padding: 20px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  position: relative;
-  transition: transform 0.2s ease;
+.campaignTable th, .campaignTable td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
 }
 
-.campaignCard:hover {
-  transform: translateY(-3px);
-}
-
-.cardHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 10px;
-}
-
-.statusBadge {
-  font-size: 12px;
+.campaignTable th {
+  background-color: #20b2aa;
   font-weight: 600;
-  padding: 4px 12px;
-  border-radius: 999px;
-  display: inline-block;
-  text-align: center;
-  min-width: 100px;
   color: white;
 }
 
-.status-Đang-diễn-ra {
-  background-color: #facc15;
-  color: #1f2937;
+.campaignTable td {
+  color: #222;
+  font-size: 1rem;
 }
 
-.status-Đã-hoàn-thành {
-  background-color: #10b981;
-}
-
-.status-Chưa-bắt-đầu {
-  background-color: #0ea5e9;
-}
-
-.status-Đã-huỷ {
-  background-color: #ef4444;
-}
-
-.vaccineType {
-  font-size: 14px;
-  color: #4b5563;
-  margin-bottom: 6px;
-}
-
-.date,
-.confirmed {
-  font-size: 14px;
-  color: #6b7280;
-  margin: 4px 0;
-}
-
-.btnDetail {
-  background-color: #e0f2f1;
-  color: #20b2aa;
-  border: none;
-  padding: 6px 12px;
+/* === Status Badge === */
+.statusBadge {
+  display: inline-block;
+  padding: 5px 10px;
   border-radius: 8px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-.btnDetail:hover {
-  background-color: #b2dfdb;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 32px;
-  flex-wrap: wrap;
-}
-
-.pagination button {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 6px;
-  background-color: #e5e7eb;
-  cursor: pointer;
   font-weight: 500;
-  color: #374151;
-  transition: all 0.2s ease;
 }
 
-.pagination button:hover:not(:disabled) {
+.status-Dang-Dien-Ra {
   background-color: #20b2aa;
   color: white;
 }
 
-.pagination button[disabled] {
-  background-color: #d1d5db;
-  cursor: not-allowed;
+.status-Da-Hoan-Thanh {
+  background-color: #8bc34a;
+  color: white;
 }
 
-.activePage {
-  background-color: #20b2aa !important;
-  color: white !important;
+.status-Chua-Bat-Dau {
+  background-color: #ff9800;
+  color: white;
 }
 
-.textBlack {
-  color: #111827;
+.status-Da-Huy {
+  background-color: #f44336;
+  color: white;
 }
 
-.textAccent {
-  color: #20b2aa;
+/* === Button === */
+.btnDetail {
+  background-color: #20b2aa;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
+
+.btnDetail:hover {
+  background-color: #20b2aa;
+}
+
+/* === Pagination === */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination button {
+  margin: 0 5px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  background-color: #e0e0e0;
+  color: #222;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.pagination button:hover {
+  background-color: #ccc;
+}
+
+.pagination .activePage {
+  background-color: #20b2aa;
+  color: #fff;
+}
+
+/* === Main Section === */
+.campaignPage {
+  padding: 24px;
+  background-color: #f9fafb;
+  border-radius: 10px;
+  min-height: 100vh;
+}
+
