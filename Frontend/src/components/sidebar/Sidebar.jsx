@@ -109,7 +109,20 @@ const Sidebar = () => {
           <HeartPulse size={20} />
           <span>Sức khỏe định kỳ</span>
         </NavLink>
-
+        <NavLink
+          to="/vaccination-campaigns"
+          className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}
+        >
+          <Syringe size={20} />
+          <span>Chiến dịch tiêm chủng</span>
+        </NavLink>
+        <NavLink
+          to="/health-check-campaign"
+          className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}
+        >
+          <HeartPulse size={20} />
+          <span>Chiến dịch kiểm tra sức khỏe</span>
+        </NavLink>
         <NavLink
           to="/notifications"
           className={({ isActive }) =>

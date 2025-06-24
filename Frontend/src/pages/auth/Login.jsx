@@ -80,22 +80,25 @@ const Login = () => {
           } else if (roleName === "Parent") {
             // Nếu là parent và đăng nhập lần đầu, chuyển đến trang đổi mật khẩu
             if (resData.isFirstLogin) {
-              navigate("/firstlogin");
+              navigate("/firstlogin", { state: { userId: resData.userId } });
               return;
             }
             // Lưu parentId vào localStorage
             localStorage.setItem("parentId", resData.userId);
-            // Xử lý lấy student và redirect sau khi có dữ liệu
+            // Lấy danh sách học sinh của parent
             (async () => {
               try {
                 const studentRes = await axios.get(
                   "https://swp-school-medical-management.onrender.com/api/Student"
                 );
-                const student = studentRes.data.find(
+                const students = studentRes.data.filter(
                   (s) => s.parentId === resData.userId
                 );
-                if (student) {
-                  localStorage.setItem("studentId", student.studentId);
+                if (students.length > 0) {
+                  // Lưu tất cả studentId vào localStorage dạng JSON
+                  localStorage.setItem("studentIds", JSON.stringify(students.map(s => s.studentId)));
+                  // Lưu studentId đầu tiên (nếu cần dùng mặc định)
+                  localStorage.setItem("studentId", students[0].studentId);
                 } else {
                   alert("❗Không tìm thấy học sinh tương ứng với phụ huynh này!");
                 }

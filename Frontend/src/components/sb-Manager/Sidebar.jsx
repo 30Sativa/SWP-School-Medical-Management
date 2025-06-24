@@ -65,14 +65,20 @@ const Sidebar = () => {
           <Bell size={20} />
           <span>Gửi thông báo</span>
         </NavLink>
-        <NavLink to="/vaccination-campaigns" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
+        {/* <NavLink
+          to="/vaccination-campaigns"
+          className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}
+        >
           <ClipboardPlus size={20} />
           <span>Chiến dịch tiêm chủng</span>
         </NavLink>
-        <NavLink to="/health-check-campaign" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
+        <NavLink
+          to="/health-check-campaign"
+          className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}
+        >
           <ClipboardPlus size={25} />
-          <span >Chiến dịch kiểm tra sức khỏe</span>
-        </NavLink>
+          <span>Chiến dịch kiểm tra sức khỏe</span>
+        </NavLink> */}
         <button
           className={`${style.navItem} ${style.logoutButton}`}
           onClick={() => {

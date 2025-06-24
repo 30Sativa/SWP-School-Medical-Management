@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Sidebar from "../../components/sb-Manager/Sidebar";
+import Sidebar from "../../components/sidebar/Sidebar";
 import style from "../../components/sb-Manager/MainLayout.module.css";
 import campaignStyle from "../../assets/css/VaccinationCampaign.module.css";
 import { Table, Button, Modal, Form, Input, DatePicker, Select, message, Spin } from "antd";
@@ -77,8 +77,6 @@ const VaccinationCampaign = () => {
     setModalOpen(true);
   };
 
-  
-
   const handleModalOk = async () => {
     try {
       const values = await form.validateFields();
@@ -87,23 +85,21 @@ const VaccinationCampaign = () => {
         const putData = {
           vaccineName: values.vaccineName,
           date: values.date ? dayjs(values.date).format('YYYY-MM-DD') : undefined,
-          description: values.description, // luôn lấy đúng giá trị nhập
+          description: values.description,
           createdBy: getCurrentUserId(),
           statusId: Number(values.statusId),
-          campaignId: editing.campaignId, // thêm campaignId đúng theo API
+          campaignId: editing.campaignId,
         };
-        console.log("PUT data:", putData); // debug
         await axios.put(apiUrl, putData);
         message.success("Đã cập nhật chiến dịch!");
       } else {
         const postData = {
           vaccineName: values.vaccineName,
           date: values.date ? dayjs(values.date).format('YYYY-MM-DD') : undefined,
-          description: values.description, // luôn lấy đúng giá trị nhập
+          description: values.description,
           createdBy: getCurrentUserId(),
-          statusId: Number(values.statusId),
+          statusId: 1, // Luôn là "Chưa bắt đầu"
         };
-        console.log("POST data:", postData); // debug
         await axios.post(apiUrl, postData);
         message.success("Đã tạo chiến dịch mới!");
       }
@@ -304,28 +300,32 @@ const VaccinationCampaign = () => {
               <Input.TextArea rows={3} className={campaignStyle.input} /> 
             </Form.Item>
             <Form.Item name="createdBy" style={{ display: 'none' }}><Input /></Form.Item>
-            <Form.Item name="statusId" label="Trạng thái" rules={[{ required: true, message: "Chọn trạng thái" }]}> 
-              <Select 
-                options={statusOptions}
-                getPopupContainer={trigger => trigger.parentNode}
-                disabled={editing && (editing.statusId === 4)}
-                className={campaignStyle.input + ' ' + campaignStyle.selectCustom}
-                dropdownStyle={{ borderRadius: 12, boxShadow: '0 4px 24px #23b7b71a', padding: 0, }}
-                size="large"
-                placeholder="Chọn trạng thái chiến dịch"
-                style={{
-                  
-                  borderRadius: 12,
-                  fontSize: 16,
-                  background: '#f9fefe',
-                  minHeight: 44,
-                  boxShadow: '0 2px 12px #23b7b71a',
-                  transition: 'border-color 0.2s',
-                  
-                }}
-                notFoundContent={<span style={{color:'#888'}}>Không có trạng thái</span>}
-              /> 
-            </Form.Item>
+            {editing && (
+              <Form.Item name="statusId" label="Trạng thái" rules={[{ required: true, message: "Chọn trạng thái" }]}> 
+                <Select
+                  value={form.getFieldValue('statusId')}
+                  getPopupContainer={trigger => trigger.parentNode}
+                  disabled={editing && (editing.statusId === 4)}
+                  className={campaignStyle.input + ' ' + campaignStyle.selectCustom}
+                  dropdownStyle={{ borderRadius: 12, boxShadow: '0 4px 24px #23b7b71a', padding: 0, }}
+                  size="large"
+                  placeholder="Chọn trạng thái chiến dịch"
+                  style={{
+                    borderRadius: 12,
+                    fontSize: 16,
+                    background: '#f9fefe',
+                    minHeight: 44,
+                    boxShadow: '0 2px 12px #23b7b71a',
+                    transition: 'border-color 0.2s',
+                  }}
+                  notFoundContent={<span style={{color:'#888'}}>Không có trạng thái</span>}
+                >
+                  {statusOptions.filter(opt => opt.value !== 1 || editing.statusId === 1).map(opt => (
+                    <Select.Option key={opt.value} value={opt.value}>{opt.label}</Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            )}
           </Form>
         </Modal>
       </main>

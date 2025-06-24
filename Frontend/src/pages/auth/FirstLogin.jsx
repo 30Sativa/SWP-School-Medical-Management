@@ -47,14 +47,35 @@ const FirstLogin = () => {
       );
 
       if (response.status === 200) {
-        setMessage("Đổi mật khẩu thành công! Đang chuyển về trang đăng nhập...");
-        // Log out user và chuyển hướng sau 1.5s
-        localStorage.removeItem("token");
-        localStorage.removeItem("userId");
-        localStorage.removeItem("role");
-        setTimeout(() => {
-          navigate("/login");
-        }, 1500);
+        setMessage("Đổi mật khẩu thành công! Đang chuyển vào trang phụ huynh...");
+        // Giữ lại token, userId, role để không bị mất session
+        setTimeout(async () => {
+          // Lấy lại userId từ localStorage hoặc truyền qua location.state
+          let userId = localStorage.getItem("userId");
+          if (!userId && window.history.state && window.history.state.usr && window.history.state.usr.userId) {
+            userId = window.history.state.usr.userId;
+            localStorage.setItem("userId", userId);
+          }
+          // Lưu parentId vào localStorage
+          localStorage.setItem("parentId", userId);
+          // Lấy danh sách học sinh của parent
+          try {
+            const studentRes = await axios.get(
+              "https://swp-school-medical-management.onrender.com/api/Student"
+            );
+            const students = studentRes.data.filter(
+              (s) => s.parentId === userId
+            );
+            if (students.length > 0) {
+              localStorage.setItem("studentIds", JSON.stringify(students.map(s => s.studentId)));
+              localStorage.setItem("studentId", students[0].studentId);
+            }
+          } catch (err) {
+            // Không alert ở đây, chỉ log
+            console.error("Lỗi khi lấy danh sách học sinh sau đổi mật khẩu:", err);
+          }
+          navigate("/parent");
+        }, 1200);
       } else {
         setMessage("Đổi mật khẩu thất bại!");
       }

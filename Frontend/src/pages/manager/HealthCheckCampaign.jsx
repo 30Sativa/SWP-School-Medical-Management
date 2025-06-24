@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 // import styles from "../../assets/css/HealthCheckCampaign.module.css";
 import campaignStyle from "../../assets/css/VaccinationCampaign.module.css";
-import Sidebar from "../../components/sb-Manager/Sidebar";
+import Sidebar from "../../components/sidebar/Sidebar";
 import { Modal, Form as AntForm, Input, DatePicker, message } from "antd";
 import dayjs from "dayjs";
 import { Plus, Edit2, Trash2 } from "lucide-react";
@@ -52,17 +52,17 @@ const HealthCheckCampaign = () => {
     if (showModal) {
       if (pendingCampaign) {
         formAntd.setFieldsValue({
-          title: pendingCampaign.title,
-          description: pendingCampaign.description,
+          title: pendingCampaign.title || '',
+          description: pendingCampaign.description || '',
           date: pendingCampaign.date ? dayjs(pendingCampaign.date) : null,
-          statusId: pendingCampaign.statusId,
+          statusId: pendingCampaign.statusId || 1,
         });
       } else {
         formAntd.resetFields();
       }
     }
     // eslint-disable-next-line
-  }, [showModal]);
+  }, [showModal, pendingCampaign]);
 
   const getCurrentUserId = () => localStorage.getItem("userId") || "";
 
@@ -176,7 +176,7 @@ const HealthCheckCampaign = () => {
                 <th>STT</th>
                 <th>Tiêu đề</th>
                 <th>Mô tả</th>
-                <th>Ngày tạo</th>
+                <th>Ngày tổ chức</th>
                 <th>Người tạo</th>
                 <th>Trạng thái</th>
                 <th>Thao tác</th>
@@ -235,7 +235,6 @@ const HealthCheckCampaign = () => {
           onOk={handleSubmit}
           okText={pendingCampaign ? "Lưu" : "Tạo mới"}
           cancelText="Hủy"
-          destroyOnHidden
           className={campaignStyle.modalForm}
         >
           <AntForm form={formAntd} layout="vertical" preserve={false} initialValues={{}}>
@@ -245,7 +244,7 @@ const HealthCheckCampaign = () => {
             <AntForm.Item name="description" label="Mô tả" rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}> 
               <Input.TextArea rows={3} className={campaignStyle.input} />
             </AntForm.Item>
-            <AntForm.Item name="date" label="Ngày tạo" rules={[{ required: true, message: "Vui lòng chọn ngày!" }]}> 
+            <AntForm.Item name="date" label="Ngày tổ chức" rules={[{ required: true, message: "Vui lòng chọn ngày!" }]}> 
               <DatePicker 
                 style={{ width: '100%' }} 
                 format="YYYY-MM-DD" 
@@ -253,14 +252,21 @@ const HealthCheckCampaign = () => {
                 className={campaignStyle.input}
               />
             </AntForm.Item>
-            <AntForm.Item name="statusId" label="Trạng thái" rules={[{ required: true, message: "Vui lòng chọn trạng thái!" }]}> 
-              <select className={campaignStyle.input} style={{ width: '100%', borderRadius: 12, minHeight: 44, fontSize: 16 }}>
-                <option value="" disabled>Chọn trạng thái</option>
-                {statusOptions.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </AntForm.Item>
+            {/* Bỏ dòng chọn trạng thái khi tạo mới chiến dịch */}
+            {pendingCampaign && (
+              <AntForm.Item name="statusId" label="Trạng thái" rules={[{ required: true, message: "Vui lòng chọn trạng thái!" }]}> 
+                <select
+                  className={campaignStyle.input}
+                  style={{ width: '100%', borderRadius: 12, minHeight: 44, fontSize: 16 }}
+                  value={formAntd.getFieldValue('statusId')}
+                  onChange={e => formAntd.setFieldsValue({ statusId: Number(e.target.value) })}
+                >
+                  {statusOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </AntForm.Item>
+            )}
           </AntForm>
         </Modal>
       </main>
