@@ -39,6 +39,11 @@
   width: 200px;
 }
 
+.searchInput:focus {
+  outline: none;  /* Bỏ outline mặc định */
+  border-color: #20b2aa; /* Thay đổi màu viền khi focus */
+}
+
 .addButton,
 .exportBtn {
   background-color: #20b2aa;

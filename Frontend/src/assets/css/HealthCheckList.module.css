@@ -1,0 +1,179 @@
+.campaignPage {
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.pageHeader {
+  margin-bottom: 20px;
+}
+
+.textBlack {
+  font-weight: bold;
+  color: #333;
+  font-size: 36px;
+  margin-left: 10px;
+}
+
+.textAccent {
+  color: #20b2aa;
+  font-size: 36px;
+}
+
+.filterRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  padding: 5px 15px;
+  border-radius: 5px;
+  width: 300px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  margin-left: 10px;
+}
+
+.searchBox input {
+  border: none;
+  outline: none;
+  background-color: transparent;
+  margin-left: 10px;
+  padding: 5px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.filterDropdown {
+  padding: 5px 15px;
+  margin-left: 20px;
+  border-radius: 5px;
+  background-color: #e6f7ff;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.filterDropdown:focus {
+  border-color: #20b2aa;
+}
+
+.campaignTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: white;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+  margin-left: 10px;
+}
+
+.campaignTable th,
+.campaignTable td {
+  padding: 12px 20px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.campaignTable th {
+  background-color: #20b2aa;
+  font-weight: bold;
+  color: white;
+}
+
+.campaignTable td {
+  color: #555;
+}
+
+.campaignTable td button {
+  padding: 8px 16px;
+  background-color: #20b2aa;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.campaignTable td button:hover {
+  background-color: #20b2aa;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination button {
+  padding: 8px 15px;
+  margin: 0 5px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.pagination button.activePage {
+  background-color: #20b2aa;
+  color: white;
+}
+
+.pagination button:hover {
+  background-color: #20b2aa;
+}
+
+.pagination button:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
+
+.campaignTable td button {
+  padding: 8px 16px;
+  background-color: #20b2aa;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  white-space: nowrap; /* Thêm thuộc tính này để không cho chữ xuống dòng */
+}
+
+.campaignTable td button:hover {
+  background-color: #20b2aa;
+}
+
+.statusDropdown {
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fff;
+  width: 160px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.statusText {
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.statusText.Đang-dien-ra {
+  color: #00C49F; /* Xanh lá */
+}
+
+.statusText.Chua-bat-dau {
+  color: #FFBB28; /* Vàng */
+}
+
+.statusText.Da-hoan-thanh {
+  color: #FF8042; /* Cam */
+}
+
+.statusText.Da-huy {
+  color: #FF6347; /* Đỏ */
+}
+
