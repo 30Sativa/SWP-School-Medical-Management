@@ -230,5 +230,27 @@ namespace SchoolMedicalManagement.Service.Implement
                 }
             };
         }
+
+        public async Task<BaseResponse> UpdateMedicationRequestStatusAsync(int requestId, UpdateMedicationStatusDto dto)
+        {
+            var request = await _medicationRequestRepository.GetByIdAsync(requestId);
+            if (request == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = "Medication request not found.",
+                    Data = null
+                };
+            }
+            request.StatusId = dto.StatusId;
+            await _medicationRequestRepository.UpdateAsync(request);
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Status updated successfully.",
+                Data = null
+            };
+        }
     }
 }

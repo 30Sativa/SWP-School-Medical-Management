@@ -154,5 +154,16 @@ namespace School_Medical_Management.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving request: {ex.Message}");
             }
         }
+
+        // API cập nhật trạng thái tổng quát cho đơn thuốc
+        [HttpPut("{requestId}/status")]
+        public async Task<IActionResult> UpdateMedicationRequestStatus(int requestId, [FromBody] UpdateMedicationStatusDto dto)
+        {
+            if (dto == null || dto.StatusId <= 0)
+                return BadRequest("Invalid status.");
+
+            var response = await _medicationRequestService.UpdateMedicationRequestStatusAsync(requestId, dto);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
     }
 }

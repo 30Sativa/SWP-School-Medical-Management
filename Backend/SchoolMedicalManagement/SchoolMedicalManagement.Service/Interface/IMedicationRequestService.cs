@@ -24,5 +24,7 @@ namespace SchoolMedicalManagement.Service.Interface
 
         // Get medication request by ID
         Task<BaseResponse> GetRequestByIdAsync(int requestId);
+
+        Task<BaseResponse> UpdateMedicationRequestStatusAsync(int requestId, UpdateMedicationStatusDto dto);
     }
 }
