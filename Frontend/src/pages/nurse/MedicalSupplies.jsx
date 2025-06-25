@@ -37,14 +37,15 @@ const MedicalSupplies = () => {
   useEffect(() => {
     fetchSupplies();
   }, []);
-
   const fetchSupplies = () => {
     axios
       .get(API_URL)
-      .then((res) => setSupplies(res.data))
+      .then((res) => {
+        console.log("API data:", res.data);
+        setSupplies(Array.isArray(res.data.data) ? res.data.data : []);
+      })
       .catch((err) => console.error("❌ Lỗi khi tải vật tư:", err));
   };
-
   const handleChange = (e) => {
     setFormData((prev) => ({
       ...prev,
@@ -66,9 +67,11 @@ const MedicalSupplies = () => {
       .catch((err) => console.error("❌ Lỗi thêm/cập nhật:", err));
   };
 
-  const filteredSupplies = supplies.filter((s) =>
-    s.name.toLowerCase().includes(searchText.toLowerCase())
-  );
+  const filteredSupplies = Array.isArray(supplies)
+    ? supplies.filter((s) =>
+        (s.name || "").toLowerCase().includes(searchText.toLowerCase())
+      )
+    : [];
 
   const paginatedSupplies = filteredSupplies.slice(
     (currentPage - 1) * itemsPerPage,
@@ -91,9 +94,9 @@ const MedicalSupplies = () => {
     saveAs(blob, "Danh_sach_vat_tu.xlsx");
   };
 
-  const top5Supplies = [...supplies]
-    .sort((a, b) => b.quantity - a.quantity)
-    .slice(0, 5);
+  const top5Supplies = Array.isArray(supplies)
+    ? [...supplies].sort((a, b) => b.quantity - a.quantity).slice(0, 5)
+    : [];
 
   return (
     <div className={style.wrapper}>

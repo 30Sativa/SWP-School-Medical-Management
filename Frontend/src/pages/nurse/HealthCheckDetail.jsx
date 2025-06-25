@@ -124,12 +124,12 @@ const HealthCheckDetail = () => {
         const studentsRes = await axios.get(
           `https://swp-school-medical-management.onrender.com/api/student/`
         );
-        setStudents(studentsRes.data);
+        setStudents(studentsRes.data.data || []);
         // Lấy toàn bộ health check summaries
         const summariesRes = await axios.get(
           `https://swp-school-medical-management.onrender.com/api/health-checks/summaries`
         );
-        setHealthCheckSummaries(summariesRes.data || []);
+        setHealthCheckSummaries(summariesRes.data.data || []);
       } catch (error) {
         console.error("Lỗi khi gọi API:", error);
       } finally {

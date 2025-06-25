@@ -40,7 +40,10 @@ const Login = () => {
 
       console.log("📥 Phản hồi từ server:", response.data);
 
-      if (response.data.message?.toLowerCase().includes("login successful") && token) {
+      if (
+        response.data.message?.toLowerCase().includes("login successful") &&
+        token
+      ) {
         // Lưu token vào localStorage
         localStorage.setItem("token", token);
         localStorage.setItem("userId", resData.userId);
@@ -48,8 +51,11 @@ const Login = () => {
         let roleName = "";
 
         try {
-          const decoded = jwtDecode(token); 
-          roleName = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+          const decoded = jwtDecode(token);
+          roleName =
+            decoded[
+              "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+            ];
           console.log("Role:", roleName);
         } catch (decodeError) {
           console.error("❌ Lỗi giải mã token:", decodeError);
@@ -72,7 +78,14 @@ const Login = () => {
 
         // Delay chuyển trang để toast hiển thị
         setTimeout(() => {
-          console.log("Role for redirect:", roleName, "isFirstLogin:", resData.isFirstLogin, "resData:", resData);
+          console.log(
+            "Role for redirect:",
+            roleName,
+            "isFirstLogin:",
+            resData.isFirstLogin,
+            "resData:",
+            resData
+          );
           if (roleName === "Manager") {
             navigate("/manager");
           } else if (roleName === "Nurse") {
@@ -91,16 +104,23 @@ const Login = () => {
                 const studentRes = await axios.get(
                   "https://swp-school-medical-management.onrender.com/api/Student"
                 );
-                const students = studentRes.data.filter(
+                const studentArray = studentRes.data?.data || [];
+                const students = studentArray.filter(
                   (s) => s.parentId === resData.userId
                 );
+
                 if (students.length > 0) {
                   // Lưu tất cả studentId vào localStorage dạng JSON
-                  localStorage.setItem("studentIds", JSON.stringify(students.map(s => s.studentId)));
+                  localStorage.setItem(
+                    "studentIds",
+                    JSON.stringify(students.map((s) => s.studentId))
+                  );
                   // Lưu studentId đầu tiên (nếu cần dùng mặc định)
                   localStorage.setItem("studentId", students[0].studentId);
                 } else {
-                  alert("❗Không tìm thấy học sinh tương ứng với phụ huynh này!");
+                  alert(
+                    "❗Không tìm thấy học sinh tương ứng với phụ huynh này!"
+                  );
                 }
                 navigate("/parent");
               } catch (studentError) {
@@ -139,7 +159,9 @@ const Login = () => {
       <div className="login-container">
         <div className="left-section">
           <h1>Hệ thống quản lý sức khỏe học đường</h1>
-          <p>Giải pháp toàn diện cho việc theo dõi và quản lý sức khỏe của bạn</p>
+          <p>
+            Giải pháp toàn diện cho việc theo dõi và quản lý sức khỏe của bạn
+          </p>
           <div className="illustration"></div>
         </div>
         <div className="right-section">
@@ -173,7 +195,15 @@ const Login = () => {
                 />
               </div>
               <div className="forgot-password">
-                <a href="#" onClick={(e) => { e.preventDefault(); navigate("/forgot-password"); }}>Quên mật khẩu?</a>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/forgot-password");
+                  }}
+                >
+                  Quên mật khẩu?
+                </a>
               </div>
               <button type="submit" className="login-btn" disabled={loading}>
                 {loading ? "Đang đăng nhập..." : "Đăng nhập"}

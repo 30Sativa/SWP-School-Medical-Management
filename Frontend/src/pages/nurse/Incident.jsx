@@ -116,10 +116,11 @@ const Incident = () => {
       })
       .then((res) => {
         console.log("📥 Danh sách học sinh:", res.data);
-        setStudents(res.data);
+        setStudents(Array.isArray(res.data.data) ? res.data.data : []);
       })
       .catch((err) => {
         console.error("❌ Lỗi lấy danh sách học sinh:", err);
+        setStudents([]);
       });
 
     axios
@@ -139,8 +140,13 @@ const Incident = () => {
       .get("/api/MedicalSupplies", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
-      .then((res) => setSupplies(res.data))
-      .catch((err) => console.error("❌ Lỗi lấy vật tư:", err));
+      .then((res) => {
+        setSupplies(Array.isArray(res.data.data) ? res.data.data : []);
+      })
+      .catch((err) => {
+        console.error("❌ Lỗi lấy vật tư:", err);
+        setSupplies([]);
+      });
   }, []);
 
   useEffect(() => {
@@ -755,10 +761,10 @@ const Incident = () => {
           <div className={style.modalContent}>
             <h3>Tạo sự cố mới</h3>
             <Select
-              options={students.map((s) => ({
+              options={Array.isArray(students) ? students.map((s) => ({
                 value: s.studentId,
                 label: s.fullName,
-              }))}
+              })) : []}
               placeholder="Tìm học sinh..."
               onChange={(selectedOption) =>
                 setNewEvent({ ...newEvent, studentId: selectedOption.value })
@@ -841,11 +847,11 @@ const Incident = () => {
                   }}
                 >
                   <option value="">-- Chọn vật tư --</option>
-                  {supplies.map((supply) => (
+                  {Array.isArray(supplies) ? supplies.map((supply) => (
                     <option key={supply.supplyID} value={supply.supplyID}>
                       {supply.name}
                     </option>
-                  ))}
+                  )) : null}
                 </select>
 
                 <input
@@ -982,11 +988,11 @@ const Incident = () => {
                   }}
                 >
                   <option value="">-- Chọn vật tư --</option>
-                  {supplies.map((supply) => (
+                  {Array.isArray(supplies) ? supplies.map((supply) => (
                     <option key={supply.supplyID} value={supply.supplyID}>
                       {supply.name}
                     </option>
-                  ))}
+                  )) : null}
                 </select>
 
                 <input

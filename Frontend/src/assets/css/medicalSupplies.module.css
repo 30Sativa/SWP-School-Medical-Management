@@ -28,7 +28,7 @@
 .actions {
   display: flex;
   gap: 12px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap !important;
 }
 
 .searchInput {
@@ -37,6 +37,7 @@
   border-radius: 6px;
   font-size: 14px;
   width: 200px;
+  height: 37px !important;
 }
 
 .searchInput:focus {
@@ -53,6 +54,9 @@
   border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
+  width: 132px !important;
+  height: 37px !important;
+  white-space: nowrap !important;
 }
 
 .addButton:hover,

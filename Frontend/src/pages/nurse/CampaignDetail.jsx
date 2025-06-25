@@ -58,32 +58,37 @@ const CampaignDetail = () => {
 
   const handleSendConsentToAll = async () => {
     try {
-      const pendingStudents = consents
-        .filter((c) => c.consentStatusName === "Chờ xác nhận")
-        .map((c) => c.studentId);
-
-      if (pendingStudents.length === 0) {
-        alert("Tất cả phụ huynh đã được gửi phiếu xác nhận.");
+      if (!campaign || !campaign.campaignId) {
+        alert("Không tìm thấy thông tin chiến dịch.");
         return;
       }
-
       const res = await axios.post(
-        `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/send-consent-bulk`,
-        {
-          studentIds: pendingStudents,
-        }
+        `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/send-consent-to-all-parents`
       );
-
       setSendResult(res.data.data);
+      alert("Đã gửi thông báo đến cho phụ huynh.");
       setShowModal(true);
+      const consentsRes = await axios.get(
+        `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/consent-requests`
+      );
+      setConsents(consentsRes.data.data);
     } catch (err) {
-      console.error("Gửi phiếu xác nhận thất bại:", err);
-      alert("Không thể gửi phiếu xác nhận.");
+      console.error("Gửi phiếu xác nhận thất bại:", err, err.response?.data);
+      alert(
+        "Không thể gửi phiếu xác nhận: " +
+          (err.response?.data?.message || err.message)
+      );
     }
   };
 
   const handleStartCampaign = async () => {
     try {
+      if (!isChuaBatDau(campaign.statusName)) {
+        alert(
+          "Chỉ chiến dịch ở trạng thái 'Chưa bắt đầu' mới có thể khởi động."
+        );
+        return;
+      }
       const agreedStudents = consents
         .filter((c) => c.consentStatusName === "Đồng ý")
         .map((c) => parseInt(c.studentId));
@@ -94,34 +99,30 @@ const CampaignDetail = () => {
       }
 
       await axios.put(
-        `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${id}/activate`
+        "https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns",
+        {
+          vaccineName: campaign.vaccineName,
+          date: campaign.date,
+          description: campaign.description,
+          createdBy: campaign.createdBy,
+          statusId: 2,
+          campaignId: campaign.campaignId,
+        }
       );
 
       alert("Chiến dịch đã được khởi động!");
       setCampaign((prev) => ({
         ...prev,
         statusName: "Đang diễn ra",
+        statusId: 2,
         totalVaccinationRecords: agreedStudents.length,
       }));
     } catch (err) {
-      console.error("Lỗi khi khởi động chiến dịch:", err);
-      alert("Không thể khởi động chiến dịch.");
-    }
-  };
-
-  const handleActivateAgain = async () => {
-    try {
-      await axios.put(
-        `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${id}/activate`
+      console.error("Lỗi khi khởi động chiến dịch:", err, err.response?.data);
+      alert(
+        "Không thể khởi động chiến dịch: " +
+          (err.response?.data?.message || err.message)
       );
-      alert("Chiến dịch đã được kích hoạt lại.");
-      setCampaign((prev) => ({
-        ...prev,
-        statusName: "Đang diễn ra",
-      }));
-    } catch (err) {
-      console.error("Lỗi khi kích hoạt lại:", err);
-      alert("Không thể kích hoạt lại chiến dịch.");
     }
   };
 
@@ -250,10 +251,6 @@ const CampaignDetail = () => {
         )}
         {isDaHoanThanh(campaign.statusName) && (
           <>
-            {" "}
-            <button className={style.btnRestore} onClick={handleActivateAgain}>
-              Kích hoạt lại
-            </button>
             <button className={style.btnExport} onClick={exportToExcel}>
               Xuất Excel
             </button>

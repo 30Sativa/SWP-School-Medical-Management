@@ -31,20 +31,28 @@ const HealthCheckList = () => {
     const fetchCampaigns = async () => {
       try {
         const res = await axios.get(
-          "https://swp-school-medical-management.onrender.com/api/HealthCheckCampaign"
+          "/api/HealthCheckCampaign"
         );
-        const transformed = res.data.map((item) => ({
-          id: item.campaignId,
-          title: item.title,
-          date: item.date,
-          description: item.description,
-          createdByName: item.createdByName,
-          statusName: item.statusName,
-        }));
-        setCampaigns(transformed);
-        calculateStatusCount(transformed);
+        console.log("API Response from HealthCheckList:", res.data); // Log the response
+        const campaignsData = Array.isArray(res.data) ? res.data : res.data.data;
+        if (Array.isArray(campaignsData)) {
+          const transformed = campaignsData.map((item) => ({
+            id: item.campaignId,
+            title: item.title,
+            date: item.date,
+            description: item.description,
+            createdByName: item.createdByName,
+            statusName: item.statusName,
+          }));
+          setCampaigns(transformed);
+          calculateStatusCount(transformed);
+        } else {
+          setCampaigns([]);
+          calculateStatusCount([]);
+        }
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu chiến dịch:", error);
+        setCampaigns([]); // Ensure campaigns is an array on error
       }
     };
 
@@ -107,7 +115,7 @@ const HealthCheckList = () => {
     try {
       const apiStatus = statusMap[newStatus] || newStatus;
       const res = await axios.put(
-        `https://swp-school-medical-management.onrender.com/api/HealthCheckCampaign/${campaignId}`,
+        `/api/HealthCheckCampaign/${campaignId}`,
         { statusId: apiStatus }
       );
       console.log("PUT response:", res.data);

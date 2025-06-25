@@ -1,17 +1,32 @@
 /* === Header === */
 .pageHeader {
+  display: flex;
+  justify-content: flex-start; 
+  align-items: center;    
   margin-bottom: 20px;
-  font-size: 2rem;
-  font-weight: 700;
+  margin-top: 0;
 }
 
 .pageHeader h1 {
+  margin: 0;
   text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+
+.campaignPage {
+  padding: 12px 24px 24px; /* giảm khoảng cách trên */
+  background-color: #f9fafb;
+  border-radius: 10px;
+  min-height: 100vh;
 }
 
 .textBlack {
   color: #222;
   font-size: 36px;
+  padding-top: 0;
+  margin-top: 0;
 }
 
 .textAccent {
@@ -22,7 +37,7 @@
 /* === Filter Row === */
 .filterRow {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-bottom: 20px;
 }
 
@@ -32,6 +47,7 @@
   background-color: white;
   padding: 5px;
   border-radius: 8px;
+  margin-right: 20px;
 }
 
 .searchBox input {
@@ -49,11 +65,13 @@
 
 .filterDropdown {
   padding: 10px;
-  font-size: 1rem;
+  font-size: 14px;
   border-radius: 8px;
   border: 1px solid #ddd;
   background-color: #f4f4f4;
   color: #333;
+  width: 150px !important;
+  height: 37px !important;
 }
 
 /* === Table === */
@@ -153,13 +171,5 @@
 .pagination .activePage {
   background-color: #20b2aa;
   color: #fff;
-}
-
-/* === Main Section === */
-.campaignPage {
-  padding: 24px;
-  background-color: #f9fafb;
-  border-radius: 10px;
-  min-height: 100vh;
 }
 

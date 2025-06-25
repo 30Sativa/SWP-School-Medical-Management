@@ -13,10 +13,7 @@ import {
   Package,
   HeartPulse,
   BarChart2,
-  User, // ✅ Thêm icon
-
-  
-
+  User, 
 } from "lucide-react";
 import style from "./Sidebar.module.css";
 import { useEffect } from "react";
@@ -91,6 +88,17 @@ const Sidebar = () => {
           <ClipboardList size={20} />
           <span>Quản lý thuốc</span>
         </NavLink>
+
+        <NavLink
+          to="/vaccination-campaigns"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
+          <Syringe size={20} />
+          <span>Tạo tiêm chủng</span>
+        </NavLink>
+
         <NavLink
           to="/vaccines"
           className={({ isActive }) =>
@@ -98,8 +106,19 @@ const Sidebar = () => {
           }
         >
           <Syringe size={20} />
-          <span>Tiêm chủng</span>
+          <span>QL Tiêm chủng</span>
         </NavLink>
+
+        <NavLink
+          to="/health-check-campaign"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
+          <HeartPulse size={20} />
+          <span>Tạo lịch kiểm tra</span>
+        </NavLink>
+
         <NavLink
           to="/health-check"
           className={({ isActive }) =>
@@ -107,22 +126,9 @@ const Sidebar = () => {
           }
         >
           <HeartPulse size={20} />
-          <span>Sức khỏe định kỳ</span>
+          <span> QL Khám sức khỏe</span>
         </NavLink>
-        <NavLink
-          to="/vaccination-campaigns"
-          className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}
-        >
-          <Syringe size={20} />
-          <span>Chiến dịch tiêm chủng</span>
-        </NavLink>
-        <NavLink
-          to="/health-check-campaign"
-          className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}
-        >
-          <HeartPulse size={20} />
-          <span>Chiến dịch kiểm tra sức khỏe</span>
-        </NavLink>
+
         <NavLink
           to="/notifications"
           className={({ isActive }) =>
