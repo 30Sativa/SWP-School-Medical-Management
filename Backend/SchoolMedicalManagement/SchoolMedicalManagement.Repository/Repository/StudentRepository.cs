@@ -99,5 +99,15 @@ namespace SchoolMedicalManagement.Repository.Repository
                 .Where(s => s.IsActive == true)
                 .CountAsync();
         }
+
+        // Lấy danh sách học sinh theo tên lớp
+        public async Task<List<Student>> GetStudentsByClass(string className)
+        {
+            return await _context.Students
+                .Include(s => s.Parent)
+                .Include(s => s.Gender)
+                .Where(s => s.Class == className && s.IsActive == true)
+                .ToListAsync();
+        }
     }
 }

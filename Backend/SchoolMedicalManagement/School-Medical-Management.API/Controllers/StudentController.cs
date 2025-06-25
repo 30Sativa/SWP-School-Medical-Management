@@ -21,8 +21,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetStudentList()
         {
-            var responses = await _studentService.GetStudentList();
-            return Ok(responses);
+            var response = await _studentService.GetStudentList();
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         // Dùng StatusCode để phản hồi theo status code từ BaseResponse
@@ -70,6 +70,13 @@ namespace School_Medical_Management.API.Controllers
         {
             var response = await _studentService.GetStudentsOfParent(parentId);
             return StatusCode(int.Parse(response.Status), response);
+        }
+
+        [HttpGet("by-class/{className}")]
+        public async Task<IActionResult> GetStudentsByClass([FromRoute] string className)
+        {
+            var response = await _studentService.GetStudentsByClass(className);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
     }
 }
