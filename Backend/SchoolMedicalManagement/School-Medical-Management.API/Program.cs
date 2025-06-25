@@ -32,6 +32,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 
+//DI for Repo
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<StudentRepository>();
 builder.Services.AddScoped<HealthProfileRepository>();
@@ -43,14 +44,16 @@ builder.Services.AddScoped<HealthCheckSummaryRepository>();
 builder.Services.AddScoped<VaccinationCampaignRepository>();
 builder.Services.AddScoped<MedicalHistoryRepository>();
 builder.Services.AddScoped<MedicationRequestRepository>();
-
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationTypeRepository>();
 builder.Services.AddScoped<MedicalEventTypeRepository>();
-
 builder.Services.AddScoped<BlogPostRepository>();
+builder.Services.AddScoped<ParentFeedbackRepository>();
 
+//DI for Service
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IOtpService, OtpService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddScoped<IMedicalHistoryService, MedicalHistoryService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -61,18 +64,13 @@ builder.Services.AddScoped<IMedicalSupplyService, MedicalSupplyService>();
 builder.Services.AddScoped<IMedicalEventService, MedicalEventService>();
 builder.Services.AddScoped<IMedicationRequestService, MedicationRequestService>();
 builder.Services.AddScoped<IHealthCheckSummaryService, HealthCheckSummaryService>();
-
 builder.Services.AddScoped<IVaccinationCampaignService, VaccinationCampaignService>();
-
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<INotificationTypeService, NotificationTypeService>();
 builder.Services.AddScoped<IMedicalEventTypeService, MedicalEventTypeService>();
 builder.Services.AddScoped<IBlogPostService, BlogPostService>();
-
 builder.Services.AddScoped<IDashboardService, DashboardService>();
-
-builder.Services.AddScoped<IOtpService, OtpService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IParentFeedbackService, ParentFeedbackService>();
 
 // CORS
 builder.Services.AddCors(options =>
