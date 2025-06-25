@@ -6,102 +6,68 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const HealthProfile = () => {
-  const [profile, setProfile] = useState(null);
-  const [studentInfo, setStudentInfo] = useState(null);
+  const [studentList, setStudentList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({});
-  const [healthSummaries, setHealthSummaries] = useState([]);
-
-  const studentId = localStorage.getItem("studentId");
   const token = localStorage.getItem("token");
+  const parentId = localStorage.getItem("parentId");
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProfiles = async () => {
       try {
-        const [healthRes, studentRes] = await Promise.all([
-          axios.get(
-            `https://swp-school-medical-management.onrender.com/api/health-profiles/student/${studentId}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          ),
-          axios.get(
-            `https://swp-school-medical-management.onrender.com/api/Student/${studentId}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          ),
-        ]);
+        const studentRes = await axios.get(`https://swp-school-medical-management.onrender.com/api/Student/by-parent/${parentId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-        const healthData = healthRes.data.data;
-        const studentData = studentRes.data.data;
+        const students = studentRes.data.data || [];
 
-        setProfile(healthData);
-        setFormData(healthData);
-        setStudentInfo(studentData);
+        const fetchedData = await Promise.all(
+          students.map(async (student) => {
+            try {
+              const [profileRes, summaryRes] = await Promise.all([
+                axios.get(`https://swp-school-medical-management.onrender.com/api/health-profiles/student/${student.studentId}`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                }),
+                axios.get(`https://swp-school-medical-management.onrender.com/api/health-checks/summaries`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                }),
+              ]);
+
+              const summaries = summaryRes.data.data;
+              const matchedSummaries = Array.isArray(summaries)
+                ? summaries.filter(s => s.studentId === student.studentId)
+                : [];
+
+              return {
+                studentInfo: student,
+                profile: profileRes.data.data,
+                summaries: matchedSummaries,
+              };
+            } catch (error) {
+              return {
+                studentInfo: student,
+                profile: null,
+                summaries: [],
+              };
+            }
+          })
+        );
+
+        setStudentList(fetchedData);
       } catch (err) {
-        console.error("Lỗi khi tải dữ liệu:", err);
-        toast.error("Không thể tải hồ sơ sức khỏe hoặc thông tin học sinh.");
+        console.error("Lỗi khi tải danh sách hồ sơ:", err);
+        toast.error("Không thể tải dữ liệu hồ sơ sức khỏe.");
       } finally {
         setLoading(false);
       }
     };
 
-    const fetchSummaries = async () => {
-      try {
-        const res = await axios.get(
-          "https://swp-school-medical-management.onrender.com/api/health-checks/summaries",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const filtered = res.data.filter(
-          (item) => item.studentId === parseInt(studentId)
-        );
-        const sorted = filtered.sort((a, b) => b.recordId - a.recordId);
-        setHealthSummaries(sorted.slice(0, 2));
-      } catch (err) {
-        console.error("Lỗi khi tải lịch sử khám:", err);
-      }
-    };
-
-    if (studentId && token) {
-      fetchData();
-      fetchSummaries();
+    if (parentId && token) {
+      fetchProfiles();
     } else {
-      toast.error("Thiếu studentId hoặc token!");
+      toast.error("Thiếu token hoặc parentId!");
       setLoading(false);
     }
-  }, [studentId, token]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSave = async () => {
-    try {
-      await axios.put(
-        `https://swp-school-medical-management.onrender.com/api/health-profiles/student/${studentId}`,
-        {
-          height: formData.height,
-          weight: formData.weight,
-          chronicDiseases: formData.chronicDiseases,
-          allergies: formData.allergies,
-          generalNote: formData.generalNote,
-          isActive: formData.isActive,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      toast.success("Cập nhật thành công!");
-      setProfile({ ...profile, ...formData });
-      setIsEditing(false);
-    } catch (err) {
-      console.error("Lỗi cập nhật:", err);
-      toast.error("❌ Cập nhật thất bại!");
-    }
-  };
+  }, [token, parentId]);
 
   const calculateAge = (dob) => {
     const birthDate = new Date(dob);
@@ -115,219 +81,107 @@ const HealthProfile = () => {
   };
 
   if (loading) return <p>Đang tải dữ liệu...</p>;
-  if (!profile || !studentInfo) return <p>Không có hồ sơ sức khỏe.</p>;
+  if (studentList.length === 0) return <p>Không có hồ sơ sức khỏe nào.</p>;
 
   return (
     <div className={styles.container}>
       <ToastContainer />
       <Sidebar />
       <div className={styles.content}>
-        <h2 className={styles.title}>
-          <span className={styles.accent}>|</span> Hồ sơ{" "}
-          <span className={styles.greenText}>sức khỏe học sinh</span>
-        </h2>
+        {studentList.map(({ studentInfo, profile, summaries }) => (
+          <div
+            key={studentInfo.studentId}
+            className={styles.cardBox}
+            style={{
+              maxWidth: "1000px",
+              margin: "0 auto 40px auto",
+              borderRadius: "20px",
+              background: "#fff",
+              padding: "32px",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.08)"
+            }}
+          >
+            <h2 style={{ color: "#0e2a47", marginBottom: "20px" }}>🩺 Hồ sơ sức khỏe của bé {studentInfo.fullName}</h2>
 
-        <div className={styles.profileWrapper}>
-          <div className={styles.leftPanel}>
-            <img
-              src="https://i.pravatar.cc/120"
-              alt="avatar"
-              className={styles.avatar}
-            />
-            <h3 className={styles.name}>{studentInfo.fullName}</h3>
-
-            <div className={styles.infoBlock}>
-              <div className={styles.infoItem}>
-                <span>Chiều cao:</span>
-                <span>
-                  {isEditing ? (
-                    <input
-                      name="height"
-                      value={formData.height}
-                      onChange={handleChange}
-                      className={styles.inputField} 
-                    />
-                  ) : (
-                    `${profile.height} cm`
-                  )}
-                </span>
-              </div>
-              <div className={styles.infoItem}>
-                <span>Cân nặng:</span>
-                <span>
-                  {isEditing ? (
-                    <input
-                      name="weight"
-                      value={formData.weight}
-                      onChange={handleChange}
-                      className={styles.inputField} 
-                    />
-                  ) : (
-                    `${profile.weight} kg`
-                  )}
-                </span>
-              </div>
-              <div className={styles.infoItem}>
-                <span>Bệnh mãn tính:</span>
-                <span>
-                  {isEditing ? (
-                    <input
-                      name="chronicDiseases"
-                      value={formData.chronicDiseases}
-                      onChange={handleChange}
-                      className={styles.inputField}
-                    />
-                  ) : (
-                    profile.chronicDiseases
-                  )}
-                </span>
-              </div>
-              <div className={styles.infoItem}>
-                <span>Dị ứng:</span>
-                <span>
-                  {isEditing ? (
-                    <input
-                      name="allergies"
-                      value={formData.allergies}
-                      onChange={handleChange}
-                      className={styles.inputField}
-                    />
-                  ) : (
-                    profile.allergies
-                  )}
-                </span>
-              </div>
-              <div className={styles.infoItem}>
-                <span>Ghi chú:</span>
-                <span>
-                  {isEditing ? (
-                    <input
-                      name="generalNote"
-                      value={formData.generalNote}
-                      onChange={handleChange}
-                      className={styles.inputField}
-                    />
-                  ) : (
-                    profile.generalNote
-                  )}
-                </span>
-              </div>
-              <div className={styles.infoItem}>
-                <span>Trạng thái:</span>
-                <span>
-                  {profile.isActive ? "Đang hoạt động" : "Ngừng hoạt động"}
-                </span>
-              </div>
-            </div>
-
-            {!isEditing ? (
-              <button
-                className={styles.updateButton}
-                onClick={() => setIsEditing(true)}
-              >
-                Cập nhật
-              </button>
+            {!profile ? (
+              <p style={{ color: "#dc2626", fontWeight: "500" }}>⚠️ Chưa có hồ sơ sức khỏe cho bé này.</p>
             ) : (
-              <div className={styles.editActionRow}>
-                <button className={styles.updateButton} onClick={handleSave}>
-                  Lưu
-                </button>
-                <button
-                  className={styles.updateButton}
-                  onClick={() => setIsEditing(false)}
+              <>
+                <div style={{ display: "flex", flexDirection: window.innerWidth < 600 ? "column" : "row", alignItems: "center", gap: "24px", marginBottom: "28px" }}>
+                  <img src="https://i.pravatar.cc/120" alt="avatar" className={styles.avatar} />
+                  <div>
+                    <h3 className={styles.name}>👦 {studentInfo.fullName}</h3>
+                    <p className={styles.subInfo}>🏫 Lớp: {studentInfo.className}</p>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: window.innerWidth < 600 ? "1fr" : "repeat(auto-fit, minmax(280px, 1fr))",
+                    gap: "18px",
+                    marginBottom: "28px",
+                    fontSize: "1rem",
+                    color: "#1e293b"
+                  }}
                 >
-                  Huỷ
-                </button>
-              </div>
+                  <div>👨‍⚕️ <strong>Giới tính:</strong> {studentInfo.gender}</div>
+                  <div>🎂 <strong>Tuổi:</strong> {calculateAge(studentInfo.dateOfBirth)}</div>
+                  <div>📏 <strong>Chiều cao:</strong> {profile.height} cm</div>
+                  <div>⚖️ <strong>Cân nặng:</strong> {profile.weight} kg</div>
+                  <div>🏥 <strong>Bệnh mãn tính:</strong> {profile.chronicDiseases}</div>
+                  <div>🌼 <strong>Dị ứng:</strong> {profile.allergies}</div>
+                  <div>📝 <strong>Ghi chú:</strong> {profile.generalNote}</div>
+                  <div>✅ <strong>Trạng thái:</strong> {profile.isActive ? "Đang hoạt động" : "Ngừng hoạt động"}</div>
+                </div>
+
+                {summaries.length > 0 && (
+                  <div style={{ background: "#f1f5f9", padding: "20px", borderRadius: "14px", border: "1px solid #e2e8f0" }}>
+                    <h4 style={{ marginBottom: "16px", color: "#0e2a47", fontSize: "1.1rem" }}>📋 Thông tin khám sức khỏe</h4>
+                    {summaries.map((item, index) => (
+                      <div
+                        key={index}
+                        style={{
+                          marginBottom: "20px",
+                          padding: "12px 16px",
+                          borderRadius: "10px",
+                          background: "#fff",
+                          border: "1px solid #e2e8f0",
+                          boxShadow: "0 2px 6px rgba(0,0,0,0.05)"
+                        }}
+                      >
+                        <h5 style={{ marginBottom: "10px", fontSize: "1.05rem", color: "#0284c7" }}>📌 {item.campaignTitle}</h5>
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: window.innerWidth < 600 ? "1fr" : "repeat(auto-fit, minmax(260px, 1fr))",
+                            gap: "12px",
+                            fontSize: "0.95rem",
+                            color: "#1e293b"
+                          }}
+                        >
+                          <div>📏 <strong>Chiều cao:</strong> {item.height} cm</div>
+                          <div>⚖️ <strong>Cân nặng:</strong> {item.weight} kg</div>
+                          <div>❤️ <strong>Huyết áp:</strong> {item.bloodPressure}</div>
+                          <div>👁️ <strong>Thị lực:</strong> {item.visionSummary}</div>
+                          <div>👂 <strong>Tai mũi họng:</strong> {item.ent}</div>
+                          <div>📝 <strong>Ghi chú:</strong> {item.generalNote}</div>
+                          <div>🔍 <strong>Theo dõi:</strong> {item.followUpNote}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
-
-          <div className={styles.rightPanel}>
-            <div className={styles.basicInfoRow}>
-              <div className={styles.basicInfoBox}>
-                <div className={styles.basicIcon}>👩‍⚕️</div>
-                <div className={styles.basicLabel}>Giới tính</div>
-                <div className={styles.basicValue}>
-                  {studentInfo?.genderName || "Không rõ"}
-                </div>
-              </div>
-              <div className={styles.basicInfoBox}>
-                <div className={styles.basicIcon}>🎂</div>
-                <div className={styles.basicLabel}>Tuổi</div>
-                <div className={styles.basicValue}>
-                  {calculateAge(studentInfo.dateOfBirth)}
-                </div>
-              </div>
-              <div className={styles.basicInfoBox}>
-                <div className={styles.basicIcon}>🏫</div>
-                <div className={styles.basicLabel}>Lớp</div>
-                <div className={styles.basicValue}>{studentInfo.class}</div>
-              </div>
-            </div>
-
-            <div className={styles.infoBox}>
-              <h4>🩺 Lịch sử khám sức khỏe</h4>
-              {healthSummaries.length === 0 ? (
-                <p>Không có dữ liệu khám sức khỏe.</p>
-              ) : (
-                <div>
-                  {healthSummaries.map((item, index) => (
-                    <div key={index} className={styles.healthSummaryCard}>
-                      <div className={styles.healthSummaryTitle}>
-                        <span>📅</span>
-                        {item.campaignTitle}
-                      </div>
-                      <div className={styles.healthSummaryRow}>
-                        <span className={styles.healthSummaryLabel}>Chiều cao:</span>
-                        <span className={styles.healthSummaryValue}>{item.height} cm</span>
-                        <span className={styles.healthSummaryLabel}>Cân nặng:</span>
-                        <span className={styles.healthSummaryValue}>{item.weight} kg</span>
-                        <span className={styles.healthSummaryLabel}>Huyết áp:</span>
-                        <span className={styles.healthSummaryValue}>{item.bloodPressure}</span>
-                      </div>
-                      <div className={styles.healthSummaryRow}>
-                        <span className={styles.healthSummaryLabel}>Thị lực:</span>
-                        <span className={styles.healthSummaryValue}>{item.visionSummary}</span>
-                        <span className={styles.healthSummaryLabel}>Tai mũi họng:</span>
-                        <span className={styles.healthSummaryValue}>{item.ent}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className={styles.infoBox}>
-              <h4>📋 Ghi chú theo dõi</h4>
-              {healthSummaries.length === 0 ? (
-                <p>Không có ghi chú theo dõi.</p>
-              ) : (
-                <div>
-                  {healthSummaries.map((item, index) => (
-                    <div key={index} className={styles.healthSummaryCard}>
-                      <div className={styles.healthSummaryTitle}>
-                        <span>📝</span>
-                        {item.campaignTitle}
-                      </div>
-                      <div className={styles.healthSummaryRow}>
-                        <span className={styles.healthSummaryLabel}>🧠 Tổng quát:</span>
-                        <span className={styles.healthSummaryValue}>{item.generalNote}</span>
-                      </div>
-                      <div className={styles.followNote}>
-                        <span className={styles.healthSummaryLabel}>🩹 Theo dõi:</span>
-                        {item.followUpNote}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );
 };
 
 export default HealthProfile;
+
+
 

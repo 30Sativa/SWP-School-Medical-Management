@@ -40,16 +40,21 @@ const Login = () => {
 
       console.log("📥 Phản hồi từ server:", response.data);
 
-      if (response.data.message?.toLowerCase().includes("login successful") && token) {
-        // Lưu token vào localStorage
+      if (
+        response.data.message?.toLowerCase().includes("login successful") &&
+        token
+      ) {
         localStorage.setItem("token", token);
         localStorage.setItem("userId", resData.userId);
 
         let roleName = "";
 
         try {
-          const decoded = jwtDecode(token); 
-          roleName = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+          const decoded = jwtDecode(token);
+          roleName =
+            decoded[
+              "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+            ];
           console.log("Role:", roleName);
         } catch (decodeError) {
           console.error("❌ Lỗi giải mã token:", decodeError);
@@ -70,42 +75,64 @@ const Login = () => {
           theme: "colored",
         });
 
-        // Delay chuyển trang để toast hiển thị
         setTimeout(() => {
-          console.log("Role for redirect:", roleName, "isFirstLogin:", resData.isFirstLogin, "resData:", resData);
+          console.log(
+            "Role for redirect:",
+            roleName,
+            "isFirstLogin:",
+            resData.isFirstLogin,
+            "resData:",
+            resData
+          );
+
           if (roleName === "Manager") {
             navigate("/manager");
           } else if (roleName === "Nurse") {
             navigate("/nurse");
           } else if (roleName === "Parent") {
-            // Nếu là parent và đăng nhập lần đầu, chuyển đến trang đổi mật khẩu
             if (resData.isFirstLogin) {
               navigate("/firstlogin", { state: { userId: resData.userId } });
               return;
             }
-            // Lưu parentId vào localStorage
+
             localStorage.setItem("parentId", resData.userId);
-            // Lấy danh sách học sinh của parent
+
             (async () => {
               try {
                 const studentRes = await axios.get(
                   "https://swp-school-medical-management.onrender.com/api/Student"
                 );
-                const students = studentRes.data.filter(
+
+                const studentList = studentRes.data?.data;
+
+                if (!Array.isArray(studentList)) {
+                  throw new Error("Dữ liệu học sinh không hợp lệ.");
+                }
+
+                const students = studentList.filter(
                   (s) => s.parentId === resData.userId
                 );
+
                 if (students.length > 0) {
-                  // Lưu tất cả studentId vào localStorage dạng JSON
-                  localStorage.setItem("studentIds", JSON.stringify(students.map(s => s.studentId)));
-                  // Lưu studentId đầu tiên (nếu cần dùng mặc định)
+                  localStorage.setItem(
+                    "studentIds",
+                    JSON.stringify(students.map((s) => s.studentId))
+                  );
                   localStorage.setItem("studentId", students[0].studentId);
                 } else {
-                  alert("❗Không tìm thấy học sinh tương ứng với phụ huynh này!");
+                  toast.warn("Không tìm thấy học sinh thuộc tài khoản này.", {
+                    position: "top-center",
+                    autoClose: 3000,
+                  });
                 }
+
                 navigate("/parent");
               } catch (studentError) {
-                console.error("Lỗi khi tìm học sinh:", studentError);
-                alert("Lỗi khi lấy dữ liệu học sinh!");
+                console.error("❌ Lỗi khi lấy học sinh:", studentError);
+                toast.error("Lỗi khi tải danh sách học sinh.", {
+                  position: "top-center",
+                  autoClose: 3000,
+                });
               }
             })();
           } else {
@@ -173,7 +200,15 @@ const Login = () => {
                 />
               </div>
               <div className="forgot-password">
-                <a href="#" onClick={(e) => { e.preventDefault(); navigate("/forgot-password"); }}>Quên mật khẩu?</a>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/forgot-password");
+                  }}
+                >
+                  Quên mật khẩu?
+                </a>
               </div>
               <button type="submit" className="login-btn" disabled={loading}>
                 {loading ? "Đang đăng nhập..." : "Đăng nhập"}
@@ -190,3 +225,4 @@ const Login = () => {
 };
 
 export default Login;
+

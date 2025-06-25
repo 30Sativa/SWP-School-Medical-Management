@@ -24,7 +24,7 @@ const ChildCareHistory = () => {
         const fetchWith404Handling = async (url) => {
           try {
             const res = await axios.get(url);
-            return res.data;
+            return res.data?.data || [];
           } catch (err) {
             if (err.response && err.response.status === 404) {
               return [];
@@ -36,7 +36,7 @@ const ChildCareHistory = () => {
 
         const [
           medicalHistoryData,
-          vaccinationResponse,
+          vaccinationData,
           medicalEventsData,
           studentResponse
         ] = await Promise.all([
@@ -47,19 +47,14 @@ const ChildCareHistory = () => {
         ]);
 
         setMedicalHistory(medicalHistoryData);
-        setVaccinationHistory(
-          vaccinationResponse && Array.isArray(vaccinationResponse.data)
-            ? vaccinationResponse.data
-            : []
-        );
-        setMedicalEvents(medicalEventsData);
-        setStudentName(studentResponse?.data?.fullName || "");
+        setVaccinationHistory(Array.isArray(vaccinationData) ? vaccinationData : []);
+        setMedicalEvents(Array.isArray(medicalEventsData) ? medicalEventsData : []);
+        setStudentName(studentResponse?.fullName || "");
 
-        // 🧮 Tính tổng số lần tiêm trong tháng hiện tại
         const currentMonth = dayjs().month() + 1;
         const currentYear = dayjs().year();
 
-        const vaccineCount = vaccinationResponse?.data?.filter(item => {
+        const vaccineCount = vaccinationData?.filter(item => {
           const date = dayjs(item.vaccinationDate);
           return date.month() + 1 === currentMonth && date.year() === currentYear;
         }).length || 0;
@@ -102,7 +97,6 @@ const ChildCareHistory = () => {
           Xin chào, bạn đang đăng nhập với tư cách phụ huynh em <strong>{studentName || "..."}</strong>
         </p>
 
-        {/* 🔍 Thanh tìm kiếm */}
         <div style={{ marginBottom: "20px" }}>
           <input
             type="text"
@@ -121,7 +115,6 @@ const ChildCareHistory = () => {
           />
         </div>
 
-        {/* 🧮 Thống kê */}
         <div style={{ marginBottom: "30px", fontSize: "16px" }}>
           🧮 <strong>Thống kê tháng này:</strong> {totalVaccinesThisMonth} lần tiêm
         </div>
@@ -132,7 +125,6 @@ const ChildCareHistory = () => {
           <p className={styles.error}>{error}</p>
         ) : (
           <>
-            {/* Bệnh án */}
             <div className={styles.section}>
               <h3>🩺 Lịch Sử Bệnh Án</h3>
               {medicalHistory.filter(item =>
@@ -152,7 +144,6 @@ const ChildCareHistory = () => {
               )}
             </div>
 
-            {/* Tiêm chủng */}
             <div className={styles.section}>
               <h3>💉 Lịch Sử Tiêm Chủng</h3>
               {vaccinationHistory.filter(item =>
@@ -173,7 +164,6 @@ const ChildCareHistory = () => {
               )}
             </div>
 
-            {/* Sự kiện y tế */}
             <div className={styles.section}>
               <h3>🚨 Sự Kiện Y Tế</h3>
               {medicalEvents.filter(item =>
@@ -202,5 +192,6 @@ const ChildCareHistory = () => {
 };
 
 export default ChildCareHistory;
+
 
 
