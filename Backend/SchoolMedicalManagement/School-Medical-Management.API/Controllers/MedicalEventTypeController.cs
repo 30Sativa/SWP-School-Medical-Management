@@ -1,5 +1,4 @@
-﻿
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolMedicalManagement.Models.Request;
 using SchoolMedicalManagement.Service.Interface;
@@ -21,12 +20,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetMedicalEventTypeList()
         {
-            var responses = await _medicalEventTypeService.GetAllMedicalEventTypesAsync();
-            if (responses == null || responses.Count == 0)
-            {
-                return NotFound("Medical event type list is empty!");
-            }
-            return Ok(responses);
+            var response = await _medicalEventTypeService.GetAllMedicalEventTypesAsync();
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         [HttpGet("{id}")]

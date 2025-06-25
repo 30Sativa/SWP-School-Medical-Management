@@ -20,12 +20,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetHealthCheckCampaignList()
         {
-            var responses = await _healthCheckCampaignService.GetAllHealthCheckCampaignsAsync();
-            if (responses == null || responses.Count == 0)
-            {
-                return NotFound("Health check campaign list is empty!");
-            }
-            return Ok(responses);
+            var response = await _healthCheckCampaignService.GetAllHealthCheckCampaignsAsync();
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         [HttpGet("{id}")]
@@ -71,12 +67,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpGet("status/{statusId}")]
         public async Task<IActionResult> GetHealthCheckCampaignsByStatus([FromRoute] int statusId)
         {
-            var responses = await _healthCheckCampaignService.GetHealthCheckCampaignsByStatusAsync(statusId);
-            if (responses == null || responses.Count == 0)
-            {
-                return NotFound($"No health check campaigns found with statusId {statusId}.");
-            }
-            return Ok(responses);
+            var response = await _healthCheckCampaignService.GetHealthCheckCampaignsByStatusAsync(statusId);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
     }
 }

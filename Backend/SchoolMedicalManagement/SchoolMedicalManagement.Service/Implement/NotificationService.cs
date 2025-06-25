@@ -7,6 +7,7 @@ using SchoolMedicalManagement.Service.Interface;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace SchoolMedicalManagement.Service.Implement
 {
@@ -26,48 +27,50 @@ namespace SchoolMedicalManagement.Service.Implement
             _notificationTypeRepository = notificationTypeRepository;
         }
 
-        public async Task<List<NotificationManagementResponse>> GetAllNotificationsAsync()
+        public async Task<BaseResponse> GetAllNotificationsAsync()
         {
             var notifications = await _notificationRepository.GetAllNotifications();
-            var result = new List<NotificationManagementResponse>();
-            foreach (var n in notifications)
+            var data = notifications.Select(n => new NotificationManagementResponse
             {
-                result.Add(new NotificationManagementResponse
-                {
-                    NotificationId = n.NotificationId,
-                    ReceiverId = n.ReceiverId,
-                    ReceiverName = n.Receiver?.FullName,
-                    Title = n.Title,
-                    Message = n.Message,
-                    TypeId = n.TypeId,
-                    TypeName = n.Type?.TypeName,
-                    IsRead = n.IsRead,
-                    SentDate = n.SentDate
-                });
-            }
-            return result;
+                NotificationId = n.NotificationId,
+                ReceiverId = n.ReceiverId,
+                ReceiverName = n.Receiver?.FullName,
+                Title = n.Title,
+                Message = n.Message,
+                TypeId = n.TypeId,
+                TypeName = n.Type?.TypeName,
+                IsRead = n.IsRead,
+                SentDate = n.SentDate
+            }).ToList();
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách thông báo thành công.",
+                Data = data
+            };
         }
 
-        public async Task<List<NotificationManagementResponse>> GetNotificationsByUserIdAsync(Guid userId)
+        public async Task<BaseResponse> GetNotificationsByUserIdAsync(Guid userId)
         {
             var notifications = await _notificationRepository.GetNotificationsByUserId(userId);
-            var result = new List<NotificationManagementResponse>();
-            foreach (var n in notifications)
+            var data = notifications.Select(n => new NotificationManagementResponse
             {
-                result.Add(new NotificationManagementResponse
-                {
-                    NotificationId = n.NotificationId,
-                    ReceiverId = n.ReceiverId,
-                    ReceiverName = n.Receiver?.FullName,
-                    Title = n.Title,
-                    Message = n.Message,
-                    TypeId = n.TypeId,
-                    TypeName = n.Type?.TypeName,
-                    IsRead = n.IsRead,
-                    SentDate = n.SentDate
-                });
-            }
-            return result;
+                NotificationId = n.NotificationId,
+                ReceiverId = n.ReceiverId,
+                ReceiverName = n.Receiver?.FullName,
+                Title = n.Title,
+                Message = n.Message,
+                TypeId = n.TypeId,
+                TypeName = n.Type?.TypeName,
+                IsRead = n.IsRead,
+                SentDate = n.SentDate
+            }).ToList();
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách thông báo theo user thành công.",
+                Data = data
+            };
         }
 
         public async Task<BaseResponse?> GetNotificationByIdAsync(int id)

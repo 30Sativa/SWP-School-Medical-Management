@@ -7,7 +7,7 @@ namespace SchoolMedicalManagement.Service.Interface
 {
     public interface IMedicalEventTypeService
     {
-        Task<List<MedicalEventTypeManagementResponse>> GetAllMedicalEventTypesAsync();
+        Task<BaseResponse> GetAllMedicalEventTypesAsync();
         Task<BaseResponse?> GetMedicalEventTypeByIdAsync(int id);
         Task<BaseResponse?> CreateMedicalEventTypeAsync(CreateMedicalEventTypeRequest request);
         Task<BaseResponse?> UpdateMedicalEventTypeAsync(int id, UpdateMedicalEventTypeRequest request);

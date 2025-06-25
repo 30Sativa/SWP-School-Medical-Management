@@ -6,6 +6,7 @@ using SchoolMedicalManagement.Repository.Repository;
 using SchoolMedicalManagement.Service.Interface;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace SchoolMedicalManagement.Service.Implement
 {
@@ -18,19 +19,20 @@ namespace SchoolMedicalManagement.Service.Implement
             _notificationTypeRepository = notificationTypeRepository;
         }
 
-        public async Task<List<NotificationTypeManagementResponse>> GetAllNotificationTypesAsync()
+        public async Task<BaseResponse> GetAllNotificationTypesAsync()
         {
             var types = await _notificationTypeRepository.GetAllNotificationTypes();
-            var result = new List<NotificationTypeManagementResponse>();
-            foreach (var t in types)
+            var data = types.Select(t => new NotificationTypeManagementResponse
             {
-                result.Add(new NotificationTypeManagementResponse
-                {
-                    TypeId = t.TypeId,
-                    TypeName = t.TypeName
-                });
-            }
-            return result;
+                TypeId = t.TypeId,
+                TypeName = t.TypeName
+            }).ToList();
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách loại thông báo thành công.",
+                Data = data
+            };
         }
 
         public async Task<BaseResponse?> GetNotificationTypeByIdAsync(int id)

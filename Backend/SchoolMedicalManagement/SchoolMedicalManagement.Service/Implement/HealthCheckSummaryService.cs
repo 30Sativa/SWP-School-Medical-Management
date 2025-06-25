@@ -6,6 +6,7 @@ using SchoolMedicalManagement.Repository.Repository;
 using SchoolMedicalManagement.Service.Interface;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace SchoolMedicalManagement.Service.Implement
 {
@@ -22,37 +23,38 @@ namespace SchoolMedicalManagement.Service.Implement
             _campaignRepository = campaignRepository;
         }
 
-        public async Task<List<HealthCheckSummaryManagementResponse>> GetAllHealthCheckSummariesAsync()
+        public async Task<BaseResponse> GetAllHealthCheckSummariesAsync()
         {
             var summaries = await _summaryRepository.GetAllHealthCheckSummaries();
-            var result = new List<HealthCheckSummaryManagementResponse>();
-            foreach (var s in summaries)
+            var data = summaries.Select(s => new HealthCheckSummaryManagementResponse
             {
-                result.Add(new HealthCheckSummaryManagementResponse
-                {
-                    RecordId = s.RecordId,
-                    StudentId = s.StudentId,
-                    StudentName = s.Student?.FullName,
-                    CampaignId = s.CampaignId,
-                    CampaignTitle = s.Campaign?.Title,
-                    BloodPressure = s.BloodPressure,
-                    HeartRate = s.HeartRate,
-                    Height = s.Height,
-                    Weight = s.Weight,
-                    Bmi = s.Bmi,
-                    VisionSummary = s.VisionSummary,
-                    Ent = s.Ent,
-                    EntNotes = s.EntNotes,
-                    Mouth = s.Mouth,
-                    Throat = s.Throat,
-                    ToothDecay = s.ToothDecay,
-                    ToothNotes = s.ToothNotes,
-                    GeneralNote = s.GeneralNote,
-                    FollowUpNote = s.FollowUpNote,
-                    IsActive = s.IsActive
-                });
-            }
-            return result;
+                RecordId = s.RecordId,
+                StudentId = s.StudentId,
+                StudentName = s.Student?.FullName,
+                CampaignId = s.CampaignId,
+                CampaignTitle = s.Campaign?.Title,
+                BloodPressure = s.BloodPressure,
+                HeartRate = s.HeartRate,
+                Height = s.Height,
+                Weight = s.Weight,
+                Bmi = s.Bmi,
+                VisionSummary = s.VisionSummary,
+                Ent = s.Ent,
+                EntNotes = s.EntNotes,
+                Mouth = s.Mouth,
+                Throat = s.Throat,
+                ToothDecay = s.ToothDecay,
+                ToothNotes = s.ToothNotes,
+                GeneralNote = s.GeneralNote,
+                FollowUpNote = s.FollowUpNote,
+                IsActive = s.IsActive
+            }).ToList();
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách tổng hợp khám sức khỏe thành công.",
+                Data = data
+            };
         }
 
         public async Task<BaseResponse?> GetHealthCheckSummaryByIdAsync(int id)

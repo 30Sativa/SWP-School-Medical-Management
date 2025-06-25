@@ -31,8 +31,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var users = await _userService.GetAllUserAsync();
-            return Ok(users); // Không cần check null vì luôn trả List<>
+            var response = await _userService.GetAllUserAsync();
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         // Lấy thông tin 1 user theo ID

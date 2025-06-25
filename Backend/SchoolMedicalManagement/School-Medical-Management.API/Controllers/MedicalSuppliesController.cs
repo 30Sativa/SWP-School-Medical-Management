@@ -22,12 +22,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllSupplies()
         {
-            var supplies = await _medicalSupplyService.GetAllSuppliesAsync();
-            if (supplies == null || !supplies.Any())
-            {
-                return NotFound("Không tìm thấy vật tư nào trong kho.");
-            }
-            return Ok(supplies);
+            var response = await _medicalSupplyService.GetAllSuppliesAsync();
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         /// <summary>

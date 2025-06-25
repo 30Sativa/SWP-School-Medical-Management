@@ -25,25 +25,26 @@ namespace SchoolMedicalManagement.Service.Implement
             _context = context;
         }
 
-        public async Task<List<HealthCheckCampaignManagementResponse>> GetAllHealthCheckCampaignsAsync()
+        public async Task<BaseResponse> GetAllHealthCheckCampaignsAsync()
         {
             var campaigns = await _campaignRepository.GetAllHealthCheckCampaigns();
-            var result = new List<HealthCheckCampaignManagementResponse>();
-            foreach (var c in campaigns)
+            var data = campaigns.Select(c => new HealthCheckCampaignManagementResponse
             {
-                result.Add(new HealthCheckCampaignManagementResponse
-                {
-                    CampaignId = c.CampaignId,
-                    Title = c.Title,
-                    Date = c.Date,
-                    Description = c.Description,
-                    CreatedBy = c.CreatedBy,
-                    CreatedByName = c.CreatedByNavigation?.FullName,
-                    StatusId = c.StatusId,
-                    StatusName = c.Status?.StatusName
-                });
-            }
-            return result;
+                CampaignId = c.CampaignId,
+                Title = c.Title,
+                Date = c.Date,
+                Description = c.Description,
+                CreatedBy = c.CreatedBy,
+                CreatedByName = c.CreatedByNavigation?.FullName,
+                StatusId = c.StatusId,
+                StatusName = c.Status?.StatusName
+            }).ToList();
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách chiến dịch khám sức khỏe thành công.",
+                Data = data
+            };
         }
 
         public async Task<BaseResponse?> GetHealthCheckCampaignByIdAsync(int id)
@@ -188,26 +189,27 @@ namespace SchoolMedicalManagement.Service.Implement
             return await _campaignRepository.DeleteHealthCheckCampaign(id);
         }
 
-        public async Task<List<HealthCheckCampaignManagementResponse>> GetHealthCheckCampaignsByStatusAsync(int statusId)
+        public async Task<BaseResponse> GetHealthCheckCampaignsByStatusAsync(int statusId)
         {
             var campaigns = await _campaignRepository.GetAllHealthCheckCampaigns();
             var filtered = campaigns.Where(c => c.StatusId == statusId).ToList();
-            var result = new List<HealthCheckCampaignManagementResponse>();
-            foreach (var c in filtered)
+            var data = filtered.Select(c => new HealthCheckCampaignManagementResponse
             {
-                result.Add(new HealthCheckCampaignManagementResponse
-                {
-                    CampaignId = c.CampaignId,
-                    Title = c.Title,
-                    Date = c.Date,
-                    Description = c.Description,
-                    CreatedBy = c.CreatedBy,
-                    CreatedByName = c.CreatedByNavigation?.FullName,
-                    StatusId = c.StatusId,
-                    StatusName = c.Status?.StatusName
-                });
-            }
-            return result;
+                CampaignId = c.CampaignId,
+                Title = c.Title,
+                Date = c.Date,
+                Description = c.Description,
+                CreatedBy = c.CreatedBy,
+                CreatedByName = c.CreatedByNavigation?.FullName,
+                StatusId = c.StatusId,
+                StatusName = c.Status?.StatusName
+            }).ToList();
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách chiến dịch khám sức khỏe theo trạng thái thành công.",
+                Data = data
+            };
         }
     }
 }

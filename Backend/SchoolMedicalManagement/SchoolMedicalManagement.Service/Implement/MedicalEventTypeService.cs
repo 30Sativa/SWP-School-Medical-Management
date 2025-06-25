@@ -6,6 +6,7 @@ using SchoolMedicalManagement.Repository.Repository;
 using SchoolMedicalManagement.Service.Interface;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace SchoolMedicalManagement.Service.Implement
 {
@@ -18,19 +19,20 @@ namespace SchoolMedicalManagement.Service.Implement
             _medicalEventTypeRepository = medicalEventTypeRepository;
         }
 
-        public async Task<List<MedicalEventTypeManagementResponse>> GetAllMedicalEventTypesAsync()
+        public async Task<BaseResponse> GetAllMedicalEventTypesAsync()
         {
             var types = await _medicalEventTypeRepository.GetAllMedicalEventTypes();
-            var result = new List<MedicalEventTypeManagementResponse>();
-            foreach (var t in types)
+            var data = types.Select(t => new MedicalEventTypeManagementResponse
             {
-                result.Add(new MedicalEventTypeManagementResponse
-                {
-                    EventTypeId = t.EventTypeId,
-                    EventTypeName = t.EventTypeName
-                });
-            }
-            return result;
+                EventTypeId = t.EventTypeId,
+                EventTypeName = t.EventTypeName
+            }).ToList();
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách loại sự kiện y tế thành công.",
+                Data = data
+            };
         }
 
         public async Task<BaseResponse?> GetMedicalEventTypeByIdAsync(int id)

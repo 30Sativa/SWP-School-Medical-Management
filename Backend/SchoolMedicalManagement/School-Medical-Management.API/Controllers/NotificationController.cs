@@ -21,23 +21,15 @@ namespace School_Medical_Management.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetNotificationList()
         {
-            var responses = await _notificationService.GetAllNotificationsAsync();
-            if (responses == null || responses.Count == 0)
-            {
-                return NotFound("Notification list is empty!");
-            }
-            return Ok(responses);
+            var response = await _notificationService.GetAllNotificationsAsync();
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetNotificationsByUserId([FromRoute] Guid userId)
         {
-            var responses = await _notificationService.GetNotificationsByUserIdAsync(userId);
-            if (responses == null || responses.Count == 0)
-            {
-                return NotFound($"No notifications found for user with ID {userId}!");
-            }
-            return Ok(responses);
+            var response = await _notificationService.GetNotificationsByUserIdAsync(userId);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         [HttpGet("{id}")]

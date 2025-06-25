@@ -7,7 +7,7 @@ namespace SchoolMedicalManagement.Service.Interface
 {
     public interface IBlogPostService
     {
-        Task<List<BlogPostManagementResponse>> GetAllBlogPostsAsync();
+        Task<BaseResponse> GetAllBlogPostsAsync();
         Task<BaseResponse?> GetBlogPostByIdAsync(int id);
         Task<BaseResponse?> CreateBlogPostAsync(CreateBlogPostRequest request);
         Task<BaseResponse?> UpdateBlogPostAsync(int id, UpdateBlogPostRequest request);

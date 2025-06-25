@@ -7,7 +7,7 @@ namespace SchoolMedicalManagement.Service.Interface
 {
     public interface IHealthCheckSummaryService
     {
-        Task<List<HealthCheckSummaryManagementResponse>> GetAllHealthCheckSummariesAsync();
+        Task<BaseResponse> GetAllHealthCheckSummariesAsync();
         Task<BaseResponse?> GetHealthCheckSummaryByIdAsync(int id);
         Task<BaseResponse?> CreateHealthCheckSummaryAsync(CreateHealthCheckSummaryRequest request);
         Task<BaseResponse?> UpdateHealthCheckSummaryAsync(int id, UpdateHealthCheckSummaryRequest request);
