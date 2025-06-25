@@ -32,5 +32,29 @@ namespace School_Medical_Management.API.Controllers
             var response = await _dashboardService.GetVaccinationCampaignStatisticsAsync();
             return StatusCode(int.Parse(response?.Status ?? "200"), response);
         }
+
+        // API: Thống kê sức khỏe học sinh
+        [HttpGet("health-statistics")]
+        public async Task<IActionResult> GetHealthStatistics()
+        {
+            var response = await _dashboardService.GetHealthStatisticsAsync();
+            return StatusCode(int.Parse(response?.Status ?? "200"), response);
+        }
+
+        // API: Thống kê sự kiện y tế
+        [HttpGet("medical-events-statistics")]
+        public async Task<IActionResult> GetMedicalEventsStatistics()
+        {
+            var response = await _dashboardService.GetMedicalEventsStatisticsAsync();
+            return StatusCode(int.Parse(response?.Status ?? "200"), response);
+        }
+
+        // API: Thống kê dùng thuốc
+        [HttpGet("medication-statistics")]
+        public async Task<IActionResult> GetMedicationStatistics()
+        {
+            var response = await _dashboardService.GetMedicationStatisticsAsync();
+            return StatusCode(int.Parse(response?.Status ?? "200"), response);
+        }
     }
 } 

@@ -9,5 +9,9 @@ namespace SchoolMedicalManagement.Service.Interface
         
         // Thêm method mới để lấy thống kê chi tiết chiến dịch tiêm chủng
         Task<BaseResponse?> GetVaccinationCampaignStatisticsAsync();
+
+        Task<BaseResponse?> GetHealthStatisticsAsync();
+        Task<BaseResponse?> GetMedicalEventsStatisticsAsync();
+        Task<BaseResponse?> GetMedicationStatisticsAsync();
     }
 } 

@@ -73,7 +73,7 @@ namespace SchoolMedicalManagement.Models.Response
         public string EventType { get; set; } = null!;
 
         // Ngày xảy ra sự kiện
-        public DateTime EventDate { get; set; }
+        public DateTime? EventDate { get; set; }
 
         // Mức độ nghiêm trọng của sự kiện (Nhẹ, Trung bình, Nghiêm trọng)
         public string Severity { get; set; } = null!;
