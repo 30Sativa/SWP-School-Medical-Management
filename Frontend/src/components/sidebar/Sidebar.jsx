@@ -14,6 +14,8 @@ import {
   HeartPulse,
   BarChart2,
   User, 
+  CalendarPlus, 
+  ClipboardPlus,
 } from "lucide-react";
 import style from "./Sidebar.module.css";
 import { useEffect } from "react";
@@ -95,7 +97,7 @@ const Sidebar = () => {
             `${style.navItem} ${isActive ? style.active : ""}`
           }
         >
-          <Syringe size={20} />
+          <ClipboardPlus size={20} />
           <span>Tạo tiêm chủng</span>
         </NavLink>
 
@@ -115,7 +117,7 @@ const Sidebar = () => {
             `${style.navItem} ${isActive ? style.active : ""}`
           }
         >
-          <HeartPulse size={20} />
+          <CalendarPlus size={20} />
           <span>Tạo lịch kiểm tra</span>
         </NavLink>
 

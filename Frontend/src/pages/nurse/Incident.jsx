@@ -17,7 +17,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, Users } from "lucide-react";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 dayjs.extend(isoWeek);
@@ -45,9 +45,13 @@ const Incident = () => {
   const itemsPerPage = 5;
   const [selectedMedicalHistory, setSelectedMedicalHistory] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showBulkCreateForm, setShowBulkCreateForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   const [students, setStudents] = useState([]);
+  const [classList, setClassList] = useState([]);
+  const [selectedClass, setSelectedClass] = useState("");
+  const [classStudents, setClassStudents] = useState([]);
   const [newEvent, setNewEvent] = useState({
     studentId: "",
     eventTypeId: "",
@@ -58,9 +62,18 @@ const Incident = () => {
     location: "",
     notes: "",
   });
+  const [bulkEvent, setBulkEvent] = useState({
+    selectedStudents: [],
+    eventTypeId: "",
+    severityId: "",
+    eventDate: new Date().toISOString().slice(0, 16),
+    description: "",
+    location: "",
+    notes: "",
+  });
   const [supplies, setSupplies] = useState([]);
   const [suppliesUsed, setSuppliesUsed] = useState([]);
-
+  const [bulkSuppliesUsed, setBulkSuppliesUsed] = useState([]);
   const [users, setUsers] = useState([]);
 
   const eventTypes = [
@@ -427,18 +440,136 @@ const Incident = () => {
     }
   };
 
+  const handleBulkCreate = () => {
+    const currentUserId = localStorage.getItem("userId");
+    const token = localStorage.getItem("token");
+
+    // Kiểm tra các trường bắt buộc
+    if (
+      !bulkEvent.selectedStudents ||
+      bulkEvent.selectedStudents.length === 0
+    ) {
+      alert("Vui lòng chọn ít nhất một học sinh!");
+      return;
+    }
+    if (
+      !bulkEvent.eventTypeId ||
+      isNaN(Number(bulkEvent.eventTypeId)) ||
+      Number(bulkEvent.eventTypeId) === 0
+    ) {
+      alert("Vui lòng chọn loại sự cố!");
+      return;
+    }
+    if (
+      !bulkEvent.severityId ||
+      isNaN(Number(bulkEvent.severityId)) ||
+      Number(bulkEvent.severityId) === 0
+    ) {
+      alert("Vui lòng chọn mức độ!");
+      return;
+    }
+    if (!bulkEvent.eventDate) {
+      alert("Vui lòng chọn thời gian!");
+      return;
+    }
+    if (!bulkEvent.description) {
+      alert("Vui lòng nhập mô tả!");
+      return;
+    }
+    if (!currentUserId) {
+      alert("Vui lòng đăng nhập lại!");
+      return;
+    }
+
+    const suppliesPayload = bulkSuppliesUsed
+      .filter(
+        (item) =>
+          item.supplyID &&
+          !isNaN(parseInt(item.supplyID, 10)) &&
+          Number(item.quantityUsed) > 0
+      )
+      .map((item) => ({
+        supplyID: parseInt(item.supplyID, 10),
+        quantityUsed: Number(item.quantityUsed),
+        note: item.note || "",
+      }));
+
+    // Tạo nhiều sự cố cùng lúc
+    const promises = bulkEvent.selectedStudents.map((studentId) => {
+      const payload = {
+        studentId: Number(studentId),
+        eventTypeId: Number(bulkEvent.eventTypeId),
+        severityId: Number(bulkEvent.severityId),
+        eventDate: bulkEvent.eventDate,
+        description: bulkEvent.description,
+        handledByUserId: currentUserId,
+        status: "Đã gửi",
+        location: bulkEvent.location,
+        notes: bulkEvent.notes,
+        suppliesUsed: suppliesPayload,
+        request: "Không có yêu cầu đặc biệt",
+      };
+
+      return axios.post("/api/MedicalEvent", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    });
+
+    Promise.all(promises)
+      .then((responses) => {
+        console.log("✅ Tạo hàng loạt sự cố thành công:", responses);
+        const addedEvents = responses.map((res) => ({
+          ...res.data,
+          handledByName: "Bạn",
+        }));
+        setEvents((prev) => [...prev, ...addedEvents]);
+        setShowBulkCreateForm(false);
+        setBulkEvent({
+          selectedStudents: [],
+          eventTypeId: "",
+          severityId: "",
+          eventDate: new Date().toISOString().slice(0, 16),
+          description: "",
+          location: "",
+          notes: "",
+        });
+        setBulkSuppliesUsed([]);
+        fetchEvents();
+        alert(`Đã tạo thành công ${responses.length} sự cố y tế!`);
+      })
+      .catch((err) => {
+        const errorDetail =
+          err.response?.data?.errors || err.response?.data || err.message;
+        console.error("❌ Lỗi tạo hàng loạt sự cố:", errorDetail);
+        alert(
+          "Lỗi khi tạo hàng loạt sự cố:\n" +
+            JSON.stringify(errorDetail, null, 2)
+        );
+      });
+  };
+
   return (
     <div className={style.pageContainer}>
       <Sidebar />
       <div className={style.contentArea}>
         <div className={style.header}>
           <h2>Báo cáo sự cố y tế học đường</h2>
-          <button
-            className={style.addButton}
-            onClick={() => setShowCreateForm(true)}
-          >
-            <Plus size={16} /> Tạo sự cố mới
-          </button>
+          <div className={style.headerButtons}>
+            <button
+              className={style.bulkAddButton}
+              onClick={() => setShowBulkCreateForm(true)}
+            >
+              <Users size={16} /> Tạo hàng loạt
+            </button>
+            <button
+              className={style.addButton}
+              onClick={() => setShowCreateForm(true)}
+            >
+              <Plus size={16} /> Tạo sự cố mới
+            </button>
+          </div>
         </div>
 
         <div className={style.filters}>
@@ -752,6 +883,52 @@ const Incident = () => {
                 Xoá
               </button>
               <button onClick={() => setSelectedEvent(null)}>Đóng</button>
+              <button
+                className={style.sendBtn}
+                onClick={async () => {
+                  // Lấy parentId từ API Student
+                  try {
+                    const token = localStorage.getItem("token");
+                    const res = await axios.get(
+                      `/api/Student/${selectedEvent.studentId}`,
+                      {
+                        headers: { Authorization: `Bearer ${token}` },
+                      }
+                    );
+                    const parentId = res.data?.data?.parentId;
+                    if (!parentId) {
+                      alert("Không tìm thấy phụ huynh của học sinh này!");
+                      return;
+                    }
+                    // Soạn message
+                    const message = `Học sinh: ${
+                      selectedEvent.studentName
+                    }\nLoại sự cố: ${
+                      selectedEvent.eventType
+                    }\nThời gian: ${new Date(
+                      selectedEvent.eventDate
+                    ).toLocaleString()}\nMức độ: ${
+                      selectedEvent.severityLevelName
+                    }\nMô tả: ${selectedEvent.description}`;
+                    await axios.post(
+                      "/api/Notification/send",
+                      {
+                        receiverId: parentId,
+                        title: "Thông báo sự cố y tế học đường",
+                        message,
+                        typeId: 2,
+                        isRead: false,
+                      },
+                      { headers: { Authorization: `Bearer ${token}` } }
+                    );
+                    alert("Đã gửi thông báo cho phụ huynh!");
+                  } catch {
+                    alert("Gửi thông báo thất bại!");
+                  }
+                }}
+              >
+                Gửi thông báo
+              </button>
             </div>
           </div>
         </div>
@@ -760,12 +937,70 @@ const Incident = () => {
         <div className={style.modalOverlay}>
           <div className={style.modalContent}>
             <h3>Tạo sự cố mới</h3>
+            {/* Dropdown chọn lớp */}
+            <select
+              value={selectedClass}
+              onClick={() => {
+                if (classList.length === 0 && students.length > 0) {
+                  const uniqueClasses = Array.from(
+                    new Set(students.map((s) => s.className).filter(Boolean))
+                  );
+                  setClassList(uniqueClasses);
+                }
+              }}
+              onChange={async (e) => {
+                const className = e.target.value;
+                setSelectedClass(className);
+                setNewEvent({ ...newEvent, studentId: "" });
+                if (className) {
+                  try {
+                    const token = localStorage.getItem("token");
+                    const res = await axios.get(
+                      `/api/Student/by-class/${encodeURIComponent(className)}`,
+                      {
+                        headers: { Authorization: `Bearer ${token}` },
+                      }
+                    );
+                    setClassStudents(
+                      Array.isArray(res.data.data) ? res.data.data : []
+                    );
+                  } catch {
+                    setClassStudents([]);
+                  }
+                } else {
+                  setClassStudents([]);
+                }
+              }}
+              style={{ marginBottom: 12 }}
+            >
+              <option value="">-- Chọn lớp --</option>
+              {classList.map((cl) => (
+                <option key={cl} value={cl}>
+                  {cl}
+                </option>
+              ))}
+            </select>
             <Select
-              options={Array.isArray(students) ? students.map((s) => ({
-                value: s.studentId,
-                label: s.fullName,
-              })) : []}
-              placeholder="Tìm học sinh..."
+              options={
+                Array.isArray(classStudents)
+                  ? classStudents.map((s) => ({
+                      value: s.studentId,
+                      label: s.fullName,
+                    }))
+                  : []
+              }
+              placeholder={selectedClass ? "Tìm học sinh..." : "Chọn lớp trước"}
+              isDisabled={!selectedClass}
+              value={
+                classStudents.find((s) => s.studentId === newEvent.studentId)
+                  ? {
+                      value: newEvent.studentId,
+                      label: classStudents.find(
+                        (s) => s.studentId === newEvent.studentId
+                      )?.fullName,
+                    }
+                  : null
+              }
               onChange={(selectedOption) =>
                 setNewEvent({ ...newEvent, studentId: selectedOption.value })
               }
@@ -847,11 +1082,13 @@ const Incident = () => {
                   }}
                 >
                   <option value="">-- Chọn vật tư --</option>
-                  {Array.isArray(supplies) ? supplies.map((supply) => (
-                    <option key={supply.supplyID} value={supply.supplyID}>
-                      {supply.name}
-                    </option>
-                  )) : null}
+                  {Array.isArray(supplies)
+                    ? supplies.map((supply) => (
+                        <option key={supply.supplyID} value={supply.supplyID}>
+                          {supply.name}
+                        </option>
+                      ))
+                    : null}
                 </select>
 
                 <input
@@ -988,11 +1225,13 @@ const Incident = () => {
                   }}
                 >
                   <option value="">-- Chọn vật tư --</option>
-                  {Array.isArray(supplies) ? supplies.map((supply) => (
-                    <option key={supply.supplyID} value={supply.supplyID}>
-                      {supply.name}
-                    </option>
-                  )) : null}
+                  {Array.isArray(supplies)
+                    ? supplies.map((supply) => (
+                        <option key={supply.supplyID} value={supply.supplyID}>
+                          {supply.name}
+                        </option>
+                      ))
+                    : null}
                 </select>
 
                 <input
@@ -1064,6 +1303,256 @@ const Incident = () => {
                   setShowEditForm(false);
                   setEditingEvent(null);
                 }}
+              >
+                Huỷ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showBulkCreateForm && (
+        <div className={style.modalOverlay}>
+          <div className={style.modalContent}>
+            <h3>Tạo sự cố hàng loạt</h3>
+            <p className={style.bulkDescription}>
+              Chọn nhiều học sinh có cùng triệu chứng để tạo sự cố cùng lúc
+            </p>
+
+            {/* Dropdown chọn lớp */}
+            <select
+              value={selectedClass}
+              onClick={() => {
+                // Lấy danh sách lớp từ students nếu chưa có
+                if (classList.length === 0 && students.length > 0) {
+                  const uniqueClasses = Array.from(
+                    new Set(students.map((s) => s.className).filter(Boolean))
+                  );
+                  setClassList(uniqueClasses);
+                }
+              }}
+              onChange={async (e) => {
+                const className = e.target.value;
+                setSelectedClass(className);
+                setBulkEvent({ ...bulkEvent, selectedStudents: [] });
+                if (className) {
+                  try {
+                    const token = localStorage.getItem("token");
+                    const res = await axios.get(
+                      `/api/Student/by-class/${encodeURIComponent(className)}`,
+                      {
+                        headers: { Authorization: `Bearer ${token}` },
+                      }
+                    );
+                    setClassStudents(
+                      Array.isArray(res.data.data) ? res.data.data : []
+                    );
+                  } catch {
+                    setClassStudents([]);
+                  }
+                } else {
+                  setClassStudents([]);
+                }
+              }}
+              style={{ marginBottom: 12 }}
+            >
+              <option value="">-- Chọn lớp --</option>
+              {classList.map((cl) => (
+                <option key={cl} value={cl}>
+                  {cl}
+                </option>
+              ))}
+            </select>
+
+            {/* Dropdown chọn học sinh theo lớp */}
+            <Select
+              isMulti
+              isDisabled={!selectedClass}
+              options={
+                Array.isArray(classStudents)
+                  ? classStudents.map((s) => ({
+                      value: s.studentId,
+                      label: s.fullName,
+                    }))
+                  : []
+              }
+              placeholder={
+                selectedClass ? "Chọn học sinh..." : "Chọn lớp trước"
+              }
+              value={bulkEvent.selectedStudents
+                .map((id) => {
+                  const stu = classStudents.find((s) => s.studentId === id);
+                  return stu
+                    ? { value: stu.studentId, label: stu.fullName }
+                    : null;
+                })
+                .filter(Boolean)}
+              onChange={(selectedOptions) =>
+                setBulkEvent({
+                  ...bulkEvent,
+                  selectedStudents: selectedOptions.map(
+                    (option) => option.value
+                  ),
+                })
+              }
+            />
+
+            <select
+              value={bulkEvent.eventTypeId}
+              onChange={(e) =>
+                setBulkEvent({ ...bulkEvent, eventTypeId: e.target.value })
+              }
+            >
+              <option value="">-- Loại sự cố --</option>
+              {eventTypes.map((et) => (
+                <option key={et.id} value={et.id}>
+                  {et.name}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={bulkEvent.severityId}
+              onChange={(e) =>
+                setBulkEvent({ ...bulkEvent, severityId: e.target.value })
+              }
+            >
+              <option value="">-- Mức độ --</option>
+              {severityLevels.map((sl) => (
+                <option key={sl.id} value={sl.id}>
+                  {sl.level}
+                </option>
+              ))}
+            </select>
+
+            <input
+              type="datetime-local"
+              value={bulkEvent.eventDate}
+              onChange={(e) =>
+                setBulkEvent({ ...bulkEvent, eventDate: e.target.value })
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Địa điểm xảy ra sự cố"
+              value={bulkEvent.location}
+              onChange={(e) =>
+                setBulkEvent({ ...bulkEvent, location: e.target.value })
+              }
+            />
+
+            <textarea
+              placeholder="Mô tả chung cho tất cả học sinh"
+              value={bulkEvent.description}
+              onChange={(e) =>
+                setBulkEvent({ ...bulkEvent, description: e.target.value })
+              }
+            />
+
+            <textarea
+              placeholder="Ghi chú chung"
+              value={bulkEvent.notes}
+              onChange={(e) =>
+                setBulkEvent({ ...bulkEvent, notes: e.target.value })
+              }
+            />
+
+            <h4 className={style.sectionTitle}>Vật tư đã sử dụng (chung):</h4>
+            {bulkSuppliesUsed.map((s, index) => (
+              <div
+                key={index}
+                style={{ display: "flex", gap: "8px", marginBottom: "8px" }}
+              >
+                <select
+                  value={s.supplyID}
+                  onChange={(e) => {
+                    const updated = [...bulkSuppliesUsed];
+                    updated[index].supplyID = e.target.value;
+                    setBulkSuppliesUsed(updated);
+                  }}
+                >
+                  <option value="">-- Chọn vật tư --</option>
+                  {Array.isArray(supplies)
+                    ? supplies.map((supply) => (
+                        <option key={supply.supplyID} value={supply.supplyID}>
+                          {supply.name}
+                        </option>
+                      ))
+                    : null}
+                </select>
+
+                <input
+                  type="number"
+                  placeholder="Số lượng"
+                  value={s.quantityUsed}
+                  onChange={(e) => {
+                    const updated = [...bulkSuppliesUsed];
+                    updated[index].quantityUsed = e.target.value;
+                    setBulkSuppliesUsed(updated);
+                  }}
+                  style={{ width: "80px" }}
+                />
+
+                <input
+                  type="text"
+                  placeholder="Ghi chú"
+                  value={s.note}
+                  onChange={(e) => {
+                    const updated = [...bulkSuppliesUsed];
+                    updated[index].note = e.target.value;
+                    setBulkSuppliesUsed(updated);
+                  }}
+                />
+
+                <button
+                  onClick={() => {
+                    const updated = [...bulkSuppliesUsed];
+                    updated.splice(index, 1);
+                    setBulkSuppliesUsed(updated);
+                  }}
+                >
+                  ❌
+                </button>
+              </div>
+            ))}
+
+            <button
+              onClick={() =>
+                setBulkSuppliesUsed([
+                  ...bulkSuppliesUsed,
+                  { supplyID: "", quantityUsed: 1, note: "" },
+                ])
+              }
+              style={{ marginBottom: "10px" }}
+            >
+              + Thêm vật tư
+            </button>
+
+            {bulkEvent.selectedStudents.length > 0 && (
+              <div className={style.selectedStudents}>
+                <h4>Học sinh đã chọn ({bulkEvent.selectedStudents.length}):</h4>
+                <div className={style.studentList}>
+                  {bulkEvent.selectedStudents.map((studentId) => {
+                    const student = students.find(
+                      (s) => s.studentId === studentId
+                    );
+                    return (
+                      <span key={studentId} className={style.studentTag}>
+                        {student?.fullName || studentId}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div className={style.modalActions}>
+              <button className={style.tagBlue} onClick={handleBulkCreate}>
+                Tạo cho {bulkEvent.selectedStudents.length} học sinh
+              </button>
+              <button
+                className={style.closeBtn}
+                onClick={() => setShowBulkCreateForm(false)}
               >
                 Huỷ
               </button>
