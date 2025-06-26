@@ -36,6 +36,8 @@ const VaccinCampaign = () => {
             total: item.totalConsentRequests,
             status: item.statusName,
           }));
+          // Sắp xếp theo ngày giảm dần (mới nhất lên đầu)
+          transformed.sort((a, b) => new Date(b.date) - new Date(a.date));
           setCampaigns(transformed);
         }
       } catch (error) {

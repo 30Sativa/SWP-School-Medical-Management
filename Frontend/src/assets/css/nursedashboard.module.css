@@ -1,0 +1,128 @@
+.container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.dashboardWrapper {
+  flex: 1;
+  padding: 24px;
+  background-color: #f5f5f5;
+}
+
+.header {
+  margin-bottom: 16px;
+}
+
+.header h2 {
+  margin-bottom: 4px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.header p {
+  font-size: 14px;
+  color: #666;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summaryBox {
+  background-color: #ffffff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.summaryBox h4 {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+.summaryBox p {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.summaryBox span {
+  font-size: 12px;
+  color: #999;
+}
+
+.contentRow {
+  display: flex;
+  gap: 24px;
+}
+
+.leftPanel {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.rightPanel {
+  flex: 1;
+}
+
+.card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.styledTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.styledTable th,
+.styledTable td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.pill {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.green {
+  background-color: #bbf7d0;
+  color: #166534;
+}
+
+.yellow {
+  background-color: #fef08a;
+  color: #92400e;
+}
+
+.btnAction {
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border: none;
+  cursor: pointer;
+}

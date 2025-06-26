@@ -99,7 +99,9 @@ const Incident = () => {
       })
       .then((res) => {
         console.log("📥 Danh sách sự cố:", res.data);
-        setEvents(res.data);
+        // Sắp xếp theo thời gian tạo mới nhất
+        const sortedEvents = [...res.data].sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate));
+        setEvents(sortedEvents);
       })
       .catch((err) => {
         console.error("❌ Lỗi lấy danh sách sự cố:", err);

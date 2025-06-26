@@ -44,6 +44,8 @@ const HealthCheckList = () => {
             createdByName: item.createdByName,
             statusName: item.statusName,
           }));
+          // Sắp xếp theo ngày tạo giảm dần (mới nhất lên đầu)
+          transformed.sort((a, b) => new Date(b.date) - new Date(a.date));
           setCampaigns(transformed);
           calculateStatusCount(transformed);
         } else {
