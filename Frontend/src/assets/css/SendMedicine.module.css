@@ -411,3 +411,27 @@
 .historySection:hover::-webkit-scrollbar-thumb:hover {
   background-color: #6366f1;
 }
+.selectWrapper {
+  max-width: 720px; /* hoặc cùng chiều rộng với .medicineInfo */
+  margin: 0 auto 24px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.selectStudent {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 16px;
+  width: 100%;
+  background-color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: border 0.2s ease;
+}
+
+.selectStudent:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}

@@ -13,14 +13,14 @@ const SendMedicine = () => {
   const [file, setFile] = useState(null);
   const [history, setHistory] = useState([]);
   const [studentName, setStudentName] = useState("");
+  const [studentId, setStudentId] = useState(localStorage.getItem("studentId"));
+  const [studentList, setStudentList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showPopup, setShowPopup] = useState(false);
 
-  const studentId = localStorage.getItem("studentId");
   const parentId = localStorage.getItem("parentId");
-
   const historyEndRef = useRef(null);
   const historyTopRef = useRef(null);
 
@@ -31,7 +31,7 @@ const SendMedicine = () => {
   const handleSend = async () => {
     if (!title.trim()) return toast.error("Vui lòng nhập tên thuốc!");
     if (!usage.trim()) return toast.error("Vui lòng nhập liều dùng!");
-    if (!parentId) return toast.error("Không có thông tin phụ huynh.");
+    if (!studentId) return toast.error("Vui lòng chọn học sinh!");
 
     try {
       setLoading(true);
@@ -59,6 +59,22 @@ const SendMedicine = () => {
       toast.error("Gửi thất bại!");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchStudentList = async () => {
+    try {
+      const res = await axios.get(
+        `https://swp-school-medical-management.onrender.com/api/Student/by-parent/${parentId}`
+      );
+      const data = res.data.data;
+      setStudentList(data);
+      if (!studentId && data.length > 0) {
+        setStudentId(data[0].studentId);
+        localStorage.setItem("studentId", data[0].studentId);
+      }
+    } catch (err) {
+      console.error("Không lấy được danh sách học sinh:", err);
     }
   };
 
@@ -96,6 +112,10 @@ const SendMedicine = () => {
   };
 
   useEffect(() => {
+    fetchStudentList();
+  }, []);
+
+  useEffect(() => {
     if (studentId) fetchHistory();
   }, [studentId]);
 
@@ -117,10 +137,27 @@ const SendMedicine = () => {
           </span>
         </div>
 
+        <div style={{ marginTop: 20, marginBottom: 20 }}>
+          <label style={{ fontWeight: 600, fontSize: "16px", color: "#1e3a8a" }}>Chọn học sinh:</label>
+          <select
+            value={studentId}
+            onChange={(e) => {
+              setStudentId(e.target.value);
+              localStorage.setItem("studentId", e.target.value);
+            }}
+            className={styles.selectStudent}
+          >
+            {studentList.map((student) => (
+              <option key={student.studentId} value={student.studentId}>
+                {student.fullName} - {student.className}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className={styles.mainSection}>
           <div className={styles.medicineInfo}>
             <div className={styles.medicineSectionTitle}>Thông tin thuốc</div>
-
             <div className={`${styles.box} ${styles.boxYellow}`}>
               <h3><FiInfo style={{ marginRight: 8, color: "#f59e42" }} /> Thông tin bệnh</h3>
               <textarea
@@ -130,7 +167,6 @@ const SendMedicine = () => {
                 className={styles.inputField}
               ></textarea>
             </div>
-
             <div className={`${styles.box} ${styles.boxBlue}`}>
               <h3><FiEdit style={{ marginRight: 8, color: "#3b82f6" }} /> Liều dùng</h3>
               <input
@@ -141,7 +177,6 @@ const SendMedicine = () => {
                 className={styles.inputField}
               />
             </div>
-
             <div className={`${styles.box} ${styles.boxGreen}`}>
               <h3><FiClipboard style={{ marginRight: 8, color: "#10b981" }} /> Ghi chú thêm</h3>
               <textarea
@@ -151,7 +186,6 @@ const SendMedicine = () => {
                 className={styles.inputField}
               ></textarea>
             </div>
-
             <div className={styles.uploadSection}>
               <label htmlFor="file-upload" style={{ cursor: "pointer" }}>
                 <p className={styles.uploadText}>Tải lên tài liệu hoặc kéo thả file vào đây</p>
@@ -165,7 +199,6 @@ const SendMedicine = () => {
                 />
               </label>
             </div>
-
             <button
               className={styles.sendBtn}
               onClick={handleSend}
@@ -185,7 +218,6 @@ const SendMedicine = () => {
                 Xem thêm
               </button>
             </div>
-
             <input
               type="text"
               placeholder="🔍 Tìm theo tên thuốc hoặc ghi chú..."
@@ -193,7 +225,6 @@ const SendMedicine = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className={styles.searchBox}
             />
-
             {(showAll ? filteredHistory : filteredHistory.slice(0, 3)).map((item, index) => (
               <div
                 key={index}
@@ -206,15 +237,7 @@ const SendMedicine = () => {
                 <p>📝 {item.instructions}</p>
                 {item.imagePath && (
                   <p>
-                    📄 File:{" "}
-                    <a
-                      href={`https://swp-school-medical-management.onrender.com${item.imagePath}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ fontWeight: 600, color: "#2563eb", textDecoration: "underline" }}
-                    >
-                      Xem file
-                    </a>
+                    📄 File: <a href={`https://swp-school-medical-management.onrender.com${item.imagePath}`} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600, color: "#2563eb", textDecoration: "underline" }}>Xem file</a>
                   </p>
                 )}
                 <div className={styles.statusRow}>
@@ -235,7 +258,6 @@ const SendMedicine = () => {
                 <span>Lịch sử gửi thuốc ({filteredHistory.length})</span>
                 <button className={styles.closeBtn} onClick={() => setShowPopup(false)}>✖</button>
               </div>
-            
               <input
                 type="text"
                 placeholder="🔍 Tìm theo tên thuốc hoặc ghi chú..."
@@ -252,17 +274,9 @@ const SendMedicine = () => {
                     <p>💊 {item.dosage}</p>
                     <p>📝 {item.instructions}</p>
                     {item.imagePath && (
-   <p>
-                    📄 File:{" "}
-                    <a
-                      href={`https://swp-school-medical-management.onrender.com${item.imagePath}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ fontWeight: 600, color: "#2563eb", textDecoration: "underline" }}
-                    >
-                      Xem file
-                    </a>
-                  </p>
+                      <p>
+                        📄 File: <a href={`https://swp-school-medical-management.onrender.com${item.imagePath}`} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600, color: "#2563eb", textDecoration: "underline" }}>Xem file</a>
+                      </p>
                     )}
                     <div className={styles.statusRow}>
                       <span className={`${styles.status} ${item.status === "Đã duyệt" ? styles.done : item.status === "Chờ duyệt" ? styles.pending : styles.reject}`}>
@@ -275,6 +289,7 @@ const SendMedicine = () => {
             </div>
           </div>
         )}
+
       </div>
     </div>
   );
