@@ -80,6 +80,15 @@
   border: none;
 }
 
+.approveTag {
+  background: linear-gradient(90deg, #22c55e, #10b981);
+}
+
+.rejectTag {
+  background: linear-gradient(90deg, #fb7185, #ef4444);
+}
+
+
 .notifyCard {
   border-left: 8px solid #60a5fa;
   background: linear-gradient(90deg, #f0f9ff 60%, #e0e7ff 100%);
@@ -184,6 +193,23 @@
   margin-top: 18px;
   margin-bottom: 8px;
   flex-wrap: wrap;
+}
+.tabButton {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  color: white;
+  font-weight: 600;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.tabButton:hover,
+.tabButton.active {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  transform: translateY(-2px);
 }
 
 .approve, .decline {
