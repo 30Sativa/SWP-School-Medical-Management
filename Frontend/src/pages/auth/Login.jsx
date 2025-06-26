@@ -55,11 +55,6 @@ const Login = () => {
             decoded[
               "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
             ];
-          const decoded = jwtDecode(token);
-          roleName =
-            decoded[
-              "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-            ];
           console.log("Role:", roleName);
         } catch (decodeError) {
           console.error("❌ Lỗi giải mã token:", decodeError);
@@ -208,15 +203,6 @@ const Login = () => {
                 />
               </div>
               <div className="forgot-password">
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate("/forgot-password");
-                  }}
-                >
-                  Quên mật khẩu?
-                </a>
                 <a
                   href="#"
                   onClick={(e) => {
