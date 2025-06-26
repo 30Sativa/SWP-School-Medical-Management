@@ -14,9 +14,12 @@ const HealthProfile = () => {
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
-        const studentRes = await axios.get(`https://swp-school-medical-management.onrender.com/api/Student/by-parent/${parentId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const studentRes = await axios.get(
+          `https://swp-school-medical-management.onrender.com/api/Student/by-parent/${parentId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         const students = studentRes.data.data || [];
 
@@ -24,17 +27,23 @@ const HealthProfile = () => {
           students.map(async (student) => {
             try {
               const [profileRes, summaryRes] = await Promise.all([
-                axios.get(`https://swp-school-medical-management.onrender.com/api/health-profiles/student/${student.studentId}`, {
-                  headers: { Authorization: `Bearer ${token}` },
-                }),
-                axios.get(`https://swp-school-medical-management.onrender.com/api/health-checks/summaries`, {
-                  headers: { Authorization: `Bearer ${token}` },
-                }),
+                axios.get(
+                  `https://swp-school-medical-management.onrender.com/api/health-profiles/student/${student.studentId}`,
+                  {
+                    headers: { Authorization: `Bearer ${token}` },
+                  }
+                ),
+                axios.get(
+                  `https://swp-school-medical-management.onrender.com/api/health-checks/summaries`,
+                  {
+                    headers: { Authorization: `Bearer ${token}` },
+                  }
+                ),
               ]);
 
               const summaries = summaryRes.data.data;
               const matchedSummaries = Array.isArray(summaries)
-                ? summaries.filter(s => s.studentId === student.studentId)
+                ? summaries.filter((s) => s.studentId === student.studentId)
                 : [];
 
               return {
@@ -98,17 +107,33 @@ const HealthProfile = () => {
               borderRadius: "20px",
               background: "#fff",
               padding: "32px",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.08)"
+              boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
             }}
           >
-            <h2 style={{ color: "#0e2a47", marginBottom: "20px" }}>🩺 Hồ sơ sức khỏe của bé {studentInfo.fullName}</h2>
+            <h2 style={{ color: "#0e2a47", marginBottom: "20px" }}>
+              🩺 Hồ sơ sức khỏe của bé {studentInfo.fullName}
+            </h2>
 
             {!profile ? (
-              <p style={{ color: "#dc2626", fontWeight: "500" }}>⚠️ Chưa có hồ sơ sức khỏe cho bé này.</p>
+              <p style={{ color: "#dc2626", fontWeight: "500" }}>
+                ⚠️ Chưa có hồ sơ sức khỏe cho bé này.
+              </p>
             ) : (
               <>
-                <div style={{ display: "flex", flexDirection: window.innerWidth < 600 ? "column" : "row", alignItems: "center", gap: "24px", marginBottom: "28px" }}>
-                  <img src="https://i.pravatar.cc/120" alt="avatar" className={styles.avatar} />
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: window.innerWidth < 600 ? "column" : "row",
+                    alignItems: "center",
+                    gap: "24px",
+                    marginBottom: "28px",
+                  }}
+                >
+                  <img
+                    src="https://i.pravatar.cc/120"
+                    alt="avatar"
+                    className={styles.avatar}
+                  />
                   <div>
                     <h3 className={styles.name}>👦 {studentInfo.fullName}</h3>
                     <p className={styles.subInfo}>🏫 Lớp: {studentInfo.className}</p>
@@ -118,11 +143,14 @@ const HealthProfile = () => {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: window.innerWidth < 600 ? "1fr" : "repeat(auto-fit, minmax(280px, 1fr))",
+                    gridTemplateColumns:
+                      window.innerWidth < 600
+                        ? "1fr"
+                        : "repeat(auto-fit, minmax(280px, 1fr))",
                     gap: "18px",
                     marginBottom: "28px",
                     fontSize: "1rem",
-                    color: "#1e293b"
+                    color: "#1e293b",
                   }}
                 >
                   <div>👨‍⚕️ <strong>Giới tính:</strong> {studentInfo.gender}</div>
@@ -136,40 +164,77 @@ const HealthProfile = () => {
                 </div>
 
                 {summaries.length > 0 && (
-                  <div style={{ background: "#f1f5f9", padding: "20px", borderRadius: "14px", border: "1px solid #e2e8f0" }}>
-                    <h4 style={{ marginBottom: "16px", color: "#0e2a47", fontSize: "1.1rem" }}>📋 Thông tin khám sức khỏe</h4>
-                    {summaries.map((item, index) => (
-                      <div
-                        key={index}
-                        style={{
-                          marginBottom: "20px",
-                          padding: "12px 16px",
-                          borderRadius: "10px",
-                          background: "#fff",
-                          border: "1px solid #e2e8f0",
-                          boxShadow: "0 2px 6px rgba(0,0,0,0.05)"
-                        }}
-                      >
-                        <h5 style={{ marginBottom: "10px", fontSize: "1.05rem", color: "#0284c7" }}>📌 {item.campaignTitle}</h5>
+                  <div
+                    style={{
+                      background: "#f1f5f9",
+                      padding: "20px",
+                      borderRadius: "14px",
+                      border: "1px solid #e2e8f0",
+                    }}
+                  >
+                    <h4
+                      style={{
+                        marginBottom: "16px",
+                        color: "#0e2a47",
+                        fontSize: "1.1rem",
+                      }}
+                    >
+                      📋 Thông tin khám sức khỏe
+                    </h4>
+                    {[...summaries]
+                      .sort((a, b) => {
+                        const getPriority = (title) => {
+                          title = title.toLowerCase();
+                          if (title.includes("giữa kỳ 2025")) return 3;
+                          if (title.includes("cuối năm 2025")) return 2;
+                          if (title.includes("định kỳ")) return 1;
+                          return 0;
+                        };
+                        return getPriority(b.campaignTitle) - getPriority(a.campaignTitle);
+                      })
+                      .map((item, index) => (
                         <div
+                          key={index}
                           style={{
-                            display: "grid",
-                            gridTemplateColumns: window.innerWidth < 600 ? "1fr" : "repeat(auto-fit, minmax(260px, 1fr))",
-                            gap: "12px",
-                            fontSize: "0.95rem",
-                            color: "#1e293b"
+                            marginBottom: "20px",
+                            padding: "12px 16px",
+                            borderRadius: "10px",
+                            background: "#fff",
+                            border: "1px solid #e2e8f0",
+                            boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
                           }}
                         >
-                          <div>📏 <strong>Chiều cao:</strong> {item.height} cm</div>
-                          <div>⚖️ <strong>Cân nặng:</strong> {item.weight} kg</div>
-                          <div>❤️ <strong>Huyết áp:</strong> {item.bloodPressure}</div>
-                          <div>👁️ <strong>Thị lực:</strong> {item.visionSummary}</div>
-                          <div>👂 <strong>Tai mũi họng:</strong> {item.ent}</div>
-                          <div>📝 <strong>Ghi chú:</strong> {item.generalNote}</div>
-                          <div>🔍 <strong>Theo dõi:</strong> {item.followUpNote}</div>
+                          <h5
+                            style={{
+                              marginBottom: "10px",
+                              fontSize: "1.05rem",
+                              color: "#0284c7",
+                            }}
+                          >
+                            📌 {item.campaignTitle}
+                          </h5>
+                          <div
+                            style={{
+                              display: "grid",
+                              gridTemplateColumns:
+                                window.innerWidth < 600
+                                  ? "1fr"
+                                  : "repeat(auto-fit, minmax(260px, 1fr))",
+                              gap: "12px",
+                              fontSize: "0.95rem",
+                              color: "#1e293b",
+                            }}
+                          >
+                            <div>📏 <strong>Chiều cao:</strong> {item.height} cm</div>
+                            <div>⚖️ <strong>Cân nặng:</strong> {item.weight} kg</div>
+                            <div>❤️ <strong>Huyết áp:</strong> {item.bloodPressure}</div>
+                            <div>👁️ <strong>Thị lực:</strong> {item.visionSummary}</div>
+                            <div>👂 <strong>Tai mũi họng:</strong> {item.ent}</div>
+                            <div>📝 <strong>Ghi chú:</strong> {item.generalNote}</div>
+                            <div>🔍 <strong>Theo dõi:</strong> {item.followUpNote}</div>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
                   </div>
                 )}
               </>
