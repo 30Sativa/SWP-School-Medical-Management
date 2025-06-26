@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-// import styles from "../../assets/css/HealthCheckCampaign.module.css";
-import campaignStyle from "../../assets/css/VaccinationCampaign.module.css";
+import campaignStyle from "../../assets/css/HealthCheckCampaign.module.css";
 import Sidebar from "../../components/sidebar/Sidebar";
 import { Modal, Form as AntForm, Input, DatePicker, message } from "antd";
 import dayjs from "dayjs";
@@ -36,8 +35,40 @@ const HealthCheckCampaign = () => {
       const res = await axios.get(`${API_BASE}/HealthCheckCampaign`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-      setCampaigns(res.data);
-    } catch {
+
+      console.log("API Response Data:", res.data);
+      console.log("Type of API Response Data:", typeof res.data);
+
+      let campaignData = res.data;
+      if (typeof campaignData === "string") {
+        try {
+          campaignData = JSON.parse(campaignData);
+        } catch (e) {
+          console.error("Failed to parse response data:", e);
+          setCampaigns([]);
+          setLoading(false);
+          return;
+        }
+      }
+
+      if (
+        campaignData &&
+        campaignData["$values"] &&
+        Array.isArray(campaignData["$values"])
+      ) {
+        campaignData = campaignData["$values"];
+      }
+
+      if (Array.isArray(campaignData)) {
+        setCampaigns(campaignData);
+      } else if (campaignData && Array.isArray(campaignData.data)) {
+        setCampaigns(campaignData.data);
+      } else {
+        console.warn("API response is not a recognized array format:", campaignData);
+        setCampaigns([]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch campaigns:", error);
       setCampaigns([]);
     }
     setLoading(false);
@@ -52,8 +83,8 @@ const HealthCheckCampaign = () => {
     if (showModal) {
       if (pendingCampaign) {
         formAntd.setFieldsValue({
-          title: pendingCampaign.title || '',
-          description: pendingCampaign.description || '',
+          title: pendingCampaign.title || "",
+          description: pendingCampaign.description || "",
           date: pendingCampaign.date ? dayjs(pendingCampaign.date) : null,
           statusId: pendingCampaign.statusId || 1,
         });
@@ -71,14 +102,14 @@ const HealthCheckCampaign = () => {
       const values = await formAntd.validateFields();
       let dateValue = values.date;
       if (!dateValue) {
-        formAntd.setFields([{ name: 'date', errors: ['Vui lòng chọn ngày!'] }]);
+        formAntd.setFields([{ name: "date", errors: ["Vui lòng chọn ngày!"] }]);
         return;
       }
-      if (typeof dateValue === 'string') {
+      if (typeof dateValue === "string") {
         dateValue = dayjs(dateValue);
       }
       if (!dayjs(dateValue).isValid()) {
-        formAntd.setFields([{ name: 'date', errors: ['Ngày không hợp lệ!'] }]);
+        formAntd.setFields([{ name: "date", errors: ["Ngày không hợp lệ!"] }]);
         return;
       }
       let payload = {
@@ -92,7 +123,11 @@ const HealthCheckCampaign = () => {
         await axios.put(
           `${API_BASE}/HealthCheckCampaign/${pendingCampaign.campaignId}`,
           payload,
-          { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
         );
         message.success("Cập nhật thành công!");
       } else {
@@ -128,7 +163,10 @@ const HealthCheckCampaign = () => {
       c.description?.toLowerCase().includes(searchText.toLowerCase())
   );
   const totalPage = Math.ceil(filteredCampaigns.length / PAGE_SIZE);
-  const pagedCampaigns = filteredCampaigns.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const pagedCampaigns = filteredCampaigns.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   return (
     <div className={campaignStyle.layoutContainer}>
@@ -138,7 +176,10 @@ const HealthCheckCampaign = () => {
           <div className={campaignStyle.titleGroup}>
             <h1>
               <span className={campaignStyle.textBlack}>Danh sách</span>
-              <span className={campaignStyle.textAccent}> chiến dịch kiểm tra sức khỏe</span>
+              <span className={campaignStyle.textAccent}>
+                {" "}
+                chiến dịch kiểm tra sức khỏe
+              </span>
             </h1>
           </div>
         </header>
@@ -148,25 +189,29 @@ const HealthCheckCampaign = () => {
             placeholder="Tìm kiếm chiến dịch..."
             className={campaignStyle.searchBar}
             value={searchText}
-            onChange={(e) => { setSearchText(e.target.value); setCurrentPage(1); }}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+              setCurrentPage(1);
+            }}
             style={{
-              border: '2px solid #23b7b7',
+              border: "2px solid #23b7b7",
               borderRadius: 12,
-              padding: '10px 16px',
+              padding: "10px 16px",
               fontSize: 16,
-              outline: 'none',
-              boxShadow: '0 2px 12px #23b7b71a',
-              background: '#f9fefe',
-              transition: 'border-color 0.2s',
+              outline: "none",
+              boxShadow: "0 2px 12px #23b7b71a",
+              background: "#f9fefe",
+              transition: "border-color 0.2s",
               marginRight: 16,
               width: 320,
-              maxWidth: '100%',
+              maxWidth: "100%",
             }}
-            onFocus={e => e.target.style.borderColor = '#1890ff'}
-            onBlur={e => e.target.style.borderColor = '#23b7b7'}
+            onFocus={(e) => (e.target.style.borderColor = "#1890ff")}
+            onBlur={(e) => (e.target.style.borderColor = "#23b7b7")}
           />
           <button className={campaignStyle.addBtn} onClick={() => openModal()}>
-            <Plus size={16} style={{ marginRight: 6, marginBottom: -2 }} /> Thêm chiến dịch
+            <Plus size={16} style={{ marginRight: 6, marginBottom: -2 }} /> Thêm
+            chiến dịch
           </button>
         </div>
         <div className={campaignStyle.table}>
@@ -184,9 +229,17 @@ const HealthCheckCampaign = () => {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={7} style={{ textAlign: 'center' }}>Đang tải...</td></tr>
+                <tr>
+                  <td colSpan={7} style={{ textAlign: "center" }}>
+                    Đang tải...
+                  </td>
+                </tr>
               ) : pagedCampaigns.length === 0 ? (
-                <tr><td colSpan={7} style={{ textAlign: 'center' }}>Không có dữ liệu</td></tr>
+                <tr>
+                  <td colSpan={7} style={{ textAlign: "center" }}>
+                    Không có dữ liệu
+                  </td>
+                </tr>
               ) : (
                 pagedCampaigns.map((c, idx) => (
                   <tr key={c.campaignId}>
@@ -198,10 +251,16 @@ const HealthCheckCampaign = () => {
                     <td>{c.statusName}</td>
                     <td>
                       <div className={campaignStyle.actionGroup}>
-                        <button className={campaignStyle.editBtn} onClick={() => openModal(c)}>
+                        <button
+                          className={campaignStyle.editBtn}
+                          onClick={() => openModal(c)}
+                        >
                           <Edit2 size={16} style={{ marginRight: 4 }} /> Sửa
                         </button>
-                        <button className={campaignStyle.deleteBtn} onClick={() => handleDelete(c.campaignId)}>
+                        <button
+                          className={campaignStyle.deleteBtn}
+                          onClick={() => handleDelete(c.campaignId)}
+                        >
                           <Trash2 size={16} style={{ marginRight: 4 }} /> Xóa
                         </button>
                       </div>
@@ -218,7 +277,9 @@ const HealthCheckCampaign = () => {
             Array.from({ length: totalPage }, (_, i) => (
               <button
                 key={i}
-                className={i + 1 === currentPage ? campaignStyle.activePage : ''}
+                className={
+                  i + 1 === currentPage ? campaignStyle.activePage : ""
+                }
                 onClick={() => setCurrentPage(i + 1)}
               >
                 {i + 1}
@@ -231,38 +292,77 @@ const HealthCheckCampaign = () => {
         <Modal
           open={showModal}
           title={pendingCampaign ? "Chỉnh sửa chiến dịch" : "Thêm chiến dịch"}
-          onCancel={() => { setShowModal(false); setPendingCampaign(null); }}
+          onCancel={() => {
+            setShowModal(false);
+            setPendingCampaign(null);
+          }}
           onOk={handleSubmit}
           okText={pendingCampaign ? "Lưu" : "Tạo mới"}
           cancelText="Hủy"
           className={campaignStyle.modalForm}
         >
-          <AntForm form={formAntd} layout="vertical" preserve={false} initialValues={{}}>
-            <AntForm.Item name="title" label="Tiêu đề" rules={[{ required: true, message: "Vui lòng nhập tiêu đề!" }]}> 
+          <AntForm
+            form={formAntd}
+            layout="vertical"
+            preserve={false}
+            initialValues={{}}
+          >
+            <AntForm.Item
+              name="title"
+              label="Tiêu đề"
+              rules={[{ required: true, message: "Vui lòng nhập tiêu đề!" }]}
+            >
               <Input className={campaignStyle.input} />
             </AntForm.Item>
-            <AntForm.Item name="description" label="Mô tả" rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}> 
+            <AntForm.Item
+              name="description"
+              label="Mô tả"
+              rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}
+            >
               <Input.TextArea rows={3} className={campaignStyle.input} />
             </AntForm.Item>
-            <AntForm.Item name="date" label="Ngày tổ chức" rules={[{ required: true, message: "Vui lòng chọn ngày!" }]}> 
-              <DatePicker 
-                style={{ width: '100%' }} 
-                format="YYYY-MM-DD" 
-                disabledDate={current => current && current < dayjs().startOf('day')} 
+            <AntForm.Item
+              name="date"
+              label="Ngày tổ chức"
+              rules={[{ required: true, message: "Vui lòng chọn ngày!" }]}
+            >
+              <DatePicker
+                style={{ width: "100%" }}
+                format="YYYY-MM-DD"
+                disabledDate={(current) =>
+                  current && current < dayjs().startOf("day")
+                }
                 className={campaignStyle.input}
               />
             </AntForm.Item>
             {/* Bỏ dòng chọn trạng thái khi tạo mới chiến dịch */}
             {pendingCampaign && (
-              <AntForm.Item name="statusId" label="Trạng thái" rules={[{ required: true, message: "Vui lòng chọn trạng thái!" }]}> 
+              <AntForm.Item
+                name="statusId"
+                label="Trạng thái"
+                rules={[
+                  { required: true, message: "Vui lòng chọn trạng thái!" },
+                ]}
+              >
                 <select
                   className={campaignStyle.input}
-                  style={{ width: '100%', borderRadius: 12, minHeight: 44, fontSize: 16 }}
-                  value={formAntd.getFieldValue('statusId')}
-                  onChange={e => formAntd.setFieldsValue({ statusId: Number(e.target.value) })}
+                  style={{
+                    width: "100%",
+                    borderRadius: 12,
+                    minHeight: 44,
+                    fontSize: 16,
+                  }}
+                  value={formAntd.getFieldValue("statusId")}
+                  onChange={(e) =>
+                    formAntd.setFieldsValue({
+                      statusId: Number(e.target.value),
+                    })
+                  }
                 >
-                  {statusOptions.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  {statusOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
                   ))}
                 </select>
               </AntForm.Item>

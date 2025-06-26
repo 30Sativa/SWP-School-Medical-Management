@@ -191,8 +191,9 @@
   border-bottom: 1px solid #ddd;
 }
 .studentTable th {
-  background-color: #f4f4f4;
+  background-color: #20b2aa;
   font-weight: 600;
+  color: white;
 }
 .studentTable tr:last-child td {
   border-bottom: none !important;
@@ -213,6 +214,8 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  background-color: #20b2aa;
+  color: white;
 }
 .deleteBtn {
   display: flex;

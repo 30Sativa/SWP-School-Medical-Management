@@ -50,3 +50,20 @@ h2 {
   font-weight: bold;
   width: 200px;
 }
+
+.sendButton {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-left: 10px;
+  height: 38px;
+}
+
+.sendButton:hover {
+  background-color: #0056b3;
+}
+

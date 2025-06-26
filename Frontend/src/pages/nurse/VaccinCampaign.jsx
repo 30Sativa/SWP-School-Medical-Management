@@ -4,6 +4,14 @@ import { Search } from "lucide-react";
 import style from "../../assets/css/VaccinCampaign.module.css";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 const VaccinCampaign = () => {
   const [campaigns, setCampaigns] = useState([]);
@@ -28,6 +36,8 @@ const VaccinCampaign = () => {
             total: item.totalConsentRequests,
             status: item.statusName,
           }));
+          // Sắp xếp theo ngày giảm dần (mới nhất lên đầu)
+          transformed.sort((a, b) => new Date(b.date) - new Date(a.date));
           setCampaigns(transformed);
         }
       } catch (error) {
@@ -42,7 +52,8 @@ const VaccinCampaign = () => {
   const filteredCampaigns = campaigns.filter(
     (c) =>
       c.vaccineName.toLowerCase().includes(searchKeyword.toLowerCase()) &&
-      (filterStatus === "Tất cả trạng thái" || c.status === filterStatus)
+      (filterStatus === "Tất cả trạng thái" || c.status === filterStatus) &&
+      c.status !== "Đã huỷ"
   );
   const totalPages = Math.ceil(filteredCampaigns.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -56,6 +67,20 @@ const VaccinCampaign = () => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+  const campaignStats = [
+    {
+      name: "Chưa bắt đầu",
+      value: campaigns.filter((c) => c.status === "Chưa bắt đầu").length,
+    },
+    {
+      name: "Đang diễn ra",
+      value: campaigns.filter((c) => c.status === "Đang diễn ra").length,
+    },
+    {
+      name: "Đã hoàn thành",
+      value: campaigns.filter((c) => c.status === "Đã hoàn thành").length,
+    },
+  ];
 
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
@@ -93,11 +118,10 @@ const VaccinCampaign = () => {
                 setCurrentPage(1);
               }}
             >
-              <option>Tất cả trạng thái</option>
+              <option>Tất cả</option>
               <option>Đang diễn ra</option>
               <option>Đã hoàn thành</option>
               <option>Chưa bắt đầu</option>
-              <option>Đã huỷ</option>
             </select>
           </div>
 
@@ -123,14 +147,18 @@ const VaccinCampaign = () => {
                     <td>{c.description}</td>
                     <td>
                       <span
-                        className={`${style.statusBadge} ${style[`status-${c.status.replace(/\s/g, "-")}`]}`}
+                        className={`${style.statusBadge} ${
+                          style[`status-${c.status.replace(/\s/g, "-")}`]
+                        }`}
                       >
                         {c.status}
                       </span>
                     </td>
                     <td>
                       <Link to={`/vaccines/${c.id}`}>
-                        <button className={style.btnDetail}>Xem chi tiết</button>
+                        <button className={style.btnDetail}>
+                          Xem chi tiết
+                        </button>
                       </Link>
                     </td>
                   </tr>
@@ -162,6 +190,38 @@ const VaccinCampaign = () => {
             >
               »
             </button>
+          </div>
+          <div
+            style={{
+              marginTop: "32px",
+              padding: "1rem",
+              background: "#fff",
+              borderRadius: "12px",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+            }}
+          >
+            <h3 style={{ marginBottom: "16px", color: "#333" }}>
+              Thống kê chiến dịch theo trạng thái
+            </h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={campaignStats}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  label
+                >
+                  <Cell fill="#facc15" />
+                  <Cell fill="#38bdf8" />
+                  <Cell fill="#10b981" />
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </main>

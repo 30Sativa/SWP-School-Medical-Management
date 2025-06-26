@@ -19,8 +19,16 @@ const StudentList = () => {
   const fetchStudents = async () => {
     try {
       const response = await axios.get("/api/Student");
-      setStudents(response.data);
-      setFilteredStudents(response.data);
+      let studentArray = response.data?.data || [];
+
+      // Sắp xếp theo mã học sinh (studentId) tăng dần
+      studentArray.sort((a, b) => {
+        // Nếu mã là số, ép kiểu và so sánh số
+        return Number(a.studentId) - Number(b.studentId);
+      });
+
+      setStudents(studentArray);
+      setFilteredStudents(studentArray);
     } catch (error) {
       console.error("Có lỗi khi gọi API:", error);
     }
@@ -74,8 +82,8 @@ const StudentList = () => {
           <thead>
             <tr>
               <th>STT</th>
+              <th>Mã học sinh</th>
               <th>Họ và tên</th>
-              <th>Mã số</th>
               <th>Lớp</th>
               <th>Phụ huynh</th>
               <th>Thao tác</th>
@@ -86,8 +94,8 @@ const StudentList = () => {
               currentStudents.map((student, index) => (
                 <tr key={student.id || index}>
                   <td>{indexOfFirstStudent + index + 1}</td>
+                  <td> HS{student.studentId}</td>
                   <td>{student.fullName}</td>
-                  <td>{student.studentId}</td>
                   <td>{student.className}</td>
                   <td>{student.parentName}</td>
                   <td>

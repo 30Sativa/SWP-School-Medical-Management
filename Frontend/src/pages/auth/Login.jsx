@@ -55,6 +55,11 @@ const Login = () => {
             decoded[
               "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
             ];
+          const decoded = jwtDecode(token);
+          roleName =
+            decoded[
+              "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+            ];
           console.log("Role:", roleName);
         } catch (decodeError) {
           console.error("❌ Lỗi giải mã token:", decodeError);
@@ -113,6 +118,7 @@ const Login = () => {
                   (s) => s.parentId === resData.userId
                 );
 
+
                 if (students.length > 0) {
                   localStorage.setItem(
                     "studentIds",
@@ -166,7 +172,9 @@ const Login = () => {
       <div className="login-container">
         <div className="left-section">
           <h1>Hệ thống quản lý sức khỏe học đường</h1>
-          <p>Giải pháp toàn diện cho việc theo dõi và quản lý sức khỏe của bạn</p>
+          <p>
+            Giải pháp toàn diện cho việc theo dõi và quản lý sức khỏe của bạn
+          </p>
           <div className="illustration"></div>
         </div>
         <div className="right-section">
@@ -200,6 +208,15 @@ const Login = () => {
                 />
               </div>
               <div className="forgot-password">
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/forgot-password");
+                  }}
+                >
+                  Quên mật khẩu?
+                </a>
                 <a
                   href="#"
                   onClick={(e) => {

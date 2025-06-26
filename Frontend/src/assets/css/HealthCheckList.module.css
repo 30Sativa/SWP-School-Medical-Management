@@ -21,9 +21,10 @@
 
 .filterRow {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   margin-bottom: 20px;
+  
 }
 
 .searchBox {
@@ -55,6 +56,8 @@
   border: 1px solid #ccc;
   cursor: pointer;
   font-size: 14px;
+  height: 37px;
+  width: 150px;
 }
 
 .filterDropdown:focus {
