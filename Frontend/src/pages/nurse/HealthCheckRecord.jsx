@@ -9,28 +9,28 @@ const HealthCheckRecord = () => {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   const campaignStatus = location.state?.campaignStatus;
-  const isEditMode = location.pathname.includes('/healthcheck-detail/');
+  const isEditMode = location.pathname.includes("/healthcheck-detail/");
   const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
 
   // Nếu là ghi nhận mới (recordId === 'new')
-  const isNewRecord = recordId === 'new';
+  const isNewRecord = recordId === "new";
   const state = location.state || {};
   const [newRecord, setNewRecord] = useState({
-    bloodPressure: '',
-    heartRate: '',
-    height: '',
-    weight: '',
-    bmi: '',
-    visionSummary: '',
-    ent: '',
-    entNotes: '',
-    mouth: '',
-    toothDecay: '',
-    toothNotes: '',
-    throat: '',
-    generalNote: '',
-    followUpNote: '',
+    bloodPressure: "",
+    heartRate: "",
+    height: "",
+    weight: "",
+    bmi: "",
+    visionSummary: "",
+    ent: "",
+    entNotes: "",
+    mouth: "",
+    toothDecay: "",
+    toothNotes: "",
+    throat: "",
+    generalNote: "",
+    followUpNote: "",
     consentStatusId: 1,
     isActive: true,
   });
@@ -41,37 +41,42 @@ const HealthCheckRecord = () => {
       const h = parseFloat(newRecord.height) / 100;
       const w = parseFloat(newRecord.weight);
       if (h > 0 && w > 0) {
-        setNewRecord(r => ({ ...r, bmi: (w / (h * h)).toFixed(1) }));
+        setNewRecord((r) => ({ ...r, bmi: (w / (h * h)).toFixed(1) }));
       }
     }
   }, [newRecord.height, newRecord.weight]);
 
   const handleNewChange = (e) => {
     const { name, value } = e.target;
-    setNewRecord(r => ({ ...r, [name]: value }));
+    setNewRecord((r) => ({ ...r, [name]: value }));
   };
 
   const handleNewSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('https://swp-school-medical-management.onrender.com/api/health-checks/summaries', {
-        ...newRecord,
-        studentId: state.studentId,
-        campaignId: state.campaignId,
-        throat: newRecord.throat || '',
-        consentStatusId: 1,
-        isActive: true,
-        generalNote: newRecord.generalNote,
-        bloodPressure: Number(newRecord.bloodPressure),
-        heartRate: Number(newRecord.heartRate),
-        height: Number(newRecord.height),
-        weight: Number(newRecord.weight),
-        bmi: Number(newRecord.bmi),
-      });
-      alert('Ghi nhận thành công!');
+      await axios.post(
+        "https://swp-school-medical-management.onrender.com/api/health-checks/summaries",
+        {
+          ...newRecord,
+          studentId: state.studentId,
+          campaignId: state.campaignId,
+          throat: newRecord.throat || "",
+          consentStatusId: 1,
+          isActive: true,
+          generalNote: newRecord.generalNote,
+          bloodPressure: Number(newRecord.bloodPressure),
+          heartRate: Number(newRecord.heartRate),
+          height: Number(newRecord.height),
+          weight: Number(newRecord.weight),
+          bmi: Number(newRecord.bmi),
+        }
+      );
+      alert("Ghi nhận thành công!");
       navigate(-1);
     } catch (error) {
-      alert('Lỗi ghi nhận! ' + (error.response?.data?.message || error.message));
+      alert(
+        "Lỗi ghi nhận! " + (error.response?.data?.message || error.message)
+      );
     }
   };
 
@@ -116,7 +121,7 @@ const HealthCheckRecord = () => {
       const h = parseFloat(record.height) / 100;
       const w = parseFloat(record.weight);
       if (h > 0 && w > 0) {
-        setRecord(r => ({ ...r, bmi: (w / (h * h)).toFixed(1) }));
+        setRecord((r) => ({ ...r, bmi: (w / (h * h)).toFixed(1) }));
       }
     }
     // eslint-disable-next-line
@@ -138,19 +143,22 @@ const HealthCheckRecord = () => {
     try {
       if (isNewRecord) {
         // Tạo mới
-        await axios.post('https://swp-school-medical-management.onrender.com/api/health-checks/summaries', {
-          ...record,
-          throat: record.throat || '',
-          consentStatusId: 1,
-          isActive: true,
-          generalNote: record.generalNote,
-          bloodPressure: Number(record.bloodPressure),
-          heartRate: Number(record.heartRate),
-          height: Number(record.height),
-          weight: Number(record.weight),
-          bmi: Number(record.bmi),
-        });
-        alert('Ghi nhận thành công!');
+        await axios.post(
+          "https://swp-school-medical-management.onrender.com/api/health-checks/summaries",
+          {
+            ...record,
+            throat: record.throat || "",
+            consentStatusId: 1,
+            isActive: true,
+            generalNote: record.generalNote,
+            bloodPressure: Number(record.bloodPressure),
+            heartRate: Number(record.heartRate),
+            height: Number(record.height),
+            weight: Number(record.weight),
+            bmi: Number(record.bmi),
+          }
+        );
+        alert("Ghi nhận thành công!");
         navigate(-1);
       } else {
         // Cập nhật
@@ -158,7 +166,7 @@ const HealthCheckRecord = () => {
           `https://swp-school-medical-management.onrender.com/api/health-checks/summaries/${recordId}`,
           {
             ...record,
-            throat: record.throat || '',
+            throat: record.throat || "",
             consentStatusId: 1,
             isActive: true,
             generalNote: record.generalNote,
@@ -177,7 +185,10 @@ const HealthCheckRecord = () => {
         }
       }
     } catch (error) {
-      alert("Lỗi khi gửi dữ liệu: " + (error.response?.data?.message || error.message));
+      alert(
+        "Lỗi khi gửi dữ liệu: " +
+          (error.response?.data?.message || error.message)
+      );
       console.error("Error while submitting the data", error);
     }
   };
@@ -194,59 +205,150 @@ const HealthCheckRecord = () => {
             <tbody>
               <tr>
                 <td>Huyết áp</td>
-                <td><input name="bloodPressure" value={newRecord.bloodPressure} onChange={handleNewChange} required /></td>
+                <td>
+                  <input
+                    name="bloodPressure"
+                    value={newRecord.bloodPressure}
+                    onChange={handleNewChange}
+                    required
+                  />
+                </td>
               </tr>
               <tr>
                 <td>Nhịp tim</td>
-                <td><input name="heartRate" value={newRecord.heartRate} onChange={handleNewChange} required /></td>
+                <td>
+                  <input
+                    name="heartRate"
+                    value={newRecord.heartRate}
+                    onChange={handleNewChange}
+                    required
+                  />
+                </td>
               </tr>
               <tr>
                 <td>Chiều cao</td>
-                <td><input name="height" value={newRecord.height} onChange={handleNewChange} required /> cm</td>
+                <td>
+                  <input
+                    name="height"
+                    value={newRecord.height}
+                    onChange={handleNewChange}
+                    required
+                  />{" "}
+                  cm
+                </td>
               </tr>
               <tr>
                 <td>Cân nặng</td>
-                <td><input name="weight" value={newRecord.weight} onChange={handleNewChange} required /> kg</td>
+                <td>
+                  <input
+                    name="weight"
+                    value={newRecord.weight}
+                    onChange={handleNewChange}
+                    required
+                  />{" "}
+                  kg
+                </td>
               </tr>
               <tr>
                 <td>BMI</td>
-                <td><input name="bmi" value={newRecord.bmi} readOnly /></td>
+                <td>
+                  <input name="bmi" value={newRecord.bmi} readOnly />
+                </td>
               </tr>
               <tr>
                 <td>Mắt</td>
-                <td><input name="visionSummary" value={newRecord.visionSummary} onChange={handleNewChange} required /></td>
+                <td>
+                  <input
+                    name="visionSummary"
+                    value={newRecord.visionSummary}
+                    onChange={handleNewChange}
+                    required
+                  />
+                </td>
               </tr>
               <tr>
                 <td>Tai-Mũi-Họng</td>
-                <td><input name="ent" value={newRecord.ent} onChange={handleNewChange} required /></td>
+                <td>
+                  <input
+                    name="ent"
+                    value={newRecord.ent}
+                    onChange={handleNewChange}
+                    required
+                  />
+                </td>
               </tr>
               <tr>
                 <td>Ghi chú TMH</td>
-                <td><input name="entNotes" value={newRecord.entNotes} onChange={handleNewChange} /></td>
+                <td>
+                  <input
+                    name="entNotes"
+                    value={newRecord.entNotes}
+                    onChange={handleNewChange}
+                  />
+                </td>
               </tr>
               <tr>
                 <td>Miệng</td>
-                <td><input name="mouth" value={newRecord.mouth} onChange={handleNewChange} required /></td>
+                <td>
+                  <input
+                    name="mouth"
+                    value={newRecord.mouth}
+                    onChange={handleNewChange}
+                    required
+                  />
+                </td>
               </tr>
               <tr>
                 <td>Sâu răng</td>
-                <td><input name="toothDecay" value={newRecord.toothDecay} onChange={handleNewChange} required /></td>
+                <td>
+                  <input
+                    name="toothDecay"
+                    value={newRecord.toothDecay}
+                    onChange={handleNewChange}
+                    required
+                  />
+                </td>
               </tr>
               <tr>
                 <td>Ghi chú răng</td>
-                <td><input name="toothNotes" value={newRecord.toothNotes} onChange={handleNewChange} /></td>
+                <td>
+                  <input
+                    name="toothNotes"
+                    value={newRecord.toothNotes}
+                    onChange={handleNewChange}
+                  />
+                </td>
               </tr>
               <tr>
                 <td>Họng</td>
-                <td><input name="throat" value={newRecord.throat} onChange={handleNewChange} /></td>
+                <td>
+                  <input
+                    name="throat"
+                    value={newRecord.throat}
+                    onChange={handleNewChange}
+                  />
+                </td>
               </tr>
               <tr>
                 <td>Sức khỏe chung</td>
-                <td><input name="generalNote" value={newRecord.generalNote} onChange={handleNewChange} required /></td>
+                <td>
+                  <input
+                    name="generalNote"
+                    value={newRecord.generalNote}
+                    onChange={handleNewChange}
+                    required
+                  />
+                </td>
               </tr>
               <tr>
                 <td>Khuyến nghị</td>
-                <td><input name="followUpNote" value={newRecord.followUpNote} onChange={handleNewChange} /></td>
+                <td>
+                  <input
+                    name="followUpNote"
+                    value={newRecord.followUpNote}
+                    onChange={handleNewChange}
+                  />
+                </td>
               </tr>
             </tbody>
           </table>
@@ -256,15 +358,102 @@ const HealthCheckRecord = () => {
     );
   }
 
+  const handleSendResultToParent = async () => {
+    try {
+      // 1. Lấy thông tin học sinh để truy xuất parentId
+      const studentRes = await axios.get(
+        `https://swp-school-medical-management.onrender.com/api/Student/${record.studentId}`
+      );
+      const parentId = studentRes.data?.data?.parentId;
+
+      if (!parentId) {
+        alert("Không tìm thấy phụ huynh của học sinh này.");
+        return;
+      }
+
+      // 2. Soạn nội dung thông báo
+      const message = `
+Kính gửi phụ huynh,
+
+Dưới đây là kết quả khám sức khỏe của học sinh ${
+        record.studentName
+      } trong chiến dịch "${record.campaignTitle}":
+
+• Huyết áp: ${record.bloodPressure}
+• Nhịp tim: ${record.heartRate}
+• Chiều cao: ${record.height} cm
+• Cân nặng: ${record.weight} kg
+• BMI: ${record.bmi}
+• Mắt: ${record.visionSummary}
+• Tai-Mũi-Họng: ${record.ent} (${record.entNotes || "Không ghi chú"})
+• Miệng: ${record.mouth}
+• Sâu răng: ${record.toothDecay} (${record.toothNotes || "Không ghi chú"})
+• Họng: ${record.throat || "Không ghi chú"}
+• Sức khỏe chung: ${record.generalNote}
+• Khuyến nghị: ${record.followUpNote || "Không có"}
+
+Trân trọng,
+Trường Mầm Non
+    `.trim();
+
+      // 3. Gửi thông báo qua Notification
+      const response = await axios.post(
+        "https://swp-school-medical-management.onrender.com/api/Notification/send",
+        {
+          receiverId: parentId, // ✅ đúng theo VaccineResult
+          title: "Kết quả khám sức khỏe",
+          message: message,
+          typeId: 7, // Loại thông báo khám sức khỏe
+          isRead: false,
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        alert("✅ Đã gửi kết quả khám sức khỏe cho phụ huynh!");
+      } else {
+        alert("❌ Gửi thất bại: " + (response.data?.message || "Không rõ lỗi"));
+      }
+    } catch (error) {
+      console.error("Lỗi khi gửi kết quả:", error);
+      alert(
+        "Đã xảy ra lỗi khi gửi kết quả: " +
+          (error.response?.data?.message || error.message)
+      );
+    }
+  };
+
   return (
     <div className={styles.container}>
       <h2>Thông tin khám sức khỏe: {record.studentName}</h2>
       <button className={styles.backButton} onClick={() => navigate(-1)}>
         ⬅ Quay lại
       </button>
+      <button
+        onClick={handleSendResultToParent}
+        className={styles.sendButton}
+        style={{
+          marginTop: "16px",
+          padding: "10px 16px",
+          backgroundColor: "#007bff",
+          color: "#fff",
+          border: "none",
+          borderRadius: "6px",
+          cursor: "pointer",
+        }}
+      >
+        Gửi kết quả
+      </button>
 
-      {(!isEditing && record.campaignStatus === "Đang diễn ra" && isEditMode) && (
-        <button onClick={() => setIsEditing(true)} style={{ marginBottom: '10px' }}>Ghi nhận</button>
+      {!isEditing && record.campaignStatus === "Đang diễn ra" && isEditMode && (
+        <button
+          onClick={() => setIsEditing(true)}
+          style={{ marginBottom: "10px" }}
+        >
+          Ghi nhận
+        </button>
       )}
 
       {isEditing ? (
@@ -308,7 +497,8 @@ const HealthCheckRecord = () => {
                     onChange={(e) =>
                       setRecord({ ...record, height: e.target.value })
                     }
-                  /> cm
+                  />{" "}
+                  cm
                 </td>
               </tr>
               <tr>
@@ -320,7 +510,8 @@ const HealthCheckRecord = () => {
                     onChange={(e) =>
                       setRecord({ ...record, weight: e.target.value })
                     }
-                  /> kg
+                  />{" "}
+                  kg
                 </td>
               </tr>
               <tr>
@@ -404,7 +595,7 @@ const HealthCheckRecord = () => {
                 <td>
                   <input
                     type="text"
-                    value={record.throat || ''}
+                    value={record.throat || ""}
                     onChange={(e) =>
                       setRecord({ ...record, throat: e.target.value })
                     }
@@ -492,7 +683,7 @@ const HealthCheckRecord = () => {
             </tr>
             <tr>
               <td>Họng</td>
-              <td>{record.throat || ''}</td>
+              <td>{record.throat || ""}</td>
             </tr>
             <tr>
               <td>Sức khỏe chung</td>

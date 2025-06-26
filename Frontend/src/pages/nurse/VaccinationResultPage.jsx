@@ -1,30 +1,26 @@
+// VaccineResult.jsx
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import style from "../../assets/css/ResultPage.module.css";
-import * as XLSX from "xlsx";
-import { useNavigate } from "react-router-dom";
 
 const VaccineResult = () => {
   const { id } = useParams();
   const [records, setRecords] = useState([]);
   const [campaignStatus, setCampaignStatus] = useState("");
   const [loading, setLoading] = useState(true);
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [viewingIndex, setViewingIndex] = useState(null);
   const navigate = useNavigate();
 
-  // Lấy trạng thái chiến dịch
   useEffect(() => {
     const fetchStatus = async () => {
       try {
         const res = await axios.get(
           `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${id}`
         );
-        // Ưu tiên lấy statusName nếu có, fallback sang status nếu không có
         const statusName =
-          res.data.data.statusName ||
-          (typeof res.data.data.status === "string"
-            ? res.data.data.status
-            : res.data.data.status?.name);
+          res.data.data.statusName || res.data.data.status?.name;
         setCampaignStatus(statusName);
       } catch (error) {
         console.error("Lỗi lấy trạng thái chiến dịch:", error);
@@ -33,56 +29,37 @@ const VaccineResult = () => {
     fetchStatus();
   }, [id]);
 
-  // Lấy danh sách học sinh đã đồng ý
   useEffect(() => {
     const fetchRecords = async () => {
       setLoading(true);
       try {
-        if (campaignStatus === "Đang diễn ra") {
-          const res = await axios.get(
-            `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${id}/approved-consents`
-          );
-          setRecords(res.data.data || []);
-        } else {
-          // Lấy danh sách học sinh đã đồng ý tiêm
-          const res = await axios.get(
-            `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${id}/approved-consents`
-          );
-          const students = res.data.data || [];
-          // Gọi API lấy kết quả tiêm cho từng học sinh
-          const allRecords = await Promise.all(
-            students.map(async (student) => {
-              try {
-                const recordRes = await axios.get(
-                  `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/records/student/${student.studentId}`
+        const res = await axios.get(
+          `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${id}/approved-consents`
+        );
+        const students = res.data.data || [];
+
+        const allRecords = await Promise.all(
+          students.map(async (student) => {
+            try {
+              const recordRes = await axios.get(
+                `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/records/student/${student.studentId}`
+              );
+              let record = recordRes.data.data;
+              if (Array.isArray(record)) {
+                record = record.find(
+                  (r) => String(r.campaignId) === String(id)
                 );
-                let record = null;
-                if (Array.isArray(recordRes.data.data)) {
-                  // Lọc đúng campaignId hiện tại
-                  const recordsForCampaign = recordRes.data.data.filter(
-                    (rec) => String(rec.campaignId) === String(id)
-                  );
-                  if (recordsForCampaign.length > 0) {
-                    // Sắp xếp giảm dần theo vaccinationDate
-                    recordsForCampaign.sort((a, b) =>
-                      new Date(b.vaccinationDate || 0) - new Date(a.vaccinationDate || 0)
-                    );
-                    record = recordsForCampaign[0]; // lấy bản ghi mới nhất
-                  }
-                } else {
-                  record = recordRes.data.data;
-                }
-                return { ...student, ...record };
-              } catch {
-                return { ...student, result: "Không có dữ liệu" };
               }
-            })
-          );
-          setRecords(allRecords);
-        }
+              return { ...student, ...record };
+            } catch {
+              return { ...student };
+            }
+          })
+        );
+        setRecords(allRecords);
       } catch (error) {
-        setRecords([]);
         console.error("Lỗi lấy kết quả tiêm chủng:", error);
+        setRecords([]);
       } finally {
         setLoading(false);
       }
@@ -90,88 +67,65 @@ const VaccineResult = () => {
     if (campaignStatus) fetchRecords();
   }, [id, campaignStatus]);
 
-  const isEditable = campaignStatus === "Đang diễn ra";
-
-  const handleResultChange = (index, value) => {
+  const handleInputChange = (index, field, value) => {
     const updated = [...records];
-    updated[index].result = value;
+    updated[index][field] = value;
     setRecords(updated);
   };
 
-  const handleNoteChange = (index, value) => {
-    const updated = [...records];
-    updated[index].followUpNote = value;
-    setRecords(updated);
-  };
-
-  const handleSave = async () => {
+  const handleSave = async (index) => {
+    const r = records[index];
     try {
-      // Lọc bản ghi hợp lệ và có kết quả
-      const validRecords = records.filter(
-        (r) => r.studentId && r.studentId !== 0 && r.result
+      await axios.post(
+        "https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/records",
+        {
+          studentId: r.studentId,
+          campaignId: id,
+          consentStatusId: r.consentStatusId || 2,
+          vaccinationDate: r.vaccinationDate || new Date().toISOString(),
+          result: r.result,
+          followUpNote: r.followUpNote || "",
+          isActive: true,
+        },
+        { headers: { "Content-Type": "application/json" } }
       );
-      if (validRecords.length === 0) {
-        alert("Không có bản ghi hợp lệ để lưu!");
-        return;
-      }
-      for (const r of validRecords) {
-        await axios.post(
-          "https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/records",
-          {
-            studentId: r.studentId,
-            campaignId: id,
-            consentStatusId: r.consentStatusId || 2, // 2 = Đồng ý, hoặc lấy đúng từ API nếu có
-            vaccinationDate: r.vaccinationDate || new Date().toISOString(),
-            result: r.result,
-            followUpNote: r.followUpNote || "",
-            isActive: true,
-          },
-          { headers: { "Content-Type": "application/json" } }
-        );
-      }
-      alert("Đã lưu kết quả thành công!");
+      alert("Lưu thành công!");
+      setEditingIndex(null);
     } catch (error) {
-      console.error("Lỗi khi lưu:", error.response?.data || error);
       alert("Lỗi khi lưu dữ liệu: " + JSON.stringify(error.response?.data));
     }
   };
 
-  const exportToExcel = () => {
-    const headers = [
-      ["STT", "Học sinh", "Phụ huynh", "Ngày phản hồi", "Kết quả", "Ghi chú"],
-    ];
-    const data = records.map((r, idx) => [
-      idx + 1,
-      r.studentName,
-      r.parentName,
-      r.consentDate ? new Date(r.consentDate).toLocaleDateString() : "",
-      r.result || "",
-      r.followUpNote || "",
-    ]);
-
-    const ws = XLSX.utils.aoa_to_sheet([...headers, ...data]);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Kết quả tiêm");
-    XLSX.writeFile(wb, `DanhSach_TiemChung_${id}.xlsx`);
+  const handleSendNotification = async (student) => {
+    try {
+      const note = student.followUpNote
+        ? `Ghi chú: ${student.followUpNote}`
+        : "Không có ghi chú.";
+      await axios.post(
+        "https://swp-school-medical-management.onrender.com/api/Notification/send",
+        {
+          receiverId: student.parentId,
+          title: "Kết quả tiêm chủng",
+          message: `Học sinh ${
+            student.studentName
+          } đã ${student.result.toLowerCase()} trong đợt tiêm chủng.\n${note}`,
+          typeId: 8,
+          isRead: false,
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      alert("Đã gửi thông báo đến phụ huynh!");
+    } catch (error) {
+      console.error("Lỗi khi gửi thông báo:", error);
+      alert("Không thể gửi thông báo: " + error.response?.data?.message);
+    }
   };
 
   return (
     <div className={style.container}>
-      <h2 className={style.title}>Danh sách học sinh đã đồng ý tiêm</h2>
-      <button
-        className={style.btnBack}
-        onClick={() => navigate(-1)} // quay lại trang trước đó
-      >
+      <h2 className={style.title}>Kết quả tiêm chủng</h2>
+      <button className={style.btnBack} onClick={() => navigate(-1)}>
         ← Quay lại
-      </button>
-      {isEditable && (
-        <button className={style.btnExport} onClick={handleSave}>
-          Lưu kết quả
-        </button>
-      )}
-
-      <button className={style.btnExport} onClick={exportToExcel}>
-        Xuất Excel
       </button>
 
       <table className={style.resultTable}>
@@ -183,12 +137,13 @@ const VaccineResult = () => {
             <th>Ngày phản hồi</th>
             <th>Kết quả</th>
             <th>Ghi chú</th>
+            <th>Hành động</th>
           </tr>
         </thead>
         <tbody>
           {records.length === 0 && !loading ? (
             <tr>
-              <td colSpan="6" style={{ textAlign: "center", padding: "12px" }}>
+              <td colSpan="7" style={{ textAlign: "center" }}>
                 Không có dữ liệu
               </td>
             </tr>
@@ -203,13 +158,13 @@ const VaccineResult = () => {
                     ? new Date(r.consentDate).toLocaleDateString()
                     : ""}
                 </td>
-                {isEditable ? (
+                {editingIndex === index ? (
                   <>
                     <td>
                       <select
                         value={r.result || ""}
                         onChange={(e) =>
-                          handleResultChange(index, e.target.value)
+                          handleInputChange(index, "result", e.target.value)
                         }
                       >
                         <option value="">--Chọn--</option>
@@ -222,15 +177,47 @@ const VaccineResult = () => {
                         type="text"
                         value={r.followUpNote || ""}
                         onChange={(e) =>
-                          handleNoteChange(index, e.target.value)
+                          handleInputChange(
+                            index,
+                            "followUpNote",
+                            e.target.value
+                          )
                         }
                       />
+                    </td>
+                    <td>
+                      <button onClick={() => handleSave(index)}>Lưu</button>
                     </td>
                   </>
                 ) : (
                   <>
-                    <td>{r.result}</td>
-                    <td>{r.followUpNote}</td>
+                    <td>{r.result || "Chưa ghi nhận"}</td>
+                    <td>{r.followUpNote || ""}</td>
+                    <td>
+                      {r.result && (
+                        <button
+                          onClick={() => setViewingIndex(index)}
+                          className={style.detailBtn}
+                        >
+                          Xem chi tiết
+                        </button>
+                      )}
+                      {campaignStatus === "Đang diễn ra" &&
+                        (r.result ? (
+                          <button onClick={() => setEditingIndex(index)}>
+                            Chỉnh sửa
+                          </button>
+                        ) : (
+                          <button onClick={() => setEditingIndex(index)}>
+                            Ghi nhận
+                          </button>
+                        ))}
+                      {campaignStatus === "Đã hoàn thành" && r.result && (
+                        <button onClick={() => handleSendNotification(r)}>
+                          Gửi thông báo
+                        </button>
+                      )}
+                    </td>
                   </>
                 )}
               </tr>
@@ -238,6 +225,33 @@ const VaccineResult = () => {
           )}
         </tbody>
       </table>
+
+      {viewingIndex !== null && (
+        <div className={style.detailModal}>
+          <div className={style.modalContent}>
+            <h3>Chi tiết kết quả tiêm</h3>
+            <p>
+              <strong>Học sinh:</strong> {records[viewingIndex].studentName}
+            </p>
+            <p>
+              <strong>Phụ huynh:</strong> {records[viewingIndex].parentName}
+            </p>
+            <p>
+              <strong>Kết quả:</strong> {records[viewingIndex].result}
+            </p>
+            <p>
+              <strong>Ghi chú:</strong>{" "}
+              {records[viewingIndex].followUpNote || "Không có"}
+            </p>
+            <button
+              onClick={() => setViewingIndex(null)}
+              className={style.closeBtn}
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

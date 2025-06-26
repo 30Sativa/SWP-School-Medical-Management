@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import Modal from "../../components/Modal";
 import styles from "../../assets/css/HealthCheckDetail.module.css";
 
 const HealthCheckDetail = () => {
@@ -13,11 +14,13 @@ const HealthCheckDetail = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [healthCheckSummaries, setHealthCheckSummaries] = useState([]);
-  const [showSaveStudentId, setShowSaveStudentId] = useState(null); // Lưu studentId đang ghi nhận
-  const [editRecordId, setEditRecordId] = useState(null); // Lưu recordId đang chỉnh sửa
+  const [showModal, setShowModal] = useState(false); // Hiển thị modal
+  const [modalType, setModalType] = useState(''); // 'add' hoặc 'edit'
+  const [selectedStudent, setSelectedStudent] = useState(null); // Học sinh được chọn
+  const [selectedRecord, setSelectedRecord] = useState(null); // Record được chọn để edit
 
   // Hàm xử lý dữ liệu form khi submit
-  const handleFormSubmit = async (e, studentId) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const healthDetails = Object.fromEntries(formData.entries());
@@ -27,7 +30,7 @@ const HealthCheckDetail = () => {
 
     // Gửi dữ liệu đến API
     const dataToSubmit = {
-      studentId: studentId,
+      studentId: selectedStudent.studentId,
       campaignId: campaignId,
       bloodPressure: healthDetails.bloodPressure,
       heartRate: healthDetails.heartRate,
@@ -44,7 +47,7 @@ const HealthCheckDetail = () => {
       generalNote: healthDetails.overallHealth,
       followUpNote: healthDetails.recommendation,
       consentStatusId: 1, // Giả sử consentStatusId là 1 khi đồng ý
-      isActive: true
+      isActive: true,
     };
 
     console.log("Dữ liệu gửi đi: ", dataToSubmit); // Kiểm tra dữ liệu gửi đi
@@ -56,12 +59,16 @@ const HealthCheckDetail = () => {
       );
       console.log("Dữ liệu đã được lưu:", response.data);
       alert("Thông tin sức khỏe đã được ghi nhận!");
-      setShowSaveStudentId(null); // Đóng form sau khi lưu thành công
+      setShowModal(false); // Đóng modal sau khi lưu thành công
+      // Reload data
+      fetchData();
     } catch (error) {
       console.error("Lỗi khi gửi dữ liệu:", error);
       if (error.response) {
         console.error("Lỗi từ server:", error.response.data);
-        alert("Có lỗi xảy ra khi lưu thông tin: " + error.response.data.message);
+        alert(
+          "Có lỗi xảy ra khi lưu thông tin: " + error.response.data.message
+        );
       } else {
         alert("Có lỗi xảy ra khi gửi yêu cầu!");
       }
@@ -69,7 +76,7 @@ const HealthCheckDetail = () => {
   };
 
   // Hàm chỉnh sửa thông tin sức khỏe học sinh
-  const handleEditSubmit = async (e, recordId) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const healthDetails = Object.fromEntries(formData.entries());
@@ -91,17 +98,19 @@ const HealthCheckDetail = () => {
       generalNote: healthDetails.overallHealth,
       followUpNote: healthDetails.recommendation,
       consentStatusId: 1, // hoặc lấy từ form nếu cần
-      isActive: true
+      isActive: true,
     };
 
     try {
       const response = await axios.put(
-        `https://swp-school-medical-management.onrender.com/api/health-checks/summaries/${recordId}`,
+        `https://swp-school-medical-management.onrender.com/api/health-checks/summaries/${selectedRecord.recordId}`,
         dataToUpdate
       );
       console.log("Dữ liệu đã được cập nhật:", response.data);
       alert("Cập nhật thông tin sức khỏe thành công!");
-      // Có thể reload lại dữ liệu hoặc đóng form chỉnh sửa ở đây
+      setShowModal(false); // Đóng modal sau khi cập nhật thành công
+      // Reload data
+      fetchData();
     } catch (error) {
       console.error("Lỗi khi cập nhật dữ liệu:", error);
       if (error.response) {
@@ -112,33 +121,85 @@ const HealthCheckDetail = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchCampaignDetail = async () => {
-      try {
-        const campaignRes = await axios.get(
-          `https://swp-school-medical-management.onrender.com/api/HealthCheckCampaign/${campaignId}`
-        );
-        console.log("Campaign data:", campaignRes.data); // Kiểm tra dữ liệu chiến dịch
-        setCampaign(campaignRes.data.data); // Lưu chiến dịch
-        // Lấy danh sách học sinh tham gia chiến dịch
-        const studentsRes = await axios.get(
-          `https://swp-school-medical-management.onrender.com/api/student/`
-        );
-        setStudents(studentsRes.data.data || []);
-        // Lấy toàn bộ health check summaries
-        const summariesRes = await axios.get(
-          `https://swp-school-medical-management.onrender.com/api/health-checks/summaries`
-        );
-        setHealthCheckSummaries(summariesRes.data.data || []);
-      } catch (error) {
-        console.error("Lỗi khi gọi API:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const sendNotificationToAll = async () => {
+    if (!campaign) return;
+    try {
+      await Promise.all(
+        students.map(async (student) => {
+          if (!student.parentId) return;
+          await axios.post(
+            "https://swp-school-medical-management.onrender.com/api/Notification/send",
+            {
+              receiverId: student.parentId,
+              title: "Thông báo kiểm tra sức khỏe",
+              message: `Học sinh ${student.fullName} sẽ tham gia chiến dịch kiểm tra sức khỏe: ${campaign.title}.\nMô tả: ${campaign.description}.\nNgày kiểm tra: ${campaign.date}`,
+              typeId: 2,
+              isRead: false,
+            },
+            {
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+        })
+      );
+      alert("Đã gửi thông báo cho tất cả phụ huynh!");
+    } catch (error) {
+      console.error("Lỗi khi gửi thông báo hàng loạt:", error);
+      alert("Gửi thông báo thất bại. Vui lòng thử lại!");
+    }
+  };
 
-    fetchCampaignDetail();
+  const fetchData = async () => {
+    try {
+      const campaignRes = await axios.get(
+        `https://swp-school-medical-management.onrender.com/api/HealthCheckCampaign/${campaignId}`
+      );
+      console.log("Campaign data:", campaignRes.data); // Kiểm tra dữ liệu chiến dịch
+      setCampaign(campaignRes.data.data); // Lưu chiến dịch
+      // Lấy danh sách học sinh tham gia chiến dịch
+      const studentsRes = await axios.get(
+        `https://swp-school-medical-management.onrender.com/api/student/`
+      );
+      setStudents(studentsRes.data.data || []);
+      // Lấy toàn bộ health check summaries
+      const summariesRes = await axios.get(
+        `https://swp-school-medical-management.onrender.com/api/health-checks/summaries`
+      );
+      setHealthCheckSummaries(summariesRes.data.data || []);
+    } catch (error) {
+      console.error("Lỗi khi gọi API:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [campaignId]);
+
+  // Hàm mở modal để thêm mới
+  const openAddModal = (student) => {
+    setSelectedStudent(student);
+    setSelectedRecord(null);
+    setModalType('add');
+    setShowModal(true);
+  };
+
+  // Hàm mở modal để chỉnh sửa
+  const openEditModal = (student, record) => {
+    setSelectedStudent(student);
+    setSelectedRecord(record);
+    setModalType('edit');
+    setShowModal(true);
+  };
+
+  // Hàm đóng modal
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedStudent(null);
+    setSelectedRecord(null);
+    setModalType('');
+  };
 
   // Phân trang
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -185,6 +246,14 @@ const HealthCheckDetail = () => {
           <p>
             <strong>Trạng thái:</strong> {campaign.statusName}
           </p>
+          {campaign.statusName === "Chưa bắt đầu" && (
+            <button
+              onClick={sendNotificationToAll}
+              className={styles.notifyButton}
+            >
+              Gửi thông báo
+            </button>
+          )}
         </div>
       )}
 
@@ -223,261 +292,23 @@ const HealthCheckDetail = () => {
                           </Link>
                           {campaign &&
                             campaign.statusName === "Đang diễn ra" && (
-                              editRecordId === recordId ? (
-                                <form
-                                  className={styles.saveForm}
-                                  onSubmit={(e) => handleEditSubmit(e, recordId)}
-                                >
-                                  <label htmlFor="bloodPressure">Huyết áp:</label>
-                                  <input
-                                    type="number"
-                                    id="bloodPressure"
-                                    name="bloodPressure"
-                                    defaultValue={summary.bloodPressure}
-                                    required
-                                  />
-                                  <label htmlFor="heartRate">Nhịp tim:</label>
-                                  <input
-                                    type="number"
-                                    id="heartRate"
-                                    name="heartRate"
-                                    defaultValue={summary.heartRate}
-                                    required
-                                  />
-                                  <label htmlFor="height">Chiều cao (cm):</label>
-                                  <input
-                                    type="number"
-                                    id="height"
-                                    name="height"
-                                    defaultValue={summary.height}
-                                    required
-                                  />
-                                  <label htmlFor="weight">Cân nặng (kg):</label>
-                                  <input
-                                    type="number"
-                                    id="weight"
-                                    name="weight"
-                                    defaultValue={summary.weight}
-                                    required
-                                  />
-                                  <label htmlFor="bmi">BMI:</label>
-                                  <input
-                                    type="number"
-                                    id="bmi"
-                                    name="bmi"
-                                    defaultValue={summary.bmi}
-                                    required
-                                  />
-                                  <label htmlFor="vision">Mắt:</label>
-                                  <input
-                                    type="text"
-                                    id="vision"
-                                    name="vision"
-                                    defaultValue={summary.visionSummary}
-                                    required
-                                  />
-                                  <label htmlFor="ent">Tai-Mũi-Họng:</label>
-                                  <input
-                                    type="text"
-                                    id="ent"
-                                    name="ent"
-                                    defaultValue={summary.ent}
-                                    required
-                                  />
-                                  <label htmlFor="entNotes">Ghi chú TMH:</label>
-                                  <input
-                                    type="text"
-                                    id="entNotes"
-                                    name="entNotes"
-                                    defaultValue={summary.entNotes}
-                                  />
-                                  <label htmlFor="mouth">Miệng:</label>
-                                  <input
-                                    type="text"
-                                    id="mouth"
-                                    name="mouth"
-                                    defaultValue={summary.mouth}
-                                    required
-                                  />
-                                  <label htmlFor="teeth">Sâu răng:</label>
-                                  <input
-                                    type="text"
-                                    id="teeth"
-                                    name="teeth"
-                                    defaultValue={summary.toothDecay}
-                                  />
-                                  <label htmlFor="teethNotes">Ghi chú răng:</label>
-                                  <input
-                                    type="text"
-                                    id="teethNotes"
-                                    name="teethNotes"
-                                    defaultValue={summary.toothNotes}
-                                  />
-                                  <label htmlFor="overallHealth">Sức khỏe chung:</label>
-                                  <input
-                                    type="text"
-                                    id="overallHealth"
-                                    name="overallHealth"
-                                    defaultValue={summary.generalNote}
-                                    required
-                                  />
-                                  <label htmlFor="recommendation">Khuyến nghị:</label>
-                                  <input
-                                    type="text"
-                                    id="recommendation"
-                                    name="recommendation"
-                                    defaultValue={summary.followUpNote}
-                                  />
-                                  <button type="submit" className={styles.saveButton}>
-                                    Lưu chỉnh sửa
-                                  </button>
-                                  <button type="button" onClick={() => setEditRecordId(null)}>
-                                    Hủy
-                                  </button>
-                                </form>
-                              ) : (
-                                <button
-                                  className={styles.editButton}
-                                  onClick={() => setEditRecordId(recordId)}
-                                >
-                                  Chỉnh sửa
-                                </button>
-                              )
+                              <button
+                                className={styles.editButton}
+                                onClick={() => openEditModal(student, summary)}
+                              >
+                                Chỉnh sửa
+                              </button>
                             )}
                         </>
                       ) : (
                         campaign &&
                         campaign.statusName === "Đang diễn ra" && (
-                          <div>
-                            {showSaveStudentId === student.studentId ? (
-                              <form
-                                className={styles.saveForm}
-                                onSubmit={(e) => handleFormSubmit(e, student.studentId)}
-                              >
-                                <label htmlFor="bloodPressure">Huyết áp:</label>
-                                <input
-                                  type="number"
-                                  id="bloodPressure"
-                                  name="bloodPressure"
-                                  placeholder="Nhập huyết áp"
-                                  required
-                                />
-                                <label htmlFor="heartRate">Nhịp tim:</label>
-                                <input
-                                  type="number"
-                                  id="heartRate"
-                                  name="heartRate"
-                                  placeholder="Nhập nhịp tim"
-                                  required
-                                />
-                                <label htmlFor="height">Chiều cao (cm):</label>
-                                <input
-                                  type="number"
-                                  id="height"
-                                  name="height"
-                                  placeholder="Nhập chiều cao"
-                                  required
-                                />
-                                <label htmlFor="weight">Cân nặng (kg):</label>
-                                <input
-                                  type="number"
-                                  id="weight"
-                                  name="weight"
-                                  placeholder="Nhập cân nặng"
-                                  required
-                                />
-                                <label htmlFor="bmi">BMI:</label>
-                                <input
-                                  type="number"
-                                  id="bmi"
-                                  name="bmi"
-                                  placeholder="Nhập BMI"
-                                  required
-                                />
-                                <label htmlFor="vision">Mắt:</label>
-                                <input
-                                  type="text"
-                                  id="vision"
-                                  name="vision"
-                                  placeholder="Mắt"
-                                  required
-                                />
-                                <label htmlFor="ent">Tai-Mũi-Họng:</label>
-                                <input
-                                  type="text"
-                                  id="ent"
-                                  name="ent"
-                                  placeholder="Tai-Mũi-Họng"
-                                  required
-                                />
-                                <label htmlFor="entNotes">Ghi chú TMH:</label>
-                                <input
-                                  type="text"
-                                  id="entNotes"
-                                  name="entNotes"
-                                  placeholder="Ghi chú TMH"
-                                />
-                                <label htmlFor="mouth">Miệng:</label>
-                                <input
-                                  type="text"
-                                  id="mouth"
-                                  name="mouth"
-                                  placeholder="Miệng"
-                                  required
-                                />
-                                <label htmlFor="throat">Họng:</label>
-                                <input
-                                  type="text"
-                                  id="throat"
-                                  name="throat"
-                                  placeholder="Họng"
-                                  required
-                                />
-                                <label htmlFor="teeth">Sâu răng:</label>
-                                <input
-                                  type="text"
-                                  id="teeth"
-                                  name="teeth"
-                                  placeholder="Sâu răng"
-                                />
-                                <label htmlFor="teethNotes">Ghi chú răng:</label>
-                                <input
-                                  type="text"
-                                  id="teethNotes"
-                                  name="teethNotes"
-                                  placeholder="Ghi chú răng"
-                                />
-                                <label htmlFor="overallHealth">Sức khỏe chung:</label>
-                                <input
-                                  type="text"
-                                  id="overallHealth"
-                                  name="overallHealth"
-                                  placeholder="Sức khỏe chung"
-                                  required
-                                />
-                                <label htmlFor="recommendation">Khuyến nghị:</label>
-                                <input
-                                  type="text"
-                                  id="recommendation"
-                                  name="recommendation"
-                                  placeholder="Khuyến nghị"
-                                />
-                                <button type="submit" className={styles.saveButton}>
-                                  Lưu
-                                </button>
-                                <button type="button" onClick={() => setShowSaveStudentId(null)}>
-                                  Hủy
-                                </button>
-                              </form>
-                            ) : (
-                              <button
-                                className={styles.editButton}
-                                onClick={() => setShowSaveStudentId(student.studentId)}
-                              >
-                                Ghi nhận
-                              </button>
-                            )}
-                          </div>
+                          <button
+                            className={styles.editButton}
+                            onClick={() => openAddModal(student)}
+                          >
+                            Ghi nhận
+                          </button>
                         )
                       )}
                     </td>
@@ -506,6 +337,188 @@ const HealthCheckDetail = () => {
           </div>
         </>
       )}
+
+      {/* Modal Form */}
+      <Modal
+        isOpen={showModal}
+        onClose={closeModal}
+        title={modalType === 'add' ? 'Ghi nhận thông tin sức khỏe' : 'Chỉnh sửa thông tin sức khỏe'}
+      >
+        <form onSubmit={modalType === 'add' ? handleFormSubmit : handleEditSubmit} className={styles.modalForm}>
+          <div className={styles.formGroup}>
+            <label htmlFor="bloodPressure">Huyết áp:</label>
+            <input
+              type="number"
+              id="bloodPressure"
+              name="bloodPressure"
+              defaultValue={modalType === 'edit' ? selectedRecord?.bloodPressure : ''}
+              placeholder="Nhập huyết áp"
+              required
+            />
+          </div>
+          
+          <div className={styles.formGroup}>
+            <label htmlFor="heartRate">Nhịp tim:</label>
+            <input
+              type="number"
+              id="heartRate"
+              name="heartRate"
+              defaultValue={modalType === 'edit' ? selectedRecord?.heartRate : ''}
+              placeholder="Nhập nhịp tim"
+              required
+            />
+          </div>
+          
+          <div className={styles.formGroup}>
+            <label htmlFor="height">Chiều cao (cm):</label>
+            <input
+              type="number"
+              id="height"
+              name="height"
+              defaultValue={modalType === 'edit' ? selectedRecord?.height : ''}
+              placeholder="Nhập chiều cao"
+              required
+            />
+          </div>
+          
+          <div className={styles.formGroup}>
+            <label htmlFor="weight">Cân nặng (kg):</label>
+            <input
+              type="number"
+              id="weight"
+              name="weight"
+              defaultValue={modalType === 'edit' ? selectedRecord?.weight : ''}
+              placeholder="Nhập cân nặng"
+              required
+            />
+          </div>
+          
+          <div className={styles.formGroup}>
+            <label htmlFor="bmi">BMI:</label>
+            <input
+              type="number"
+              id="bmi"
+              name="bmi"
+              defaultValue={modalType === 'edit' ? selectedRecord?.bmi : ''}
+              placeholder="Nhập BMI"
+              required
+            />
+          </div>
+          
+          <div className={styles.formGroup}>
+            <label htmlFor="vision">Mắt:</label>
+            <input
+              type="text"
+              id="vision"
+              name="vision"
+              defaultValue={modalType === 'edit' ? selectedRecord?.visionSummary : ''}
+              placeholder="Mắt"
+              required
+            />
+          </div>
+          
+          <div className={styles.formGroup}>
+            <label htmlFor="ent">Tai-Mũi-Họng:</label>
+            <input
+              type="text"
+              id="ent"
+              name="ent"
+              defaultValue={modalType === 'edit' ? selectedRecord?.ent : ''}
+              placeholder="Tai-Mũi-Họng"
+              required
+            />
+          </div>
+          
+          <div className={styles.formGroup}>
+            <label htmlFor="entNotes">Ghi chú TMH:</label>
+            <input
+              type="text"
+              id="entNotes"
+              name="entNotes"
+              defaultValue={modalType === 'edit' ? selectedRecord?.entNotes : ''}
+              placeholder="Ghi chú TMH"
+            />
+          </div>
+          
+          <div className={styles.formGroup}>
+            <label htmlFor="mouth">Miệng:</label>
+            <input
+              type="text"
+              id="mouth"
+              name="mouth"
+              defaultValue={modalType === 'edit' ? selectedRecord?.mouth : ''}
+              placeholder="Miệng"
+              required
+            />
+          </div>
+          
+          <div className={styles.formGroup}>
+            <label htmlFor="throat">Họng:</label>
+            <input
+              type="text"
+              id="throat"
+              name="throat"
+              defaultValue={modalType === 'edit' ? selectedRecord?.throat : ''}
+              placeholder="Họng"
+              required
+            />
+          </div>
+          
+          <div className={styles.formGroup}>
+            <label htmlFor="teeth">Sâu răng:</label>
+            <input
+              type="text"
+              id="teeth"
+              name="teeth"
+              defaultValue={modalType === 'edit' ? selectedRecord?.toothDecay : ''}
+              placeholder="Sâu răng"
+            />
+          </div>
+          
+          <div className={styles.formGroup}>
+            <label htmlFor="teethNotes">Ghi chú răng:</label>
+            <input
+              type="text"
+              id="teethNotes"
+              name="teethNotes"
+              defaultValue={modalType === 'edit' ? selectedRecord?.toothNotes : ''}
+              placeholder="Ghi chú răng"
+            />
+          </div>
+          
+          <div className={styles.formGroup}>
+            <label htmlFor="overallHealth">Sức khỏe chung:</label>
+            <input
+              type="text"
+              id="overallHealth"
+              name="overallHealth"
+              defaultValue={modalType === 'edit' ? selectedRecord?.generalNote : ''}
+              placeholder="Sức khỏe chung"
+              required
+            />
+          </div>
+          
+          <div className={styles.formGroup}>
+            <label htmlFor="recommendation">Khuyến nghị:</label>
+            <input
+              type="text"
+              id="recommendation"
+              name="recommendation"
+              defaultValue={modalType === 'edit' ? selectedRecord?.followUpNote : ''}
+              placeholder="Khuyến nghị"
+            />
+          </div>
+          
+          <div className={styles.formActions}>
+            <button type="button" onClick={closeModal} className={styles.cancelButton}>
+              Hủy
+            </button>
+            <button type="submit" className={styles.saveButton}>
+              {modalType === 'add' ? 'Lưu' : 'Cập nhật'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

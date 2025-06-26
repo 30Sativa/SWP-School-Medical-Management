@@ -50,7 +50,8 @@
 
 .resultTable th {
   font-weight: 600;
-  color: #333;
+  color: white;
+  background-color: #20b2aa;
 }
 
 .resultTable td {
@@ -73,3 +74,56 @@
   box-shadow: 0 0 0 1px #20b2aa;
 }
 
+.detailModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modalContent {
+  background: #fff;
+  padding: 24px;
+  border-radius: 10px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.closeBtn {
+  margin-top: 20px;
+  padding: 8px 16px;
+  background: #d33;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.detailBtn {
+  margin-right: 8px;
+  background-color: #20b2aa;
+  color: white;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
