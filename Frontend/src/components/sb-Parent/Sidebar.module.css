@@ -47,6 +47,19 @@ nav {
   transition: background-color 0.2s ease;
   height: 48px;
 }
+.logoutButton {
+  background-color: #000 !important;
+  color: #fff !important;
+  border: none;
+  margin-top: 16px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.logoutButton:hover {
+  background-color: #333 !important;
+  cursor: pointer;
+}
 
 .navItem:hover {
   background-color: rgba(255, 255, 255, 0.12);
