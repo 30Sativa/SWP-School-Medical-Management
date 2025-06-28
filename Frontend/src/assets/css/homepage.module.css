@@ -101,12 +101,16 @@
 
 /* ===== Hero Section ===== */
 .hero {
+  position: relative;
+  min-height: 520px;
+  height: 520px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  background-color: #eaf8ff;
-  width: 100%;
-  align-items: stretch;
+  justify-content: flex-start;
+  background: #eaf8ff;
+  overflow: hidden;
+  border-radius: 0 0 32px 32px;
+  margin-bottom: 0;
 }
 
 .heroText {
@@ -135,39 +139,145 @@
   flex-wrap: wrap;
 }
 
+/* ===== Hero Background Slideshow ===== */
+.heroBgSlideshow {
+  position: absolute;
+  left: 0; top: 0; width: 100%; height: 100%;
+  z-index: 1;
+  overflow: hidden;
+}
+.heroBgImg {
+  position: absolute;
+  left: 0; top: 0; width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  opacity: 0;
+  transform: scale(1.01);
+  transition: opacity 0.7s cubic-bezier(.4,0,.2,1), transform 0.7s cubic-bezier(.4,0,.2,1);
+  pointer-events: none;
+  filter: brightness(0.88) saturate(1.08);
+  image-rendering: auto;
+}
+.activeBg {
+  opacity: 1 !important;
+  z-index: 2;
+  transform: scale(1);
+  pointer-events: auto;
+}
+.inactiveBg {
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.slideDotsBg {
+  position: absolute;
+  right: 32px;
+  bottom: 24px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+.heroTextOverlay {
+  position: relative;
+  z-index: 2;
+  padding: 60px 48px;
+  background: rgba(255,255,255,0.72);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px #00b89422, 0 2px 8px #00b89411;
+  max-width: 600px;
+  margin-left: 48px;
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+@media (max-width: 900px) {
+  .hero {
+    min-height: 320px;
+    height: 320px;
+  }
+  .heroTextOverlay {
+    padding: 32px 16px;
+    margin-left: 8px;
+    margin-top: 12px;
+    max-width: 98vw;
+  }
+  .slideDotsBg {
+    right: 12px;
+    bottom: 10px;
+  }
+}
+@media (max-width: 600px) {
+  .hero {
+    min-height: 180px;
+    height: 180px;
+    border-radius: 0 0 16px 16px;
+  }
+  .heroTextOverlay {
+    padding: 12px 4px;
+    margin-left: 0;
+    margin-top: 4px;
+    border-radius: 10px;
+  }
+}
+
+/* ===== Hero Slideshow ===== */
 .heroImage {
   flex: 0 0 40%;
-  height: auto;
+  height: 340px;
+  min-width: 320px;
+  max-width: 520px;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 24px;
+  box-shadow: 0 8px 32px #00b89422, 0 2px 8px #00b89411;
+  background: #eaf8ff;
 }
-
-.heroImage img {
-  width: 100%;
-  height: 100%;
+.heroSlideImg {
+  position: absolute;
+  left: 0; top: 0; width: 100%; height: 100%;
   object-fit: cover;
-  display: block;
+  opacity: 0;
+  transform: scale(1.08);
+  transition: opacity 0.7s cubic-bezier(.4,0,.2,1), transform 0.7s cubic-bezier(.4,0,.2,1);
+  pointer-events: none;
 }
-
-.primaryBtn,
-.outlineBtn {
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: 500;
+.activeSlide {
+  opacity: 1 !important;
+  z-index: 2;
+  transform: scale(1);
+  pointer-events: auto;
+}
+.inactiveSlide {
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.slideDots {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+.dot, .dotActive {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #b2dfdb;
   cursor: pointer;
-  transition: 0.3s ease;
-  font-size: 15px;
+  transition: background 0.3s, transform 0.2s;
+  border: 2px solid #fff;
 }
-
-.primaryBtn {
-  background-color: #00b894;
-  color: white;
-  border: none;
-}
-
-.outlineBtn {
-  background: white;
-  border: 2px solid #00b894;
-  color: #00b894;
+.dotActive {
+  background: #00b894;
+  transform: scale(1.2);
+  box-shadow: 0 0 0 2px #00b89444;
 }
 
 /* ===== Features Section ===== */
@@ -385,6 +495,173 @@
   padding-top: 15px;
   color: #a4b0be;
 }
+
+/* ===== Animation & Transition ===== */
+.sectionVisible {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: opacity 0.8s cubic-bezier(.4,0,.2,1), transform 0.8s cubic-bezier(.4,0,.2,1);
+}
+
+.fadeInUp {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s, transform 0.8s;
+}
+.sectionVisible .fadeInUp, .sectionVisible.fadeInUp {
+  opacity: 1;
+  transform: none;
+}
+
+.fadeInDown {
+  opacity: 0;
+  transform: translateY(-40px);
+  transition: opacity 0.8s, transform 0.8s;
+}
+.sectionVisible .fadeInDown, .sectionVisible.fadeInDown {
+  opacity: 1;
+  transform: none;
+}
+
+.cardSlideUp {
+  opacity: 0;
+  transform: translateY(60px) scale(0.98);
+  transition: opacity 0.7s, transform 0.7s;
+}
+.sectionVisible .cardSlideUp, .sectionVisible.cardSlideUp {
+  opacity: 1;
+  transform: none;
+}
+
+/* Navbar underline effect */
+.navLink {
+  position: relative;
+  transition: color 0.3s;
+}
+.navLink:after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -2px;
+  height: 2px;
+  background: linear-gradient(90deg, #00b894, #00bfa5);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transition: transform 0.3s;
+}
+.navLink:hover:after {
+  transform: scaleX(1);
+}
+
+/* Nút login nhún nhẹ */
+.loginBtn {
+  transition: background 0.3s, transform 0.2s;
+}
+.loginBtn:active {
+  transform: scale(0.95);
+}
+
+/* Hero parallax */
+.parallaxImg {
+  will-change: transform;
+  transition: transform 0.7s cubic-bezier(.4,0,.2,1);
+  animation: floatY 3.5s ease-in-out infinite alternate;
+}
+@keyframes floatY {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-18px); }
+}
+
+/* Nút động */
+.btnPulse {
+  animation: pulseBtn 1.5s infinite;
+}
+@keyframes pulseBtn {
+  0% { box-shadow: 0 0 0 0 #00b89455; }
+  70% { box-shadow: 0 0 0 10px #00b89400; }
+  100% { box-shadow: 0 0 0 0 #00b89400; }
+}
+
+/* Nút shine */
+.btnShine {
+  position: relative;
+  overflow: hidden;
+}
+.btnShine:after {
+  content: '';
+  position: absolute;
+  left: -75%; top: 0; width: 50%; height: 100%;
+  background: linear-gradient(120deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.7) 100%);
+  transform: skewX(-20deg);
+  transition: left 0.5s;
+}
+.btnShine:hover:after {
+  left: 120%;
+}
+
+/* Box hover nổi lên */
+.boxHover {
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+.boxHover:hover {
+  box-shadow: 0 8px 32px #00b89422, 0 2px 8px #00b89411;
+  transform: translateY(-8px) scale(1.03);
+  z-index: 2;
+}
+
+/* Card hover nổi lên */
+.cardHover {
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+.cardHover:hover {
+  box-shadow: 0 8px 32px #00b89422, 0 2px 8px #00b89411;
+  transform: translateY(-8px) scale(1.03);
+  z-index: 2;
+}
+
+/* Icon lắc nhẹ khi hover */
+.iconAnim {
+  transition: transform 0.3s;
+}
+.boxHover:hover .iconAnim {
+  animation: shakeIcon 0.5s;
+}
+@keyframes shakeIcon {
+  0% { transform: rotate(0); }
+  20% { transform: rotate(-10deg); }
+  40% { transform: rotate(10deg); }
+  60% { transform: rotate(-6deg); }
+  80% { transform: rotate(6deg); }
+  100% { transform: rotate(0); }
+}
+
+/* Feedback card nổi lên khi hover */
+.feedbackCard {
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+.feedbackCard:hover {
+  box-shadow: 0 8px 32px #00b89422, 0 2px 8px #00b89411;
+  transform: translateY(-8px) scale(1.03);
+}
+
+/* CTA section hiệu ứng sóng nhẹ */
+.cta {
+  position: relative;
+  overflow: hidden;
+}
+.cta:before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 0; height: 100%;
+  background: repeating-linear-gradient(120deg, #eaf8ff 0 2px, #f1faff 2px 8px);
+  opacity: 0.2;
+  z-index: 0;
+  animation: waveMove 6s linear infinite alternate;
+}
+@keyframes waveMove {
+  0% { background-position: 0 0; }
+  100% { background-position: 80px 40px; }
+}
+.cta > * { position: relative; z-index: 1; }
 
 /* ===== Responsive Adjustments ===== */
 @media (max-width: 768px) {
