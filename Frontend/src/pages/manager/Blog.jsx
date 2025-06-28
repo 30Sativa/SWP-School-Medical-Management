@@ -20,11 +20,21 @@ const Blog = () => {
   const fetchBlogs = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(apiUrl);
-      setBlogs(res.data.filter(blog => blog.isActive !== false));
-    } catch {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(apiUrl, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const blogsData = Array.isArray(res.data) ? res.data : res.data?.data || [];
+      setBlogs(blogsData.filter(blog => blog.isActive !== false));
+    } catch (err) {
       message.error("Không thể tải danh sách blog!");
       setBlogs([]);
+      // Log lỗi chi tiết để debug
+      if (err && err.response) {
+        console.error("Blog fetch error:", err.response.status, err.response.data);
+      } else {
+        console.error("Blog fetch error:", err);
+      }
     } finally {
       setLoading(false);
     }

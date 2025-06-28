@@ -57,6 +57,7 @@ const SendNotifications = () => {
       .then(data => {
         if (Array.isArray(data)) setCategories(data);
         else if (Array.isArray(data.data)) setCategories(data.data);
+        else if (Array.isArray(data.items)) setCategories(data.items);
         else setCategories([]);
       })
       .catch(() => setCategories([]));
@@ -75,6 +76,7 @@ const SendNotifications = () => {
       .then(data => {
         if (Array.isArray(data)) setAllNotifications(data);
         else if (Array.isArray(data.items)) setAllNotifications(data.items);
+        else if (Array.isArray(data.data)) setAllNotifications(data.data);
         else setAllNotifications([]);
         setTotalPages(1); // chỉ 1 trang khi lọc client
       })
@@ -129,6 +131,7 @@ const SendNotifications = () => {
       .then(data => {
         if (Array.isArray(data)) setParents(data);
         else if (Array.isArray(data.data)) setParents(data.data);
+        else if (Array.isArray(data.items)) setParents(data.items);
         else setParents([]);
       })
       .catch(() => setParents([]));

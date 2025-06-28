@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/sb-Manager/Sidebar";
-import "../../assets/css/ManagerDashboard.css";
+import styles from "../../assets/css/ManagerDashboard.module.css";
 import {
   HeartOutlined,
   TeamOutlined,
@@ -44,88 +44,88 @@ const ManagerDashboard = () => {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
-    <div className="manager-dashboard">
+    <div className={styles.managerDashboard}>
       {/* Sidebar */}
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
       {/* Main content */}
-      <div className="main-content">
+      <div className={styles.mainContent}>
         {/* Header */}
         <header>
-          <div className="dashboard-header-bar">
-            <div className="title-group">
-              <h1>
-                <span className="text-accent">|</span>
-                <span className="text-black">Dashboard</span>
-                <h5 className="text-welcome">Chào mừng trở lại!</h5>
+          <div className={styles.dashboardHeaderBar}>
+            <div className={styles.titleGroup}>
+              <h1 className={styles.titleGroupH1}>
+                <span className={styles.textAccent}>|</span>
+                <span className={styles.textBlack}>Dashboard</span>
+                <span className={styles.textWelcome}>Chào mừng trở lại!</span>
               </h1>
             </div>
           </div>
         </header>
 
         {/* Stats cards */}
-        <section className="stats-cards">
+        <section className={styles.statsCards}>
           {loading ? (
             <div>Đang tải dữ liệu...</div>
           ) : (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 24, justifyContent: 'space-between', width: '100%' }}>
-              <div className="stat-card" style={{ background: "#e0f7fa", flex: 1, minWidth: 180, maxWidth: 240, marginRight: 0 }}>
-                <div className="stat-icon">
+            <>
+              <div className={styles.statCard} style={{ background: "#e0f7fa" }}>
+                <div className={styles.statIcon}>
                   <TeamOutlined style={{ fontSize: 32, color: "#06b6d4" }} />
                 </div>
-                <div className="stat-title">Tổng học sinh</div>
-                <div className="stat-value">
+                <div className={styles.statTitle}>Tổng học sinh</div>
+                <div className={styles.statValue}>
                   {overview?.data?.totalStudents ?? 0}
                 </div>
               </div>
-              <div className="stat-card" style={{ background: "#f3e8ff", flex: 1, minWidth: 180, maxWidth: 240, marginRight: 0 }}>
-                <div className="stat-icon">
+              <div className={styles.statCard} style={{ background: "#f3e8ff" }}>
+                <div className={styles.statIcon}>
                   <ProfileOutlined style={{ fontSize: 32, color: "#a21caf" }} />
                 </div>
-                <div className="stat-title">Admin</div>
-                <div className="stat-value">
+                <div className={styles.statTitle}>Admin</div>
+                <div className={styles.statValue}>
                   {overview?.data?.totalUsers?.admin ?? 0}
                 </div>
               </div>
-              <div className="stat-card" style={{ background: "#d1fae5", flex: 1, minWidth: 180, maxWidth: 240, marginRight: 0 }}>
-                <div className="stat-icon">
+              <div className={styles.statCard} style={{ background: "#d1fae5" }}>
+                <div className={styles.statIcon}>
                   <HeartOutlined style={{ fontSize: 32, color: "#059669" }} />
                 </div>
-                <div className="stat-title">Nurse</div>
-                <div className="stat-value">
+                <div className={styles.statTitle}>Nurse</div>
+                <div className={styles.statValue}>
                   {overview?.data?.totalUsers?.nurse ?? 0}
                 </div>
               </div>
-              <div className="stat-card" style={{ background: "#fef9c3", flex: 1, minWidth: 180, maxWidth: 240 }}>
-                <div className="stat-icon">
+              <div className={styles.statCard} style={{ background: "#fef9c3" }}>
+                <div className={styles.statIcon}>
                   <TeamOutlined style={{ fontSize: 32, color: "#eab308" }} />
                 </div>
-                <div className="stat-title">Parent</div>
-                <div className="stat-value">
+                <div className={styles.statTitle}>Parent</div>
+                <div className={styles.statValue}>
                   {overview?.data?.totalUsers?.parent ?? 0}
                 </div>
               </div>
-            </div>
+            </>
           )}
         </section>
 
         {/* Thông báo mới */}
-        <section className="card-requests" style={{ marginTop: 32 }}>
-          <div className="request-header">
+        <section className={styles.cardRequests}>
+          <div className={styles.requestHeader}>
             <h2>Thông báo mới</h2>
           </div>
-          <ul className="incident-list-ui">
+          <ul className={styles.incidentListUi}>
             {notifications.length === 0 && !loading && (
-              <li className="incident-card">
-                <div className="incident-content">Không có thông báo mới</div>
+              <li className={styles.incidentCard}>
+                <div className={styles.incidentContent}>Không có thông báo mới</div>
               </li>
             )}
             {notifications.map((note, idx) => (
-              <li className="incident-card" key={idx}>
-                <div className="incident-content">
-                  <strong>{note.title}</strong>
-                  <p>{note.description}</p>
-                  <span className="incident-time">{note.time}</span>
+              <li className={styles.incidentCard} key={idx}>
+                <div className={styles.incidentContent}>
+                  <strong className={styles.incidentContentStrong}>{note.title}</strong>
+                  <p className={styles.incidentContentP}>{note.description}</p>
+                  <span className={styles.incidentTime}>{note.time}</span>
                 </div>
               </li>
             ))}

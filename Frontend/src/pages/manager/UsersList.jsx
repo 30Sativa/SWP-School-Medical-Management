@@ -33,12 +33,19 @@ const UsersList = () => {
           Authorization: `Bearer ${token}`,
         },
       });
+      // Nếu API trả về { data: [...] } thì lấy response.data.data
+      const userArr = Array.isArray(response.data)
+        ? response.data
+        : Array.isArray(response.data.data)
+        ? response.data.data
+        : [];
       // Lọc bỏ user đã bị soft delete (isActive === false)
-      const activeUsers = response.data.filter((u) => u.isActive !== false);
+      const activeUsers = userArr.filter((u) => u.isActive !== false);
       setUsers(activeUsers);
       setLoading(false);
-    } catch {
+    } catch (err) {
       message.error("Failed to fetch users");
+      console.error("Fetch users error:", err, err?.response?.data);
       setLoading(false);
     }
   };
