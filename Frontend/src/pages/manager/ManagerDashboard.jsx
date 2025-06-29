@@ -57,7 +57,7 @@ const ManagerDashboard = () => {
               <h1 className={styles.titleGroupH1}>
                 <span className={styles.textAccent}>|</span>
                 <span className={styles.textBlack}>Dashboard</span>
-                <span className={styles.textWelcome}>Chào mừng trở lại!</span>
+                
               </h1>
             </div>
           </div>

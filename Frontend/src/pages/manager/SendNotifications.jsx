@@ -64,10 +64,9 @@ const SendNotifications = () => {
   }, []);
 
   // Fetch tất cả notification 1 lần (không phân trang, không search)
-  useEffect(() => {
+  const fetchAllNotifications = () => {
     const token = localStorage.getItem("token");
-    let url = `${API_BASE}/Notification`;
-    fetch(url, {
+    fetch(`${API_BASE}/Notification`, {
       headers: {
         "Authorization": token ? `Bearer ${token}` : undefined
       }
@@ -78,14 +77,19 @@ const SendNotifications = () => {
         else if (Array.isArray(data.items)) setAllNotifications(data.items);
         else if (Array.isArray(data.data)) setAllNotifications(data.data);
         else setAllNotifications([]);
-        setTotalPages(1); // chỉ 1 trang khi lọc client
+        setTotalPages(1);
       })
       .catch(() => setAllNotifications([]));
+  };
+
+  useEffect(() => {
+    fetchAllNotifications();
   }, []);
 
   // Lọc client khi search/category thay đổi
   useEffect(() => {
-    let filtered = allNotifications;
+    const safeNotifications = Array.isArray(allNotifications) ? allNotifications : [];
+    let filtered = safeNotifications;
     if (selectedCategory) {
       filtered = filtered.filter(n => n.typeId === selectedCategory);
     }
@@ -195,14 +199,7 @@ const SendNotifications = () => {
       });
       setShowDeleteModal(false);
       setDeleteId(null);
-      // reload danh sách: chỉ setAllNotifications, KHÔNG setNotifications
-      fetch(`${API_BASE}/Notification`, {
-        headers: {
-          "Authorization": token ? `Bearer ${token}` : undefined
-        }
-      })
-        .then(res => res.json())
-        .then(data => setAllNotifications(data.items || data));
+      fetchAllNotifications(); // reload danh sách sau khi xóa
     } catch {}
   };
 
@@ -456,7 +453,7 @@ const SendNotifications = () => {
             <Pagination
               current={page}
               pageSize={pageSize}
-              total={allNotifications.filter(n => {
+              total={(Array.isArray(allNotifications) ? allNotifications : []).filter(n => {
                 if (selectedCategory && n.typeId !== selectedCategory) return false;
                 if (search.trim()) {
                   const s = search.trim().toLowerCase();
