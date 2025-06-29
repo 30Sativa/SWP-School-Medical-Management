@@ -90,7 +90,7 @@ const Homepage = () => {
           <img src={logo} alt="EduHealth Logo" className={style.logoImg} />
         </div>
         <nav className={style.navLinks}>
-          <a href="#" className={style.navLink}>Trang chủ</a>
+          <a href="#" className={style.navLink} onClick={() => navigate("/")} >Trang chủ</a>
           <a href="#" className={style.navLink}>Giới thiệu</a>
           <a href="#" className={style.navLink}>Dịch vụ</a>
           <a href="#" className={style.navLink}>Liên hệ</a>
@@ -128,7 +128,7 @@ const Homepage = () => {
           </h1>
           <p className={style.fadeInUp}>Kết nối phụ huynh, nhà trường và đội ngũ y tế...</p>
           <div className={style.heroButtons}>
-            <button className={style.primaryBtn + ' ' + style.btnPulse}>Tìm hiểu thêm </button>
+            <button className={style.primaryBtn + ' ' + style.btnPulse} onClick={() => navigate("/login")}>Tìm hiểu thêm </button>
           </div>
         </div>
       </section>
@@ -202,8 +202,8 @@ const Homepage = () => {
         <h2 className={style.fadeInUp}>Sẵn sàng nâng cao chất lượng?</h2>
         <p>Đăng ký ngay để trải nghiệm hệ thống quản lý sức khỏe học đường.</p>
         <div className={style.ctaButtons}>
-          <button className={style.primaryBtn + ' ' + style.btnPulse}>Đăng ký trải nghiệm</button>
-          <button className={style.outlineBtn + ' ' + style.btnPulse}>Tìm hiểu thêm</button>
+          <button className={style.primaryBtn + ' ' + style.btnPulse} onClick={() => navigate("/login")}>Đăng ký trải nghiệm</button>
+          <button className={style.outlineBtn + ' ' + style.btnPulse} onClick={() => navigate("/login")}>Tìm hiểu thêm</button>
         </div>
       </section>
 
