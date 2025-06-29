@@ -116,7 +116,17 @@ namespace SchoolMedicalManagement.Repository.Repository
             return Task.FromResult<MedicationRequest?>(null);
         }
 
-
+        // ✅ Lấy danh sách đơn thuốc theo Id trạng thái
+        public async Task<List<MedicationRequest>> GetRequestsByStatusIdAsync(int statusId)
+        {
+            return await _context.MedicationRequests
+                .Where(r => r.StatusId == statusId && r.IsActive == true)
+                .Include(r => r.Student)  // nếu bạn cần thông tin học sinh
+                .Include(r => r.Status)   // nếu bạn cần thông tin trạng thái
+                .Include(r => r.Parent)   // thêm thông tin phụ huynh
+                .Include(r => r.ReceivedByNavigation)
+                .ToListAsync();
+        }
 
     }
 }

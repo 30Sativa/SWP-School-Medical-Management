@@ -165,5 +165,13 @@ namespace School_Medical_Management.API.Controllers
             var response = await _medicationRequestService.UpdateMedicationRequestStatusAsync(requestId, dto);
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
+
+        // ✅ Lấy danh sách đơn thuốc theo Id trạng thái
+        [HttpGet("status/{statusId}")]
+        public async Task<IActionResult> GetRequestsByStatusId(int statusId)
+        {
+            var response = await _medicationRequestService.GetRequestsByStatusIdAsync(statusId);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
     }
 }

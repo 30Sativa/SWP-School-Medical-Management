@@ -252,5 +252,30 @@ namespace SchoolMedicalManagement.Service.Implement
                 Data = null
             };
         }
+
+        // ✅ Lấy danh sách đơn thuốc theo Id trạng thái
+        public async Task<BaseResponse> GetRequestsByStatusIdAsync(int statusId)
+        {
+            var list = await _medicationRequestRepository.GetRequestsByStatusIdAsync(statusId);
+            var data = list.Select(r => new MedicationRequestResponse
+            {
+                RequestID = r.RequestId,
+                StudentName = r.Student?.FullName ?? "Unknown",
+                ParentName = r.Parent?.FullName ?? "Unknown",
+                MedicationName = r.MedicationName,
+                Dosage = r.Dosage,
+                Instructions = r.Instructions,
+                Status = r.Status?.StatusId == 1 ? "Chờ duyệt" : (r.Status?.StatusId == 2 ? "Đã duyệt" : "Từ chối"),
+                ImagePath = r.ImagePath,
+                ReceivedByName = r.ReceivedByNavigation?.FullName,
+                RequestDate = r.RequestDate
+            }).ToList();
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách đơn thuốc theo trạng thái thành công.",
+                Data = data
+            };
+        }
     }
 }
