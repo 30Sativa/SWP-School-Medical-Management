@@ -13,6 +13,7 @@ const ManagerDashboard = () => {
   const [overview, setOverview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
@@ -39,6 +40,23 @@ const ManagerDashboard = () => {
       setLoading(false);
     };
     fetchData();
+
+    // Fetch parent feedback
+    const fetchFeedbacks = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch("/api/ParentFeedback", {
+          headers: { "Authorization": token ? `Bearer ${token}` : undefined },
+        });
+        const data = await res.json();
+        if (Array.isArray(data)) setFeedbacks(data);
+        else if (Array.isArray(data.data)) setFeedbacks(data.data);
+        else setFeedbacks([]);
+      } catch {
+        setFeedbacks([]);
+      }
+    };
+    fetchFeedbacks();
   }, []);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -109,23 +127,23 @@ const ManagerDashboard = () => {
           )}
         </section>
 
-        {/* Thông báo mới */}
+        {/* Thông báo mới (hiển thị feedback phụ huynh) */}
         <section className={styles.cardRequests}>
           <div className={styles.requestHeader}>
-            <h2>Thông báo mới</h2>
+            <h2>Phản hồi phụ huynh</h2>
           </div>
           <ul className={styles.incidentListUi}>
-            {notifications.length === 0 && !loading && (
+            {feedbacks.length === 0 && !loading && (
               <li className={styles.incidentCard}>
-                <div className={styles.incidentContent}>Không có thông báo mới</div>
+                <div className={styles.incidentContent}>Không có phản hồi nào</div>
               </li>
             )}
-            {notifications.map((note, idx) => (
-              <li className={styles.incidentCard} key={idx}>
+            {feedbacks.slice(0, 5).map((fb, idx) => (
+              <li className={styles.incidentCard} key={fb.feedbackId || idx}>
                 <div className={styles.incidentContent}>
-                  <strong className={styles.incidentContentStrong}>{note.title}</strong>
-                  <p className={styles.incidentContentP}>{note.description}</p>
-                  <span className={styles.incidentTime}>{note.time}</span>
+                  <strong className={styles.incidentContentStrong}>{fb.parentName}</strong>
+                  <p className={styles.incidentContentP}>{fb.content}</p>
+                  <span className={styles.incidentTime}>{fb.createdAt ? new Date(fb.createdAt).toLocaleString() : ""}</span>
                 </div>
               </li>
             ))}
