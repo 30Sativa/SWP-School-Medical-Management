@@ -1,7 +1,6 @@
 // Homepage.jsx - đã sửa dùng module CSS
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import style from "../../assets/css/homepage.module.css";
-import minhhoa from "../../assets/img/homepage.jpg";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/icon/eduhealth.jpg";
 import parLogo from "../../assets/icon/Background.png";
@@ -15,9 +14,48 @@ import reportLogo from "../../assets/icon/report.png";
 import notifyLogo from "../../assets/icon/notify.png";
 import vacxinLogo from "../../assets/icon/vacxin.png";
 import feedback from "../../assets/icon/feedback.png";
+import school1 from "../../assets/img/school1.jpg";
+import school2 from "../../assets/img/school2.jpg";
+import school3 from "../../assets/img/school3.jpg";
 
 const Homepage = () => {
   const navigate = useNavigate();
+  const heroRef = useRef();
+  const featuresRef = useRef();
+  const rolesRef = useRef();
+  const feedbackRef = useRef();
+  const ctaRef = useRef();
+  const [slideIdx, setSlideIdx] = React.useState(0);
+  const heroImages = [school1, school2, school3];
+
+  // Hiệu ứng xuất hiện khi cuộn
+  useEffect(() => {
+    const reveal = (ref, className = style.sectionVisible) => {
+      if (!ref.current) return;
+      const onScroll = () => {
+        const rect = ref.current.getBoundingClientRect();
+        if (rect.top < window.innerHeight - 100) {
+          ref.current.classList.add(className);
+        }
+      };
+      window.addEventListener("scroll", onScroll);
+      onScroll();
+      return () => window.removeEventListener("scroll", onScroll);
+    };
+    reveal(heroRef);
+    reveal(featuresRef);
+    reveal(rolesRef);
+    reveal(feedbackRef);
+    reveal(ctaRef);
+  }, []);
+
+  // Tự động chuyển slide mỗi 4s
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSlideIdx((idx) => (idx + 1) % heroImages.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [heroImages.length]);
 
   useEffect(() => {
     if (!window.chatbase || window.chatbase("getState") !== "initialized") {
@@ -52,51 +90,71 @@ const Homepage = () => {
           <img src={logo} alt="EduHealth Logo" className={style.logoImg} />
         </div>
         <nav className={style.navLinks}>
-          <a href="#">Trang chủ</a>
-          <a href="#">Giới thiệu</a>
-          <a href="#">Dịch vụ</a>
-          <a href="#">Liên hệ</a>
+          <a href="#" className={style.navLink} onClick={() => navigate("/")} >Trang chủ</a>
+          <a href="#" className={style.navLink}>Giới thiệu</a>
+          <a href="#" className={style.navLink}>Dịch vụ</a>
+          <a href="#" className={style.navLink}>Liên hệ</a>
           <button className={style.loginBtn} onClick={() => navigate("/login")}>Đăng nhập</button>
         </nav>
       </header>
 
-      <section className={style.hero}>
-        <div className={style.heroText}>
-          <h1>
+      <section className={style.hero} ref={heroRef}>
+        <div className={style.heroBgSlideshow}>
+          {heroImages.map((img, idx) => (
+            <img
+              key={idx}
+              src={img}
+              alt={`slide-${idx+1}`}
+              className={
+                style.heroBgImg +
+                (idx === slideIdx ? ' ' + style.activeBg : ' ' + style.inactiveBg)
+              }
+              style={{ zIndex: idx === slideIdx ? 2 : 1 }}
+            />
+          ))}
+          <div className={style.slideDotsBg}>
+            {heroImages.map((_, idx) => (
+              <span
+                key={idx}
+                className={idx === slideIdx ? style.dotActive : style.dot}
+                onClick={() => setSlideIdx(idx)}
+              />
+            ))}
+          </div>
+        </div>
+        <div className={style.heroTextOverlay}>
+          <h1 className={style.fadeInDown}>
             Hệ thống quản lý <span className={style.highlight}>sức khỏe học đường</span>
           </h1>
-          <p>Kết nối phụ huynh, nhà trường và đội ngũ y tế...</p>
+          <p className={style.fadeInUp}>Kết nối phụ huynh, nhà trường và đội ngũ y tế...</p>
           <div className={style.heroButtons}>
-            <button className={style.primaryBtn}>Tìm hiểu thêm </button>
+            <button className={style.primaryBtn + ' ' + style.btnPulse} onClick={() => navigate("/login")}>Tìm hiểu thêm </button>
           </div>
-        </div>
-        <div className={style.heroImage}>
-          <img src={minhhoa} alt="Minh họa" />
         </div>
       </section>
 
-      <section className={style.features}>
-        <h2>Tính năng nổi bật</h2>
-        <p className={style.description}>EduHealth cung cấp những tính năng đầy đủ...</p>
+      <section className={style.features} ref={featuresRef}>
+        <h2 className={style.fadeInUp}>Tính năng nổi bật</h2>
+        <p className={style.description + ' ' + style.fadeInUp}>EduHealth cung cấp những tính năng đầy đủ...</p>
         <div className={style.featureRows}>
           <div className={style.featureRow}>
-            <div className={style.featureBox}><img src={overlayLogo} alt="" /><h3>Quản lý thuốc</h3><p>Theo dõi đơn thuốc...</p></div>
-            <div className={style.featureBox}><img src={vacxinLogo} alt="" /><h3>Tiêm chủng</h3><p>Quản lý chiến dịch...</p></div>
-            <div className={style.featureBox}><img src={healthLogo} alt="" /><h3>Khám sức khỏe</h3><p>Quản lý chỉ số...</p></div>
+            <div className={style.featureBox + ' ' + style.boxHover}><img src={overlayLogo} alt="" className={style.iconAnim}/><h3>Quản lý thuốc</h3><p>Theo dõi đơn thuốc...</p></div>
+            <div className={style.featureBox + ' ' + style.boxHover}><img src={vacxinLogo} alt="" className={style.iconAnim}/><h3>Tiêm chủng</h3><p>Quản lý chiến dịch...</p></div>
+            <div className={style.featureBox + ' ' + style.boxHover}><img src={healthLogo} alt="" className={style.iconAnim}/><h3>Khám sức khỏe</h3><p>Quản lý chỉ số...</p></div>
           </div>
           <div className={style.featureRow}>
-            <div className={style.featureBox}><img src={reportLogo} alt="" /><h3>Hồ sơ sức khỏe</h3><p>Ghi nhận và theo dõi...</p></div>
-            <div className={style.featureBox}><img src={notifyLogo} alt="" /><h3>Thông báo</h3><p>Thông tin tức thì</p></div>
-            <div className={style.featureBox}><img src={statisticLogo} alt="" /><h3>Báo cáo</h3><p>Xuất báo cáo theo lớp...</p></div>
+            <div className={style.featureBox + ' ' + style.boxHover}><img src={reportLogo} alt="" className={style.iconAnim}/><h3>Hồ sơ sức khỏe</h3><p>Ghi nhận và theo dõi...</p></div>
+            <div className={style.featureBox + ' ' + style.boxHover}><img src={notifyLogo} alt="" className={style.iconAnim}/><h3>Thông báo</h3><p>Thông tin tức thì</p></div>
+            <div className={style.featureBox + ' ' + style.boxHover}><img src={statisticLogo} alt="" className={style.iconAnim}/><h3>Báo cáo</h3><p>Xuất báo cáo theo lớp...</p></div>
           </div>
         </div>
       </section>
 
-      <section className={style.roles}>
-        <h2>Dành cho mọi đối tượng</h2>
-        <p className={style.description}>EduHealth được thiết kế...</p>
+      <section className={style.roles} ref={rolesRef}>
+        <h2 className={style.fadeInUp}>Dành cho mọi đối tượng</h2>
+        <p className={style.description + ' ' + style.fadeInUp}>EduHealth được thiết kế...</p>
         <div className={style.roleRow}>
-          <div className={`${style.roleCard} ${style.parent}`}>
+          <div className={style.roleCard + ' ' + style.cardHover + ' ' + style.parent}>
             <img src={parLogo} alt="" />
             <h3>Phụ huynh</h3>
             <ul>
@@ -104,10 +162,10 @@ const Homepage = () => {
               <li><img src={tickLogo} alt="" /> Nhận thông báo</li>
               <li><img src={tickLogo} alt="" /> Chủ động phối hợp</li>
             </ul>
-            <button className={style.btnParent}>Dành cho phụ huynh</button>
+            <button className={style.btnParent + ' ' + style.btnShine}>Dành cho phụ huynh</button>
           </div>
 
-          <div className={`${style.roleCard} ${style.health}`}>
+          <div className={style.roleCard + ' ' + style.cardHover + ' ' + style.health}>
             <img src={nurseLogo} alt="" />
             <h3>Y tá</h3>
             <ul>
@@ -115,10 +173,10 @@ const Homepage = () => {
               <li><img src={tickLogo} alt="" /> Ghi nhận sơ cứu</li>
               <li><img src={tickLogo} alt="" /> Thống kê</li>
             </ul>
-            <button className={style.btnHealth}>Dành cho y tế</button>
+            <button className={style.btnHealth + ' ' + style.btnShine}>Dành cho y tế</button>
           </div>
 
-          <div className={`${style.roleCard} ${style.board}`}>
+          <div className={style.roleCard + ' ' + style.cardHover + ' ' + style.board}>
             <img src={adminLogo} alt="" />
             <h3>Ban giám hiệu</h3>
             <ul>
@@ -126,26 +184,26 @@ const Homepage = () => {
               <li><img src={tickLogo} alt="" /> Giám sát nhân sự</li>
               <li><img src={tickLogo} alt="" /> Thống kê & báo cáo</li>
             </ul>
-            <button className={style.btnBoard}>Dành cho BGH</button>
+            <button className={style.btnBoard + ' ' + style.btnShine}>Dành cho BGH</button>
           </div>
         </div>
       </section>
 
-      <section className={style.feedback}>
-        <h2>Khách hàng nói gì về chúng tôi</h2>
+      <section className={style.feedback + ' ' + style.sectionVisible} ref={feedbackRef}>
+        <h2 className={style.fadeInUp}>Khách hàng nói gì về chúng tôi</h2>
         <div className={style.feedbackCards}>
-          <div className={style.feedbackCard}><p>“Ứng dụng dễ sử dụng...”</p><div className={style.feedbackUser}><img src={feedback} alt="" className={style.userIcon} /><strong>Nguyễn Thị Hương</strong></div></div>
-          <div className={style.feedbackCard}><p>“Tôi không phải ghi giấy...”</p><div className={style.feedbackUser}><img src={feedback} alt="" className={style.userIcon} /><strong>Trần Văn Duy</strong></div></div>
-          <div className={style.feedbackCard}><p>“Giúp tôi nắm được sức khỏe...”</p><div className={style.feedbackUser}><img src={feedback} alt="" className={style.userIcon} /><strong>Nguyễn Thị Ánh Dương</strong></div></div>
+          <div className={style.feedbackCard + ' ' + style.cardSlideUp}><p>“Ứng dụng dễ sử dụng...”</p><div className={style.feedbackUser}><img src={feedback} alt="" className={style.userIcon} /><strong>Nguyễn Thị Hương</strong></div></div>
+          <div className={style.feedbackCard + ' ' + style.cardSlideUp}><p>“Tôi không phải ghi giấy...”</p><div className={style.feedbackUser}><img src={feedback} alt="" className={style.userIcon} /><strong>Trần Văn Duy</strong></div></div>
+          <div className={style.feedbackCard + ' ' + style.cardSlideUp}><p>“Giúp tôi nắm được sức khỏe...”</p><div className={style.feedbackUser}><img src={feedback} alt="" className={style.userIcon} /><strong>Nguyễn Thị Ánh Dương</strong></div></div>
         </div>
       </section>
 
-      <section className={style.cta}>
-        <h2>Sẵn sàng nâng cao chất lượng?</h2>
+      <section className={style.cta} ref={ctaRef}>
+        <h2 className={style.fadeInUp}>Sẵn sàng nâng cao chất lượng?</h2>
         <p>Đăng ký ngay để trải nghiệm hệ thống quản lý sức khỏe học đường.</p>
         <div className={style.ctaButtons}>
-          <button className={style.primaryBtn}>Đăng ký trải nghiệm</button>
-          <button className={style.outlineBtn}>Tìm hiểu thêm</button>
+          <button className={style.primaryBtn + ' ' + style.btnPulse} onClick={() => navigate("/login")}>Đăng ký trải nghiệm</button>
+          <button className={style.outlineBtn + ' ' + style.btnPulse} onClick={() => navigate("/login")}>Tìm hiểu thêm</button>
         </div>
       </section>
 
