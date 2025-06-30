@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/sb-Parent/Sidebar";
-import styles from "../../assets/css/HealthProfile.module.css";
+import styles from "../../assets/css/Healthprofile.module.css";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
