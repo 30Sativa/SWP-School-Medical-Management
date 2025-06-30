@@ -5,6 +5,10 @@ import axios from "axios";
 import dayjs from "dayjs";
 
 const ChildCareHistory = () => {
+  const parentId = localStorage.getItem("userId");
+  const [students, setStudents] = useState([]);
+  const [selectedStudentId, setSelectedStudentId] = useState(Number(localStorage.getItem("studentId")) || null);
+
   const [medicalHistory, setMedicalHistory] = useState([]);
   const [vaccinationHistory, setVaccinationHistory] = useState([]);
   const [medicalEvents, setMedicalEvents] = useState([]);
@@ -14,12 +18,30 @@ const ChildCareHistory = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const studentId = localStorage.getItem("studentId");
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const res = await axios.get(
+          `https://swp-school-medical-management.onrender.com/api/Student/by-parent/${parentId}`
+        );
+        const studentList = res.data?.data || [];
+        setStudents(studentList);
+        if (!selectedStudentId && studentList.length > 0) {
+          setSelectedStudentId(studentList[0].studentId);
+          localStorage.setItem("studentId", studentList[0].studentId);
+        }
+      } catch (err) {
+        console.error("Lỗi khi tải danh sách học sinh:", err);
+      }
+    };
+
+    fetchStudents();
+  }, [parentId]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (!studentId) throw new Error("Không tìm thấy studentId");
+        if (!selectedStudentId) return;
 
         const fetchWith404Handling = async (url) => {
           try {
@@ -40,10 +62,10 @@ const ChildCareHistory = () => {
           medicalEventsData,
           studentResponse
         ] = await Promise.all([
-          fetchWith404Handling(`https://swp-school-medical-management.onrender.com/api/MedicalHistory/student/${studentId}`),
-          fetchWith404Handling(`https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/records/student/${studentId}`),
-          fetchWith404Handling(`https://swp-school-medical-management.onrender.com/api/MedicalEvent/student/${studentId}`),
-          fetchWith404Handling(`https://swp-school-medical-management.onrender.com/api/Student/${studentId}`)
+          fetchWith404Handling(`https://swp-school-medical-management.onrender.com/api/MedicalHistory/student/${selectedStudentId}`),
+          fetchWith404Handling(`https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/records/student/${selectedStudentId}`),
+          fetchWith404Handling(`https://swp-school-medical-management.onrender.com/api/MedicalEvent/student/${selectedStudentId}`),
+          fetchWith404Handling(`https://swp-school-medical-management.onrender.com/api/Student/${selectedStudentId}`)
         ]);
 
         setMedicalHistory(medicalHistoryData);
@@ -69,7 +91,7 @@ const ChildCareHistory = () => {
     };
 
     fetchData();
-  }, [studentId]);
+  }, [selectedStudentId]);
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
@@ -97,6 +119,36 @@ const ChildCareHistory = () => {
           Xin chào, bạn đang đăng nhập với tư cách phụ huynh em <strong>{studentName || "..."}</strong>
         </p>
 
+        {/* Dropdown chọn học sinh */}
+        <label style={{ color: '#059669', fontWeight: 'bold', marginBottom: '8px', display: 'inline-block' }}>
+          Chọn học sinh:
+        </label>
+        <select
+          value={selectedStudentId || ""}
+          onChange={(e) => {
+            const selected = Number(e.target.value);
+            localStorage.setItem("studentId", selected);
+            window.location.reload();
+          }}
+          style={{
+            padding: "10px 16px",
+            borderRadius: "8px",
+            border: "1px solid #3b82f6",
+            fontSize: "15px",
+            outline: "none",
+            marginBottom: "20px",
+            width: "100%",
+            maxWidth: "400px"
+          }}
+        >
+          {students.map((s) => (
+            <option key={s.studentId} value={s.studentId}>
+              {s.fullName} - Lớp {s.className}
+            </option>
+          ))}
+        </select>
+
+        {/* Thanh tìm kiếm */}
         <div style={{ marginBottom: "20px" }}>
           <input
             type="text"
@@ -192,6 +244,3 @@ const ChildCareHistory = () => {
 };
 
 export default ChildCareHistory;
-
-
-

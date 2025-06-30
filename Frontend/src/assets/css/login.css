@@ -179,3 +179,11 @@ body {
         height: 150px;
     }
 }
+
+.right-content {
+  background-color: #ffffff;
+  padding: 40px 32px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
