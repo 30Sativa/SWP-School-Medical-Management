@@ -14,7 +14,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import Sidebar from "../../components/sidebar/Sidebar";
-import style from "../../assets/css/MedicalSupplies.module.css";
+import style from "../../assets/css/medicalSupplies.module.css";
 
 const MedicalSupplies = () => {
   const [supplies, setSupplies] = useState([]);
