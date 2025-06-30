@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Sidebar from "../../components/sidebar/Sidebar";
-import style from "../../assets/css/viewblog.module.css";
+import style from "../../assets/css/viewBlog.module.css";
 
 const ViewBlog = () => {
   const [blogs, setBlogs] = useState([]);
