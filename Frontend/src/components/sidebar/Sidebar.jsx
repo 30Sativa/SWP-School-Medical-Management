@@ -9,50 +9,173 @@ import {
   Bell,
   LogOut,
   Menu,
+  AlertTriangle,
+  Package,
+  HeartPulse,
+  BarChart2,
+  User, 
+  CalendarPlus, 
+  ClipboardPlus,
 } from "lucide-react";
-import "./Sidebar.css";
+import style from "./Sidebar.module.css";
+import { useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
   const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        const name =
+          decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"];
+        setUsername(name);
+      } catch (error) {
+        console.error("❌ Lỗi giải mã token:", error);
+      }
+    }
+  }, []);
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   return (
-    <aside className={`sb-sidebar ${isOpen ? "expanded" : "collapsed"}`}>
-      <button className="toggle-btn" onClick={toggleSidebar}>
-        <Menu size={22} />
-      </button>
+    <aside
+      className={`${style.sbSidebar} ${
+        isOpen ? style.expanded : style.collapsed
+      }`}
+    >
+      {isOpen && (
+        <div className={style.profileBox}>
+          <div className={style.avatar}>
+            <User size={18} stroke="#20b2aa" />
+          </div>
+          <div className={style.profileName}>{username || "Người dùng"}</div>
+        </div>
+      )}
+
+      <div className={style.navItem} onClick={toggleSidebar}>
+        <Menu size={20} />
+        {isOpen && <span className={style.systemName}>EduHealth</span>}
+      </div>
 
       <nav>
-        <NavLink to="/nurse" className="nav-item">
+        <NavLink
+          to="/nurse"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
           <Home size={20} />
           <span>Trang chủ</span>
         </NavLink>
-        <NavLink to="/students" className="nav-item">
+        <NavLink
+          to="/students"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
           <Users size={20} />
           <span>Danh sách học sinh</span>
         </NavLink>
-        <NavLink to="/medicine" className="nav-item">
+        <NavLink
+          to="/medicine"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
           <ClipboardList size={20} />
           <span>Quản lý thuốc</span>
         </NavLink>
-        <NavLink to="/vaccines" className="nav-item">
-          <Syringe size={20} />
-          <span>Tiêm chủng</span>
+
+        <NavLink
+          to="/vaccination-campaigns"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
+          <ClipboardPlus size={20} />
+          <span>Tạo tiêm chủng</span>
         </NavLink>
-        <NavLink to="/notifications" className="nav-item">
+
+        <NavLink
+          to="/vaccines"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
+          <Syringe size={20} />
+          <span>QL Tiêm chủng</span>
+        </NavLink>
+
+        <NavLink
+          to="/health-check-campaign"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
+          <CalendarPlus size={20} />
+          <span>Tạo lịch kiểm tra</span>
+        </NavLink>
+
+        <NavLink
+          to="/health-check"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
+          <HeartPulse size={20} />
+          <span> QL Khám sức khỏe</span>
+        </NavLink>
+
+        <NavLink
+          to="/viewBlog"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
           <Bell size={20} />
-          <span>Thông báo</span>
+          <span>Blog</span>
+        </NavLink>
+        <NavLink
+          to="/supplies"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
+          <Package size={20} />
+          <span>Vật tư y tế</span>
+        </NavLink>
+        {/* ✅ Mục Sự cố y tế */}
+        <NavLink
+          to="/incidents"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
+          <AlertTriangle size={20} />
+          <span>Sự cố y tế</span>
+        </NavLink>
+        <NavLink
+          to="/report"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
+          <BarChart2 size={20} />
+          <span>Báo cáo thống kê</span>
         </NavLink>
         <button
-          className="nav-item"
+          className={`${style.navItem} ${style.logoutButton}`}
           onClick={() => {
             localStorage.clear();
             navigate("/");
           }}
         >
-          <LogOut size={20} />
+          <LogOut size={20} stroke="#fff" />
           <span>Đăng xuất</span>
         </button>
       </nav>

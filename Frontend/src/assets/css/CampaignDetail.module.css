@@ -1,0 +1,354 @@
+.container {
+  max-width: 960px;
+  margin: auto;
+  padding: 32px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+h2 {
+  font-size: 24px;
+  color: #20b2aa;
+  margin-bottom: 16px;
+}
+
+h3 {
+  color: #20b2aa;
+  margin-top: 32px;
+  margin-bottom: 16px;
+}
+
+p {
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+strong {
+  color: #111827;
+}
+
+/* ==== BUTTONS ==== */
+.actions {
+  display: flex;
+  gap: 12px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.btnNotify,
+.btnStart,
+.btnBack {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnNotify {
+  background-color: #20b2aa;
+  color: white;
+}
+
+.btnStart {
+  background-color: #10b981;
+  color: white;
+}
+
+.btnBack {
+  background-color: #e5e7eb;
+  color: #111827;
+  margin-top: 24px;
+}
+
+.btnNotify:hover,
+.btnStart:hover,
+.btnBack:hover {
+  opacity: 0.9;
+}
+
+/* ==== TABS ==== */
+.tabRow {
+  display: flex;
+  gap: 12px;
+  margin: 24px 0 16px;
+  flex-wrap: wrap;
+}
+
+.tabRow button {
+  padding: 8px 16px;
+  background-color: #f3f4f6;
+  border: none;
+  border-radius: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #333;
+}
+
+.activeTab {
+  background-color: #20b2aa;
+  color: white;
+}
+
+/* ==== TABLE ==== */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.table th,
+.table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  font-size: 14px;
+  color: #333;
+}
+
+.table th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #111827;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ==== STATUS BADGES ==== */
+.status-Đồng-ý {
+  background-color: #10b981;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-block;
+  text-align: center;
+}
+
+.status-Từ-chối {
+  background-color: #ef4444;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-block;
+  text-align: center;
+}
+
+/* ==== MODAL ==== */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modalContent {
+  background-color: #fff;
+  padding: 24px 32px;
+  border-radius: 12px;
+  width: 500px;
+  max-width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  text-align: left;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.modalContent h3 {
+  margin-bottom: 12px;
+  color: #20b2aa;
+}
+
+.modalContent ul {
+  padding-left: 20px;
+  margin: 10px 0;
+}
+
+@keyframes fadeIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.pagination button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #e5e7eb;
+  cursor: pointer;
+  font-weight: 500;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.pagination button:hover:not(:disabled) {
+  background-color: #20b2aa;
+  color: white;
+}
+
+.pagination button[disabled] {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.activePage {
+  background-color: #20b2aa !important;
+  color: white !important;
+}
+
+.btnComplete {
+  background-color: #20b2aa;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  margin-left: 12px;
+}
+
+.btnComplete:hover {
+  background-color: #20b2aa;
+}
+
+.btnExport {
+  background-color: #20b2aa; /* xanh lá đậm */
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.btnExport:hover {
+  background-color: #20b2aa; /* xanh lá hover */
+}
+
+.chartAndCalendar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 40px;
+  flex-wrap: wrap;
+  margin-top: 32px;
+}
+
+.chartBox {
+  flex: 1;
+  min-width: 300px;
+  max-width: 500px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+}
+
+.chartAndCalendar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.chartBox {
+  width: 100%;
+  max-width: 380px;
+  padding: 16px;
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.calendarBox {
+  width: 300px; /* hoặc 280px nếu muốn nhỏ hơn */
+  font-size: 13px;
+}
+.react-calendar {
+  width: 100% !important;
+  font-size: 13px;
+  padding: 8px;
+  border-radius: 12px;
+}
+
+.react-calendar__navigation {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: #0f766e;
+}
+
+.react-calendar__navigation button {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  color: #10b981;
+  cursor: pointer;
+}
+
+.react-calendar__tile {
+  padding: 6px 0 !important;
+  font-size: 13px;
+}
+
+.react-calendar__month-view__weekdays {
+  font-size: 11px;
+}
+
+
+.react-calendar__tile:hover {
+  background-color: #e0f7fa;
+}
+
+.react-calendar__tile--now {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.react-calendar__tile--active {
+  background-color: #10b981 !important;
+  color: white;
+  font-weight: bold;
+}
+
+.react-calendar__tile div {
+  font-size: 10px !important;
+  padding: 2px 4px;
+  margin-top: 2px;
+}

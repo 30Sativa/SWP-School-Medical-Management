@@ -1,0 +1,175 @@
+/* === Header === */
+.pageHeader {
+  display: flex;
+  justify-content: flex-start; 
+  align-items: center;    
+  margin-bottom: 20px;
+  margin-top: 0;
+}
+
+.pageHeader h1 {
+  margin: 0;
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+
+.campaignPage {
+  padding: 12px 24px 24px; /* giảm khoảng cách trên */
+  background-color: #f9fafb;
+  border-radius: 10px;
+  min-height: 100vh;
+}
+
+.textBlack {
+  color: #222;
+  font-size: 36px;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.textAccent {
+  color: #20b2aa;
+  font-size: 36px;
+}
+
+/* === Filter Row === */
+.filterRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  padding: 5px;
+  border-radius: 8px;
+  margin-right: 20px;
+}
+
+.searchBox input {
+  border: none;
+  background-color: transparent;
+  font-size: 1rem;
+  padding-left: 8px;
+  width: 250px;
+}
+
+.searchBox input:focus {
+  outline: none;
+  border-color: #20b2aa;
+}
+
+.filterDropdown {
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background-color: #f4f4f4;
+  color: #333;
+  width: 150px !important;
+  height: 37px !important;
+}
+
+/* === Table === */
+.campaignTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.campaignTable th, .campaignTable td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.campaignTable th {
+  background-color: #20b2aa;
+  font-weight: 600;
+  color: white;
+}
+
+.campaignTable td {
+  color: #222;
+  font-size: 1rem;
+}
+
+/* === Status Badge === */
+.statusBadge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.status-Dang-Dien-Ra {
+  background-color: #20b2aa;
+  color: white;
+}
+
+.status-Da-Hoan-Thanh {
+  background-color: #8bc34a;
+  color: white;
+}
+
+.status-Chua-Bat-Dau {
+  background-color: #ff9800;
+  color: white;
+}
+
+.status-Da-Huy {
+  background-color: #f44336;
+  color: white;
+}
+
+/* === Button === */
+.btnDetail {
+  background-color: #20b2aa;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btnDetail:hover {
+  background-color: #20b2aa;
+}
+
+/* === Pagination === */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination button {
+  margin: 0 5px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  background-color: #e0e0e0;
+  color: #222;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.pagination button:hover {
+  background-color: #ccc;
+}
+
+.pagination .activePage {
+  background-color: #20b2aa;
+  color: #fff;
+}
+

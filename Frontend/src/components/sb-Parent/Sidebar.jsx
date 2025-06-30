@@ -1,4 +1,3 @@
-// src/components/sidebar/Sidebar.jsx
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
@@ -10,7 +9,7 @@ import {
   LogOut,
   Menu,
 } from "lucide-react";
-import "./Sidebar.css";
+import styles from "./Sidebar.module.css";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -19,34 +18,70 @@ const Sidebar = () => {
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   return (
-    <aside className={`sb-sidebar ${isOpen ? "expanded" : "collapsed"}`}>
-      <button className="toggle-btn" onClick={toggleSidebar}>
-        <Menu size={22} />
-      </button>
+    <aside
+      className={`${styles.sbSidebar} ${
+        isOpen ? styles.expanded : styles.collapsed
+      }`}
+    >
+      {/* DÙNG navItem để đảm bảo icon và chữ thẳng hàng tuyệt đối */}
+      <div className={styles.navItem} onClick={toggleSidebar}>
+        <Menu size={20} />
+        {isOpen && <span className={styles.systemName}>EduHealth</span>}
+      </div>
 
       <nav>
-        <NavLink to="/parent" className="nav-item">
+        <NavLink
+          to="/parent"
+          className={({ isActive }) =>
+            `${styles.navItem} ${isActive ? styles.active : ""}`
+          }
+        >
           <Home size={20} />
           <span>Trang chủ</span>
         </NavLink>
-        <NavLink to="/healthprofile" className="nav-item">
+
+        <NavLink
+          to="/healthprofile"
+          className={({ isActive }) =>
+            `${styles.navItem} ${isActive ? styles.active : ""}`
+          }
+        >
           <Users size={20} />
           <span>Hồ sơ sức khỏe</span>
         </NavLink>
-        <NavLink to="/sendmedicine" className="nav-item">
+
+        <NavLink
+          to="/sendmedicine"
+          className={({ isActive }) =>
+            `${styles.navItem} ${isActive ? styles.active : ""}`
+          }
+        >
           <ClipboardList size={20} />
           <span>Gửi thuốc cho y tế</span>
         </NavLink>
-        <NavLink to="/hisofcare" className="nav-item">
+
+        <NavLink
+          to="/hisofcare"
+          className={({ isActive }) =>
+            `${styles.navItem} ${isActive ? styles.active : ""}`
+          }
+        >
           <Syringe size={20} />
           <span>Lịch sử chăm sóc</span>
         </NavLink>
-        <NavLink to="/notiAndRep" className="nav-item">
+
+        <NavLink
+          to="/notification"
+          className={({ isActive }) =>
+            `${styles.navItem} ${isActive ? styles.active : ""}`
+          }
+        >
           <Bell size={20} />
           <span>Thông báo và phản hồi</span>
         </NavLink>
+
         <button
-          className="nav-item"
+          className={styles.navItem}
           onClick={() => {
             localStorage.clear();
             navigate("/");

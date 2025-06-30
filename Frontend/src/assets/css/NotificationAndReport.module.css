@@ -1,0 +1,325 @@
+.container {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(120deg, #f0f4ff 0%, #e0e7ff 100%);
+}
+
+.content {
+  flex: 1;
+  padding: 40px 5vw 40px 5vw;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+}
+
+.title {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #1e3a8a;
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 8px rgba(30,58,138,0.07);
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: #475569;
+  margin-bottom: 32px;
+  font-weight: 500;
+}
+
+.listWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.card {
+  background: linear-gradient(90deg, #f8fafc 60%, #e0e7ff 100%);
+  border-radius: 22px;
+  padding: 36px 32px 48px 32px;
+  box-shadow: 0 8px 32px rgba(30, 58, 138, 0.10);
+  border: 1.5px solid #c7d2fe;
+  transition: transform 0.22s, box-shadow 0.22s;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-7px) scale(1.01);
+  box-shadow: 0 16px 48px rgba(30, 58, 138, 0.16);
+  border-color: #60a5fa;
+}
+
+.card h3 {
+  font-size: 1.35rem;
+  color: #1e293b;
+  margin-bottom: 18px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.card p, .card pre {
+  font-size: 1.05rem;
+  color: #475569;
+  margin: 10px 0;
+  line-height: 1.7;
+  font-family: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.tag {
+  display: inline-block;
+  margin-top: 22px;
+  padding: 7px 22px;
+  border-radius: 18px;
+  font-size: 0.97rem;
+  font-weight: bold;
+  color: #fff;
+  box-shadow: 0 2px 8px #bae6fd55;
+  letter-spacing: 0.5px;
+  border: none;
+}
+
+.approveTag {
+  background: linear-gradient(90deg, #22c55e, #10b981);
+}
+
+.rejectTag {
+  background: linear-gradient(90deg, #fb7185, #ef4444);
+}
+
+
+.notifyCard {
+  border-left: 8px solid #60a5fa;
+  background: linear-gradient(90deg, #f0f9ff 60%, #e0e7ff 100%);
+}
+
+.notifyCard .tag {
+  background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%);
+  box-shadow: 0 2px 8px #60a5fa33;
+}
+
+.reportCard {
+  border-left: 8px solid #34d399;
+  background: linear-gradient(90deg, #f0fdf4 60%, #e0e7ff 100%);
+}
+
+.reportCard .tag {
+  background: linear-gradient(90deg, #6ee7b7 0%, #34d399 100%);
+  box-shadow: 0 2px 8px #34d39933;
+}
+
+.replyButton {
+  position: absolute;
+  bottom: 28px;
+  right: 32px;
+  background: linear-gradient(90deg, #14b8a6 60%, #06b6d4 100%);
+  color: #fff;
+  border: none;
+  padding: 11px 28px;
+  font-weight: 700;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  box-shadow: 0 2px 12px #06b6d455;
+  transition: background 0.22s, transform 0.15s;
+}
+
+.replyButton:hover {
+  background: linear-gradient(90deg, #0d9488 60%, #2563eb 100%);
+  transform: scale(1.05);
+}
+
+.actionRow {
+  display: flex;
+  gap: 18px;
+  margin-top: 18px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.acceptBtn, .rejectBtn {
+  padding: 10px 28px;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.15s, box-shadow 0.18s;
+  box-shadow: 0 2px 8px #bae6fd33;
+}
+
+.acceptBtn {
+  background: linear-gradient(90deg, #34d399 60%, #10b981 100%);
+  color: #fff;
+}
+.acceptBtn:hover {
+  background: linear-gradient(90deg, #059669 60%, #34d399 100%);
+  transform: translateY(-2px) scale(1.04);
+}
+
+.rejectBtn {
+  background: linear-gradient(90deg, #f87171 60%, #ef4444 100%);
+  color: #fff;
+}
+.rejectBtn:hover {
+  background: linear-gradient(90deg, #b91c1c 60%, #f87171 100%);
+  transform: translateY(-2px) scale(1.04);
+}
+
+.rejectReasonBox {
+  margin-top: 12px;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 8px;
+  border: 1.5px solid #f87171;
+  padding: 10px 14px;
+  font-size: 1rem;
+  color: #b91c1c;
+  background: #fff0f1;
+  transition: border 0.18s, box-shadow 0.18s;
+  box-shadow: 0 1px 4px #fca5a533;
+  outline: none;
+  resize: vertical;
+}
+.rejectReasonBox:focus {
+  border: 2px solid #ef4444;
+  background: #fff;
+}
+
+.responseActions {
+  display: flex;
+  gap: 16px;
+  margin-top: 18px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.tabButton {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  color: white;
+  font-weight: 600;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.tabButton:hover,
+.tabButton.active {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  transform: translateY(-2px);
+}
+
+.approve, .decline {
+  padding: 10px 28px;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.15s, box-shadow 0.18s;
+  box-shadow: 0 2px 8px #bae6fd33;
+}
+
+.approve {
+  background: linear-gradient(90deg, #34d399 60%, #10b981 100%);
+  color: #fff;
+}
+.approve:hover {
+  background: linear-gradient(90deg, #059669 60%, #34d399 100%);
+  transform: translateY(-2px) scale(1.04);
+}
+
+.decline {
+  background: linear-gradient(90deg, #f87171 60%, #ef4444 100%);
+  color: #fff;
+}
+.decline:hover {
+  background: linear-gradient(90deg, #b91c1c 60%, #f87171 100%);
+  transform: translateY(-2px) scale(1.04);
+}
+
+.reasonBox {
+  margin-top: 12px;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 8px;
+  border: 1.5px solid #f87171;
+  padding: 10px 14px 18px 14px;
+  background: #fff0f1;
+  box-shadow: 0 1px 4px #fca5a533;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reasonBox textarea {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 1rem;
+  color: #b91c1c;
+  resize: vertical;
+  min-height: 48px;
+  border-radius: 6px;
+  padding: 6px 0;
+}
+
+.confirmDecline {
+  align-self: flex-end;
+  margin-top: 4px;
+  background: linear-gradient(90deg, #f87171 60%, #ef4444 100%);
+  color: #fff;
+  border: none;
+  padding: 8px 22px;
+  font-weight: 700;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px #fca5a533;
+  transition: background 0.18s, transform 0.15s;
+}
+.confirmDecline:hover {
+  background: linear-gradient(90deg, #b91c1c 60%, #f87171 100%);
+  transform: scale(1.04);
+}
+
+@media (max-width: 900px) {
+  .content {
+    padding: 24px 2vw;
+  }
+  .card {
+    padding: 18px 8px 38px 8px;
+  }
+  .title {
+    font-size: 1.3rem;
+  }
+}
+.subtitle {
+  font-size: 17px;
+  font-weight: 500;
+  margin-bottom: 30px;
+  line-height: 1.6;
+
+  background: linear-gradient(to right, #4f46e5, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  color: #4f46e5;
+}
+
+
+@media (max-width: 600px) {
+  .content {
+    padding: 10px 2vw;
+  }
+  .card {
+    padding: 10px 2px 28px 2px;
+    border-radius: 12px;
+  }
+  .title {
+    font-size: 1.1rem;
+  }
+}

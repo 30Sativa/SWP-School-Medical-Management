@@ -1,16 +1,34 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/sidebar/Sidebar";
-import "../../assets/css/studentList.css";
+import style from "../../assets/css/studentList.module.css";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const StudentList = () => {
   const [students, setStudents] = useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const studentsPerPage = 10;
+  const navigate = useNavigate();
 
-  // Call API để lấy danh sách học sinh
+  const handleViewDetail = (id) => {
+    navigate(`/students/${id}`);
+  };
+
   const fetchStudents = async () => {
     try {
       const response = await axios.get("/api/Student");
-      setStudents(response.data);
+      let studentArray = response.data?.data || [];
+
+      // Sắp xếp theo mã học sinh (studentId) tăng dần
+      studentArray.sort((a, b) => {
+        // Nếu mã là số, ép kiểu và so sánh số
+        return Number(a.studentId) - Number(b.studentId);
+      });
+
+      setStudents(studentArray);
+      setFilteredStudents(studentArray);
     } catch (error) {
       console.error("Có lỗi khi gọi API:", error);
     }
@@ -20,55 +38,73 @@ const StudentList = () => {
     fetchStudents();
   }, []);
 
-  const totalPages = 5;
+  useEffect(() => {
+    const filtered = students.filter((student) =>
+      student.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredStudents(filtered);
+    setCurrentPage(1);
+  }, [searchTerm, students]);
+
+  const indexOfLastStudent = currentPage * studentsPerPage;
+  const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
+  const currentStudents = filteredStudents.slice(
+    indexOfFirstStudent,
+    indexOfLastStudent
+  );
+  const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
 
   return (
-    <div className="layout-container">
+    <div className={style.layoutContainer}>
       <Sidebar />
 
-      <main className="layout-content">
-        <header>
-          <div className="dashboard-header-bar">
-            <div className="title-group">
-              <h1>
-                <span className="text-black">Danh sách</span>
-                <span className="text-accent"> học sinh</span>
-              </h1>
-            </div>
+      <main className={style.layoutContent}>
+        <header className={style.dashboardHeaderBar}>
+          <div className={style.titleGroup}>
+            <h1>
+              <span className={style.textBlack}>Danh sách</span>
+              <span className={style.textAccent}> học sinh</span>
+            </h1>
           </div>
         </header>
 
-        <div className="header">
+        <div className={style.header}>
           <input
             type="text"
             placeholder="Tìm kiếm học sinh..."
-            className="search-bar"
+            className={style.searchBar}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <button className="add-btn">Thêm học sinh</button>
         </div>
 
-        <table className="student-table">
+        <table className={style.studentTable}>
           <thead>
             <tr>
               <th>STT</th>
+              <th>Mã học sinh</th>
               <th>Họ và tên</th>
-              <th>Mã số</th>
               <th>Lớp</th>
               <th>Phụ huynh</th>
               <th>Thao tác</th>
             </tr>
           </thead>
           <tbody>
-            {students && students.length > 0 ? (
-              students.map((student, index) => (
+            {currentStudents.length > 0 ? (
+              currentStudents.map((student, index) => (
                 <tr key={student.id || index}>
-                  <td>{index + 1}</td>
+                  <td>{indexOfFirstStudent + index + 1}</td>
+                  <td> HS{student.studentId}</td>
                   <td>{student.fullName}</td>
-                  <td>{student.studentId}</td>
-                  <td>{student.class}</td>
-                  <td>{student.parent}</td>
+                  <td>{student.className}</td>
+                  <td>{student.parentName}</td>
                   <td>
-                    <button className="btn">Xem chi tiết</button>
+                    <button
+                      className={style.btn}
+                      onClick={() => handleViewDetail(student.studentId)}
+                    >
+                      Xem chi tiết
+                    </button>
                   </td>
                 </tr>
               ))
@@ -82,9 +118,15 @@ const StudentList = () => {
           </tbody>
         </table>
 
-        <div className="pagination">
+        <div className={style.pagination}>
           {[...Array(totalPages)].map((_, index) => (
-            <button key={index}>{index + 1}</button>
+            <button
+              key={index}
+              onClick={() => setCurrentPage(index + 1)}
+              className={currentPage === index + 1 ? style.activePage : ""}
+            >
+              {index + 1}
+            </button>
           ))}
         </div>
       </main>

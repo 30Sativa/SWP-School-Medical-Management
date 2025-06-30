@@ -1,0 +1,345 @@
+/* SendNotification.module.css - đồng bộ style hiện đại, bo góc, shadow, màu chủ đạo, responsive */
+
+.container {
+  display: flex;
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+.mainContent {
+  flex: 1;
+  padding: 0 0 32px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.headerBar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px 0 0 20px;
+  margin-bottom: 0;
+}
+
+.titleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.textBlack {
+  color: #222;
+  font-weight: 700;
+  font-size: 3rem;
+}
+.textAccent {
+  color: #20b2aa;
+  font-weight: 700;
+  font-size: 3rem;
+  margin-left: 6px;
+}
+
+.cardSection {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin-top: 18px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(32,178,170,0.13);
+  padding: 32px 32px 24px 32px;
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  transition: box-shadow 0.2s;
+}
+
+.input, .textarea {
+  width: 100%;
+  padding: 14px 12px;
+  border-radius: 10px;
+  border: 1.5px solid #38b2ac;
+  font-size: 16px;
+  outline: none;
+  background: #f8fafc;
+  box-shadow: 0 1px 6px rgba(32,178,170,0.07);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input:focus, .textarea:focus {
+  border-color: #20b2aa;
+  box-shadow: 0 0 0 2px rgba(32,178,170,0.13);
+}
+
+.button {
+  width: 100%;
+  background: linear-gradient(90deg,#20b2aa,#38b2ac);
+  color: #fff;
+  font-weight: 700;
+  font-size: 17px;
+  border-radius: 10px;
+  padding: 14px 0;
+  margin-top: 8px;
+  box-shadow: 0 2px 12px rgba(32,178,170,0.13);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.button:disabled {
+  background: #b2dfdb;
+  cursor: not-allowed;
+}
+
+.listSection {
+  width: 100%;
+  max-width: 100vw;
+  margin: 32px auto 0 auto;
+  background: #f9fafb; 
+  border-radius: 14px;
+  padding: 0 24px 24px 24px;
+  overflow-x: auto;
+  margin-left: 0;
+  margin-right: 0;
+  box-shadow: none; 
+}
+
+.filterBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 24px 10px 24px;
+  background: #e3e3e3c9;
+  border-radius: 14px 14px 0 0;
+  flex-wrap: wrap;
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  margin-top: 18px;
+  overflow: hidden;
+}
+.table th, .table td {
+  padding: 14px 10px;
+  text-align: left;
+  font-size: 16px;
+}
+.table th {
+  background: #f5f6fa; /* đồng bộ VaccinationCampaign */
+  color: #000000;
+  font-weight: 700;
+  border-bottom: 2px solid #e0e7ef;
+}
+.table tr {
+  border-bottom: 1px solid #e0e7ef;
+  transition: background 0.15s;
+}
+.table tr:last-child {
+  border-bottom: none;
+}
+.table td {
+  color: #222;
+  vertical-align: top;
+}
+.table tbody tr:hover {
+  background: #f5f6fa;
+}
+.table thead tr:first-child th:first-child {
+  border-top-left-radius: 14px;
+}
+.table thead tr:first-child th:last-child {
+  border-top-right-radius: 14px;
+}
+.table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 14px;
+}
+.table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 14px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 18px 24px 0 0;
+}
+.pagination button {
+  background: #20b2aa;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.pagination button:disabled {
+  background: #b2dfdb;
+  color: #fff;
+  cursor: not-allowed;
+}
+
+.formTable {
+  width: 100%;
+  max-width: 98vw;
+  margin: 32px auto 0 auto;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(32,178,170,0.10);
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow-x: auto;
+}
+.formTable th, .formTable td {
+  padding: 14px 10px;
+  text-align: left;
+  font-size: 16px;
+}
+.formTable th {
+  background: #e0f7fa;
+  color: #20b2aa;
+  font-weight: 700;
+  border-bottom: 2px solid #20b2aa;
+}
+.formTable tr {
+  border-bottom: 1px solid #e0f2f1;
+}
+.formTable tr:last-child {
+  border-bottom: none;
+}
+.formTable input, .formTable textarea, .formTable select {
+  width: 100%;
+  padding: 10px 8px;
+  border-radius: 8px;
+  border: 1.5px solid #38b2ac;
+  font-size: 15px;
+  outline: none;
+  background: #f8fafc;
+  box-shadow: 0 1px 6px rgba(32,178,170,0.07);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.formTable input:focus, .formTable textarea:focus, .formTable select:focus {
+  border-color: #20b2aa;
+  box-shadow: 0 0 0 2px rgba(32,178,170,0.13);
+}
+.formTable button {
+  background: linear-gradient(90deg,#20b2aa,#38b2ac);
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  border-radius: 8px;
+  padding: 10px 0;
+  box-shadow: 0 2px 12px rgba(32,178,170,0.13);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.formTable button:disabled {
+  background: #b2dfdb;
+  cursor: not-allowed;
+}
+
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 240px;
+}
+.searchInput {
+  width: 100%;
+  padding: 10px 36px 10px 14px;
+  border-radius: 8px;
+  border: 1.5px solid #38b2ac;
+  font-size: 15px;
+  outline: none;
+  background: #f8fafc;
+  box-shadow: 0 1px 6px rgba(32,178,170,0.07);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.searchInput:focus {
+  border-color: #20b2aa;
+  box-shadow: 0 0 0 2px rgba(32,178,170,0.13);
+}
+.searchIcon {
+  position: absolute;
+  right: 10px;
+  color: #20b2aa;
+  pointer-events: none;
+}
+@media (max-width: 700px) {
+  .card {
+    padding: 16px 6px 16px 6px;
+    border-radius: 10px;
+  }
+  .mainContent {
+    padding: 0 0 12px 0;
+  }
+  .headerBar h1 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 1200px) {
+  .listSection {
+    padding: 0 8px 16px 8px;
+  }
+  .table {
+    min-width: 700px;
+  }
+}
+
+@media (max-width: 900px) {
+  .listSection {
+    padding: 0 2px 8px 2px;
+  }
+  .table {
+    min-width: 600px;
+  }
+}
+
+@media (max-width: 700px) {
+  .table {
+    min-width: 400px;
+  }
+}
+
+@media (max-width: 600px) {
+  .listSection, .formTable {
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    font-size: 13px;
+  }
+  .table th, .table td, .formTable th, .formTable td {
+    font-size: 13px;
+    padding: 6px 2px;
+  }
+}

@@ -1,0 +1,251 @@
+.layoutContainer {
+  display: flex;
+  align-items: stretch;
+  min-height: 100vh;
+}
+
+.layoutContent {
+  flex: 1;
+  background-color: #f9fafb;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Header group */
+.dashboardHeaderBar {
+  margin-bottom: 20px;
+}
+
+.titleGroup h1 {
+  font-size: 50px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.textBlack {
+  color: #111827;
+}
+
+.textAccent {
+  color: #20b2aa;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* Search Bar */
+.searchBar {
+  padding: 10px;
+  width: 250px !important;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+.searchBar:focus {
+  outline: none;
+  border-color: #20b2aa;
+  background-color: #ffffff;
+}
+
+.searchBar::placeholder {
+  color: #888;
+}
+
+/* Add Button */
+.addBtn {
+  padding: 10px 15px;
+  background-color: #20b2aa;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.addBtn:hover {
+  background-color: #178d89;
+}
+
+/* Table */
+.studentTable {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.studentTable th,
+.studentTable td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.studentTable th {
+  background-color: #20b2aa;
+  font-weight: 600;
+  color: white;
+}
+
+/* Action Button */
+.btn {
+  background-color: #20b2aa;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #20b2aa;
+}
+
+/* Pagination */
+.pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.pagination button {
+  margin: 0 5px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  background-color: #e0e0e0; /* xám nhạt */
+  color: #222; /* chữ đen */
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.pagination button:hover {
+  background-color: #ccc;
+}
+
+.pagination .activePage {
+  background-color: #20b2aa; /* xanh chủ đạo */
+  color: #fff;
+}
+
+/* Modal */
+/* Overlay nền đen mờ */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Modal form */
+.modalContent {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 30px 24px;
+  width: 420px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeIn 0.3s ease;
+}
+
+.modalContent h2 {
+  text-align: center;
+  margin-bottom: 8px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+}
+
+
+/* Input đẹp */
+.modalContent input {
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 15px;
+  background-color: #ffffff; /* MÀU NỀN TRẮNG */
+  color: #111827;
+  transition: 0.2s ease;
+}
+
+.modalContent input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+
+/* Hành động (Lưu / Hủy) */
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+.modalContent form {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* CĂN GIỮA THEO CHIỀU NGANG */
+  gap: 14px;
+}
+
+/* Nút lưu */
+.submitBtn {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submitBtn:hover {
+  background-color: #0e9e6e;
+}
+
+/* Nút huỷ */
+.cancelBtn {
+  background-color: #e5e7eb;
+  color: #111827;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancelBtn:hover {
+  background-color: #d1d5db;
+}
+
+
+/* Animation xuất hiện nhẹ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

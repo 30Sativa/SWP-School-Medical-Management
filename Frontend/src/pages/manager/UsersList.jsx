@@ -1,444 +1,381 @@
 import React, { useEffect, useState } from "react";
-import Logo from "../../assets/icon/header.jpg";
-import {
-    Layout,
-    Menu,
-    Table,
-    Avatar,
-    Tag,
-    Button,
-    Input,
-    Typography,
-    message,
-    Modal,
-    Form,
-    Select,
-} from "antd";
-import {
-    DashboardOutlined,
-    FileTextOutlined,
-    TeamOutlined,
-    ReadOutlined,
-    BarChartOutlined,
-    EditOutlined,
-    DeleteOutlined,
-    SearchOutlined,
-    BellOutlined,
-    QuestionCircleOutlined,
-    ExclamationCircleOutlined,
-} from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { Button, Input, Table, message, Modal, Form, Select, Typography, Avatar, Tag } from "antd";
+import { SearchOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { Edit2, Trash2 } from "lucide-react";
+import Sidebar from "../../components/sb-Manager/Sidebar";
+import style from "../../assets/css/userList.module.css";  // Import CSS riêng cho UserList
+import axios from "axios";
 
-const { Header, Sider, Content } = Layout;
-const { Title } = Typography;
 const { Option } = Select;
-const { confirm } = Modal;
-
-const sidebarItems = [
-    { key: "dashboard", icon: <DashboardOutlined />, label: "Bảng điều khiển", route: "/manager" },
-    { key: "logs", icon: <FileTextOutlined />, label: "Nhật ký hoạt động", route: "/logs" },
-    { key: "users", icon: <TeamOutlined />, label: "Danh sách người dùng", route: "/users" },
-    { key: "blog", icon: <ReadOutlined />, label: "Blog", route: "/blog" },
-    { key: "reports", icon: <BarChartOutlined />, label: "Báo cáo thống kê", route: "/reports" },
-];
+const { Title } = Typography;
 
 const UsersList = () => {
-    const navigate = useNavigate();
-    const [collapsed, setCollapsed] = useState(false);
-    const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [searchText, setSearchText] = useState("");
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchText, setSearchText] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMode, setModalMode] = useState("add"); // 'add' or 'edit'
+  const [editingUser, setEditingUser] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1); // Trạng thái trang hiện tại
+  const [modalForm] = Form.useForm();
+  const usersPerPage = 10; // Số người dùng mỗi trang
 
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [modalMode, setModalMode] = useState("add"); // 'add' or 'edit'
-    const [currentUser, setCurrentUser] = useState(null);
+  const apiUrl = "https://swp-school-medical-management.onrender.com/api/User"; 
 
-    const [form] = Form.useForm();
+  // Fetch users from API
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      const response = await axios.get(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      // Nếu API trả về { data: [...] } thì lấy response.data.data
+      const userArr = Array.isArray(response.data)
+        ? response.data
+        : Array.isArray(response.data.data)
+        ? response.data.data
+        : [];
+      // Lọc bỏ user đã bị soft delete (isActive === false)
+      const activeUsers = userArr.filter((u) => u.isActive !== false);
+      setUsers(activeUsers);
+      setLoading(false);
+    } catch (err) {
+      message.error("Failed to fetch users");
+      console.error("Fetch users error:", err, err?.response?.data);
+      setLoading(false);
+    }
+  };
 
-    useEffect(() => {
-        setLoading(true);
-        setTimeout(() => {
-            setUsers([
-                {
-                    id: 1,
-                    name: "Nguyễn Văn An",
-                    avatar: "/search-image-2.png",
-                    email: "nguyenvanan@gmail.com",
-                    phone: "0912345678",
-                    role: "Học sinh",
-                    status: "active",
-                    lastActive: "25/05/2025",
-                },
-                {
-                    id: 2,
-                    name: "Trần Thị Bình",
-                    avatar: "/search-image-3.png",
-                    email: "tranthib@gmail.com",
-                    phone: "0923456789",
-                    role: "Giáo viên",
-                    status: "active",
-                    lastActive: "24/05/2025",
-                },
-                {
-                    id: 3,
-                    name: "Lê Văn Cường",
-                    avatar: "/search-image-4.png",
-                    email: "levanc@gmail.com",
-                    phone: "0934567890",
-                    role: "Quản trị viên",
-                    status: "active",
-                    lastActive: "25/05/2025",
-                },
-            ]);
-            setLoading(false);
-        }, 1000);
-    }, []);
+  useEffect(() => {
+    fetchUsers(); // Fetch users when the component is mounted
+  }, []);
 
-// const fetchUsers = async () => {                                        //Hàm lấy danh sách người dùng
-//   try {
-//     setLoading(true);
-//     const res = await fetch('/api/users'); // gọi API thật
-//     if (!res.ok) throw new Error('Lỗi tải danh sách người dùng');
-//     const data = await res.json();
-//     setUsers(data);
-//   } catch (err) {
-//     message.error(err.message || 'Lỗi không xác định');
-//   } finally {
-//     setLoading(false);
-//   }
-// };
+  // Filter users by search text
+  const filteredUsers = users.filter(
+    (user) =>
+      user.isActive !== false && // Ẩn user đã bị soft delete
+      (user.fullName.toLowerCase().includes(searchText.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchText.toLowerCase()) ||
+        user.phone.includes(searchText))
+  );
 
+  // Pagination handler
+  const handlePageChange = (page) => {
+    setCurrentPage(page); // Cập nhật trang hiện tại khi chuyển trang
+  };
 
-    const filteredUsers = users.filter(
-        (user) =>
-            user.name.toLowerCase().includes(searchText.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchText.toLowerCase()) ||
-            user.phone.includes(searchText)
-    );
-
-//     const updateUser = async (id, updatedData) => {                  //Hàm cập nhật người dùng
-//   try {
-//     setLoading(true);
-//     const res = await fetch(`/api/users/${id}`, {
-//       method: 'PUT',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify(updatedData),
-//     });
-//     if (!res.ok) throw new Error('Cập nhật người dùng thất bại');
-//     message.success('Cập nhật người dùng thành công');
-//     await fetchUsers(); // cập nhật danh sách sau khi sửa
-//   } catch (err) {
-//     message.error(err.message || 'Lỗi không xác định');
-//   } finally {
-//     setLoading(false);
-//   }
-// };
-
-    const showModal = (mode, user = null) => {
-        setModalMode(mode);
-        setCurrentUser(user);
-        if (mode === "edit" && user) {
-            form.setFieldsValue(user);
-        } else {
-            form.resetFields();
-        }
-        setIsModalVisible(true);
-    };
-
-    const handleModalCancel = () => {
-        setIsModalVisible(false);
-        setCurrentUser(null);
-    };
-
-//     const deleteUser = async (id) => {                            //Hàm xóa người dùng
-//   try {
-//     setLoading(true);
-//     const res = await fetch(`/api/users/${id}`, {
-//       method: 'DELETE',
-//     });
-//     if (!res.ok) throw new Error('Xóa người dùng thất bại');
-//     message.success('Xóa người dùng thành công');
-//     await fetchUsers(); // cập nhật danh sách sau khi xóa
-//   } catch (err) {
-//     message.error(err.message || 'Lỗi không xác định');
-//   } finally {
-//     setLoading(false);
-//   }
-// };
-
-
-   const handleDelete = (id) => {
-  confirm({
-    title: `Bạn có chắc muốn xóa người dùng này?`,
-    icon: <ExclamationCircleOutlined />,
-    onOk() {
-      // Lọc và loại bỏ người dùng có id tương ứng
-      setUsers((prev) => prev.filter((user) => user.id !== id));
-      message.success("Xóa người dùng thành công");
+  const columns = [
+    {
+      title: "Họ và tên",
+      dataIndex: "fullName",
+      key: "fullName",
+      render: (text) => (
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <Avatar>{text.charAt(0)}</Avatar> {/* Show first letter as avatar */}
+          <span>{text}</span>
+        </div>
+      ),
     },
-    onCancel() {
-      // Không làm gì khi hủy
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
     },
-  });
+    {
+      title: "Số điện thoại",
+      dataIndex: "phone",
+      key: "phone",
+    },
+    {
+      title: "Vai trò",
+      dataIndex: "role",
+      key: "role",
+      render: (role) => {
+        let color = "blue";
+        if (role.roleName === "Nurse") color = "green";
+        else if (role.roleName === "Manager") color = "purple";
+        return <Tag color={color}>{role.roleName}</Tag>;
+      },
+    },
+    {
+      title: "Địa chỉ",
+      dataIndex: "address", // This will now display the address of the user
+      key: "address",
+    },
+    {
+      title: "Hành động",
+      key: "action",
+      render: (_, record) => (
+        <div className={style.actionGroup}>
+          <button className={style.editBtn} onClick={() => showModal("edit", record)}>
+            <Edit2 size={16} /> Sửa
+          </button>
+          <button className={style.deleteBtn} onClick={() => handleDelete(record.userID)}>
+            <Trash2 size={16} /> Xóa
+          </button>
+        </div>
+      ),
+    },
+  ];
+
+  // Hiển thị modal thêm/sửa người dùng
+const showModal = (mode, user = null) => {
+  setModalMode(mode);
+  setEditingUser(user);
+  if (mode === "edit" && user) {
+    modalForm.setFieldsValue({
+      ...user,
+      roleId: user.role?.roleId || user.roleId, // Set đúng roleId nếu có
+    });
+  } else {
+    modalForm.resetFields(); // Reset form khi mở modal thêm mới
+  }
+  setModalVisible(true); // Mở modal
 };
 
-//     const addUser = async (userData) => {                      // Hàm thêm người dùng          
-//   try {
-//     setLoading(true);
-//     const res = await fetch('/api/users', {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify(userData),
-//     });
-//     if (!res.ok) throw new Error('Thêm người dùng thất bại');
-//     message.success('Thêm người dùng thành công');
-//     await fetchUsers(); // cập nhật danh sách sau khi thêm
-//   } catch (err) {
-//     message.error(err.message || 'Lỗi không xác định');
-//   } finally {
-//     setLoading(false);
-//   }
-// };
+  // Đóng modal
+  const handleModalCancel = () => {
+    setModalVisible(false);
+    setEditingUser(null);
+    modalForm.resetFields();
+  };
 
-
-    const handleFormSubmit = (values) => {
-        if (modalMode === "add") {
-            // Thêm mới (giả lập ID tự tăng)
-            const newUser = {
-                ...values,
-                id: users.length ? Math.max(...users.map((u) => u.id)) + 1 : 1,
-                lastActive: "Mới cập nhật",
-                avatar: "", // hoặc có thể thêm avatar mặc định
-            };
-            setUsers((prev) => [newUser, ...prev]);
-            message.success("Thêm người dùng thành công");
-        } else if (modalMode === "edit" && currentUser) {
-            setUsers((prev) =>
-                prev.map((u) => (u.id === currentUser.id ? { ...u, ...values } : u))
-            );
-            message.success("Cập nhật người dùng thành công");
+  // Xóa người dùng qua API (soft delete)
+  const handleDelete = async (userId) => {
+    let id = userId;
+    if (!id) {
+      id = localStorage.getItem("userId");
+    }
+    if (!id) {
+      message.error("Không tìm thấy userId để xóa!");
+      return;
+    }
+    // Tìm user object từ danh sách users
+    const userToDelete = users.find(u => u.userID === id || u.userId === id);
+    if (!userToDelete) {
+      message.error("Không tìm thấy thông tin người dùng để xóa!");
+      return;
+    }
+    Modal.confirm({
+      title: "Bạn có chắc muốn xóa người dùng này?",
+      icon: <ExclamationCircleOutlined />,
+      onOk: async () => {
+        try {
+          const token = localStorage.getItem("token");
+          const realId = typeof id === "string" ? id.trim() : id;
+          // Chuẩn bị payload đầy đủ cho API update
+          const payload = {
+            userID: userToDelete.userID || userToDelete.userId,
+            fullName: userToDelete.fullName,
+            roleID: userToDelete.role?.roleId || userToDelete.roleID || userToDelete.roleId,
+            phone: userToDelete.phone,
+            email: userToDelete.email,
+            address: userToDelete.address,
+            isActive: false,
+          };
+          await axios.put(`${apiUrl}/${realId}`, payload, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          message.success("Xóa người dùng thành công");
+          fetchUsers(); // Cập nhật lại danh sách
+        } catch (err) {
+          if (err.response && err.response.data && err.response.data.message) {
+            message.error("Xóa người dùng thất bại: " + err.response.data.message);
+          } else {
+            message.error("Xóa người dùng thất bại!");
+          }
         }
-        setIsModalVisible(false);
-        setCurrentUser(null);
-        form.resetFields();
-    };
+      },
+    });
+  };
 
-    const columns = [
-  {
-    title: "Họ và tên",
-    dataIndex: "name",
-    key: "name",
-    render: (text, record) => (
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <Avatar src={record.avatar} alt={text}>
-          {!record.avatar && text.charAt(0)}
-        </Avatar>
-        <span>{text}</span>
-      </div>
-    ),
-    sorter: (a, b) => a.name.localeCompare(b.name),
-  },
-  {
-    title: "Email",
-    dataIndex: "email",
-    key: "email",
-    sorter: (a, b) => a.email.localeCompare(b.email),
-  },
-  {
-    title: "Số điện thoại",
-    dataIndex: "phone",
-    key: "phone",
-  },
-  {
-    title: "Vai trò",
-    dataIndex: "role",
-    key: "role",
-    render: (role) => {
-      let color = "blue";
-      if (role === "Giáo viên") color = "green";
-      else if (role === "Quản trị viên") color = "purple";
-      return <Tag color={color}>{role}</Tag>;
-    },
-  },
-  {
-    title: "Trạng thái",
-    dataIndex: "status",
-    key: "status",
-    render: (status) =>
-      status === "active" ? (
-        <Tag color="green">Đang hoạt động</Tag>
-      ) : (
-        <Tag color="red">Không hoạt động</Tag>
-      ),
-  },
-  {
-    title: "Hành động",
-    key: "action",
-    render: (_, record) => (
-      <>
-        <Button
-          type="link"
-          icon={<EditOutlined />}
-          onClick={() => showModal("edit", record)}
-        />
-        <Button
-          type="link"
-          danger
-          icon={<DeleteOutlined />}
-          onClick={() => handleDelete(record.id)} // Đảm bảo truyền đúng `id`
-        />
-      </>
-    ),
-  },
-];
+  // Xử lý submit form modal
+const handleModalSubmit = async (values) => {
+  try {
+    const token = localStorage.getItem("token");
+    // Lấy đúng userId từ editingUser (API trả về userId, không phải userID)
+    let userID = editingUser?.userId || editingUser?.userID;
+    if (modalMode === "add") {
+      // Thêm người dùng mới
+      const dataToSend = {
+        username: values.username,
+        password: values.password,
+        fullName: values.fullName,
+        roleID: Number(values.roleId), // Đổi tên trường cho đúng chuẩn API
+        phone: values.phone,
+        email: values.email,
+        address: values.address,
+        isActive: true,
+        isFirstLogin: true,
+      };
+      await axios.post(apiUrl, dataToSend, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      message.success("Thêm người dùng thành công");
+    } else if (modalMode === "edit" && editingUser) {
+      // Cập nhật người dùng
+      const editData = {
+        userID: userID, // Đúng tên trường
+        fullName: values.fullName,
+        roleID: Number(values.roleId),
+        phone: values.phone,
+        email: values.email,
+        address: values.address,
+        isActive: true,
+      };
+      if (!userID) {
+        message.error("Không tìm thấy userID để cập nhật!");
+        return;
+      }
+      await axios.put(`${apiUrl}/${userID}`, editData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      message.success("Cập nhật người dùng thành công");
+    }
+    fetchUsers();
+    setModalVisible(false);
+  } catch {
+    message.error("Có lỗi khi lưu người dùng!");
+  }
+};
 
-    return (
-        <Layout style={{ minHeight: "100vh" }}>
-            <Sider
-                collapsible
-                collapsed={collapsed}
-                onCollapse={setCollapsed}
-                width={240}
-                style={{ background: "#1ab3b3" }}
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  return (
+    <div className={style.layoutContainer}>
+      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+      <main className={style.layoutContent}>
+        <header className={style.dashboardHeaderBar}>
+          <div className={style.titleGroup}>
+            <h1>
+              <span className={style.textBlack}>Danh sách</span>
+              <span className={style.textAccent}> người dùng</span>
+            </h1>
+          </div>
+        </header>
+
+        <div className={style.header}>
+          <input
+            type="text"
+            placeholder="Tìm kiếm người dùng..."
+            className={style.searchBar}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
+          <button className={style.addBtn} onClick={() => showModal("add")}>Thêm người dùng</button>
+        </div>
+
+        <table className={style.studentTable}>
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Họ và tên</th>
+              <th>Email</th>
+              <th>Số điện thoại</th>
+              <th>Địa chỉ</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredUsers.length > 0 ? (
+              filteredUsers.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage).map((user, index) => {
+                const realUserId = user.userID;
+                return (
+                  <tr key={realUserId || index}>
+                    <td>{(currentPage - 1) * usersPerPage + index + 1}</td>
+                    <td>{user.fullName}</td>
+                    <td>{user.email}</td>
+                    <td>{user.phone}</td>
+                    <td>{user.address}</td>
+                    <td>
+                      <div className={style.actionGroup}>
+                        <button className={style.editBtn} onClick={() => showModal("edit", user)}>
+                          <Edit2 size={16} /> Sửa
+                        </button>
+                        <button className={style.deleteBtn} onClick={() => handleDelete(realUserId)}>
+                          <Trash2 size={16} /> Xóa
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan="6" style={{ textAlign: "center" }}>
+                  Không có dữ liệu người dùng
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        <div className={style.pagination}>
+          {[...Array(Math.ceil(filteredUsers.length / usersPerPage))].map((_, index) => (
+            <button
+              key={index}
+              onClick={() => handlePageChange(index + 1)}
+              className={currentPage === index + 1 ? style.activePage : ""}
             >
-                <div
-                    className="sidebar-logo"
-                    style={{ color: "white", padding: 20, fontWeight: "bold", fontSize: 20 }}
-                >
-                    <img
-                        src={Logo}
-                        alt="EduHealth Logo"
-                        style={{ width: 37, height: 41, marginRight: 10 }}
-                    />
-                    {!collapsed && "EduHealth"}
-                </div>
-                <div
-                    className="sidebar-profile"
-                    style={{ padding: "0 20px 20px", color: "white" }}
-                >
-                    <div className="profile-info">
-                        <p style={{ margin: 0, fontWeight: "600", fontSize: 16 }}>
-                            Nguyễn Ngọc Viên Ka
-                        </p>
-                        <p style={{ margin: 0, fontSize: 12, color: "#c0e6e6" }}>Quản lý</p>
-                    </div>
-                </div>
-                <Menu
-                    theme="dark"
-                    mode="inline"
-                    defaultSelectedKeys={["users"]}
-                    onClick={({ key }) => {
-                        const item = sidebarItems.find((i) => i.key === key);
-                        if (item) navigate(item.route);
-                    }}
-                    items={sidebarItems.map(({ key, icon, label }) => ({
-                        key,
-                        icon,
-                        label,
-                    }))}
-                    style={{ background: "transparent" }}
-                />
-            </Sider>
-            <Layout>
-                <Header
-                    style={{
-                        padding: "0 20px",
-                        background: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                    }}
-                >
-                    <Input
-                        placeholder="Tìm kiếm người dùng..."
-                        prefix={<SearchOutlined />}
-                        style={{ width: 300 }}
-                        onChange={(e) => setSearchText(e.target.value)}
-                        allowClear
-                    />
-                    <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
-                        <Button type="text" icon={<QuestionCircleOutlined />} />
-                        <Button type="text" icon={<BellOutlined />} />
-                        <div style={{ fontWeight: "600" }}>Nguyễn Ngọc Viên Ka</div>
-                    </div>
-                </Header>
-                <Content
-                    style={{ margin: 20, background: "#fff", padding: 20, borderRadius: 8 }}
-                >
-                    <Title level={3}>Danh sách người dùng</Title>
-                    <Button
-                        type="primary"
-                        style={{ marginBottom: 16 }}
-                        onClick={() => showModal("add")}
-                    >
-                        Thêm người dùng
-                    </Button>
-                    <Table
-                        rowKey="id"
-                        dataSource={filteredUsers}
-                        columns={columns}
-                        loading={loading}
-                        pagination={{ pageSize: 5 }}
-                    />
-                </Content>
+              {index + 1}
+            </button>
+          ))}
+        </div>
 
-                {/* Modal thêm/sửa */}
-                <Modal
-                    title={modalMode === "add" ? "Thêm người dùng" : "Chỉnh sửa người dùng"}
-                    visible={isModalVisible}
-                    onCancel={handleModalCancel}
-                    onOk={() => form.submit()}
-                    okText={modalMode === "add" ? "Thêm" : "Lưu"}
-                    destroyOnClose
-                >
-                    <Form
-                        form={form}
-                        layout="vertical"
-                        onFinish={handleFormSubmit}
-                        initialValues={{ status: "active", role: "Học sinh" }}
-                    >
-                        <Form.Item
-                            name="name"
-                            label="Họ và tên"
-                            rules={[{ required: true, message: "Vui lòng nhập tên người dùng" }]}
-                        >
-                            <Input />
-                        </Form.Item>
-                        <Form.Item
-                            name="email"
-                            label="Email"
-                            rules={[
-                                { required: true, message: "Vui lòng nhập email" },
-                                { type: "email", message: "Email không hợp lệ" },
-                            ]}
-                        >
-                            <Input />
-                        </Form.Item>
-                        <Form.Item name="phone" label="Số điện thoại">
-                            <Input />
-                        </Form.Item>
-                        <Form.Item
-                            name="role"
-                            label="Vai trò"
-                            rules={[{ required: true, message: "Vui lòng chọn vai trò" }]}
-                        >
-                            <Select>
-                                <Option value="Học sinh">Học sinh</Option>
-                                <Option value="Giáo viên">Giáo viên</Option>
-                                <Option value="Quản trị viên">Quản trị viên</Option>
-                            </Select>
-                        </Form.Item>
-                        <Form.Item name="status" label="Trạng thái" rules={[{ required: true }]}>
-                            <Select>
-                                <Option value="active">Đang hoạt động</Option>
-                                <Option value="inactive">Không hoạt động</Option>
-                            </Select>
-                        </Form.Item>
-                    </Form>
-                </Modal>
-            </Layout>
-        </Layout>
-    );
+        {/* Modal thêm/sửa người dùng */}
+        <Modal
+  open={modalVisible}
+  title={modalMode === "add" ? "Thêm người dùng" : "Chỉnh sửa người dùng"}
+  onCancel={handleModalCancel}
+  onOk={() => modalForm.submit()}  // Khi nhấn Lưu hoặc Thêm sẽ gọi submit form
+  okText={modalMode === "add" ? "Thêm" : "Lưu"}
+>
+  <Form form={modalForm} layout="vertical" onFinish={handleModalSubmit}>
+    <Form.Item name="fullName" label="Họ và tên" rules={[{ required: true, message: "Vui lòng nhập tên người dùng" }]}>
+      <Input />
+    </Form.Item>
+    <Form.Item name="email" label="Email" rules={[{ required: true, message: "Vui lòng nhập email" }, { type: "email", message: "Email không hợp lệ" }]}>
+      <Input />
+    </Form.Item>
+    <Form.Item name="phone" label="Số điện thoại">
+      <Input />
+    </Form.Item>
+    <Form.Item name="address" label="Địa chỉ" rules={[{ required: true, message: "Vui lòng nhập địa chỉ" }]}>
+      <Input />
+    </Form.Item>
+    <Form.Item name="roleId" label="Vai trò" rules={[{ required: true, message: "Vui lòng chọn vai trò" }]}> 
+      <Select> 
+        <Option value={1}>Manager</Option> 
+        <Option value={2}>Nurse</Option> 
+        <Option value={3}>Parent</Option> 
+      </Select> 
+    </Form.Item>
+    {modalMode === "add" && (
+      <>
+        <Form.Item name="username" label="Tên đăng nhập" rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập" }]}> 
+          <Input /> 
+        </Form.Item>
+        <Form.Item
+          name="password"
+          label="Mật khẩu"
+          rules={[
+            { required: true, message: "Vui lòng nhập mật khẩu" },
+            { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự" }
+          ]} 
+        > 
+          <Input.Password /> 
+        </Form.Item>
+      </>
+    )}
+  </Form>
+</Modal>
+      </main>
+    </div>
+  );
 };
 
 export default UsersList;

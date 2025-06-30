@@ -1,0 +1,437 @@
+.container {
+  display: flex;
+  background: linear-gradient(120deg, #f0f4ff 0%, #e0e7ff 100%);
+  min-height: 100vh;
+}
+
+.content {
+  flex: 1;
+  padding: 32px 48px;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  scroll-behavior: smooth;
+}
+
+.title {
+  font-size: 40px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #3730a3;
+  letter-spacing: 1px;
+  width: 420px;
+  max-width: 100%;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #6366f1;
+  margin-bottom: 24px;
+  font-weight: 500;
+}
+
+.mainSection {
+  display: flex;
+  gap: 36px;
+  flex: 1;
+  align-items: stretch; 
+}
+
+.medicineInfo {
+  flex: 2;
+  background: #fff;
+  padding: 28px 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(79, 70, 229, 0.08);
+  border: 1px solid #e0e7ff;
+  transition: box-shadow 0.2s;
+}
+
+.medicineInfo:hover {
+  box-shadow: 0 8px 32px rgba(79, 70, 229, 0.15);
+}
+
+.box {
+  background: linear-gradient(90deg, #f3f4f6 0%, #e0e7ff 100%);
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 18px;
+  border: 1px solid #e0e7ff;
+  transition: transform 0.2s;
+}
+
+.boxYellow {
+  background: #fffbea;
+  border: 1px solid #fde68a;
+}
+
+.boxBlue {
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+}
+
+.boxGreen {
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+}
+
+.inputGroup {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.inputField {
+  padding: 10px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  font-size: 15px;
+  width: 60%;
+  transition: border-color 0.2s;
+  background: #fff;
+  color: #222;
+}
+
+.inputField:focus {
+  border-color: #6366f1;
+}
+
+.confirmBtn {
+  background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+  color: white;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+}
+
+.confirmBtn:hover {
+  background: linear-gradient(90deg, #4f46e5 0%, #6366f1 100%);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.15);
+}
+
+.uploadSection {
+  text-align: center;
+  padding: 24px;
+  border: 2px dashed #a5b4fc;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  background: #f8fafc;
+  transition: border-color 0.2s;
+}
+
+.uploadSection:hover {
+  border-color: #6366f1;
+}
+
+.uploadText {
+  color: #4f46e5;
+  font-weight: 700;
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.sendBtn {
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+  color: white;
+  border: none;
+  padding: 12px 0;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.sendBtn:hover {
+  background: linear-gradient(90deg, #059669 0%, #10b981 100%);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15);
+}
+
+.historySection {
+  flex: 1;
+  background: #fff;
+  padding: 24px 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(99, 102, 241, 0.08);
+  border: 1px solid #e0e7ff;
+  
+}
+
+.historyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.historyHeader span {
+  font-weight: 700;
+  font-size: 18px;
+  color: #3730a3;
+}
+
+.historyItem {
+  border: 1px solid #e0e7ff;
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 18px;
+  background: #f8fafc;
+  transition: box-shadow 0.2s;
+}
+
+.historyItem:hover {
+  box-shadow: 0 2px 12px rgba(19, 159, 155, 0.1);
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 8px 0;
+  padding: 3px 12px;
+  border-radius: 18px;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+  transition: box-shadow 0.25s, transform 0.18s;
+  position: relative;
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.status.done {
+  background: linear-gradient(90deg, #bbf7d0 0%, #34d399 100%);
+  color: #047857;
+  box-shadow: 0 0 8px #6ee7b7a0;
+  border: 1.5px solid #10b981;
+}
+
+.status.done::before {
+  content: "✔️";
+  font-size: 1.1em;
+}
+
+.status.pending {
+  background: linear-gradient(90deg, #fef9c3 0%, #fde68a 100%);
+  color: #b45309;
+  box-shadow: 0 0 8px #fde68a80;
+  border: 1.5px solid #facc15;
+}
+
+.status.pending::before {
+  content: "⏳";
+  font-size: 1.1em;
+}
+
+.status.reject {
+  background: linear-gradient(90deg, #fecaca 0%, #f87171 100%);
+  color: #b91c1c;
+  box-shadow: 0 0 8px #fca5a580;
+  border: 1.5px solid #ef4444;
+}
+
+.status.reject::before {
+  content: "❌";
+  font-size: 1.1em;
+}
+
+.status:hover {
+  box-shadow: 0 0 18px 2px #6366f155, 0 2px 8px rgba(99, 102, 241, 0.08);
+  transform: scale(1.04);
+}
+
+.statusRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.medicineSectionTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #3730a3;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.marquee {
+  max-width: 100%;
+  overflow: visible;
+  white-space: nowrap;
+  box-sizing: border-box;
+  position: relative;
+  height: 28px;
+  margin-bottom: 16px;
+}
+
+.marqueeText {
+  display: inline-block;
+  font-size: 16px;
+  color: #6366f1;
+  font-weight: 500;
+}
+
+.reviewBtn,
+.viewAllBtn {
+  background: #20b2aa;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(32, 178, 170, 0.08);
+}
+
+.reviewBtn:hover,
+.viewAllBtn:hover {
+  background: #178f86;
+  box-shadow: 0 4px 16px rgba(32, 178, 170, 0.15);
+}
+
+.searchBox {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  margin-bottom: 18px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.searchBox:focus {
+  border-color: #6366f1;
+}
+
+.fadeIn {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.popupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(30, 41, 59, 0.35);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.popupContent {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 600px;
+  width: 95vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 40px rgba(30, 41, 59, 0.18);
+  padding: 24px 18px 18px 18px;
+  position: relative;
+  animation: fadeIn 0.3s;
+}
+
+.popupHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  font-size: 18px;
+  color: #3730a3;
+  margin-bottom: 18px;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #6366f1;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.closeBtn:hover {
+  color: #ef4444;
+  background: #f3f4f6;
+}
+
+.popupBody {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.popupBody::-webkit-scrollbar,
+.historySection::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+.popupBody:hover::-webkit-scrollbar,
+.historySection:hover::-webkit-scrollbar {
+  width: 8px;
+}
+
+.popupBody:hover::-webkit-scrollbar-track,
+.historySection:hover::-webkit-scrollbar-track {
+  background: #f0f4ff;
+  border-radius: 4px;
+}
+.popupBody:hover::-webkit-scrollbar-thumb,
+.historySection:hover::-webkit-scrollbar-thumb {
+  background-color: #a5b4fc;
+  border-radius: 8px;
+  border: 2px solid #f0f4ff;
+}
+.popupBody:hover::-webkit-scrollbar-thumb:hover,
+.historySection:hover::-webkit-scrollbar-thumb:hover {
+  background-color: #6366f1;
+}
+.selectWrapper {
+  max-width: 720px; /* hoặc cùng chiều rộng với .medicineInfo */
+  margin: 0 auto 24px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.selectStudent {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 16px;
+  width: 100%;
+  background-color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: border 0.2s ease;
+}
+
+.selectStudent:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}

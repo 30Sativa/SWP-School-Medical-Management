@@ -1,0 +1,211 @@
+.layoutContainer {
+  display: flex;
+  align-items: stretch;
+  min-height: 100vh;
+}
+
+.layoutContent {
+  flex: 1;
+  background-color: #f9fafb;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Header group */
+.dashboardHeaderBar {
+  margin-bottom: 20px;
+}
+
+.titleGroup h1 {
+  font-size: 50px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.textBlack {
+  color: #111827;
+}
+
+.textAccent {
+  color: #20b2aa;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* Search Bar */
+.searchBar {
+  padding: 10px;
+  width: 250px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  background-color: #f4f4f4;
+  color: #333;
+  width: 1030px !important;
+}
+
+.searchBar:focus {
+  outline: none;
+  border-color: #20b2aa;
+  background-color: #ffffff;
+}
+
+.searchBar::placeholder {
+  color: #888;
+}
+
+/* Add Button */
+.addBtn {
+  padding: 5px 15px;
+  background-color: #20b2aa;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+  height: 41px !important;
+  white-space: nowrap !important;
+  margin-left: 5px;
+}
+
+.addBtn:hover {
+  background-color: #178d89;
+}
+
+/* Table */
+.studentTable {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.studentTable th,
+.studentTable td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.studentTable th {
+  background-color: #f4f4f4;
+  font-weight: 600;
+}
+
+/* Action Button */
+.btn {
+  background-color: #20b2aa;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #20b2aa;
+}
+
+/* Pagination */
+.pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.pagination button {
+  margin: 0 5px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  background-color: #e0e0e0; /* xám nhạt */
+  color: #222; /* chữ đen */
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.pagination button:hover {
+  background-color: #ccc;
+}
+
+.pagination .activePage {
+  background-color: #20b2aa; /* xanh chủ đạo */
+  color: #fff;
+}
+/* Sidebar */
+.sb-sidebar {
+  background-color: #20b2aa;
+  color: white;
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width 0.3s ease, padding 0.3s ease; /* Thêm transition cho width và padding */
+}
+
+/* Khi sidebar mở rộng */
+.sb-sidebar.expanded {
+  width: 220px; /* Sidebar rộng khi mở */
+  padding-left: 20px; /* Khoảng cách giữa nội dung và cạnh */
+  padding-right: 20px;
+}
+
+/* Khi sidebar thu gọn */
+.sb-sidebar.collapsed {
+  width: 64px; /* Sidebar thu gọn */
+  padding-left: 10px; /* Khoảng cách giữa nội dung và cạnh */
+  padding-right: 10px;
+}
+
+/* Action Group */
+.actionGroup {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.editBtn {
+  background: #20b2aa;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 14px 5px 10px;
+  font-size: 15px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 4px rgba(32, 178, 170, 0.08);
+  cursor: pointer;
+}
+.editBtn:hover {
+  background: #178d89;
+}
+
+.deleteBtn {
+  background: #fff0f0;
+  color: #e11d48;
+  border: 1px solid #ffe4e6;
+  border-radius: 6px;
+  padding: 5px 14px 5px 10px;
+  font-size: 15px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 4px rgba(225, 29, 72, 0.08);
+  cursor: pointer;
+}
+.deleteBtn:hover {
+  background: #ffe4e6;
+  color: #be123c;
+}

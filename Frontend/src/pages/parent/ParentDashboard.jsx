@@ -1,12 +1,91 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/sb-Parent/Sidebar";
-import styles from "../../assets/css/ParentDashboard.module.css"; // ✅ Đúng cách import CSS module
+import styles from "../../assets/css/ParentDashboard.module.css";
+import axios from "axios";
+import dayjs from "dayjs";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ParentDashboard = () => {
+  const parentId = localStorage.getItem("userId");
+  const [overview, setOverview] = useState(null);
+  const [myStudents, setMyStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Feedback
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [feedbackContent, setFeedbackContent] = useState("");
+
+  // Tìm kiếm và lọc
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterSeverity, setFilterSeverity] = useState("");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const overviewRes = await axios.get(
+          "https://swp-school-medical-management.onrender.com/api/Dashboard/overview"
+        );
+        setOverview(overviewRes.data.data);
+
+        const studentRes = await axios.get(
+          `https://swp-school-medical-management.onrender.com/api/Student/by-parent/${parentId}`
+        );
+        setMyStudents(studentRes.data.data || []);
+      } catch (error) {
+        console.error("❌ Lỗi khi tải dữ liệu:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [parentId]);
+
+  const handleSubmitFeedback = async () => {
+    if (!feedbackContent.trim()) return toast.error("❌ Nội dung không được để trống");
+
+    try {
+      await axios.post("https://swp-school-medical-management.onrender.com/api/ParentFeedback", {
+        parentId,
+        content: feedbackContent,
+        createdAt: new Date().toISOString(),
+      });
+
+      toast.success("Gửi góp ý thành công!");
+      setFeedbackContent("");
+      setShowFeedbackForm(false);
+    } catch (err) {
+      toast.error("🚫 Gửi góp ý thất bại");
+      console.error(err);
+    }
+  };
+
+  if (loading) return <p>🔄 Đang tải dữ liệu...</p>;
+  if (!overview || myStudents.length === 0) return <p>⚠️ Không có dữ liệu để hiển thị.</p>;
+
+  const myStudentNames = myStudents.map((s) => s.fullName);
+
+  const filteredMedications = overview.recentMedicationRequests.filter(
+    (item) =>
+      myStudentNames.includes(item.studentName) &&
+      (item.medicationName.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+        item.studentName.toLowerCase().includes(searchKeyword.toLowerCase())) &&
+      (filterStatus === "" || item.status === filterStatus)
+  );
+
+  const filteredEvents = overview.recentMedicalEvents.filter(
+    (event) =>
+      myStudentNames.includes(event.studentName) &&
+      (event.eventType.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+        event.studentName.toLowerCase().includes(searchKeyword.toLowerCase())) &&
+      (filterSeverity === "" || event.severity === filterSeverity)
+  );
+
   return (
     <div className={styles.container}>
       <Sidebar />
-
       <main className={styles.content}>
         <header>
           <div className={styles["dashboard-header-bar"]}>
@@ -15,19 +94,19 @@ const ParentDashboard = () => {
                 <span className={styles["text-accent"]}>|</span>
                 <span className={styles["text-black"]}>Dash</span>
                 <span className={styles["text-accent"]}>board</span>
-                <h5 className={styles["text-welcome"]}>Chào mừng trở lại!</h5>
               </h1>
+              <h5 className={styles["text-welcome"]}>
+                Chào mừng trở lại, phụ huynh của {myStudents[0]?.fullName}!
+              </h5>
             </div>
           </div>
         </header>
-
-        {/* ACTION CARDS */}
         <div className={styles["top-action-row"]}>
           <div className={styles["action-card-v2"]}>
             <div className={styles["card-text"]}>
               <h4>Đóng góp ý kiến</h4>
               <p>Hãy đóng góp ý kiến về cho trường nhé</p>
-              <a href="#">ĐÓNG GÓP →</a>
+              <a href="#" onClick={() => setShowFeedbackForm(true)}>ĐÓNG GÓP →</a>
             </div>
             <div className={styles["card-icon"]}>
               <div className={styles["icon-circle"]}>💬</div>
@@ -37,7 +116,6 @@ const ParentDashboard = () => {
           <div className={styles["action-card-v2"]}>
             <div className={styles["card-text"]}>
               <h4>Hướng dẫn sử dụng</h4>
-              <p></p>
               <a href="#">TÌM HIỂU THÊM →</a>
             </div>
             <div className={styles["card-icon"]}>
@@ -51,124 +129,111 @@ const ParentDashboard = () => {
           <div className={styles["info-header"]}>
             <h3>Thông tin chung</h3>
             <div className={styles["info-tools"]}>
-              <input type="text" placeholder="🔍 Tìm kiếm thông tin" />
-              <select>
-                <option>Tất cả</option>
-                <option>Sức khỏe</option>
-                <option>Phòng y tế</option>
+              <input
+                type="text"
+                placeholder="🔍 Tìm kiếm tên học sinh, thuốc, sự kiện"
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+              />
+              <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+                <option value="">Trạng thái đơn thuốc</option>
+                <option value="Đã duyệt">Đã duyệt</option>
+                <option value="Chờ duyệt">Chờ duyệt</option>
+              </select>
+              <select value={filterSeverity} onChange={(e) => setFilterSeverity(e.target.value)}>
+                <option value="">Mức độ sự kiện</option>
+                <option value="Nhẹ">Nhẹ</option>
+                <option value="Trung bình">Trung bình</option>
+                <option value="Nặng">Nặng</option>
               </select>
             </div>
           </div>
 
           <div className={styles["info-cards"]}>
-            {[1, 2, 3, 4].map((_, i) => (
-              <div className={styles["info-card"]} key={i}>
-                <div className={styles["card-top"]}>
-                  <h4>Dự kiến khám sức khỏe định kỳ</h4>
-                  <button className={styles["icon-btn"]}>💚</button>
-                </div>
-                <p>Ngày: 01-05/06/2025</p>
-                <p>Đối tượng: Tất cả học sinh</p>
-                <p className={styles.note}>
-                  Phòng y tế sẽ điều chỉnh lại thời gian làm việc...
-                </p>
-                <div className={styles["card-bottom"]}>
-                  <button className={styles["view-btn"]}>Xem chi tiết</button>
+            <div className={styles["info-card"]}>
+              <h4>Số học sinh của bạn</h4>
+              <p>{myStudents.length} học sinh</p>
+            </div>
+            <div className={styles["info-card"]}>
+              <h4>Sự kiện y tế gần đây</h4>
+              <p>{filteredEvents.length} sự kiện</p>
+            </div>
+            <div className={styles["info-card"]}>
+              <h4>Đơn thuốc đã gửi</h4>
+              <p>{filteredMedications.length} đơn</p>
+            </div>
+          </div>
+        </div>
+
+        {/* GRID PHẢI 2 CỘT */}
+        <div className={styles["main-right-grid"]}>
+          <div className={styles["health-check-box"]}>
+            <h4>Đơn thuốc gần đây</h4>
+            {filteredMedications.length === 0 && <p>Không có đơn thuốc gần đây.</p>}
+            {filteredMedications.map((item, i) => (
+              <div className={styles["health-item"]} key={i}>
+                <div className={styles["health-left"]}>
+                  <h5>{item.studentName}</h5>
+                  <p>Thuốc: {item.medicationName}</p>
+                  <p>Ngày gửi: {dayjs(item.requestDate).format("DD/MM/YYYY HH:mm")}</p>
+                  <span className={`${styles.tag} ${styles.blue}`}>{item.status}</span>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className={styles.pagination}>
-            <span>Hiển thị 4 của 75 bài đăng</span>
-            <div className={styles["page-nav"]}>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button key={n} className={n === 1 ? styles.active : ""}>
-                  {n}
-                </button>
+          <div className={`${styles.box} ${styles.reminders}`}>
+            <h4>Sự kiện y tế gần đây</h4>
+            <div className={styles["reminder-list"]}>
+              {filteredEvents.length === 0 && <p>Không có sự kiện gần đây.</p>}
+              {filteredEvents.map((event, i) => (
+                <div
+                  key={i}
+                  className={`${styles["reminder-card"]} ${
+                    event.severity === "Nhẹ"
+                      ? styles.green
+                      : event.severity === "Trung bình"
+                      ? styles.yellow
+                      : styles.red
+                  }`}
+                >
+                  <div className={styles["reminder-icon"]}><span>⚠️</span></div>
+                  <div className={styles["reminder-content"]}>
+                    <strong>{event.studentName}</strong>
+                    <p>{event.eventType} - {event.severity}</p>
+                    <p>{dayjs(event.eventDate).format("DD/MM/YYYY HH:mm")}</p>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* GRID PHẢI 2 CỘT: Kiểm tra + Nhắc nhở */}
-        <div className={styles["main-right-grid"]}>
-          {/* 1. Kiểm tra sức khỏe */}
-          <div className={styles["health-check-box"]}>
-            <h4>Kiểm tra sức khỏe</h4>
-            {[1, 2, 3].map((_, i) => (
-              <div className={styles["health-item"]} key={i}>
-                <div className={styles["health-left"]}>
-                  <h5>Kiểm tra sức khỏe định kỳ</h5>
-                  <p>Ngày: 01-05/06/2025</p>
-                  <p>Đối tượng: Tất cả học sinh</p>
-                  <span className={`${styles.tag} ${styles.blue}`}>
-                    Sắp diễn ra
-                  </span>
-                </div>
-                <div className={styles["health-right"]}>
-                  <p className={styles.count}>145 học sinh</p>
-                  <button className={styles["btn-join"]}>Tham gia</button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* 2. Cảnh báo & Nhắc nhở */}
-          <div className={`${styles.box} ${styles.reminders}`}>
-            <h4>Cảnh báo & Nhắc nhở</h4>
-            <div className={styles["reminder-list"]}>
-              {/* 1. Thuốc sắp hết */}
-              <div className={`${styles["reminder-card"]} ${styles.yellow}`}>
-                <div className={styles["reminder-icon"]}>
-                  <span role="img" aria-label="alert">
-                    🟡
-                  </span>
-                </div>
-                <div className={styles["reminder-content"]}>
-                  <strong>Thuốc sắp hết</strong>
-                  <p>Số thuốc phụ huynh cung cấp gần hết</p>
-                  <a href="#">Bổ sung thêm</a>
-                </div>
-              </div>
-
-              {/* 2. Giấy tờ còn thiếu */}
-              <div className={`${styles["reminder-card"]} ${styles.blue}`}>
-                <div className={styles["reminder-icon"]}>
-                  <span role="img" aria-label="file">
-                    📄
-                  </span>
-                </div>
-                <div className={styles["reminder-content"]}>
-                  <strong>Giấy tờ còn thiếu</strong>
-                  <p>Trần Văn Hùng chưa nộp giấy khai sinh</p>
-                  <a href="#">Nộp</a>
-                </div>
-              </div>
-
-              {/* 3. Sự kiện sắp tới */}
-              <div className={`${styles["reminder-card"]} ${styles.green}`}>
-                <div className={styles["reminder-icon"]}>
-                  <span role="img" aria-label="calendar">
-                    📅
-                  </span>
-                </div>
-                <div className={styles["reminder-content"]}>
-                  <strong>Sự kiện sắp tới</strong>
-                  <p>
-                    Khám sức khỏe định kỳ: 01/06/2025
-                    <br />
-                    Tiêm phòng cúm mùa: 10/06/2025
-                  </p>
-                  <a href="#">Xem thêm</a>
-                </div>
+        {/* FORM GÓP Ý */}
+        {showFeedbackForm && (
+          <div className={styles.feedbackOverlay}>
+            <div className={styles.feedbackModal}>
+              <h3>Góp ý cho trường</h3>
+              <textarea
+                rows="5"
+                placeholder="Nhập ý kiến của bạn..."
+                value={feedbackContent}
+                onChange={(e) => setFeedbackContent(e.target.value)}
+              />
+              <div className={styles.modalActions}>
+                <button onClick={handleSubmitFeedback}>Gửi</button>
+                <button onClick={() => setShowFeedbackForm(false)}>Hủy</button>
               </div>
             </div>
           </div>
-        </div>
+        )}
+
+        <ToastContainer />
       </main>
     </div>
   );
 };
 
 export default ParentDashboard;
+
+

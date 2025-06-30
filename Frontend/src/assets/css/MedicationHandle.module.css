@@ -1,0 +1,160 @@
+/* MedicationHandle.module.css */
+
+.container {
+  display: flex;
+  min-height: 100vh;
+  background: #f8f9fa;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+
+.table th,
+.table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+.table th {
+  background-color: #20b2aa;
+  font-weight: 600;
+  color: white;
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.confirmBtn,
+.rejectBtn {
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  white-space: nowrap; /* 👉 Không cho phép ngắt dòng */
+}
+
+.confirmBtn {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.confirmBtn:hover {
+  background-color: #27ae60;
+}
+
+.rejectBtn {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.rejectBtn:hover {
+  background-color: #c0392b;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: red;
+}
+
+.pending {
+  background-color: #f0f0f0;
+  color: #7f8c8d;
+}
+
+.approved {
+  background-color: #d1f2eb;
+  color: #1abc9c;
+}
+
+.rejected {
+  background-color: #f9d6d5;
+  color: #e74c3c;
+}
+
+.pagination {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.pageButton {
+  border: none;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.pageButton.active {
+  background-color: #20b2aa;
+  color: #fff;
+  border-color: #20b2aa;
+}
+
+.toggleButtons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.toggleButton {
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.toggleButton.active {
+  background-color: #1abc9c;
+  color: #fff;
+  border-color: #1abc9c;
+}
+
+.attachmentLink {
+  color: #1abc9c;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.nullText {
+  color: red;
+  font-weight: 500;
+}

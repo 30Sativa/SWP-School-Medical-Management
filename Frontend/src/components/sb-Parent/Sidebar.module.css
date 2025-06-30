@@ -1,0 +1,97 @@
+/* Sidebar.module.css */
+.sbSidebar {
+  background-color: #20b2aa;
+  color: white;
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* ✅ Đổi thành min-height để match nội dung dài */
+  transition: width 0.3s ease;
+  overflow: hidden;
+}
+
+.sbSidebar.expanded {
+  width: 220px;
+}
+
+.sbSidebar.collapsed {
+  width: 64px;
+}
+
+.toggleBtn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 8px;
+  margin-bottom: 24px;
+  font-size: 20px;
+  align-self: flex-start;
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+  height: 48px;
+}
+.logoutButton {
+  background-color: #000 !important;
+  color: #fff !important;
+  border: none;
+  margin-top: 16px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.logoutButton:hover {
+  background-color: #333 !important;
+  cursor: pointer;
+}
+
+.navItem:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.sbSidebar.collapsed .navItem span {
+  display: none;
+}
+
+.navItem.active {
+  background-color: rgba(255, 255, 255, 0.15);
+  font-weight: bold;
+}
+
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  height: 48px; /* giống navItem */
+  padding: 0 20px;
+  gap: 12px;
+}
+
+.menuIcon {
+  color: white;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.systemName {
+  font-size: 17px;
+  font-weight: 600;
+  color: white;
+  white-space: nowrap;
+}
+

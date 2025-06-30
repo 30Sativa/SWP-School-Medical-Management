@@ -1,0 +1,86 @@
+.container {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(120deg, #f0f4ff 0%, #e0e7ff 100%);
+}
+
+.content {
+  flex: 1;
+  padding: 40px 60px;
+}
+
+/* Tiêu đề trang chính */
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 10px;
+
+  background: linear-gradient(to right, #4338ca, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #1e3a8a; 
+}
+
+/* Dòng phụ đề */
+.subtitle {
+  font-size: 17px;
+  font-weight: 500;
+  margin-bottom: 30px;
+  line-height: 1.6;
+
+  background: linear-gradient(to right, #4f46e5, #3b82f6); 
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #4f46e5;
+}
+
+.historyList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+.historyCard {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid #c7d2fe;
+  transition: transform 0.2s;
+}
+
+.historyCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.historyCard h3 {
+  font-size: 20px;
+  color: #334155;
+  margin-bottom: 12px;
+}
+
+.historyCard p {
+  font-size: 15px;
+  color: #475569;
+  margin: 6px 0;
+}
+
+.status {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.completed {
+  background: linear-gradient(90deg, #bbf7d0 0%, #34d399 100%);
+  color: #065f46;
+}
+
+.processing {
+  background: linear-gradient(90deg, #fde68a 0%, #f59e0b 100%);
+  color: #78350f;
+}

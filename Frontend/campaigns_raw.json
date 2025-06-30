@@ -1,0 +1,26 @@
+﻿
+
+StatusCode        : 200
+StatusDescription : OK
+Content           : [{"campaignId":1,"title":"Kiểm tra sức khỏe định kỳ 
+                    2025","date":"2025-06-20","description":"Kiểm tra chiều cao, cân nặng, thị lực, tai 
+                    mũi họng","createdBy":"0d04433e-f36b-1410-8ba6-0066834e4bab","cr...
+RawContent        : HTTP/1.1 200 OK
+                    Transfer-Encoding: chunked
+                    Connection: keep-alive
+                    rndr-id: 628455dc-ba2e-4782
+                    vary: Accept-Encoding
+                    x-render-origin-server: Kestrel
+                    cf-cache-status: DYNAMIC
+                    CF-RAY: 954482587f3c...
+Forms             : {}
+Headers           : {[Transfer-Encoding, chunked], [Connection, keep-alive], [rndr-id, 
+                    628455dc-ba2e-4782], [vary, Accept-Encoding]...}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : System.__ComObject
+RawContentLength  : 1153
+
+
+
