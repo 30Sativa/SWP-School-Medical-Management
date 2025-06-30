@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/sb-Parent/Sidebar";
-import styles from "../../assets/css/ParentDashboard.module.css";
+import styles from "../../assets/css/parentDashboard.module.css";
 import axios from "axios";
 import dayjs from "dayjs";
 import { toast, ToastContainer } from "react-toastify";
