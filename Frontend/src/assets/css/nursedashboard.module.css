@@ -126,3 +126,23 @@
   border: none;
   cursor: pointer;
 }
+
+.btnExport {
+  padding: 8px 12px;
+  background: #20b2aa;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.btnExport:hover {
+  background: #20b2aa;
+}
+
+.exportControls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}

@@ -30,6 +30,8 @@ import HealthCheckCampaign from "../pages/manager/HealthCheckCampaign";
 import HealthCheckList from "../pages/nurse/HealthCheckList";
 import HealthCheckDetail from "../pages/nurse/HealthCheckDetail";
 import HealthCheckRecord from "../pages/nurse/HealthCheckRecord";
+import NurseReport from "../pages/nurse/NurseReport";
+import ViewBlog from "../pages/nurse/viewBlog";
 const AppRouter = () => {
   return (
     <Routes>
@@ -66,6 +68,8 @@ const AppRouter = () => {
       <Route path="/health-check" element={<HealthCheckList />} />
       <Route path="/healthcheck/:campaignId" element={<HealthCheckDetail />} />
       <Route path="/health-record/:recordId" element={<HealthCheckRecord />} />
+      <Route path="/report" element={<NurseReport />} />
+      <Route path="/viewBlog" element={<ViewBlog />} />
     </Routes>
   );
 };

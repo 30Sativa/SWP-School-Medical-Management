@@ -132,13 +132,13 @@ const Sidebar = () => {
         </NavLink>
 
         <NavLink
-          to="/notifications"
+          to="/viewBlog"
           className={({ isActive }) =>
             `${style.navItem} ${isActive ? style.active : ""}`
           }
         >
           <Bell size={20} />
-          <span>Thông báo</span>
+          <span>Blog</span>
         </NavLink>
         <NavLink
           to="/supplies"

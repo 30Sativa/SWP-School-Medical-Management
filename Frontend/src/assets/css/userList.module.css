@@ -45,6 +45,7 @@
   border: 1px solid #ddd;
   background-color: #f4f4f4;
   color: #333;
+  width: 1030px !important;
 }
 
 .searchBar:focus {
@@ -59,13 +60,16 @@
 
 /* Add Button */
 .addBtn {
-  padding: 10px 15px;
+  padding: 5px 15px;
   background-color: #20b2aa;
   color: white;
   border: none;
   cursor: pointer;
   border-radius: 5px;
   transition: background-color 0.3s ease;
+  height: 41px !important;
+  white-space: nowrap !important;
+  margin-left: 5px;
 }
 
 .addBtn:hover {
@@ -179,7 +183,7 @@
   align-items: center;
   gap: 4px;
   transition: background 0.2s, box-shadow 0.2s;
-  box-shadow: 0 1px 4px rgba(32,178,170,0.08);
+  box-shadow: 0 1px 4px rgba(32, 178, 170, 0.08);
   cursor: pointer;
 }
 .editBtn:hover {
@@ -198,7 +202,7 @@
   align-items: center;
   gap: 4px;
   transition: background 0.2s, box-shadow 0.2s;
-  box-shadow: 0 1px 4px rgba(225,29,72,0.08);
+  box-shadow: 0 1px 4px rgba(225, 29, 72, 0.08);
   cursor: pointer;
 }
 .deleteBtn:hover {

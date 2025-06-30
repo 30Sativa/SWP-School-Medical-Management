@@ -52,6 +52,9 @@ const Incident = () => {
   const [classList, setClassList] = useState([]);
   const [selectedClass, setSelectedClass] = useState("");
   const [classStudents, setClassStudents] = useState([]);
+  const [allStudents, setAllStudents] = useState([]);
+  const [showAllStudents, setShowAllStudents] = useState(false);
+  const [searchStudent, setSearchStudent] = useState("");
   const [newEvent, setNewEvent] = useState({
     studentId: "",
     eventTypeId: "",
@@ -131,11 +134,22 @@ const Incident = () => {
       })
       .then((res) => {
         console.log("📥 Danh sách học sinh:", res.data);
-        setStudents(Array.isArray(res.data.data) ? res.data.data : []);
+        const studentData = Array.isArray(res.data.data) ? res.data.data : [];
+        setStudents(studentData);
+        setAllStudents(studentData);
+        
+        // Tạo danh sách lớp từ dữ liệu học sinh
+        if (studentData.length > 0) {
+          const uniqueClasses = Array.from(
+            new Set(studentData.map((s) => s.className).filter(Boolean))
+          );
+          setClassList(uniqueClasses);
+        }
       })
       .catch((err) => {
         console.error("❌ Lỗi lấy danh sách học sinh:", err);
         setStudents([]);
+        setAllStudents([]);
       });
 
     axios
@@ -538,6 +552,8 @@ const Incident = () => {
           notes: "",
         });
         setBulkSuppliesUsed([]);
+        setShowAllStudents(false);
+        setSearchStudent("");
         fetchEvents();
         alert(`Đã tạo thành công ${responses.length} sự cố y tế!`);
       })
@@ -550,6 +566,48 @@ const Incident = () => {
             JSON.stringify(errorDetail, null, 2)
         );
       });
+  };
+
+  // Hàm helper để lấy học sinh theo lớp
+  const getStudentsByClass = (className) => {
+    return allStudents.filter(student => student.className === className);
+  };
+
+  // Hàm helper để chọn toàn bộ học sinh trong lớp
+  const selectAllStudentsInClass = (className) => {
+    const classStudents = getStudentsByClass(className);
+    const currentSelected = new Set(bulkEvent.selectedStudents);
+    
+    classStudents.forEach(student => {
+      currentSelected.add(student.studentId);
+    });
+    
+    setBulkEvent({
+      ...bulkEvent,
+      selectedStudents: Array.from(currentSelected)
+    });
+  };
+
+  // Hàm helper để bỏ chọn toàn bộ học sinh trong lớp
+  const deselectAllStudentsInClass = (className) => {
+    const classStudents = getStudentsByClass(className);
+    const currentSelected = bulkEvent.selectedStudents.filter(
+      studentId => !classStudents.some(student => student.studentId === studentId)
+    );
+    
+    setBulkEvent({
+      ...bulkEvent,
+      selectedStudents: currentSelected
+    });
+  };
+
+  // Hàm helper để lọc học sinh theo tìm kiếm
+  const getFilteredStudents = () => {
+    if (!searchStudent) return allStudents;
+    return allStudents.filter(student => 
+      student.fullName?.toLowerCase().includes(searchStudent.toLowerCase()) ||
+      student.className?.toLowerCase().includes(searchStudent.toLowerCase())
+    );
   };
 
   return (
@@ -1320,83 +1378,142 @@ const Incident = () => {
               Chọn nhiều học sinh có cùng triệu chứng để tạo sự cố cùng lúc
             </p>
 
-            {/* Dropdown chọn lớp */}
-            <select
-              value={selectedClass}
-              onClick={() => {
-                // Lấy danh sách lớp từ students nếu chưa có
-                if (classList.length === 0 && students.length > 0) {
-                  const uniqueClasses = Array.from(
-                    new Set(students.map((s) => s.className).filter(Boolean))
-                  );
-                  setClassList(uniqueClasses);
-                }
-              }}
-              onChange={async (e) => {
-                const className = e.target.value;
-                setSelectedClass(className);
-                setBulkEvent({ ...bulkEvent, selectedStudents: [] });
-                if (className) {
-                  try {
-                    const token = localStorage.getItem("token");
-                    const res = await axios.get(
-                      `/api/Student/by-class/${encodeURIComponent(className)}`,
-                      {
-                        headers: { Authorization: `Bearer ${token}` },
-                      }
-                    );
-                    setClassStudents(
-                      Array.isArray(res.data.data) ? res.data.data : []
-                    );
-                  } catch {
-                    setClassStudents([]);
-                  }
-                } else {
-                  setClassStudents([]);
-                }
-              }}
-              style={{ marginBottom: 12 }}
-            >
-              <option value="">-- Chọn lớp --</option>
-              {classList.map((cl) => (
-                <option key={cl} value={cl}>
-                  {cl}
-                </option>
-              ))}
-            </select>
+            {/* Tab chọn phương thức */}
+            <div className={style.tabContainer}>
+              <button
+                className={`${style.tabButton} ${!showAllStudents ? style.activeTab : ''}`}
+                onClick={() => setShowAllStudents(false)}
+              >
+                Chọn theo lớp
+              </button>
+              <button
+                className={`${style.tabButton} ${showAllStudents ? style.activeTab : ''}`}
+                onClick={() => setShowAllStudents(true)}
+              >
+                Chọn từ tất cả học sinh
+              </button>
+            </div>
 
-            {/* Dropdown chọn học sinh theo lớp */}
-            <Select
-              isMulti
-              isDisabled={!selectedClass}
-              options={
-                Array.isArray(classStudents)
-                  ? classStudents.map((s) => ({
-                      value: s.studentId,
-                      label: s.fullName,
-                    }))
-                  : []
-              }
-              placeholder={
-                selectedClass ? "Chọn học sinh..." : "Chọn lớp trước"
-              }
-              value={bulkEvent.selectedStudents
-                .map((id) => {
-                  const stu = classStudents.find((s) => s.studentId === id);
-                  return stu
-                    ? { value: stu.studentId, label: stu.fullName }
-                    : null;
-                })
-                .filter(Boolean)}
-              onChange={(selectedOptions) =>
-                setBulkEvent({
-                  ...bulkEvent,
-                  selectedStudents: selectedOptions.map(
-                    (option) => option.value
-                  ),
-                })
-              }
-            />
+            {!showAllStudents ? (
+              // Chế độ chọn theo lớp
+              <div className={style.classSelectionMode}>
+                <h4>Chọn lớp:</h4>
+                <div className={style.classGrid}>
+                  {classList.map((className) => {
+                    const classStudents = getStudentsByClass(className);
+                    const selectedInClass = classStudents.filter(student => 
+                      bulkEvent.selectedStudents.includes(student.studentId)
+                    );
+                    const isAllSelected = classStudents.length > 0 && 
+                      selectedInClass.length === classStudents.length;
+                    
+                    return (
+                      <div key={className} className={style.classCard}>
+                        <div className={style.classHeader}>
+                          <h5>{className}</h5>
+                          <span className={style.studentCount}>
+                            {selectedInClass.length}/{classStudents.length} học sinh
+                          </span>
+                        </div>
+                        <div className={style.classActions}>
+                          <button
+                            className={`${style.selectAllBtn} ${isAllSelected ? style.selected : ''}`}
+                            onClick={() => {
+                              if (isAllSelected) {
+                                deselectAllStudentsInClass(className);
+                              } else {
+                                selectAllStudentsInClass(className);
+                              }
+                            }}
+                          >
+                            {isAllSelected ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+                          </button>
+                          <button
+                            className={style.viewStudentsBtn}
+                            onClick={() => {
+                              setSelectedClass(className);
+                              setClassStudents(classStudents);
+                            }}
+                          >
+                            Xem chi tiết
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Hiển thị học sinh của lớp được chọn */}
+                {selectedClass && (
+                  <div className={style.selectedClassStudents}>
+                    <h4>Học sinh lớp {selectedClass}:</h4>
+                    <div className={style.studentCheckboxList}>
+                      {classStudents.map((student) => (
+                        <label key={student.studentId} className={style.studentCheckbox}>
+                          <input
+                            type="checkbox"
+                            checked={bulkEvent.selectedStudents.includes(student.studentId)}
+                            onChange={(e) => {
+                              const currentSelected = new Set(bulkEvent.selectedStudents);
+                              if (e.target.checked) {
+                                currentSelected.add(student.studentId);
+                              } else {
+                                currentSelected.delete(student.studentId);
+                              }
+                              setBulkEvent({
+                                ...bulkEvent,
+                                selectedStudents: Array.from(currentSelected)
+                              });
+                            }}
+                          />
+                          <span>{student.fullName}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              // Chế độ chọn từ tất cả học sinh
+              <div className={style.allStudentsMode}>
+                <div className={style.searchContainer}>
+                  <Search size={16} />
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm học sinh hoặc lớp..."
+                    value={searchStudent}
+                    onChange={(e) => setSearchStudent(e.target.value)}
+                  />
+                </div>
+                
+                <div className={style.studentSelectionArea}>
+                  <div className={style.studentCheckboxList}>
+                    {getFilteredStudents().map((student) => (
+                      <label key={student.studentId} className={style.studentCheckbox}>
+                        <input
+                          type="checkbox"
+                          checked={bulkEvent.selectedStudents.includes(student.studentId)}
+                          onChange={(e) => {
+                            const currentSelected = new Set(bulkEvent.selectedStudents);
+                            if (e.target.checked) {
+                              currentSelected.add(student.studentId);
+                            } else {
+                              currentSelected.delete(student.studentId);
+                            }
+                            setBulkEvent({
+                              ...bulkEvent,
+                              selectedStudents: Array.from(currentSelected)
+                            });
+                          }}
+                        />
+                        <span className={style.studentName}>{student.fullName}</span>
+                        <span className={style.studentClass}>{student.className}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             <select
               value={bulkEvent.eventTypeId}
@@ -1535,12 +1652,15 @@ const Incident = () => {
                 <h4>Học sinh đã chọn ({bulkEvent.selectedStudents.length}):</h4>
                 <div className={style.studentList}>
                   {bulkEvent.selectedStudents.map((studentId) => {
-                    const student = students.find(
+                    const student = allStudents.find(
                       (s) => s.studentId === studentId
                     );
                     return (
                       <span key={studentId} className={style.studentTag}>
                         {student?.fullName || studentId}
+                        {student?.className && (
+                          <span className={style.classTag}> ({student.className})</span>
+                        )}
                       </span>
                     );
                   })}
@@ -1549,12 +1669,18 @@ const Incident = () => {
             )}
 
             <div className={style.modalActions}>
-              <button className={style.tagBlue} onClick={handleBulkCreate}>
+              <button className={style.sendBtn} onClick={handleBulkCreate}>
                 Tạo cho {bulkEvent.selectedStudents.length} học sinh
               </button>
               <button
                 className={style.closeBtn}
-                onClick={() => setShowBulkCreateForm(false)}
+                onClick={() => {
+                  setShowBulkCreateForm(false);
+                  setSelectedClass("");
+                  setClassStudents([]);
+                  setShowAllStudents(false);
+                  setSearchStudent("");
+                }}
               >
                 Huỷ
               </button>

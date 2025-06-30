@@ -33,6 +33,13 @@ const CampaignDetail = () => {
   const isDaHuy = (status) => status === "Đã huỷ";
   const [selectedDate, setSelectedDate] = useState(null);
 
+  // State cho phạm vi gửi và dữ liệu học sinh/lớp
+  const [sendScope, setSendScope] = useState("all"); // "all" hoặc "class"
+  const [selectedClass, setSelectedClass] = useState("");
+  const [classList, setClassList] = useState([]); // Danh sách lớp
+  const [studentList, setStudentList] = useState([]); // Danh sách học sinh hiển thị
+  const [allStudents, setAllStudents] = useState([]); // Toàn bộ học sinh
+
   useEffect(() => {
     const fetchCampaignDetail = async () => {
       const res = await axios.get(
@@ -51,10 +58,38 @@ const CampaignDetail = () => {
       setConsents(res.data.data);
     };
 
-    Promise.all([fetchCampaignDetail(), fetchConsents()]).finally(() =>
+    const fetchStudents = async () => {
+      try {
+        const res = await axios.get("/api/Student");
+        const students = Array.isArray(res.data.data) ? res.data.data : [];
+        setAllStudents(students);
+        // Lấy danh sách lớp duy nhất
+        const uniqueClasses = Array.from(new Set(students.map(s => s.className).filter(Boolean)));
+        setClassList(uniqueClasses);
+        // Nếu mặc định là toàn trường thì hiển thị toàn bộ học sinh
+        setStudentList(students);
+      } catch {
+        setAllStudents([]);
+        setClassList([]);
+        setStudentList([]);
+      }
+    };
+
+    Promise.all([fetchCampaignDetail(), fetchConsents(), fetchStudents()]).finally(() =>
       setLoading(false)
     );
   }, [id]);
+
+  // Khi chọn phạm vi gửi hoặc lớp thì cập nhật danh sách học sinh hiển thị
+  useEffect(() => {
+    if (sendScope === "all") {
+      setStudentList(allStudents);
+    } else if (sendScope === "class" && selectedClass) {
+      setStudentList(allStudents.filter(s => s.className === selectedClass));
+    } else {
+      setStudentList([]);
+    }
+  }, [sendScope, selectedClass, allStudents]);
 
   const handleSendConsentToAll = async () => {
     try {
@@ -238,9 +273,72 @@ const CampaignDetail = () => {
         chối
       </p>
 
+      <div style={{ marginBottom: 16 }}>
+        <label>
+          <input
+            type="radio"
+            value="all"
+            checked={sendScope === "all"}
+            onChange={() => setSendScope("all")}
+          />
+          Gửi cho toàn trường
+        </label>
+        <label style={{ marginLeft: 16 }}>
+          <input
+            type="radio"
+            value="class"
+            checked={sendScope === "class"}
+            onChange={() => setSendScope("class")}
+          />
+          Gửi theo lớp
+        </label>
+        {sendScope === "class" && (
+          <>
+            <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)} style={{ marginLeft: 8 }}>
+              <option value="">-- Chọn lớp --</option>
+              {classList.map(cls => (
+                <option key={cls} value={cls}>{cls}</option>
+              ))}
+            </select>
+            <div style={{ marginTop: 12 }}>
+              <b>Danh sách học sinh:</b>
+              <ul>
+                {studentList.map(stu => (
+                  <li key={stu.studentId}>{stu.fullName} ({stu.className})</li>
+                ))}
+              </ul>
+            </div>
+          </>
+        )}
+      </div>
+
       <div className={style.actions}>
         {isChuaBatDau(campaign.statusName) && (
-          <button className={style.btnNotify} onClick={handleSendConsentToAll}>
+          <button
+            className={style.btnNotify}
+            onClick={async () => {
+              if (sendScope === "all") {
+                await handleSendConsentToAll();
+              } else if (sendScope === "class" && selectedClass) {
+                try {
+                  await axios.post(
+                    `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/send-consent-by-class`,
+                    { className: selectedClass }
+                  );
+                  alert("Đã gửi phiếu xác nhận cho lớp " + selectedClass);
+                  // Load lại consents nếu cần
+                  const consentsRes = await axios.get(
+                    `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/consent-requests`
+                  );
+                  setConsents(consentsRes.data.data);
+                } catch {
+                  alert("Gửi phiếu xác nhận thất bại!");
+                }
+              } else {
+                alert("Vui lòng chọn lớp!");
+              }
+            }}
+          >
             Gửi phiếu xác nhận
           </button>
         )}

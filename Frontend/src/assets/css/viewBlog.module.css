@@ -1,0 +1,124 @@
+.container {
+  display: flex;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+}
+
+.dashboardWrapper {
+  flex: 1;
+  padding: 2rem;
+  background-color: #fff;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.header h2 {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  font-size: 16px;
+  color: #666;
+}
+
+.cardList {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.card {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-left: 5px solid #20b2aa;
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.card h3 {
+  font-size: 20px;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.card p {
+  color: #444;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+.card ul {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.card li {
+  margin-bottom: 0.5rem;
+}
+
+.card em {
+  color: #888;
+}
+
+.card strong {
+  color: #20b2aa;
+}
+
+.card time {
+  display: block;
+  margin-top: 1rem;
+  font-size: 13px;
+  color: #999;
+  font-style: italic;
+}
+
+.btnViewMore {
+  margin-top: 1rem;
+  padding: 8px 16px;
+  background-color: #20b2aa;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.btnViewMore:hover {
+  background-color: #20b2aa;
+}
+
+.pagination {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.pageBtn {
+  padding: 6px 12px;
+  background-color: #e0e0e0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.pageBtn:hover {
+  background-color: #ccc;
+}
+
+.pageBtn.active {
+  background-color: #20b2aa;
+  color: white;
+  font-weight: bold;
+}

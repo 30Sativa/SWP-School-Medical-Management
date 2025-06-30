@@ -126,6 +126,7 @@
   width: 100%;
   font-size: 14px;
   color: #333;
+  height: 30px !important;
 }
 
 .incidentTable {
@@ -531,10 +532,244 @@ select {
 }
 
 .studentTag {
-  background-color: #20b2aa;
-  color: white;
+  background-color: #e2e8f0;
+  color: #4a5568;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin: 2px;
+  display: inline-block;
+}
+
+/* Tab Container */
+.tabContainer {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.tabButton {
+  background: none;
+  border: none;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #718096;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tabButton:hover {
+  color: #4a5568;
+  background-color: #f7fafc;
+}
+
+.activeTab {
+  color: #20b2aa;
+  border-bottom-color: #20b2aa;
+  background-color: #f0f9ff;
+}
+
+/* Class Selection Mode */
+.classSelectionMode {
+  margin-bottom: 20px;
+}
+
+.classSelectionMode h4 {
+  margin-bottom: 16px;
+  color: #2d3748;
+  font-size: 16px;
+}
+
+.classGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.classCard {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.classCard:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-color: #20b2aa;
+}
+
+.classHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.classHeader h5 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.studentCount {
+  background-color: #edf2f7;
+  color: #4a5568;
   padding: 4px 8px;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 500;
+}
+
+.classActions {
+  display: flex;
+  gap: 8px;
+}
+
+.selectAllBtn {
+  background-color: #20b2aa;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  flex: 1;
+}
+
+.selectAllBtn:hover {
+  background-color: #1a9a94;
+}
+
+.selectAllBtn.selected {
+  background-color: #e53e3e;
+}
+
+.selectAllBtn.selected:hover {
+  background-color: #c53030;
+}
+
+.viewStudentsBtn {
+  background-color: #edf2f7;
+  color: #4a5568;
+  border: 1px solid #e2e8f0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.viewStudentsBtn:hover {
+  background-color: #e2e8f0;
+  border-color: #cbd5e0;
+}
+
+/* Selected Class Students */
+.selectedClassStudents {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.selectedClassStudents h4 {
+  margin: 0 0 12px 0;
+  color: #2d3748;
+  font-size: 14px;
+}
+
+.studentCheckboxList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.studentCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.studentCheckbox:hover {
+  background-color: #f7fafc;
+}
+
+.studentCheckbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.studentCheckbox span {
+  font-size: 14px;
+  color: #2d3748;
+}
+
+/* All Students Mode */
+.allStudentsMode {
+  margin-bottom: 20px;
+}
+
+.searchContainer {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background-color: white;
+  margin-bottom: 16px;
+}
+
+.searchContainer input {
+  border: none;
+  outline: none;
+  margin-left: 8px;
+  background: transparent;
+  width: 100%;
+  font-size: 14px;
+  color: #333;
+}
+
+.studentSelectionArea {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.studentCheckbox .studentName {
+  font-weight: 500;
+  flex: 1;
+}
+
+.studentCheckbox .studentClass {
+  background-color: #edf2f7;
+  color: #4a5568;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* Class Tag in Student List */
+.classTag {
+  color: #718096;
+  font-size: 11px;
+  margin-left: 4px;
 }
