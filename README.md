@@ -46,6 +46,8 @@ EduHealth là hệ thống phần mềm hỗ trợ quản lý toàn diện các 
 - Xuất báo cáo phục vụ công tác tổng hợp & đánh giá
 
 ## 🗂️ Cấu trúc thư mục
+
+```
 SWP-School-Medical-Management/
 │
 ├── Backend/
@@ -69,6 +71,7 @@ SWP-School-Medical-Management/
 ├── Docs/                                         # Tài liệu dự án, hướng dẫn, đặc tả
 │
 └── README.md
+```
 
 ## 💻 Công nghệ sử dụng
 
