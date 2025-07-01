@@ -18,7 +18,7 @@ const StudentList = () => {
 
   const fetchStudents = async () => {
     try {
-      const response = await axios.get("${process.env.REACT_APP_API_BASE_URL}/Student");
+      const response = await axios.get("https://swp-school-medical-management.onrender.com/api/Student");
       let studentArray = response.data?.data || [];
 
       // Sắp xếp theo mã học sinh (studentId) tăng dần
