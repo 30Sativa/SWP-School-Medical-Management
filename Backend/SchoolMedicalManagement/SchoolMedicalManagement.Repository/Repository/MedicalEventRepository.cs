@@ -108,4 +108,21 @@ public class MedicalEventRepository : GenericRepository<MedicalEvent>
         await _context.SaveChangesAsync();
         return true;
     }
+
+
+
+    //
+    public async Task<MedicalEvent?> GetMedicalEventByStudentID(int studentID)
+    {
+        return await _context.MedicalEvents
+            .Include(e => e.Student)
+                .ThenInclude(pr => pr.Parent)
+            .Include(e => e.HandledByNavigation)
+            .Include(e => e.EventType)
+            .Include(e => e.Severity)
+            .Include(e => e.HandleRecords)
+                .ThenInclude(hr => hr.Supply)
+            .Include(e => e.Student.MedicalHistories)
+            .FirstOrDefaultAsync(p => p.StudentId == studentID && p.IsActive == true);
+    }
 }

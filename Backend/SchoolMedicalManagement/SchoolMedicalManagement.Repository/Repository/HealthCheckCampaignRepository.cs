@@ -18,6 +18,7 @@ namespace SchoolMedicalManagement.Repository.Repository
         public async Task<List<HealthCheckCampaign>> GetAllHealthCheckCampaigns()
         => await _context.HealthCheckCampaigns
             .Include(c => c.CreatedByNavigation)
+            .Include(c => c.Status)
             .Include(c => c.HealthCheckSummaries)
             .ThenInclude(s => s.Student)
             .ToListAsync();
@@ -26,6 +27,7 @@ namespace SchoolMedicalManagement.Repository.Repository
         public async Task<HealthCheckCampaign?> GetHealthCheckCampaignById(int id)
         => await _context.HealthCheckCampaigns
             .Include(c => c.CreatedByNavigation)
+            .Include(c => c.Status)
             .Include(c => c.HealthCheckSummaries)
             .ThenInclude(s => s.Student)
             .FirstOrDefaultAsync(c => c.CampaignId == id);
@@ -53,6 +55,18 @@ namespace SchoolMedicalManagement.Repository.Repository
                 return false;
             }
             return await RemoveAsync(campaign);
+        }
+
+        // Get total count of health check campaigns
+        public async Task<int> GetTotalHealthCheckCampaignsCount()
+        {
+            return await _context.HealthCheckCampaigns.CountAsync();
+        }
+
+        // Get count of active health check campaigns
+        public async Task<int> GetActiveHealthCheckCampaignsCount()
+        {
+            return await _context.HealthCheckCampaigns.CountAsync();
         }
     }
 }

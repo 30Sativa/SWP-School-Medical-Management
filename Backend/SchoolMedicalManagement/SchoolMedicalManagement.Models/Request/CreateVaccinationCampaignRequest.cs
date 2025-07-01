@@ -15,5 +15,7 @@ namespace SchoolMedicalManagement.Models.Request
         public string? Description { get; set; }
 
         public Guid? CreatedBy { get; set; }
+
+        public int? StatusId { get; set; }
     }
 }

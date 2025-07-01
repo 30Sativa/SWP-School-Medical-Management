@@ -94,5 +94,13 @@ namespace SchoolMedicalManagement.Repository.Repository
             return true;
 
         }
+
+        // Lấy người dùng theo Email (dùng cho quên mật khẩu, xác thực OTP)
+        public async Task<User?> GetUserByEmail(string email)
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Email == email);
+        }
     }
 }

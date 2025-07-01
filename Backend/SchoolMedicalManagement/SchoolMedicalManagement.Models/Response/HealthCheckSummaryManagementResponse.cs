@@ -23,7 +23,6 @@ namespace SchoolMedicalManagement.Models.Response
         public string? ToothNotes { get; set; }
         public string? GeneralNote { get; set; }
         public string? FollowUpNote { get; set; }
-        public int? ConsentStatusId { get; set; }
         public bool? IsActive { get; set; }
     }
 } 

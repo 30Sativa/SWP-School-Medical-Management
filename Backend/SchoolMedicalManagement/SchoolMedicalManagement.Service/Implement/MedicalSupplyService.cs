@@ -57,10 +57,10 @@ namespace SchoolMedicalManagement.Service.Implement
             };
         }
 
-        public async Task<List<MedicalSupplyResponse>> GetAllSuppliesAsync()
+        public async Task<BaseResponse> GetAllSuppliesAsync()
         {
             var list = await _medicalSupplyRepository.GetAllMedicalSupply();
-            return list.Select(s => new MedicalSupplyResponse
+            var data = list.Select(s => new MedicalSupplyResponse
             {
                 SupplyID = s.SupplyId,
                 Name = s.Name,
@@ -68,6 +68,12 @@ namespace SchoolMedicalManagement.Service.Implement
                 Unit = s.Unit,
                 ExpiryDate = s.ExpiryDate
             }).ToList();
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách vật tư y tế thành công.",
+                Data = data
+            };
         }
 
         public async Task<BaseResponse> GetSupplyByIdAsync(int id)

@@ -13,7 +13,7 @@ namespace SchoolMedicalManagement.Repository.Repository
         // 🔍 Lấy toàn bộ tiền sử bệnh của một học sinh
         public async Task<List<MedicalHistory>> GetAllByStudentIdMedicalHistory(int studentId) =>
             await _context.MedicalHistories
-                          .Where(h => h.StudentId == studentId && h.IsActive)
+                          .Where(h => h.StudentId == studentId)
                           .Include(h => h.Student)
                           .ToListAsync();
 
@@ -21,7 +21,7 @@ namespace SchoolMedicalManagement.Repository.Repository
         public async Task<MedicalHistory?> GetByIdMedicalHistory(int id) =>
             await _context.MedicalHistories
                           .Include(h => h.Student)
-                          .FirstOrDefaultAsync(h => h.HistoryId == id && h.IsActive);
+                          .FirstOrDefaultAsync(h => h.HistoryId == id);
 
         // ➕ Tạo mới
         public async Task<MedicalHistory?> CreateMedicalHistory(MedicalHistory history)
@@ -39,22 +39,20 @@ namespace SchoolMedicalManagement.Repository.Repository
             return affected > 0 ? history : null;
         }
 
-        // ❌ Xoá mềm
-        public async Task<int> SoftDeleteMedicalHistory(int id)
+        // ❌ Xoá cứng (vì không có IsActive)
+        public async Task<int> DeleteMedicalHistory(int id)
         {
             var history = await _context.MedicalHistories.FindAsync(id);
-            if (history == null || !history.IsActive) return 0;
-            history.IsActive = false;
-            _context.MedicalHistories.Update(history);
+            if (history == null) return 0;
+            _context.MedicalHistories.Remove(history);
             return await _context.SaveChangesAsync();
         }
 
         // 📋 Lấy tất cả tiền sử (toàn hệ thống) nếu cần quản trị viên dùng
-        public async Task<List<MedicalHistory>> GetAllActiveMedicalHistory()
+        public async Task<List<MedicalHistory>> GetAllMedicalHistory()
         {
             return await _context.MedicalHistories
                                  .Include(h => h.Student)
-                                 .Where(h => h.IsActive)
                                  .ToListAsync();
         }
     }

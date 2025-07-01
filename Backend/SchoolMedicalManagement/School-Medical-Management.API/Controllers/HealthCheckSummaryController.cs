@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace School_Medical_Management.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/health-checks/summaries")]
     [ApiController]
     public class HealthCheckSummaryController : ControllerBase
     {
@@ -20,12 +20,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetHealthCheckSummaryList()
         {
-            var responses = await _healthCheckSummaryService.GetAllHealthCheckSummariesAsync();
-            if (responses == null || responses.Count == 0)
-            {
-                return NotFound("Health check summary list is empty!");
-            }
-            return Ok(responses);
+            var response = await _healthCheckSummaryService.GetAllHealthCheckSummariesAsync();
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         [HttpGet("{id}")]
@@ -67,5 +63,16 @@ namespace School_Medical_Management.API.Controllers
             }
             return Ok($"Delete Health check summary with ID: {id} successfully");
         }
+
+        [HttpGet("student/{studentId}")]
+        public async Task<IActionResult> GetHealthCheckSummariesByStudentId([FromRoute] int studentId)
+        {
+            var response = await _healthCheckSummaryService.GetHealthCheckSummariesByStudentIdAsync(studentId);
+            if (response == null || response.Data == null)
+            {
+                return NotFound(response?.Message ?? $"No health check summaries found for student with ID {studentId}.");
+            }
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
     }
-} 
+}

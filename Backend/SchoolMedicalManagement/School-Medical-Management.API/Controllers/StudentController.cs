@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolMedicalManagement.Models.Request;
+using SchoolMedicalManagement.Service.Implement;
 using SchoolMedicalManagement.Service.Interface;
 
 namespace School_Medical_Management.API.Controllers
@@ -20,8 +21,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetStudentList()
         {
-            var responses = await _studentService.GetStudentList();
-            return Ok(responses);
+            var response = await _studentService.GetStudentList();
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         // Dùng StatusCode để phản hồi theo status code từ BaseResponse
@@ -41,15 +42,14 @@ namespace School_Medical_Management.API.Controllers
         }
 
         // Gợi ý: nên dùng BaseResponse thay vì bool để đồng bộ cách phản hồi
-        [HttpPut]
-        public async Task<IActionResult> UpdateStudent([FromBody] UpdateStudentRequest request)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateStudent(int id, [FromBody] UpdateStudentRequest request)
         {
-            var result = await _studentService.UpdateStudent(request);
-            if (!result)
-            {
-                return NotFound($"Student with ID {request.StudentId} not found or could not be updated.");
-            }
-            return Ok($"Update Student with ID: {request.StudentId} successfully");
+            var response = await _studentService.UpdateStudent(id, request);
+            if (response == null || response.Data == null)
+                return NotFound($"Student profile with ID {id} not found or update failed.");
+
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         [HttpDelete("{id}")]
@@ -63,13 +63,6 @@ namespace School_Medical_Management.API.Controllers
             return Ok($"Delete Student with ID: {id} successfully");
         }
 
-        // ✅ Health profile theo student ID (qua query string)
-        [HttpGet("health-profile")]
-        public async Task<IActionResult> GetHealthProfileByStudentId([FromQuery] GetHealthProfileRequest request)
-        {
-            var response = await _studentService.GetHealthProfileByStudentId(request);
-            return StatusCode(int.Parse(response.Status), response);
-        }
 
         // ✅ Sửa lại dùng StatusCode như các hàm khác
         [HttpGet("by-parent/{parentId}")]
@@ -77,6 +70,13 @@ namespace School_Medical_Management.API.Controllers
         {
             var response = await _studentService.GetStudentsOfParent(parentId);
             return StatusCode(int.Parse(response.Status), response);
+        }
+
+        [HttpGet("by-class/{className}")]
+        public async Task<IActionResult> GetStudentsByClass([FromRoute] string className)
+        {
+            var response = await _studentService.GetStudentsByClass(className);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
     }
 }

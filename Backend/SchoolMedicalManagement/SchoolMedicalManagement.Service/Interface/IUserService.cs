@@ -9,7 +9,7 @@ namespace SchoolMedicalManagement.Service.Interface
     public interface IUserService
     {
         // Lấy danh sách tất cả user đang hoạt động (IsActive = true)
-        Task<List<ListUserResponse>> GetAllUserAsync();
+        Task<BaseResponse> GetAllUserAsync();
 
         // Lấy thông tin chi tiết user theo ID
         Task<BaseResponse> GetUserByIdAsync(Guid id);
