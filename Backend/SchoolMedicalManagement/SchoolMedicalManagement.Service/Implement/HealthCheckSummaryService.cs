@@ -6,6 +6,7 @@ using SchoolMedicalManagement.Repository.Repository;
 using SchoolMedicalManagement.Service.Interface;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace SchoolMedicalManagement.Service.Implement
 {
@@ -22,38 +23,38 @@ namespace SchoolMedicalManagement.Service.Implement
             _campaignRepository = campaignRepository;
         }
 
-        public async Task<List<HealthCheckSummaryManagementResponse>> GetAllHealthCheckSummariesAsync()
+        public async Task<BaseResponse> GetAllHealthCheckSummariesAsync()
         {
             var summaries = await _summaryRepository.GetAllHealthCheckSummaries();
-            var result = new List<HealthCheckSummaryManagementResponse>();
-            foreach (var s in summaries)
+            var data = summaries.Select(s => new HealthCheckSummaryManagementResponse
             {
-                result.Add(new HealthCheckSummaryManagementResponse
-                {
-                    RecordId = s.RecordId,
-                    StudentId = s.StudentId,
-                    StudentName = s.Student?.FullName,
-                    CampaignId = s.CampaignId,
-                    CampaignTitle = s.Campaign?.Title,
-                    BloodPressure = s.BloodPressure,
-                    HeartRate = s.HeartRate,
-                    Height = s.Height,
-                    Weight = s.Weight,
-                    Bmi = s.Bmi,
-                    VisionSummary = s.VisionSummary,
-                    Ent = s.Ent,
-                    EntNotes = s.EntNotes,
-                    Mouth = s.Mouth,
-                    Throat = s.Throat,
-                    ToothDecay = s.ToothDecay,
-                    ToothNotes = s.ToothNotes,
-                    GeneralNote = s.GeneralNote,
-                    FollowUpNote = s.FollowUpNote,
-                    ConsentStatusId = s.ConsentStatusId,
-                    IsActive = s.IsActive
-                });
-            }
-            return result;
+                RecordId = s.RecordId,
+                StudentId = s.StudentId,
+                StudentName = s.Student?.FullName,
+                CampaignId = s.CampaignId,
+                CampaignTitle = s.Campaign?.Title,
+                BloodPressure = s.BloodPressure,
+                HeartRate = s.HeartRate,
+                Height = s.Height,
+                Weight = s.Weight,
+                Bmi = s.Bmi,
+                VisionSummary = s.VisionSummary,
+                Ent = s.Ent,
+                EntNotes = s.EntNotes,
+                Mouth = s.Mouth,
+                Throat = s.Throat,
+                ToothDecay = s.ToothDecay,
+                ToothNotes = s.ToothNotes,
+                GeneralNote = s.GeneralNote,
+                FollowUpNote = s.FollowUpNote,
+                IsActive = s.IsActive
+            }).ToList();
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách tổng hợp khám sức khỏe thành công.",
+                Data = data
+            };
         }
 
         public async Task<BaseResponse?> GetHealthCheckSummaryByIdAsync(int id)
@@ -93,7 +94,6 @@ namespace SchoolMedicalManagement.Service.Implement
                     ToothNotes = s.ToothNotes,
                     GeneralNote = s.GeneralNote,
                     FollowUpNote = s.FollowUpNote,
-                    ConsentStatusId = s.ConsentStatusId,
                     IsActive = s.IsActive
                 }
             };
@@ -119,7 +119,6 @@ namespace SchoolMedicalManagement.Service.Implement
                 ToothNotes = request.ToothNotes,
                 GeneralNote = request.GeneralNote,
                 FollowUpNote = request.FollowUpNote,
-                ConsentStatusId = request.ConsentStatusId,
                 IsActive = request.IsActive ?? true
             };
 
@@ -185,7 +184,6 @@ namespace SchoolMedicalManagement.Service.Implement
                     ToothNotes = created.ToothNotes,
                     GeneralNote = created.GeneralNote,
                     FollowUpNote = created.FollowUpNote,
-                    ConsentStatusId = created.ConsentStatusId,
                     IsActive = created.IsActive
                 }
             };
@@ -217,7 +215,6 @@ namespace SchoolMedicalManagement.Service.Implement
             s.ToothNotes = string.IsNullOrEmpty(request.ToothNotes) ? s.ToothNotes : request.ToothNotes;
             s.GeneralNote = string.IsNullOrEmpty(request.GeneralNote) ? s.GeneralNote : request.GeneralNote;
             s.FollowUpNote = string.IsNullOrEmpty(request.FollowUpNote) ? s.FollowUpNote : request.FollowUpNote;
-            s.ConsentStatusId = request.ConsentStatusId ?? s.ConsentStatusId;
             s.IsActive = request.IsActive ?? s.IsActive;
 
 
@@ -256,7 +253,6 @@ namespace SchoolMedicalManagement.Service.Implement
                     ToothNotes = updated.ToothNotes,
                     GeneralNote = updated.GeneralNote,
                     FollowUpNote = updated.FollowUpNote,
-                    ConsentStatusId = updated.ConsentStatusId,
                     IsActive = updated.IsActive
                 }
             };
@@ -266,5 +262,65 @@ namespace SchoolMedicalManagement.Service.Implement
         {
             return await _summaryRepository.DeleteHealthCheckSummary(id);
         }
+
+        public async Task<BaseResponse?> GetHealthCheckSummariesByStudentIdAsync(int studentId)
+        {
+            var student = await _studentRepository.GetStudentById(studentId);
+            if (student == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Student with ID {studentId} not found.",
+                    Data = null
+                };
+            }
+
+            var summaries = await _summaryRepository.GetHealthCheckSummariesByStudentId(studentId);
+            if (summaries == null || summaries.Count == 0)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"No health check summaries found for student with ID {studentId}.",
+                    Data = null
+                };
+            }
+
+            var result = new List<HealthCheckSummaryManagementResponse>();
+            foreach (var s in summaries)
+            {
+                result.Add(new HealthCheckSummaryManagementResponse
+                {
+                    RecordId = s.RecordId,
+                    StudentId = s.StudentId,
+                    StudentName = s.Student?.FullName,
+                    CampaignId = s.CampaignId,
+                    CampaignTitle = s.Campaign?.Title,
+                    BloodPressure = s.BloodPressure,
+                    HeartRate = s.HeartRate,
+                    Height = s.Height,
+                    Weight = s.Weight,
+                    Bmi = s.Bmi,
+                    VisionSummary = s.VisionSummary,
+                    Ent = s.Ent,
+                    EntNotes = s.EntNotes,
+                    Mouth = s.Mouth,
+                    Throat = s.Throat,
+                    ToothDecay = s.ToothDecay,
+                    ToothNotes = s.ToothNotes,
+                    GeneralNote = s.GeneralNote,
+                    FollowUpNote = s.FollowUpNote,
+                    IsActive = s.IsActive
+                });
+            }
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Health check summaries retrieved successfully.",
+                Data = result
+            };
+        }
     }
-} 
+}

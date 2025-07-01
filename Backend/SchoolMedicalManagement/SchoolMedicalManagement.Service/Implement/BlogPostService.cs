@@ -6,6 +6,7 @@ using SchoolMedicalManagement.Repository.Repository;
 using SchoolMedicalManagement.Service.Interface;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace SchoolMedicalManagement.Service.Implement
 {
@@ -20,24 +21,25 @@ namespace SchoolMedicalManagement.Service.Implement
             _userRepository = userRepository;
         }
 
-        public async Task<List<BlogPostManagementResponse>> GetAllBlogPostsAsync()
+        public async Task<BaseResponse> GetAllBlogPostsAsync()
         {
             var posts = await _blogPostRepository.GetAllBlogPosts();
-            var result = new List<BlogPostManagementResponse>();
-            foreach (var p in posts)
+            var data = posts.Select(p => new BlogPostManagementResponse
             {
-                result.Add(new BlogPostManagementResponse
-                {
-                    PostId = p.PostId,
-                    Title = p.Title,
-                    Content = p.Content,
-                    AuthorId = p.AuthorId,
-                    AuthorName = p.Author?.FullName,
-                    PostedDate = p.PostedDate,
-                    IsActive = p.IsActive
-                });
-            }
-            return result;
+                PostId = p.PostId,
+                Title = p.Title,
+                Content = p.Content,
+                AuthorId = p.AuthorId,
+                AuthorName = p.Author?.FullName,
+                PostedDate = p.PostedDate,
+                IsActive = p.IsActive
+            }).ToList();
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách bài viết thành công.",
+                Data = data
+            };
         }
 
         public async Task<BaseResponse?> GetBlogPostByIdAsync(int id)

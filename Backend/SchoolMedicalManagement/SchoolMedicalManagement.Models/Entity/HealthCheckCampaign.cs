@@ -15,7 +15,11 @@ public partial class HealthCheckCampaign
 
     public Guid? CreatedBy { get; set; }
 
+    public int? StatusId { get; set; }
+
     public virtual User? CreatedByNavigation { get; set; }
 
     public virtual ICollection<HealthCheckSummary> HealthCheckSummaries { get; set; } = new List<HealthCheckSummary>();
+
+    public virtual CampaignStatus? Status { get; set; }
 }

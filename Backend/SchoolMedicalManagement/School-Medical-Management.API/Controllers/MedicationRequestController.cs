@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Azure;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolMedicalManagement.Models.Request;
 using SchoolMedicalManagement.Service.Interface;
@@ -94,6 +95,83 @@ namespace School_Medical_Management.API.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, $"Error creating request: {ex.Message}");
             }
+        }
+
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllMedicalRequests()
+        {
+            try
+            {
+                var requests = await _medicationRequestService.GetAllMedicalRequest();
+                return Ok(requests);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving all requests: {ex.Message}");
+            }
+        }
+
+        [HttpGet("student/{studentId}")]
+        public async Task<IActionResult> GetMedicalRequestByStudent(string studentId)
+        {
+            try
+            {
+                var response = await _medicationRequestService.GetMedicalRequestByStudentId(studentId);
+                return StatusCode(int.Parse(response.Status), response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving student requests: {ex.Message}");
+            }
+        }
+
+        // Get medication requests by parent ID
+        [HttpGet("parent/{parentId}")]
+        public async Task<IActionResult> GetRequestsByParent(Guid parentId)
+        {
+            try
+            {
+                var requests = await _medicationRequestService.GetRequestsByParentIdAsync(parentId);
+                return Ok(requests);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving parent requests: {ex.Message}");
+            }
+        }
+
+        // Get medication request by ID
+        [HttpGet("{requestId}")]
+        public async Task<IActionResult> GetRequestById(int requestId)
+        {
+            try
+            {
+                var response = await _medicationRequestService.GetRequestByIdAsync(requestId);
+                return StatusCode(int.Parse(response.Status), response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving request: {ex.Message}");
+            }
+        }
+
+        // API cập nhật trạng thái tổng quát cho đơn thuốc
+        [HttpPut("{requestId}/status")]
+        public async Task<IActionResult> UpdateMedicationRequestStatus(int requestId, [FromBody] UpdateMedicationStatusDto dto)
+        {
+            if (dto == null || dto.StatusId <= 0)
+                return BadRequest("Invalid status.");
+
+            var response = await _medicationRequestService.UpdateMedicationRequestStatusAsync(requestId, dto);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
+        // ✅ Lấy danh sách đơn thuốc theo Id trạng thái
+        [HttpGet("status/{statusId}")]
+        public async Task<IActionResult> GetRequestsByStatusId(int statusId)
+        {
+            var response = await _medicationRequestService.GetRequestsByStatusIdAsync(statusId);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
     }
 }

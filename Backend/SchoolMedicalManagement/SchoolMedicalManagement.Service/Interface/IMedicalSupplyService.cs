@@ -10,7 +10,7 @@ namespace SchoolMedicalManagement.Service.Interface
 {
     public interface IMedicalSupplyService
     {
-        Task<List<MedicalSupplyResponse>> GetAllSuppliesAsync();
+        Task<BaseResponse> GetAllSuppliesAsync();
         Task<BaseResponse> GetSupplyByIdAsync(int id);
         Task<BaseResponse> AddSupplyAsync(CreateMedicalSupplyRequest request);
         Task<BaseResponse> UpdateSupplyAsync(UpdateMedicalSupplyRequest request);

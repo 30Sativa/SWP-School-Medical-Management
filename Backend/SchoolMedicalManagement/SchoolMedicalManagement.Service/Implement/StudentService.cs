@@ -18,13 +18,13 @@ namespace SchoolMedicalManagement.Service.Implement
             _userRepository = userRepository;
         }
 
-        public async Task<List<ListStudentResponse>> GetStudentList()
+        public async Task<BaseResponse> GetStudentList()
         {
             var students = (await _studentRepository.GetAllStudents())
                             .OrderByDescending(s => s.StudentId)
                             .ToList();
 
-            return students.Select(s => new ListStudentResponse
+            var data = students.Select(s => new ListStudentResponse
             {
                 StudentId = s.StudentId,
                 FullName = s.FullName,
@@ -35,6 +35,13 @@ namespace SchoolMedicalManagement.Service.Implement
                 ParentId = s.ParentId,
                 IsActive = s.IsActive
             }).ToList();
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách học sinh thành công.",
+                Data = data
+            };
         }
 
         public async Task<BaseResponse> GetStudentById(int studentId)
@@ -272,6 +279,29 @@ namespace SchoolMedicalManagement.Service.Implement
                 Status = StatusCodes.Status200OK.ToString(),
                 Message = "Students retrieved successfully.",
                 Data = studentList
+            };
+        }
+
+        public async Task<BaseResponse> GetStudentsByClass(string className)
+        {
+            var students = await _studentRepository.GetStudentsByClass(className);
+            var data = students.Select(s => new ListStudentResponse
+            {
+                StudentId = s.StudentId,
+                FullName = s.FullName,
+                DateOfBirth = s.DateOfBirth,
+                Gender = s.Gender?.GenderName ?? "Unknown",
+                ClassName = s.Class,
+                ParentName = s.Parent?.FullName,
+                ParentId = s.ParentId,
+                IsActive = s.IsActive
+            }).ToList();
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = $"Lấy danh sách học sinh lớp {className} thành công.",
+                Data = data
             };
         }
     }

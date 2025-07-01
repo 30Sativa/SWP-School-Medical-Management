@@ -26,6 +26,11 @@ namespace SchoolMedicalManagement.Models.Response
         // Số lượng chiến dịch tiêm chủng đang diễn ra
         public int ActiveVaccinationCampaigns { get; set; }
 
+        // Thống kê chi tiết chiến dịch tiêm chủng theo trạng thái
+        public int NotStartedVaccinationCampaigns { get; set; }
+        public int CompletedVaccinationCampaigns { get; set; }
+        public int CancelledVaccinationCampaigns { get; set; }
+
         // Tổng số chiến dịch khám sức khỏe
         public int TotalHealthCheckCampaigns { get; set; }
 
@@ -68,7 +73,7 @@ namespace SchoolMedicalManagement.Models.Response
         public string EventType { get; set; } = null!;
 
         // Ngày xảy ra sự kiện
-        public DateTime EventDate { get; set; }
+        public DateTime? EventDate { get; set; }
 
         // Mức độ nghiêm trọng của sự kiện (Nhẹ, Trung bình, Nghiêm trọng)
         public string Severity { get; set; } = null!;

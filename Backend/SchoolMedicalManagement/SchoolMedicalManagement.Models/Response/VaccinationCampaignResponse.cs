@@ -22,6 +22,12 @@ namespace SchoolMedicalManagement.Models.Response
         // Tên người tạo
         public string? CreatedByName { get; set; }
 
+        // ID trạng thái chiến dịch
+        public int? StatusId { get; set; }
+
+        // Tên trạng thái chiến dịch
+        public string? StatusName { get; set; }
+
         // Tổng số yêu cầu đồng ý
         public int TotalConsentRequests { get; set; }
 

@@ -20,12 +20,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetBlogPostList()
         {
-            var responses = await _blogPostService.GetAllBlogPostsAsync();
-            if (responses == null || responses.Count == 0)
-            {
-                return NotFound("Blog post list is empty!");
-            }
-            return Ok(responses);
+            var response = await _blogPostService.GetAllBlogPostsAsync();
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         [HttpGet("{id}")]

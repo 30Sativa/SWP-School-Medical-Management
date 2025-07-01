@@ -20,12 +20,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetNotificationTypeList()
         {
-            var responses = await _notificationTypeService.GetAllNotificationTypesAsync();
-            if (responses == null || responses.Count == 0)
-            {
-                return NotFound("Notification type list is empty!");
-            }
-            return Ok(responses);
+            var response = await _notificationTypeService.GetAllNotificationTypesAsync();
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         [HttpGet("{id}")]

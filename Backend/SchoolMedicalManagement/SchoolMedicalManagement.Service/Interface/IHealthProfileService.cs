@@ -21,5 +21,11 @@ namespace SchoolMedicalManagement.Service.Interface
 
         // ✅ Xoá mềm hồ sơ sức khỏe
         Task<bool> DeleteHealthProfileAsync(int profileId);
+
+        // ✅ Lấy hồ sơ sức khỏe theo StudentId
+        Task<BaseResponse?> GetHealthProfileByStudentIdAsync(int studentId);
+
+        // ✅ Cập nhật hồ sơ sức khỏe theo StudentId
+        Task<BaseResponse?> UpdateHealthProfileByStudentIdAsync(int studentId, UpdateHealthProfileRequest request);
     }
 }

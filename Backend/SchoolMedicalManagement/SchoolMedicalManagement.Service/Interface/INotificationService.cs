@@ -8,8 +8,8 @@ namespace SchoolMedicalManagement.Service.Interface
 {
     public interface INotificationService
     {
-        Task<List<NotificationManagementResponse>> GetAllNotificationsAsync();
-        Task<List<NotificationManagementResponse>> GetNotificationsByUserIdAsync(Guid userId);
+        Task<BaseResponse> GetAllNotificationsAsync();
+        Task<BaseResponse> GetNotificationsByUserIdAsync(Guid userId);
         Task<BaseResponse?> GetNotificationByIdAsync(int id);
         Task<BaseResponse?> CreateNotificationAsync(CreateNotificationRequest request);
         Task<bool> DeleteNotificationAsync(int id);

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace School_Medical_Management.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/health-profiles")]
     [ApiController]
     public class HealthProfileController : ControllerBase
     {
@@ -65,6 +65,28 @@ namespace School_Medical_Management.API.Controllers
             return deleted
                 ? Ok($"Deleted Health Profile with ID: {id} successfully.")
                 : NotFound($"Health profile with ID {id} not found or could not be deleted.");
+        }
+
+        // ✅ Lấy hồ sơ sức khỏe của học sinh
+        [HttpGet("student/{studentId}")]
+        public async Task<IActionResult> GetHealthProfileByStudentId([FromRoute] int studentId)
+        {
+            var response = await _healthProfileService.GetHealthProfileByStudentIdAsync(studentId);
+            if (response == null || response.Data == null)
+                return NotFound(response?.Message ?? $"Health profile for student with ID {studentId} not found.");
+
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
+
+        // ✅ Cập nhật hồ sơ sức khỏe của học sinh
+        [HttpPut("student/{studentId}")]
+        public async Task<IActionResult> UpdateHealthProfileByStudentId([FromRoute] int studentId, [FromBody] UpdateHealthProfileRequest request)
+        {
+            var response = await _healthProfileService.UpdateHealthProfileByStudentIdAsync(studentId, request);
+            if (response == null || response.Data == null)
+                return NotFound(response?.Message ?? $"Health profile for student with ID {studentId} not found or update failed.");
+
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
     }
 }
