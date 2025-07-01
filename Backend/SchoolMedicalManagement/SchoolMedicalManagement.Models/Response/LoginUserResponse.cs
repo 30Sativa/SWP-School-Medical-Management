@@ -15,7 +15,7 @@ namespace SchoolMedicalManagement.Models.Response
 
         public string RoleName { get; set; } = null!;    // ✅ thay vì trả cả object Role
 
-        public bool IsFirstLogin { get; set; }           // ✅ bool không nullable là đủ
+        public bool? IsFirstLogin { get; set; }           // ✅ bool không nullable là đủ
 
         public string Token { get; set; } = null!;
 

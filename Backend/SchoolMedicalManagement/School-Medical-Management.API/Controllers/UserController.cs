@@ -31,8 +31,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var users = await _userService.GetAllUserAsync();
-            return Ok(users); // Không cần check null vì luôn trả List<>
+            var response = await _userService.GetAllUserAsync();
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         // Lấy thông tin 1 user theo ID
@@ -76,6 +76,22 @@ namespace School_Medical_Management.API.Controllers
         public async Task<IActionResult> ChangePasswordAfterFirstLogin([FromRoute] Guid id, [FromBody] ChangePasswordUserRequest request)
         {
             var response = await _authService.ChangePasswordAfterFirstLogin(id, request);
+            return StatusCode(int.Parse(response.Status), response);
+        }
+
+        // Gửi OTP quên mật khẩu đến email
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            var response = await _authService.ForgotPasswordAsync(request);
+            return StatusCode(int.Parse(response.Status), response);
+        }
+
+        // Gộp xác thực OTP và đặt lại mật khẩu
+        [HttpPost("verify-otp-reset-password")]
+        public async Task<IActionResult> VerifyOtpAndResetPassword([FromBody] VerifyOtpAndResetPasswordRequest request)
+        {
+            var response = await _authService.VerifyOtpAndResetPasswordAsync(request);
             return StatusCode(int.Parse(response.Status), response);
         }
     }

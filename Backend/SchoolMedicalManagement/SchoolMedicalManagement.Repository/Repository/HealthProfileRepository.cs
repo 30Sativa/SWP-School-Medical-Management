@@ -50,5 +50,11 @@ namespace SchoolMedicalManagement.Repository.Repository
             await UpdateAsync(healthProfile);
             return true;
         }
+
+        // ✅ Lấy hồ sơ sức khỏe theo StudentId
+        public async Task<HealthProfile?> GetHealthProfileByStudentId(int studentId)
+            => await _context.HealthProfiles
+                .Include(hp => hp.Student)
+                .FirstOrDefaultAsync(hp => hp.StudentId == studentId && hp.IsActive == true);
     }
 }

@@ -25,5 +25,8 @@ namespace SchoolMedicalManagement.Service.Interface
         // ✅ Danh sách tất cả sự kiện y tế (đang hoạt động)
         Task<List<CreateMedicalEventResponse>> GetAllMedicalEvent();
 
+        // ✅ Danh sách sự kiện y tế theo học sinh
+        Task<BaseResponse?> GetMedicalEventsByStudentId(int studentId);
+
     }
 }

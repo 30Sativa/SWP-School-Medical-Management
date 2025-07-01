@@ -55,4 +55,11 @@ public class MedicalEventController : ControllerBase
         var result = await _medicalEventService.GetAllMedicalEvent();
         return Ok(result);
     }
+
+    [HttpGet("student/{studentId}")]
+    public async Task<IActionResult> GetMedicalEventsByStudentId([FromRoute] int studentId)
+    {
+        var result = await _medicalEventService.GetMedicalEventsByStudentId(studentId);
+        return StatusCode(int.Parse(result.Status), result);
+    }
 }

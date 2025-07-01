@@ -100,10 +100,10 @@ namespace SchoolMedicalManagement.Service.Implement
             };
         }
 
-        public async Task<List<ListUserResponse>> GetAllUserAsync()
+        public async Task<BaseResponse> GetAllUserAsync()
         {
             var users = await _userRepository.GetAllUser();
-            return users.Select(user => new ListUserResponse
+            var data = users.Select(user => new ListUserResponse
             {
                 UserID = user.UserId,
                 Username = user.Username,
@@ -115,6 +115,12 @@ namespace SchoolMedicalManagement.Service.Implement
                 Address = user.Address,
                 IsActive = user.IsActive
             }).ToList();
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách user thành công.",
+                Data = data
+            };
         }
 
         public async Task<BaseResponse> GetUserByIdAsync(Guid id)

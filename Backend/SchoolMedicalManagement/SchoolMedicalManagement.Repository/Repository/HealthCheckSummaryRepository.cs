@@ -38,8 +38,15 @@ namespace SchoolMedicalManagement.Repository.Repository
         {
             var isExist = await GetHealthCheckSummaryById(id);
             if (isExist == null) return false;
-            
+
             return await RemoveAsync(isExist);
         }
+
+        public async Task<List<HealthCheckSummary>> GetHealthCheckSummariesByStudentId(int studentId)
+            => await _context.HealthCheckSummaries
+                .Include(s => s.Student)
+                .Include(s => s.Campaign)
+                .Where(s => s.StudentId == studentId)
+                .ToListAsync();
     }
-} 
+}

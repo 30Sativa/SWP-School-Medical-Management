@@ -9,7 +9,7 @@ namespace SchoolMedicalManagement.Service.Interface
     public interface IStudentService
     {
         // Lấy danh sách toàn bộ học sinh
-        Task<List<ListStudentResponse>> GetStudentList();
+        Task<BaseResponse> GetStudentList();
 
         // Lấy thông tin chi tiết của 1 học sinh
         Task<BaseResponse> GetStudentById(int studentId);
@@ -18,7 +18,7 @@ namespace SchoolMedicalManagement.Service.Interface
         Task<BaseResponse> CreateStudent(CreateStudentRequest request);
 
         // Cập nhật học sinh
-        Task<bool> UpdateStudent(UpdateStudentRequest request);
+        Task<BaseResponse> UpdateStudent(int id, UpdateStudentRequest request);
 
         // Xóa mềm học sinh
         Task<bool> DeleteStudent(int studentId);
@@ -28,5 +28,8 @@ namespace SchoolMedicalManagement.Service.Interface
 
         // Lấy danh sách học sinh của phụ huynh (ParentId)
         Task<BaseResponse> GetStudentsOfParent(Guid parentId); // nếu bạn dùng Guid thì sửa lại cho khớp
+
+        // Lấy danh sách học sinh theo tên lớp
+        Task<BaseResponse> GetStudentsByClass(string className);
     }
 }

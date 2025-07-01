@@ -7,7 +7,7 @@ public partial class MedicalEvent
 {
     public int EventId { get; set; }
 
-    public int StudentId { get; set; }
+    public int? StudentId { get; set; }
 
     public int? EventTypeId { get; set; }
 

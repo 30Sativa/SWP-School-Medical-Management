@@ -23,11 +23,19 @@ namespace SchoolMedicalManagement.Service.Implement
     {
         private readonly UserRepository _userRepository;
         private readonly IConfiguration _config;
+        private readonly IOtpService _otpService;
+        private readonly IEmailService _emailService;
 
-        public AuthService(UserRepository userRepository, IConfiguration config)
+        public AuthService(
+            UserRepository userRepository, 
+            IConfiguration config,
+            IOtpService otpService,
+            IEmailService emailService)
         {
             _userRepository = userRepository;
             _config = config;
+            _otpService = otpService;
+            _emailService = emailService;
         }
 
 
@@ -105,8 +113,80 @@ namespace SchoolMedicalManagement.Service.Implement
                     UserId = user.UserId,
                     FullName = user.FullName,
                     RoleName = user.Role.RoleName,
+                    IsFirstLogin = user.IsFirstLogin,
                     Token = new JwtSecurityTokenHandler().WriteToken(token)
                 }
+            };
+        }
+
+        // Gửi OTP quên mật khẩu đến email người dùng
+        public async Task<BaseResponse> ForgotPasswordAsync(ForgotPasswordRequest request)
+        {
+            // Kiểm tra email hợp lệ và check ng dùng còn active ko?
+            var user = await _userRepository.GetUserByEmail(request.Email);
+            if (user == null || user.IsActive == false)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = "Email không tồn tại hoặc tài khoản không hoạt động.",
+                    Data = null
+                };
+            }
+
+            // Sinh OTP và lưu vào Redis
+            var otp = await _otpService.GenerateOtpAsync(request.Email);
+
+            // Gửi email OTP
+            await _emailService.SendOtpEmailAsync(request.Email, otp);
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "OTP đã được gửi đến email của bạn.",
+                Data = null
+            };
+        }
+
+        // Gộp xác thực OTP và đặt lại mật khẩu
+        public async Task<BaseResponse> VerifyOtpAndResetPasswordAsync(VerifyOtpAndResetPasswordRequest request)
+        {
+            // Kiểm tra email hợp lệ
+            var user = await _userRepository.GetUserByEmail(request.Email);
+            if (user == null || user.IsActive == false)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = "Email không tồn tại hoặc tài khoản không hoạt động.",
+                    Data = null
+                };
+            }
+
+            // Kiểm tra OTP với Redis
+            var isValid = await _otpService.VerifyOtpAsync(request.Email, request.Otp);
+            if (!isValid)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "OTP không hợp lệ hoặc đã hết hạn.",
+                    Data = null
+                };
+            }
+
+            // Đặt lại mật khẩu mới
+            user.Password = HashPassword.HashPasswordd(request.NewPassword);
+            await _userRepository.UpdateUser(user);
+
+            // Hủy OTP sau khi đổi mật khẩu thành công
+            await _otpService.InvalidateOtpAsync(request.Email);
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Đặt lại mật khẩu thành công.",
+                Data = null
             };
         }
     }
