@@ -679,3 +679,29 @@
     text-align: center;
   }
 }
+
+/* ===== Scroll to Top Button ===== */
+.scrollTopBtn {
+  position: fixed;
+  right: 32px;
+  bottom: 36px;
+  z-index: 1002;
+  background: #fff;
+  border: 2px solid #06b6d4;
+  border-radius: 50%;
+  box-shadow: 0 4px 18px #06b6d41a;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, border-color 0.2s;
+  opacity: 0.92;
+}
+.scrollTopBtn:hover {
+  background: #e0f7fa;
+  border-color: #0ea5e9;
+  box-shadow: 0 6px 24px #06b6d42a;
+  opacity: 1;
+}

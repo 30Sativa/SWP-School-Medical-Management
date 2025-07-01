@@ -14,9 +14,11 @@ import reportLogo from "../../assets/icon/report.png";
 import notifyLogo from "../../assets/icon/notify.png";
 import vacxinLogo from "../../assets/icon/vacxin.png";
 import feedback from "../../assets/icon/feedback.png";
-import school1 from "../../assets/img/school1.jpg";
-import school2 from "../../assets/img/school2.jpg";
-import school3 from "../../assets/img/school3.jpg";
+import school1 from "../../assets/img/school1.jpeg";
+import school2 from "../../assets/img/school2.jpeg";
+import school3 from "../../assets/img/school3.jpeg";
+import useAosInit from "../../hooks/useAosInit";
+import "aos/dist/aos.css";
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -82,6 +84,34 @@ const Homepage = () => {
     if (document.readyState === "complete") onLoad();
     else window.addEventListener("load", onLoad);
   }, []);
+  useAosInit();
+
+  // Scroll đến section theo ref
+  const scrollToRef = (ref) => {
+    if (ref && ref.current) {
+      ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  // Footer scroll handler giống header
+  const handleFooterNav = (section) => {
+    if (section === "home") scrollToRef(heroRef);
+    else if (section === "features" || section === "about" || section === "service") scrollToRef(featuresRef);
+    else if (section === "contact") scrollToRef(ctaRef);
+  };
+
+  // Nút scroll to top
+  const [showScrollTop, setShowScrollTop] = React.useState(false);
+  useEffect(() => {
+    const onScroll = () => {
+      setShowScrollTop(window.scrollY > 200);
+    };
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  const handleScrollTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <>
@@ -90,15 +120,15 @@ const Homepage = () => {
           <img src={logo} alt="EduHealth Logo" className={style.logoImg} />
         </div>
         <nav className={style.navLinks}>
-          <a href="#" className={style.navLink} onClick={() => navigate("/")} >Trang chủ</a>
-          <a href="#" className={style.navLink}>Giới thiệu</a>
-          <a href="#" className={style.navLink}>Dịch vụ</a>
-          <a href="#" className={style.navLink}>Liên hệ</a>
+          <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); scrollToRef(heroRef); }}>Trang chủ</a>
+          <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); scrollToRef(featuresRef); }}>Giới thiệu</a>
+          <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); scrollToRef(featuresRef); }}>Dịch vụ</a>
+          <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); scrollToRef(ctaRef); }}>Liên hệ</a>
           <button className={style.loginBtn} onClick={() => navigate("/login")}>Đăng nhập</button>
         </nav>
       </header>
 
-      <section className={style.hero} ref={heroRef}>
+      <section className={style.hero} ref={heroRef} data-aos="fade-in">
         <div className={style.heroBgSlideshow}>
           {heroImages.map((img, idx) => (
             <img
@@ -109,10 +139,11 @@ const Homepage = () => {
                 style.heroBgImg +
                 (idx === slideIdx ? ' ' + style.activeBg : ' ' + style.inactiveBg)
               }
-              style={{ zIndex: idx === slideIdx ? 2 : 1 }}
+              style={{ zIndex: idx === slideIdx ? 2 : 1, transition: 'opacity 1.2s cubic-bezier(.4,0,.2,1), transform 1.2s cubic-bezier(.4,0,.2,1)' }}
+              // Không dùng data-aos cho từng ảnh slideshow vì sẽ gây lỗi hiệu ứng khi chuyển slide động
             />
           ))}
-          <div className={style.slideDotsBg}>
+          <div className={style.slideDotsBg} data-aos="fade-up" data-aos-delay="400">
             {heroImages.map((_, idx) => (
               <span
                 key={idx}
@@ -122,7 +153,7 @@ const Homepage = () => {
             ))}
           </div>
         </div>
-        <div className={style.heroTextOverlay}>
+        <div className={style.heroTextOverlay} data-aos="fade-up" data-aos-delay="200">
           <h1 className={style.fadeInDown}>
             Hệ thống quản lý <span className={style.highlight}>sức khỏe học đường</span>
           </h1>
@@ -133,28 +164,28 @@ const Homepage = () => {
         </div>
       </section>
 
-      <section className={style.features} ref={featuresRef}>
+      <section className={style.features} ref={featuresRef} data-aos="fade-up">
         <h2 className={style.fadeInUp}>Tính năng nổi bật</h2>
         <p className={style.description + ' ' + style.fadeInUp}>EduHealth cung cấp những tính năng đầy đủ...</p>
         <div className={style.featureRows}>
           <div className={style.featureRow}>
-            <div className={style.featureBox + ' ' + style.boxHover}><img src={overlayLogo} alt="" className={style.iconAnim}/><h3>Quản lý thuốc</h3><p>Theo dõi đơn thuốc...</p></div>
-            <div className={style.featureBox + ' ' + style.boxHover}><img src={vacxinLogo} alt="" className={style.iconAnim}/><h3>Tiêm chủng</h3><p>Quản lý chiến dịch...</p></div>
-            <div className={style.featureBox + ' ' + style.boxHover}><img src={healthLogo} alt="" className={style.iconAnim}/><h3>Khám sức khỏe</h3><p>Quản lý chỉ số...</p></div>
+            <div className={style.featureBox + ' ' + style.boxHover} data-aos="zoom-in" data-aos-delay="0"><img src={overlayLogo} alt="" className={style.iconAnim}/><h3>Quản lý thuốc</h3><p>Theo dõi đơn thuốc...</p></div>
+            <div className={style.featureBox + ' ' + style.boxHover} data-aos="zoom-in" data-aos-delay="100"><img src={vacxinLogo} alt="" className={style.iconAnim}/><h3>Tiêm chủng</h3><p>Quản lý chiến dịch...</p></div>
+            <div className={style.featureBox + ' ' + style.boxHover} data-aos="zoom-in" data-aos-delay="200"><img src={healthLogo} alt="" className={style.iconAnim}/><h3>Khám sức khỏe</h3><p>Quản lý chỉ số...</p></div>
           </div>
           <div className={style.featureRow}>
-            <div className={style.featureBox + ' ' + style.boxHover}><img src={reportLogo} alt="" className={style.iconAnim}/><h3>Hồ sơ sức khỏe</h3><p>Ghi nhận và theo dõi...</p></div>
-            <div className={style.featureBox + ' ' + style.boxHover}><img src={notifyLogo} alt="" className={style.iconAnim}/><h3>Thông báo</h3><p>Thông tin tức thì</p></div>
-            <div className={style.featureBox + ' ' + style.boxHover}><img src={statisticLogo} alt="" className={style.iconAnim}/><h3>Báo cáo</h3><p>Xuất báo cáo theo lớp...</p></div>
+            <div className={style.featureBox + ' ' + style.boxHover} data-aos="zoom-in" data-aos-delay="0"><img src={reportLogo} alt="" className={style.iconAnim}/><h3>Hồ sơ sức khỏe</h3><p>Ghi nhận và theo dõi...</p></div>
+            <div className={style.featureBox + ' ' + style.boxHover} data-aos="zoom-in" data-aos-delay="100"><img src={notifyLogo} alt="" className={style.iconAnim}/><h3>Thông báo</h3><p>Thông tin tức thì</p></div>
+            <div className={style.featureBox + ' ' + style.boxHover} data-aos="zoom-in" data-aos-delay="200"><img src={statisticLogo} alt="" className={style.iconAnim}/><h3>Báo cáo</h3><p>Xuất báo cáo theo lớp...</p></div>
           </div>
         </div>
       </section>
 
-      <section className={style.roles} ref={rolesRef}>
+      <section className={style.roles} ref={rolesRef} data-aos="fade-up">
         <h2 className={style.fadeInUp}>Dành cho mọi đối tượng</h2>
         <p className={style.description + ' ' + style.fadeInUp}>EduHealth được thiết kế...</p>
         <div className={style.roleRow}>
-          <div className={style.roleCard + ' ' + style.cardHover + ' ' + style.parent}>
+          <div className={style.roleCard + ' ' + style.cardHover + ' ' + style.parent} data-aos="flip-left" data-aos-delay="0">
             <img src={parLogo} alt="" />
             <h3>Phụ huynh</h3>
             <ul>
@@ -164,8 +195,7 @@ const Homepage = () => {
             </ul>
             <button className={style.btnParent + ' ' + style.btnShine}>Dành cho phụ huynh</button>
           </div>
-
-          <div className={style.roleCard + ' ' + style.cardHover + ' ' + style.health}>
+          <div className={style.roleCard + ' ' + style.cardHover + ' ' + style.health} data-aos="flip-left" data-aos-delay="100">
             <img src={nurseLogo} alt="" />
             <h3>Y tá</h3>
             <ul>
@@ -175,8 +205,7 @@ const Homepage = () => {
             </ul>
             <button className={style.btnHealth + ' ' + style.btnShine}>Dành cho y tế</button>
           </div>
-
-          <div className={style.roleCard + ' ' + style.cardHover + ' ' + style.board}>
+          <div className={style.roleCard + ' ' + style.cardHover + ' ' + style.board} data-aos="flip-left" data-aos-delay="200">
             <img src={adminLogo} alt="" />
             <h3>Ban giám hiệu</h3>
             <ul>
@@ -189,16 +218,16 @@ const Homepage = () => {
         </div>
       </section>
 
-      <section className={style.feedback + ' ' + style.sectionVisible} ref={feedbackRef}>
+      <section className={style.feedback + ' ' + style.sectionVisible} ref={feedbackRef} data-aos="fade-up">
         <h2 className={style.fadeInUp}>Khách hàng nói gì về chúng tôi</h2>
         <div className={style.feedbackCards}>
-          <div className={style.feedbackCard + ' ' + style.cardSlideUp}><p>“Ứng dụng dễ sử dụng...”</p><div className={style.feedbackUser}><img src={feedback} alt="" className={style.userIcon} /><strong>Nguyễn Thị Hương</strong></div></div>
-          <div className={style.feedbackCard + ' ' + style.cardSlideUp}><p>“Tôi không phải ghi giấy...”</p><div className={style.feedbackUser}><img src={feedback} alt="" className={style.userIcon} /><strong>Trần Văn Duy</strong></div></div>
-          <div className={style.feedbackCard + ' ' + style.cardSlideUp}><p>“Giúp tôi nắm được sức khỏe...”</p><div className={style.feedbackUser}><img src={feedback} alt="" className={style.userIcon} /><strong>Nguyễn Thị Ánh Dương</strong></div></div>
+          <div className={style.feedbackCard + ' ' + style.cardSlideUp} data-aos="zoom-in" data-aos-delay="0"><p>“Ứng dụng dễ sử dụng...”</p><div className={style.feedbackUser}><img src={feedback} alt="" className={style.userIcon} /><strong>Nguyễn Thị Hương</strong></div></div>
+          <div className={style.feedbackCard + ' ' + style.cardSlideUp} data-aos="zoom-in" data-aos-delay="100"><p>“Tôi không phải ghi giấy...”</p><div className={style.feedbackUser}><img src={feedback} alt="" className={style.userIcon} /><strong>Trần Văn Duy</strong></div></div>
+          <div className={style.feedbackCard + ' ' + style.cardSlideUp} data-aos="zoom-in" data-aos-delay="200"><p>“Giúp tôi nắm được sức khỏe...”</p><div className={style.feedbackUser}><img src={feedback} alt="" className={style.userIcon} /><strong>Nguyễn Thị Ánh Dương</strong></div></div>
         </div>
       </section>
 
-      <section className={style.cta} ref={ctaRef}>
+      <section className={style.cta} ref={ctaRef} data-aos="fade-up">
         <h2 className={style.fadeInUp}>Sẵn sàng nâng cao chất lượng?</h2>
         <p>Đăng ký ngay để trải nghiệm hệ thống quản lý sức khỏe học đường.</p>
         <div className={style.ctaButtons}>
@@ -210,12 +239,29 @@ const Homepage = () => {
       <footer className={style.footer}>
         <div className={style.footerTop}>
           <div className={style.footerColumn}><div className={style.footerLogo}>EduHealth</div></div>
-          <div className={style.footerColumn}><h4>Liên kết nhanh</h4><ul><li><a href="#">Trang chủ</a></li><li><a href="#">Dịch vụ</a></li><li><a href="#">Giới thiệu</a></li><li><a href="#">Blog</a></li></ul></div>
+          <div className={style.footerColumn}><h4>Liên kết nhanh</h4><ul>
+            <li><a href="#" onClick={e => {e.preventDefault(); handleFooterNav("home");}}>Trang chủ</a></li>
+            <li><a href="#" onClick={e => {e.preventDefault(); handleFooterNav("features");}}>Dịch vụ</a></li>
+            <li><a href="#" onClick={e => {e.preventDefault(); handleFooterNav("features");}}>Giới thiệu</a></li>
+            
+          </ul></div>
           <div className={style.footerColumn}><h4>Hỗ trợ</h4><ul><li><a href="#">Trung tâm trợ giúp</a></li><li><a href="#">Chính sách</a></li><li><a href="#">Bảo mật</a></li></ul></div>
           <div className={style.footerColumn}><h4>Liên hệ</h4><ul><li>Email: support@eduhealth.vn</li><li>Địa chỉ: Q1, TP.HCM</li><li>Điện thoại: 0123 456 789</li></ul></div>
         </div>
         <div className={style.footerBottom}><p>© 2025 EduHealth. All rights reserved.</p></div>
       </footer>
+      {showScrollTop && (
+        <button
+          className={style.scrollTopBtn}
+          onClick={handleScrollTop}
+          aria-label="Lên đầu trang"
+        >
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="18" cy="18" r="16" fill="#06b6d4" stroke="#fff" strokeWidth="2"/>
+            <polyline points="12,20 18,14 24,20" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      )}
     </>
   );
 };

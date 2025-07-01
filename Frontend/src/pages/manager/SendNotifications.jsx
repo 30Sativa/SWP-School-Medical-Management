@@ -200,7 +200,10 @@ const SendNotifications = () => {
       setShowDeleteModal(false);
       setDeleteId(null);
       fetchAllNotifications(); // reload danh sách sau khi xóa
-    } catch {}
+    } catch (error) {
+      console.error("❌ Lỗi khi xóa thông báo:", error);
+      setError("Xóa thông báo thất bại!");
+    }
   };
 
   // Thêm/sửa category
@@ -266,7 +269,10 @@ const SendNotifications = () => {
       })
         .then(res => res.json())
         .then(data => setCategories(data));
-    } catch {}
+    } catch (error) {
+      console.error("❌ Lỗi khi xóa loại thông báo:", error);
+      setCatError("Xóa loại thông báo thất bại!");
+    }
   };
 
   return (
