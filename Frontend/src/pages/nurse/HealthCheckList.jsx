@@ -12,6 +12,8 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts"; // Import PieChart components
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const HealthCheckList = () => {
   const [campaigns, setCampaigns] = useState([]);
@@ -127,7 +129,7 @@ const HealthCheckList = () => {
       console.log("PUT response:", res.data);
 
       if (res.status === 200) {
-        alert("Cập nhật trạng thái thành công!");
+        notifySuccess("Cập nhật trạng thái thành công!");
         const updatedCampaigns = campaigns.map((campaign) =>
           campaign.id === campaignId
             ? { ...campaign, statusName: newStatus }
@@ -139,10 +141,10 @@ const HealthCheckList = () => {
     } catch (error) {
       if (error.response) {
         console.error("API error:", error.response.data);
-        alert("Lỗi cập nhật trạng thái: " + (error.response.data.message || ""));
+        notifyError("Lỗi cập nhật trạng thái: " + (error.response.data.message || ""));
       } else {
         console.error("Lỗi khi cập nhật trạng thái chiến dịch:", error);
-        alert("Lỗi cập nhật trạng thái.");
+        notifyError("Lỗi cập nhật trạng thái.");
       }
     }
   };
@@ -320,6 +322,7 @@ const HealthCheckList = () => {
               </PieChart>
             </ResponsiveContainer>
           </div>
+          <Notification />
         </div>
       </main>
     </div>

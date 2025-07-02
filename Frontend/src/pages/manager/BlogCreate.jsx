@@ -3,7 +3,9 @@ import Sidebar from "../../components/sb-Manager/Sidebar";
 import style from "../../components/sb-Manager/MainLayout.module.css";
 import blogStyle from "../../assets/css/Blog.module.css";
 import axios from "axios";
-import { message, Spin } from "antd";
+import { Spin } from "antd";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 function getQueryParam(name) {
   const url = new URL(window.location.href);
@@ -29,7 +31,7 @@ const BlogCreate = () => {
           setTitle(blog.title);
           setContent(blog.content);
         })
-        .catch(() => message.error('Không thể tải dữ liệu bài viết!'))
+        .catch(() => notifyError('Không thể tải dữ liệu bài viết!'))
         .finally(() => setLoading(false));
     }
   }, []);
@@ -46,7 +48,7 @@ const BlogCreate = () => {
           content,
           isActive: true
         });
-        message.success('Cập nhật bài viết thành công!');
+        notifySuccess('Cập nhật bài viết thành công!');
       } else {
         await axios.post(apiUrl, {
           title,
@@ -55,11 +57,11 @@ const BlogCreate = () => {
           postedDate,
           isActive: true
         });
-        message.success('Tạo bài viết thành công!');
+        notifySuccess('Tạo bài viết thành công!');
       }
       window.location.href = "/blog";
     } catch {
-      message.error('Lưu bài viết thất bại!');
+      notifyError('Lưu bài viết thất bại!');
     } finally {
       setLoading(false);
     }
@@ -111,6 +113,7 @@ const BlogCreate = () => {
           </button>
         </form>
         </Spin>
+        <Notification />
       </main>
     </div>
   );

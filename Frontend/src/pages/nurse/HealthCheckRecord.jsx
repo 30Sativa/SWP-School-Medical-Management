@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import styles from "../../assets/css/HealthCheckRecord.module.css";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const HealthCheckRecord = () => {
   const { recordId } = useParams();
@@ -71,10 +73,10 @@ const HealthCheckRecord = () => {
           bmi: Number(newRecord.bmi),
         }
       );
-      alert("Ghi nhận thành công!");
+      notifySuccess("Ghi nhận thành công!");
       navigate(-1);
     } catch (error) {
-      alert(
+      notifyError(
         "Lỗi ghi nhận! " + (error.response?.data?.message || error.message)
       );
     }
@@ -158,7 +160,7 @@ const HealthCheckRecord = () => {
             bmi: Number(record.bmi),
           }
         );
-        alert("Ghi nhận thành công!");
+        notifySuccess("Ghi nhận thành công!");
         navigate(-1);
       } else {
         // Cập nhật
@@ -178,14 +180,14 @@ const HealthCheckRecord = () => {
           }
         );
         if (res.status === 200) {
-          alert("Cập nhật thành công!");
+          notifySuccess("Cập nhật thành công!");
           setIsEditing(false);
         } else {
-          alert("Lỗi cập nhật! " + (res.data?.message || ""));
+          notifyError("Lỗi cập nhật! " + (res.data?.message || ""));
         }
       }
     } catch (error) {
-      alert(
+      notifyError(
         "Lỗi khi gửi dữ liệu: " +
           (error.response?.data?.message || error.message)
       );
@@ -427,6 +429,7 @@ Trường Mầm Non
 
   return (
     <div className={styles.container}>
+      <Notification />
       <h2>Thông tin khám sức khỏe: {record.studentName}</h2>
       <button className={styles.backButton} onClick={() => navigate(-1)}>
         ⬅ Quay lại

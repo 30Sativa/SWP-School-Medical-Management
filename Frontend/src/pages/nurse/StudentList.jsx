@@ -3,6 +3,8 @@ import Sidebar from "../../components/sidebar/Sidebar";
 import style from "../../assets/css/studentList.module.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const StudentList = () => {
   const [students, setStudents] = useState([]);
@@ -142,6 +144,7 @@ const StudentList = () => {
           ))}
         </div>
       </main>
+      <Notification />
     </div>
   );
 };

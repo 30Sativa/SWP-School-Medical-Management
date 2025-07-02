@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Sidebar from "../../components/sidebar/Sidebar";
 import style from "../../assets/css/viewBlog.module.css";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const ViewBlog = () => {
   const [blogs, setBlogs] = useState([]);
@@ -103,6 +105,7 @@ const ViewBlog = () => {
             </button>
           ))}
         </div>
+        <Notification />
       </main>
     </div>
   );

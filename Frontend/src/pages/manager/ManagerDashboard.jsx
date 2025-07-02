@@ -6,6 +6,8 @@ import {
   TeamOutlined,
   ProfileOutlined,
 } from "@ant-design/icons";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const API_BASE = "/api";
 
@@ -149,6 +151,8 @@ const ManagerDashboard = () => {
             ))}
           </ul>
         </section>
+
+        <Notification />
       </div>
     </div>
   );

@@ -15,6 +15,8 @@ import {
 } from "recharts";
 import Sidebar from "../../components/sidebar/Sidebar";
 import style from "../../assets/css/medicalSupplies.module.css";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const MedicalSupplies = () => {
   const [supplies, setSupplies] = useState([]);
@@ -68,8 +70,14 @@ const MedicalSupplies = () => {
         setShowModal(false);
         setEditingId(null);
         setFormData({ name: "", quantity: "", unit: "", expiryDate: "" });
+        notifySuccess(
+          editingId ? "Cập nhật vật tư thành công!" : "Thêm vật tư thành công!"
+        );
       })
-      .catch((err) => console.error("❌ Lỗi thêm/cập nhật:", err))
+      .catch((err) => {
+        console.error("❌ Lỗi thêm/cập nhật:", err);
+        notifyError("Lỗi khi lưu vật tư!");
+      })
       .finally(() => setModalLoading(false));
   };
 
@@ -284,6 +292,7 @@ const MedicalSupplies = () => {
             </div>
           </div>
         )}
+        <Notification />
       </div>
     </div>
   );

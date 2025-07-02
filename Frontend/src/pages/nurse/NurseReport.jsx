@@ -13,6 +13,8 @@ import {
 import * as XLSX from "xlsx";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import Notification from "../../components/Notification";
+// import { notifySuccess, notifyError } from "../../utils/notification";
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f7f"];
 
@@ -197,6 +199,7 @@ const NurseReport = () => {
           </div>
         </div>
       </main>
+      <Notification />
     </div>
   );
 };

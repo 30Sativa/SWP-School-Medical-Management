@@ -13,6 +13,8 @@ import {
 } from "recharts";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const CampaignDetail = () => {
   const { id } = useParams();
@@ -103,7 +105,7 @@ const CampaignDetail = () => {
         `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/send-consent-to-all-parents`
       );
       setSendResult(res.data.data);
-      alert("Đã gửi thông báo đến cho phụ huynh.");
+      notifySuccess("Đã gửi thông báo đến cho phụ huynh.");
       setShowModal(true);
       const consentsRes = await axios.get(
         `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/consent-requests`
@@ -111,7 +113,7 @@ const CampaignDetail = () => {
       setConsents(consentsRes.data.data);
     } catch (err) {
       console.error("Gửi phiếu xác nhận thất bại:", err, err.response?.data);
-      alert(
+      notifyError(
         "Không thể gửi phiếu xác nhận: " +
           (err.response?.data?.message || err.message)
       );
@@ -334,14 +336,14 @@ const CampaignDetail = () => {
                     `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/send-consent-by-class`,
                     { className: selectedClass }
                   );
-                  alert("Đã gửi phiếu xác nhận cho lớp " + selectedClass);
+                  notifySuccess("Đã gửi phiếu xác nhận cho lớp " + selectedClass);
                   // Load lại consents nếu cần
                   const consentsRes = await axios.get(
                     `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/consent-requests`
                   );
                   setConsents(consentsRes.data.data);
                 } catch {
-                  alert("Gửi phiếu xác nhận thất bại!");
+                  notifyError("Gửi phiếu xác nhận thất bại!");
                 }
               } else {
                 alert("Vui lòng chọn lớp!");
@@ -565,6 +567,8 @@ const CampaignDetail = () => {
           </div>
         </div>
       )}
+
+      <Notification />
     </div>
   );
 };

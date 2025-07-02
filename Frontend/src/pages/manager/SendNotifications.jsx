@@ -3,6 +3,8 @@ import Sidebar from "../../components/sb-Manager/Sidebar";
 import styles from "../../assets/css/SendNotification.module.css";
 import { Bell, Trash2, Plus, Filter, X, Search } from "lucide-react";
 import { Pagination, Select } from 'antd';
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const API_BASE = "/api"; // Sử dụng proxy để tránh lỗi CORS
 
@@ -168,6 +170,7 @@ const SendNotifications = () => {
         })
       });
       setSuccess("Gửi thông báo thành công!");
+      notifySuccess("Gửi thông báo thành công!");
       setLoading(false);
       setTitle("");
       setContent("");
@@ -183,6 +186,7 @@ const SendNotifications = () => {
         .then(data => setAllNotifications(data.items || data));
     } catch {
       setError("Gửi thông báo thất bại!");
+      notifyError("Gửi thông báo thất bại!");
       setLoading(false);
     }
   };
@@ -514,6 +518,7 @@ const SendNotifications = () => {
             </ul>
           </div>
         </Modal>
+        <Notification />
       </main>
     </div>
   );

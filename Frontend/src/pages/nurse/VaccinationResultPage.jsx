@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import style from "../../assets/css/ResultPage.module.css";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const VaccineResult = () => {
   const { id } = useParams();
@@ -90,10 +92,10 @@ const VaccineResult = () => {
         },
         { headers: { "Content-Type": "application/json" } }
       );
-      alert("Lưu thành công!");
+      notifySuccess("Lưu thành công!");
       setEditingIndex(null);
     } catch (error) {
-      alert("Lỗi khi lưu dữ liệu: " + JSON.stringify(error.response?.data));
+      notifyError("Lỗi khi lưu dữ liệu: " + JSON.stringify(error.response?.data));
     }
   };
 
@@ -116,10 +118,10 @@ const VaccineResult = () => {
         },
         { headers: { "Content-Type": "application/json" } }
       );
-      alert("Đã gửi thông báo đến phụ huynh!");
+      notifySuccess("Đã gửi thông báo đến phụ huynh!");
     } catch (error) {
       console.error("Lỗi khi gửi thông báo:", error);
-      alert("Không thể gửi thông báo: " + error.response?.data?.message);
+      notifyError("Không thể gửi thông báo: " + error.response?.data?.message);
     } finally {
       setModalLoading(false);
     }
@@ -261,6 +263,7 @@ const VaccineResult = () => {
           </div>
         </div>
       )}
+      <Notification />
     </div>
   );
 };

@@ -5,6 +5,8 @@ import { Edit2, Trash2 } from "lucide-react";
 import Sidebar from "../../components/sb-Manager/Sidebar";
 import style from "../../assets/css/userList.module.css";  // Import CSS riêng cho UserList
 import axios from "axios";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const { Option } = Select;
 const { Title } = Typography;
@@ -151,13 +153,13 @@ const showModal = (mode, user = null) => {
       id = localStorage.getItem("userId");
     }
     if (!id) {
-      message.error("Không tìm thấy userId để xóa!");
+      notifyError("Không tìm thấy userId để xóa!");
       return;
     }
     // Tìm user object từ danh sách users
     const userToDelete = users.find(u => u.userID === id || u.userId === id);
     if (!userToDelete) {
-      message.error("Không tìm thấy thông tin người dùng để xóa!");
+      notifyError("Không tìm thấy thông tin người dùng để xóa!");
       return;
     }
     Modal.confirm({
@@ -180,13 +182,13 @@ const showModal = (mode, user = null) => {
           await axios.put(`${apiUrl}/${realId}`, payload, {
             headers: { Authorization: `Bearer ${token}` },
           });
-          message.success("Xóa người dùng thành công");
+          notifySuccess("Xóa người dùng thành công");
           fetchUsers(); // Cập nhật lại danh sách
         } catch (err) {
           if (err.response && err.response.data && err.response.data.message) {
-            message.error("Xóa người dùng thất bại: " + err.response.data.message);
+            notifyError("Xóa người dùng thất bại: " + err.response.data.message);
           } else {
-            message.error("Xóa người dùng thất bại!");
+            notifyError("Xóa người dùng thất bại!");
           }
         }
       },
@@ -215,7 +217,7 @@ const handleModalSubmit = async (values) => {
       await axios.post(apiUrl, dataToSend, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      message.success("Thêm người dùng thành công");
+      notifySuccess("Thêm người dùng thành công");
     } else if (modalMode === "edit" && editingUser) {
       // Cập nhật người dùng
       const editData = {
@@ -228,18 +230,18 @@ const handleModalSubmit = async (values) => {
         isActive: true,
       };
       if (!userID) {
-        message.error("Không tìm thấy userID để cập nhật!");
+        notifyError("Không tìm thấy userID để cập nhật!");
         return;
       }
       await axios.put(`${apiUrl}/${userID}`, editData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      message.success("Cập nhật người dùng thành công");
+      notifySuccess("Cập nhật người dùng thành công");
     }
     fetchUsers();
     setModalVisible(false);
   } catch {
-    message.error("Có lỗi khi lưu người dùng!");
+    notifyError("Có lỗi khi lưu người dùng!");
   }
 };
 
@@ -247,6 +249,7 @@ const handleModalSubmit = async (values) => {
 
   return (
     <div className={style.layoutContainer}>
+      <Notification />
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       <main className={style.layoutContent}>
         <header className={style.dashboardHeaderBar}>

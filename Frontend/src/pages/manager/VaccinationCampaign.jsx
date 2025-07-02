@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/sidebar/Sidebar";
 import style from "../../components/sb-Manager/MainLayout.module.css";
 import campaignStyle from "../../assets/css/VaccinationCampaign.module.css";
-import { Table, Button, Modal, Form, Input, DatePicker, Select, message, Spin } from "antd";
+import { Table, Button, Modal, Form, Input, DatePicker, Select, Spin } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import axios from "axios";
 import dayjs from "dayjs";
 import { Edit2, Trash2, Plus } from "lucide-react";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const apiUrl = "https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns";
 
@@ -38,7 +40,7 @@ const VaccinationCampaign = () => {
       // API trả về { status, message, data: [...] }
       setCampaigns(res.data.data || []);
     } catch {
-      message.error("Không thể tải danh sách chiến dịch!");
+      notifyError("Không thể tải danh sách chiến dịch!");
       setCampaigns([]);
     } finally {
       setLoading(false);
@@ -91,7 +93,7 @@ const VaccinationCampaign = () => {
           campaignId: editing.campaignId,
         };
         await axios.put(apiUrl, putData);
-        message.success("Đã cập nhật chiến dịch!");
+        notifySuccess("Đã cập nhật chiến dịch!");
       } else {
         const postData = {
           vaccineName: values.vaccineName,
@@ -101,7 +103,7 @@ const VaccinationCampaign = () => {
           statusId: 1, // Luôn là "Chưa bắt đầu"
         };
         await axios.post(apiUrl, postData);
-        message.success("Đã tạo chiến dịch mới!");
+        notifySuccess("Đã tạo chiến dịch mới!");
       }
       setModalOpen(false);
       fetchCampaigns();
@@ -144,10 +146,10 @@ const VaccinationCampaign = () => {
         setLoading(true);
         try {
           await axios.put(`${apiUrl}/${id}/deactivate`, {}); // backend sẽ chuyển statusId thành 4
-          message.success("Đã huỷ chiến dịch!");
+          notifySuccess("Đã huỷ chiến dịch!");
           fetchCampaigns();
         } catch {
-          message.error("Huỷ thất bại!");
+          notifyError("Huỷ thất bại!");
         } finally {
           setLoading(false);
         }
@@ -164,10 +166,10 @@ const VaccinationCampaign = () => {
         setLoading(true);
         try {
           await axios.put(`${apiUrl}/${id}/activate`, {}); // backend sẽ chuyển statusId thành 2
-          message.success("Đã kích hoạt lại chiến dịch!");
+          notifySuccess("Đã kích hoạt lại chiến dịch!");
           fetchCampaigns();
         } catch {
-          message.error("Kích hoạt lại thất bại!");
+          notifyError("Kích hoạt lại thất bại!");
         } finally {
           setLoading(false);
         }
@@ -336,6 +338,7 @@ const VaccinationCampaign = () => {
             )}
           </Form>
         </Modal>
+        <Notification />
       </main>
     </div>
   );

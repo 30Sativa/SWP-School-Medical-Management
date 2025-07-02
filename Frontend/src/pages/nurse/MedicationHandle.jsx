@@ -4,6 +4,8 @@ import Sidebar from "../../components/sidebar/Sidebar";
 import style from "../../assets/css/MedicationHandle.module.css";
 import { Paperclip } from "lucide-react";
 import clsx from "clsx";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const MedicationHandle = () => {
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -58,8 +60,10 @@ const MedicationHandle = () => {
         payload,
         token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
       );
+      notifySuccess("Xử lý yêu cầu thành công!");
     } catch (error) {
       console.error("Chi tiết lỗi:", error.response?.data || error.message);
+      notifyError("Xử lý yêu cầu thất bại. Vui lòng thử lại sau.");
     } finally {
       const all = await fetchRequests();
       if (all) {
@@ -222,6 +226,7 @@ const MedicationHandle = () => {
             </div>
           </div>
         )}
+        <Notification />
         <h2 className={style.title}>Danh sách yêu cầu gửi thuốc (chờ xử lý)</h2>
         {renderTable(paginatedPending, true, loading)}
         {paginate(totalPendingPages, currentPage, setCurrentPage)}

@@ -12,6 +12,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const VaccinCampaign = () => {
   const [campaigns, setCampaigns] = useState([]);
@@ -256,6 +258,7 @@ const VaccinCampaign = () => {
               </PieChart>
             </ResponsiveContainer>
           </div>
+          <Notification />
         </div>
       </main>
     </div>

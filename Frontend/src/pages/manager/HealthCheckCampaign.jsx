@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import campaignStyle from "../../assets/css/HealthCheckCampaign.module.css";
 import Sidebar from "../../components/sidebar/Sidebar";
-import { Modal, Form as AntForm, Input, DatePicker, message } from "antd";
+import { Modal, Form as AntForm, Input, DatePicker } from "antd";
 import dayjs from "dayjs";
 import { Plus, Edit2, Trash2 } from "lucide-react";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const API_BASE = "/api";
 const PAGE_SIZE = 8;
@@ -129,12 +131,12 @@ const HealthCheckCampaign = () => {
             },
           }
         );
-        message.success("Cập nhật thành công!");
+        notifySuccess("Cập nhật thành công!");
       } else {
         await axios.post(`${API_BASE}/HealthCheckCampaign`, payload, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        message.success("Tạo mới thành công!");
+        notifySuccess("Tạo mới thành công!");
       }
       setShowModal(false);
       fetchCampaigns();
@@ -150,9 +152,9 @@ const HealthCheckCampaign = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       fetchCampaigns();
-      message.success("Xóa thành công!");
+      notifySuccess("Xóa thành công!");
     } catch {
-      message.error("Xóa thất bại!");
+      notifyError("Xóa thất bại!");
     }
   };
 
@@ -371,6 +373,7 @@ const HealthCheckCampaign = () => {
             )}
           </AntForm>
         </Modal>
+        <Notification />
       </main>
     </div>
   );

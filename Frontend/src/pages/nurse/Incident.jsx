@@ -22,6 +22,8 @@ import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 dayjs.extend(isoWeek);
 import Select from "react-select";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const COLORS = ["#F4C430", "#FF6B6B", "#4D96FF", "#9AE6B4", "#FFA500"];
 
@@ -383,14 +385,13 @@ const Incident = () => {
         });
         setSuppliesUsed([]);
         fetchEvents();
+        notifySuccess("Tạo sự cố thành công!");
       })
       .catch((err) => {
         const errorDetail =
           err.response?.data?.errors || err.response?.data || err.message;
         console.error("❌ Lỗi tạo sự cố:", errorDetail);
-        alert(
-          "Lỗi khi tạo mới sự cố:\n" + JSON.stringify(errorDetail, null, 2)
-        );
+        notifyError("Lỗi khi tạo mới sự cố!");
       })
       .finally(() => setModalLoading(false));
   };
@@ -444,14 +445,13 @@ const Incident = () => {
         fetchEvents();
         setShowEditForm(false);
         setEditingEvent(null);
+        notifySuccess("Cập nhật sự cố thành công!");
       })
       .catch((err) => {
         const errorDetail =
           err.response?.data?.errors || err.response?.data || err.message;
         console.error("❌ Lỗi cập nhật sự cố:", errorDetail);
-        alert(
-          "Lỗi khi cập nhật sự cố:\n" + JSON.stringify(errorDetail, null, 2)
-        );
+        notifyError("Lỗi khi cập nhật sự cố!");
       })
       .finally(() => setModalLoading(false));
   };
@@ -465,8 +465,9 @@ const Incident = () => {
         .then(() => {
           setEvents((prev) => prev.filter((e) => e.eventId !== id));
           setSelectedEvent(null);
+          notifySuccess("Đã xoá sự cố!");
         })
-        .catch((err) => alert("Lỗi khi xoá: " + err));
+        .catch((err) => notifyError("Lỗi khi xoá sự cố!"));
     }
   };
 
@@ -569,16 +570,13 @@ const Incident = () => {
         setShowAllStudents(false);
         setSearchStudent("");
         fetchEvents();
-        alert(`Đã tạo thành công ${responses.length} sự cố y tế!`);
+        notifySuccess(`Đã tạo thành công ${responses.length} sự cố y tế!`);
       })
       .catch((err) => {
         const errorDetail =
           err.response?.data?.errors || err.response?.data || err.message;
         console.error("❌ Lỗi tạo hàng loạt sự cố:", errorDetail);
-        alert(
-          "Lỗi khi tạo hàng loạt sự cố:\n" +
-            JSON.stringify(errorDetail, null, 2)
-        );
+        notifyError("Lỗi khi tạo hàng loạt sự cố!");
       });
   };
 
@@ -635,6 +633,7 @@ const Incident = () => {
 
   return (
     <div className={style.pageContainer}>
+      <Notification />
       <Sidebar />
       <div className={style.contentArea}>
         {/* LOADING OVERLAY */}

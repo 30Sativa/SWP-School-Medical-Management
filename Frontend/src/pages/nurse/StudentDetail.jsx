@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/sidebar/Sidebar";
 import style from "../../assets/css/studentDetail.module.css";
 import axios from "axios";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const StudentDetail = () => {
   const { id } = useParams();
@@ -43,12 +45,12 @@ const StudentDetail = () => {
         `https://swp-school-medical-management.onrender.com/api/Student/${student.studentId}`
       )
       .then(() => {
-        alert("Đã xoá học sinh.");
+        notifySuccess("Đã xoá học sinh.");
         navigate("/students");
       })
       .catch((err) => {
         console.error("Lỗi xoá học sinh:", err);
-        alert("Xoá thất bại!");
+        notifyError("Xoá thất bại!");
       });
   };
 
@@ -80,7 +82,7 @@ const StudentDetail = () => {
         updatedData
       )
       .then(() => {
-        alert("Cập nhật thành công!");
+        notifySuccess("Cập nhật thành công!");
         setStudent({ ...student, ...formData });
         setShowForm(false);
       })
@@ -88,7 +90,7 @@ const StudentDetail = () => {
         console.error("Lỗi cập nhật:", err);
         const errorMessage =
           err.response?.data?.message || "Cập nhật thất bại. Vui lòng thử lại!";
-        alert(errorMessage); // Show detailed error message
+        notifyError(errorMessage); // Show detailed error message
       })
       .finally(() => setModalLoading(false));
   };
@@ -208,6 +210,7 @@ const StudentDetail = () => {
             </div>
           </div>
         )}
+        <Notification />
       </main>
     </div>
   );
