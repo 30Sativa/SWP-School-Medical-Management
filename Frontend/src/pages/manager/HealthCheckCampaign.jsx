@@ -229,11 +229,13 @@ const HealthCheckCampaign = () => {
             </thead>
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan={7} style={{ textAlign: "center" }}>
-                    Đang tải...
-                  </td>
-                </tr>
+                Array.from({ length: 8 }).map((_, idx) => (
+                  <tr key={idx} className={campaignStyle.skeletonRow}>
+                    {Array.from({ length: 7 }).map((_, cidx) => (
+                      <td key={cidx}><div className={campaignStyle.skeletonCell}></div></td>
+                    ))}
+                  </tr>
+                ))
               ) : pagedCampaigns.length === 0 ? (
                 <tr>
                   <td colSpan={7} style={{ textAlign: "center" }}>

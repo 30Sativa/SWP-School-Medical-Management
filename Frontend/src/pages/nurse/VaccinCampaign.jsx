@@ -18,10 +18,12 @@ const VaccinCampaign = () => {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [filterStatus, setFilterStatus] = useState("Tất cả trạng thái");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true); // Thêm trạng thái loading
   const itemsPerPage = 5;
 
   useEffect(() => {
     const fetchCampaigns = async () => {
+      setLoading(true);
       try {
         const res = await axios.get(
           "https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns"
@@ -42,6 +44,8 @@ const VaccinCampaign = () => {
         }
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu chiến dịch:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -82,11 +86,26 @@ const VaccinCampaign = () => {
     },
   ];
 
+  // Skeleton loading rows
+  const skeletonRows = Array.from({ length: itemsPerPage }, (_, i) => (
+    <tr key={i} className={style.skeletonRow}>
+      <td colSpan={5}>
+        <div className={style.skeletonBox} style={{ height: 32, width: "100%" }} />
+      </td>
+    </tr>
+  ));
+
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       <Sidebar />
       <main style={{ flex: 1 }}>
         <div className={style.campaignPage}>
+          {/* LOADING OVERLAY */}
+          {loading && (
+            <div className={style.loadingOverlay}>
+              <div className={style.spinner}></div>
+            </div>
+          )}
           {/* HEADER */}
           <div className={style.pageHeader}>
             <div>
@@ -108,6 +127,7 @@ const VaccinCampaign = () => {
                   setSearchKeyword(e.target.value);
                   setCurrentPage(1);
                 }}
+                className={style.inputSearch}
               />
             </div>
             <select
@@ -118,7 +138,7 @@ const VaccinCampaign = () => {
                 setCurrentPage(1);
               }}
             >
-              <option>Tất cả</option>
+              <option>Tất cả trạng thái</option>
               <option>Đang diễn ra</option>
               <option>Đã hoàn thành</option>
               <option>Chưa bắt đầu</option>
@@ -126,9 +146,7 @@ const VaccinCampaign = () => {
           </div>
 
           {/* TABLE */}
-          {campaigns.length === 0 ? (
-            <p style={{ padding: "1rem" }}>Không có dữ liệu chiến dịch.</p>
-          ) : (
+          <div className={style.fadeInTable}>
             <table className={style.campaignTable}>
               <thead>
                 <tr>
@@ -140,38 +158,47 @@ const VaccinCampaign = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentCampaigns.map((c) => (
-                  <tr key={c.id}>
-                    <td>{c.vaccineName}</td>
-                    <td>{c.date}</td>
-                    <td>{c.description}</td>
-                    <td>
-                      <span
-                        className={`${style.statusBadge} ${
-                          style[`status-${c.status.replace(/\s/g, "-")}`]
-                        }`}
-                      >
-                        {c.status}
-                      </span>
-                    </td>
-                    <td>
-                      <Link to={`/vaccines/${c.id}`}>
-                        <button className={style.btnDetail}>
-                          Xem chi tiết
-                        </button>
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+                {loading
+                  ? skeletonRows
+                  : currentCampaigns.length === 0
+                  ? (
+                    <tr>
+                      <td colSpan={5} style={{ textAlign: "center", padding: 24 }}>
+                        Không có dữ liệu chiến dịch.
+                      </td>
+                    </tr>
+                  )
+                  : currentCampaigns.map((c) => (
+                      <tr key={c.id} className={style.tableRow}>
+                        <td>{c.vaccineName}</td>
+                        <td>{c.date}</td>
+                        <td>{c.description}</td>
+                        <td>
+                          <span
+                            className={`${style.statusBadge} ${
+                              style[`status-${c.status.replace(/\s/g, "-")}`]
+                            }`}
+                          >
+                            {c.status}
+                          </span>
+                        </td>
+                        <td>
+                          <Link to={`/vaccines/${c.id}`}>
+                            <button className={style.btnDetail}>Xem chi tiết</button>
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
               </tbody>
             </table>
-          )}
+          </div>
 
           {/* PAGINATION */}
           <div className={style.pagination}>
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
+              className={style.pageBtn}
             >
               «
             </button>
@@ -179,7 +206,11 @@ const VaccinCampaign = () => {
               <button
                 key={i + 1}
                 onClick={() => handlePageChange(i + 1)}
-                className={currentPage === i + 1 ? style.activePage : ""}
+                className={
+                  currentPage === i + 1
+                    ? `${style.activePage} ${style.pageBtn}`
+                    : style.pageBtn
+                }
               >
                 {i + 1}
               </button>
@@ -187,6 +218,7 @@ const VaccinCampaign = () => {
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
+              className={style.pageBtn}
             >
               »
             </button>
@@ -199,6 +231,7 @@ const VaccinCampaign = () => {
               borderRadius: "12px",
               boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
             }}
+            className={style.fadeInBox}
           >
             <h3 style={{ marginBottom: "16px", color: "#333" }}>
               Thống kê chiến dịch theo trạng thái

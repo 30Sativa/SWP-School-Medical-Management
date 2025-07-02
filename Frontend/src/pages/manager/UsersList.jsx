@@ -281,7 +281,16 @@ const handleModalSubmit = async (values) => {
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.length > 0 ? (
+            {loading ? (
+              // Hiệu ứng skeleton loading khi đang tải dữ liệu
+              Array.from({ length: 8 }).map((_, idx) => (
+                <tr key={idx} className={style.skeletonRow}>
+                  {Array.from({ length: 6 }).map((_, cidx) => (
+                    <td key={cidx}><div className={style.skeletonCell}></div></td>
+                  ))}
+                </tr>
+              ))
+            ) : filteredUsers.length > 0 ? (
               filteredUsers.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage).map((user, index) => {
                 const realUserId = user.userID;
                 return (

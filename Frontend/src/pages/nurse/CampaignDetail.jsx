@@ -21,6 +21,7 @@ const CampaignDetail = () => {
   const [campaign, setCampaign] = useState(null);
   const [consents, setConsents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalLoading, setModalLoading] = useState(false); // loading khi gửi phiếu xác nhận
   const [sendResult, setSendResult] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
@@ -93,6 +94,7 @@ const CampaignDetail = () => {
 
   const handleSendConsentToAll = async () => {
     try {
+      setModalLoading(true);
       if (!campaign || !campaign.campaignId) {
         alert("Không tìm thấy thông tin chiến dịch.");
         return;
@@ -113,6 +115,8 @@ const CampaignDetail = () => {
         "Không thể gửi phiếu xác nhận: " +
           (err.response?.data?.message || err.message)
       );
+    } finally {
+      setModalLoading(false);
     }
   };
 
@@ -223,7 +227,12 @@ const CampaignDetail = () => {
     );
   };
 
-  if (loading || !campaign) return <p>Đang tải dữ liệu...</p>;
+  if (loading || !campaign || modalLoading)
+    return (
+      <div className={style.loadingOverlay}>
+        <div className={style.spinner}></div>
+      </div>
+    );
 
   const totalAgreed = consents.filter(
     (c) => c.consentStatusName === "Đồng ý"

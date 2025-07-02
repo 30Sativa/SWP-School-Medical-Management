@@ -9,6 +9,7 @@ const VaccineResult = () => {
   const [records, setRecords] = useState([]);
   const [campaignStatus, setCampaignStatus] = useState("");
   const [loading, setLoading] = useState(true);
+  const [modalLoading, setModalLoading] = useState(false); // loading khi gửi thông báo
   const [editingIndex, setEditingIndex] = useState(null);
   const [viewingIndex, setViewingIndex] = useState(null);
   const navigate = useNavigate();
@@ -98,6 +99,7 @@ const VaccineResult = () => {
 
   const handleSendNotification = async (student) => {
     try {
+      setModalLoading(true);
       const note = student.followUpNote
         ? `Ghi chú: ${student.followUpNote}`
         : "Không có ghi chú.";
@@ -118,11 +120,18 @@ const VaccineResult = () => {
     } catch (error) {
       console.error("Lỗi khi gửi thông báo:", error);
       alert("Không thể gửi thông báo: " + error.response?.data?.message);
+    } finally {
+      setModalLoading(false);
     }
   };
 
   return (
     <div className={style.container}>
+      {(loading || modalLoading) && (
+        <div className={style.loadingOverlay}>
+          <div className={style.spinner}></div>
+        </div>
+      )}
       <h2 className={style.title}>Kết quả tiêm chủng</h2>
       <button className={style.btnBack} onClick={() => navigate(-1)}>
         ← Quay lại

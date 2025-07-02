@@ -140,7 +140,7 @@ const Homepage = () => {
                 (idx === slideIdx ? ' ' + style.activeBg : ' ' + style.inactiveBg)
               }
               style={{ zIndex: idx === slideIdx ? 2 : 1, transition: 'opacity 1.2s cubic-bezier(.4,0,.2,1), transform 1.2s cubic-bezier(.4,0,.2,1)' }}
-              // Không dùng data-aos cho từng ảnh slideshow vì sẽ gây lỗi hiệu ứng khi chuyển slide động
+              
             />
           ))}
           <div className={style.slideDotsBg} data-aos="fade-up" data-aos-delay="400">
@@ -159,7 +159,7 @@ const Homepage = () => {
           </h1>
           <p className={style.fadeInUp}>Kết nối phụ huynh, nhà trường và đội ngũ y tế...</p>
           <div className={style.heroButtons}>
-            <button className={style.primaryBtn + ' ' + style.btnPulse} onClick={() => navigate("/login")}>Tìm hiểu thêm </button>
+            <button className={style.primaryBtn + ' ' + style.btnPulse} onClick={e => { e.preventDefault(); scrollToRef(featuresRef); }}>Tìm hiểu thêm </button>
           </div>
         </div>
       </section>
@@ -232,7 +232,7 @@ const Homepage = () => {
         <p>Đăng ký ngay để trải nghiệm hệ thống quản lý sức khỏe học đường.</p>
         <div className={style.ctaButtons}>
           <button className={style.primaryBtn + ' ' + style.btnPulse} onClick={() => navigate("/login")}>Đăng ký trải nghiệm</button>
-          <button className={style.outlineBtn + ' ' + style.btnPulse} onClick={() => navigate("/login")}>Tìm hiểu thêm</button>
+          <button className={style.outlineBtn + ' ' + style.btnPulse} onClick={e => { e.preventDefault(); scrollToRef(featuresRef); }}>Tìm hiểu thêm</button>
         </div>
       </section>
 
@@ -246,7 +246,7 @@ const Homepage = () => {
             
           </ul></div>
           <div className={style.footerColumn}><h4>Hỗ trợ</h4><ul><li><a href="#">Trung tâm trợ giúp</a></li><li><a href="#">Chính sách</a></li><li><a href="#">Bảo mật</a></li></ul></div>
-          <div className={style.footerColumn}><h4>Liên hệ</h4><ul><li>Email: support@eduhealth.vn</li><li>Địa chỉ: Q1, TP.HCM</li><li>Điện thoại: 0123 456 789</li></ul></div>
+          <div className={style.footerColumn}><h4>Liên hệ</h4><ul><li>Email: support@eduhealth.vn</li><li>Địa chỉ: 7 Đ. D1, Long Thạnh Mỹ, Thủ Đức, Hồ Chí Minh</li><li>Điện thoại: 0123 456 789</li></ul></div>
         </div>
         <div className={style.footerBottom}><p>© 2025 EduHealth. All rights reserved.</p></div>
       </footer>

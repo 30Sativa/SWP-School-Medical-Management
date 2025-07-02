@@ -16,14 +16,18 @@ const StudentDetail = () => {
     parent: "",
     class: "",
   });
+  const [loading, setLoading] = useState(true);
+  const [modalLoading, setModalLoading] = useState(false); // loading khi submit modal
 
   useEffect(() => {
+    setLoading(true);
     axios
       .get(
         `https://swp-school-medical-management.onrender.com/api/Student/${id}`
       )
       .then((res) => setStudent(res.data.data))
-      .catch((err) => console.error("Lỗi khi tải dữ liệu:", err));
+      .catch((err) => console.error("Lỗi khi tải dữ liệu:", err))
+      .finally(() => setLoading(false));
   }, [id]);
 
   const handleBack = () => {
@@ -60,6 +64,7 @@ const StudentDetail = () => {
   };
 
   const handleUpdate = () => {
+    setModalLoading(true);
     const updatedData = {
       studentId: student.studentId,
       fullName: formData.fullName,
@@ -84,11 +89,16 @@ const StudentDetail = () => {
         const errorMessage =
           err.response?.data?.message || "Cập nhật thất bại. Vui lòng thử lại!";
         alert(errorMessage); // Show detailed error message
-      });
+      })
+      .finally(() => setModalLoading(false));
   };
 
-  if (!student)
-    return <div className={style.loading}>Đang tải thông tin học sinh...</div>;
+  if (loading || modalLoading)
+    return (
+      <div className={style.loadingOverlay}>
+        <div className={style.spinner}></div>
+      </div>
+    );
 
   return (
     <div className={style.layoutContainer}>

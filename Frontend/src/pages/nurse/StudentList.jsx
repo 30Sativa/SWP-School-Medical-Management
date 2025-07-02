@@ -9,6 +9,7 @@ const StudentList = () => {
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
   const studentsPerPage = 10;
   const navigate = useNavigate();
 
@@ -18,6 +19,7 @@ const StudentList = () => {
 
   const fetchStudents = async () => {
     try {
+      setLoading(true);
       const response = await axios.get("https://swp-school-medical-management.onrender.com/api/Student");
       let studentArray = response.data?.data || [];
 
@@ -29,7 +31,9 @@ const StudentList = () => {
 
       setStudents(studentArray);
       setFilteredStudents(studentArray);
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       console.error("Có lỗi khi gọi API:", error);
     }
   };
@@ -90,7 +94,15 @@ const StudentList = () => {
             </tr>
           </thead>
           <tbody>
-            {currentStudents.length > 0 ? (
+            {loading ? (
+              Array.from({ length: 8 }).map((_, idx) => (
+                <tr key={idx} className={style.skeletonRow}>
+                  {Array.from({ length: 6 }).map((_, cidx) => (
+                    <td key={cidx}><div className={style.skeletonCell}></div></td>
+                  ))}
+                </tr>
+              ))
+            ) : currentStudents.length > 0 ? (
               currentStudents.map((student, index) => (
                 <tr key={student.id || index}>
                   <td>{indexOfFirstStudent + index + 1}</td>

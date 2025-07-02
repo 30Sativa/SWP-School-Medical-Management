@@ -23,10 +23,12 @@ const NurseReport = () => {
     health: null,
     medication: null,
   });
+  const [loading, setLoading] = useState(true); // loading fetch list
   const reportRef = useRef();
 
   useEffect(() => {
     const fetchAll = async () => {
+      setLoading(true);
       try {
         const [vaccine, medical, health, medication] = await Promise.all([
           axios.get("https://swp-school-medical-management.onrender.com/api/Dashboard/vaccination-campaigns/statistics"),
@@ -42,11 +44,19 @@ const NurseReport = () => {
         });
       } catch (err) {
         console.error("Lỗi khi tải dữ liệu:", err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchAll();
   }, []);
 
+  if (loading)
+    return (
+      <div className={style.loadingOverlay}>
+        <div className={style.spinner}></div>
+      </div>
+    );
   if (!stats.vaccination || !stats.medical || !stats.health || !stats.medication)
     return <div>Đang tải dữ liệu báo cáo...</div>;
 

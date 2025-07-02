@@ -8,7 +8,7 @@ import StudentList from "../pages/nurse/StudentList";
 import StudentDetail from "../pages/nurse/StudentDetail";
 import ParentDashboard from "../pages/parent/ParentDashboard";
 import HealthProfile from "../pages/parent/HealthProfile";
-import LogsPage from "../pages/manager/Logs";
+
 import SendMedicine from "../pages/parent/SendMedicine";
 import VaccinCampaign from "../pages/nurse/VaccinCampaign";
 import ChildCareHistory from "../pages/parent/ChildCareHistory";
@@ -44,7 +44,7 @@ const AppRouter = () => {
       <Route path="/students" element={<StudentList />} />
       <Route path="/students/:id" element={<StudentDetail />} />
       <Route path="/healthprofile" element={<HealthProfile />} />
-      <Route path="/logs" element={<LogsPage />} />
+      
       <Route path="/sendmedicine" element={<SendMedicine />} />
       <Route path="/hisofcare" element={<ChildCareHistory />} />
       <Route path="/notification" element={<NotificationAndReport />} />

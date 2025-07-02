@@ -227,7 +227,15 @@ const VaccinationCampaign = () => {
             </tr>
           </thead>
           <tbody>
-            {paginatedCampaigns.length > 0 ? (
+            {loading ? (
+              Array.from({ length: 8 }).map((_, idx) => (
+                <tr key={idx} className={campaignStyle.skeletonRow}>
+                  {Array.from({ length: 7 }).map((_, cidx) => (
+                    <td key={cidx}><div className={campaignStyle.skeletonCell}></div></td>
+                  ))}
+                </tr>
+              ))
+            ) : paginatedCampaigns.length > 0 ? (
               paginatedCampaigns.map((c, idx) => (
                 <tr key={c.campaignId}>
                   <td>{(currentPage - 1) * campaignsPerPage + idx + 1}</td>

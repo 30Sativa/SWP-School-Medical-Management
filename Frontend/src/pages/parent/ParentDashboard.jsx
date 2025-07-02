@@ -62,7 +62,15 @@ const ParentDashboard = () => {
     }
   };
 
-  if (loading) return <p>🔄 Đang tải dữ liệu...</p>;
+  if (loading)
+    return (
+      <div className={styles.loadingOverlay}>
+        <div className={styles.customSpinner}>
+          <div className={styles.spinnerIcon}></div>
+          <div className={styles.spinnerText}> Đang tải dữ liệu...</div>
+        </div>
+      </div>
+    );
   if (!overview || myStudents.length === 0) return <p>⚠️ Không có dữ liệu để hiển thị.</p>;
 
   const myStudentNames = myStudents.map((s) => s.fullName);

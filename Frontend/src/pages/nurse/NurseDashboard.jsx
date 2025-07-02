@@ -5,10 +5,12 @@ import style from "../../assets/css/nursedashboard.module.css";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 const NurseDashBoard = () => {
+  const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const res = await axios.get("https://swp-school-medical-management.onrender.com/api/Dashboard/overview");
         if (res.data.status === "200") {
@@ -17,12 +19,19 @@ const NurseDashBoard = () => {
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu dashboard:", error);
       }
+      setLoading(false);
     };
 
     fetchData();
   }, []);
 
-  if (!dashboardData) return <div>Đang tải dữ liệu...</div>;
+  if (loading) return (
+    <div className={style.loadingOverlay}>
+      <div className={style.spinner}></div>
+      <div className={style.loadingText}>Đang tải dữ liệu...</div>
+    </div>
+  );
+  if (!dashboardData) return <div className={style.loadingText}>Không có dữ liệu dashboard</div>;
 
   const userData = [
     { name: "Admin", value: dashboardData.totalUsers.admin },

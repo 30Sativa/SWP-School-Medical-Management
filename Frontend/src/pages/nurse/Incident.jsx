@@ -78,6 +78,8 @@ const Incident = () => {
   const [suppliesUsed, setSuppliesUsed] = useState([]);
   const [bulkSuppliesUsed, setBulkSuppliesUsed] = useState([]);
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true); // loading fetch list
+  const [modalLoading, setModalLoading] = useState(false); // loading khi submit modal
 
   const eventTypes = [
     { id: "1", name: "Sốt" },
@@ -93,6 +95,7 @@ const Incident = () => {
   ];
 
   const fetchEvents = () => {
+    setLoading(true);
     const token = localStorage.getItem("token");
     axios
       .get("/api/MedicalEvent", {
@@ -108,7 +111,8 @@ const Incident = () => {
       })
       .catch((err) => {
         console.error("❌ Lỗi lấy danh sách sự cố:", err);
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   const getStaffName = (id, handledByName) => {
@@ -277,6 +281,7 @@ const Incident = () => {
   };
 
   const handleCreate = () => {
+    setModalLoading(true);
     const currentUserId = localStorage.getItem("userId");
     const token = localStorage.getItem("token");
 
@@ -287,6 +292,7 @@ const Incident = () => {
       Number(newEvent.studentId) === 0
     ) {
       alert("Vui lòng chọn học sinh!");
+      setModalLoading(false);
       return;
     }
     if (
@@ -295,6 +301,7 @@ const Incident = () => {
       Number(newEvent.eventTypeId) === 0
     ) {
       alert("Vui lòng chọn loại sự cố!");
+      setModalLoading(false);
       return;
     }
     if (
@@ -303,18 +310,22 @@ const Incident = () => {
       Number(newEvent.severityId) === 0
     ) {
       alert("Vui lòng chọn mức độ!");
+      setModalLoading(false);
       return;
     }
     if (!newEvent.eventDate) {
       alert("Vui lòng chọn thời gian!");
+      setModalLoading(false);
       return;
     }
     if (!newEvent.description) {
       alert("Vui lòng nhập mô tả!");
+      setModalLoading(false);
       return;
     }
     if (!currentUserId) {
       alert("Vui lòng đăng nhập lại!");
+      setModalLoading(false);
       return;
     }
 
@@ -380,7 +391,8 @@ const Incident = () => {
         alert(
           "Lỗi khi tạo mới sự cố:\n" + JSON.stringify(errorDetail, null, 2)
         );
-      });
+      })
+      .finally(() => setModalLoading(false));
   };
 
   const handleEdit = (event) => {
@@ -398,6 +410,7 @@ const Incident = () => {
 
   const handleUpdate = () => {
     if (!editingEvent) return;
+    setModalLoading(true);
 
     const token = localStorage.getItem("token");
     const payload = {
@@ -439,7 +452,8 @@ const Incident = () => {
         alert(
           "Lỗi khi cập nhật sự cố:\n" + JSON.stringify(errorDetail, null, 2)
         );
-      });
+      })
+      .finally(() => setModalLoading(false));
   };
 
   const handleDelete = (id) => {
@@ -610,10 +624,25 @@ const Incident = () => {
     );
   };
 
+  // Skeleton loading rows
+  const skeletonRows = Array.from({ length: itemsPerPage }, (_, i) => (
+    <tr key={i} className={style.skeletonRow}>
+      <td colSpan={5}>
+        <div className={style.skeletonBox} style={{ height: 32, width: "100%" }} />
+      </td>
+    </tr>
+  ));
+
   return (
     <div className={style.pageContainer}>
       <Sidebar />
       <div className={style.contentArea}>
+        {/* LOADING OVERLAY */}
+        {(loading || modalLoading) && (
+          <div className={style.loadingOverlay}>
+            <div className={style.spinner}></div>
+          </div>
+        )}
         <div className={style.header}>
           <h2>Báo cáo sự cố y tế học đường</h2>
           <div className={style.headerButtons}>
@@ -677,37 +706,39 @@ const Incident = () => {
               </tr>
             </thead>
             <tbody>
-              {currentItems.map((event) => (
-                <tr key={event.eventId}>
-                  <td>{event.studentName}</td>
-                  <td>
-                    <span className={style.tagBlue}>{event.eventType}</span>
-                  </td>
-                  <td>{new Date(event.eventDate).toLocaleString()}</td>
-                  <td>
-                    <span
-                      className={
-                        event.severityLevelName === "Nhẹ"
-                          ? style.tagYellow
-                          : event.severityLevelName === "Trung bình"
-                          ? style.tagOrange
-                          : style.tagRed
-                      }
-                    >
-                      {event.severityLevelName}
-                    </span>
-                  </td>
+              {loading
+                ? skeletonRows
+                : currentItems.map((event) => (
+                    <tr key={event.eventId} className={style.tableRow}>
+                      <td>{event.studentName}</td>
+                      <td>
+                        <span className={style.tagBlue}>{event.eventType}</span>
+                      </td>
+                      <td>{new Date(event.eventDate).toLocaleString()}</td>
+                      <td>
+                        <span
+                          className={
+                            event.severityLevelName === "Nhẹ"
+                              ? style.tagYellow
+                              : event.severityLevelName === "Trung bình"
+                              ? style.tagOrange
+                              : style.tagRed
+                          }
+                        >
+                          {event.severityLevelName}
+                        </span>
+                      </td>
 
-                  <td>
-                    <button
-                      className={style.viewDetail}
-                      onClick={() => setSelectedEvent(event)}
-                    >
-                      Xem chi tiết
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                      <td>
+                        <button
+                          className={style.viewDetail}
+                          onClick={() => setSelectedEvent(event)}
+                        >
+                          Xem chi tiết
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
             </tbody>
           </table>
         </div>

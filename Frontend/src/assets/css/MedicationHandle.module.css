@@ -158,3 +158,112 @@
   color: red;
   font-weight: 500;
 }
+
+.loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s;
+}
+
+.skeletonRow td {
+  padding: 12px 16px;
+}
+
+.skeletonBox {
+  height: 18px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  border-radius: 6px;
+  animation: skeleton-loading 1.2s infinite linear;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.tableRow {
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.tableRow:hover {
+  background: #f6fafd;
+  box-shadow: 0 2px 8px rgba(32, 178, 170, 0.08);
+  transform: translateY(-2px) scale(1.01);
+}
+
+.fadeIn {
+  animation: fadeInAnim 0.7s ease;
+}
+
+@keyframes fadeInAnim {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animatedBtn {
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.animatedBtn:hover,
+.animatedBtn:focus {
+  box-shadow: 0 2px 8px rgba(32, 178, 170, 0.12);
+  transform: translateY(-1px) scale(1.04);
+  outline: none;
+}
+
+.customSpinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinnerIcon {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #20b2aa;
+  border-top: 5px solid #e0e0e0;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.spinnerText {
+  font-size: 16px;
+  color: #20b2aa;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}

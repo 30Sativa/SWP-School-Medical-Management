@@ -89,7 +89,15 @@ const HealthProfile = () => {
     return age;
   };
 
-  if (loading) return <p>Đang tải dữ liệu...</p>;
+  if (loading)
+    return (
+      <div className={styles.loadingOverlay}>
+        <div className={styles.customSpinner}>
+          <div className={styles.spinnerIcon}></div>
+          <div className={styles.spinnerText}>Đang tải dữ liệu...</div>
+        </div>
+      </div>
+    );
   if (studentList.length === 0) return <p>Không có hồ sơ sức khỏe nào.</p>;
 
   return (

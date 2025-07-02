@@ -10,6 +10,7 @@ const HealthCheckDetail = () => {
 
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalLoading, setModalLoading] = useState(false); // loading khi submit modal
   const [campaign, setCampaign] = useState(null); // Thêm state cho chiến dịch
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -22,6 +23,7 @@ const HealthCheckDetail = () => {
   // Hàm xử lý dữ liệu form khi submit
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    setModalLoading(true);
     const formData = new FormData(e.target);
     const healthDetails = Object.fromEntries(formData.entries());
 
@@ -72,12 +74,15 @@ const HealthCheckDetail = () => {
       } else {
         alert("Có lỗi xảy ra khi gửi yêu cầu!");
       }
+    } finally {
+      setModalLoading(false);
     }
   };
 
   // Hàm chỉnh sửa thông tin sức khỏe học sinh
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    setModalLoading(true);
     const formData = new FormData(e.target);
     const healthDetails = Object.fromEntries(formData.entries());
 
@@ -118,6 +123,8 @@ const HealthCheckDetail = () => {
       } else {
         alert("Có lỗi xảy ra khi gửi yêu cầu cập nhật!");
       }
+    } finally {
+      setModalLoading(false);
     }
   };
 
@@ -220,7 +227,11 @@ const HealthCheckDetail = () => {
     if (currentPage < totalPages) handlePageChange(currentPage + 1);
   };
 
-  if (loading) return <div>Đang tải danh sách học sinh...</div>;
+  if (loading || modalLoading) return (
+    <div className={styles.loadingOverlay}>
+      <div className={styles.spinner}></div>
+    </div>
+  );
 
   return (
     <div className={styles.container}>
