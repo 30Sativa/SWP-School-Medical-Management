@@ -4,6 +4,7 @@ import Sidebar from "../../components/sidebar/Sidebar";
 import style from "../../assets/css/viewBlog.module.css";
 import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 const ViewBlog = () => {
   const [blogs, setBlogs] = useState([]);
@@ -59,11 +60,7 @@ const ViewBlog = () => {
       <Sidebar />
       <main className={style.dashboardWrapper}>
         {/* LOADING OVERLAY */}
-        {(loading || expandLoading) && (
-          <div className={style.loadingOverlay}>
-            <div className={style.spinner}></div>
-          </div>
-        )}
+        {(loading || expandLoading) && <LoadingOverlay text="Đang tải dữ liệu..." />}
         <div className={style.header}>
           <h2>Bài viết y tế</h2>
           <p>Các chia sẻ hữu ích từ y tá trường mầm non</p>

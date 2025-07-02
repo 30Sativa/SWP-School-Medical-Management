@@ -6,6 +6,7 @@ import axios from "axios";
 import { Spin } from "antd";
 import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 function getQueryParam(name) {
   const url = new URL(window.location.href);
@@ -86,6 +87,7 @@ const BlogCreate = () => {
             ← Quay lại trang Blog
           </button>
         </header>
+        {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
         <Spin spinning={loading} tip={editId ? "Đang lưu..." : "Đang tạo..."}>
         <form className={blogStyle.blogForm} onSubmit={handleSubmit}>
           <div className={blogStyle.formGroup}>

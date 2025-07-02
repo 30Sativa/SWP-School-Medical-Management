@@ -7,6 +7,7 @@ import style from "../../assets/css/userList.module.css";  // Import CSS riêng 
 import axios from "axios";
 import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 const { Option } = Select;
 const { Title } = Typography;
@@ -386,6 +387,7 @@ const handleModalSubmit = async (values) => {
   </Form>
 </Modal>
       </main>
+      {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
     </div>
   );
 };

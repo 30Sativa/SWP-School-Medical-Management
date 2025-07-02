@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 const VaccinCampaign = () => {
   const [campaigns, setCampaigns] = useState([]);
@@ -103,11 +104,7 @@ const VaccinCampaign = () => {
       <main style={{ flex: 1 }}>
         <div className={style.campaignPage}>
           {/* LOADING OVERLAY */}
-          {loading && (
-            <div className={style.loadingOverlay}>
-              <div className={style.spinner}></div>
-            </div>
-          )}
+          {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
           {/* HEADER */}
           <div className={style.pageHeader}>
             <div>

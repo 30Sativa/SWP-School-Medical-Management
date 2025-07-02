@@ -3,10 +3,11 @@ import Sidebar from "../../components/sb-Manager/Sidebar";
 import style from "../../components/sb-Manager/MainLayout.module.css";
 import blogStyle from "../../assets/css/Blog.module.css";
 import { BookOutlined, EyeOutlined, MessageOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined, SearchOutlined } from "@ant-design/icons";
-import { Modal, Spin } from "antd";
+import { Modal } from "antd";
 import axios from "axios";
 import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 const apiUrl = "https://swp-school-medical-management.onrender.com/api/BlogPost";
 
@@ -153,7 +154,7 @@ const Blog = () => {
             </button>
           </div>
         </section>
-        <Spin spinning={loading} tip="Đang tải...">
+        {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
         <section className={blogStyle.blogListSection}>
           {paginatedBlogs.length === 0 && !loading && (
             <div style={{textAlign: 'center', color: '#888', margin: '32px 0'}}>Không tìm thấy bài viết nào.</div>
@@ -203,7 +204,6 @@ const Blog = () => {
             </div>
           )}
         </section>
-        </Spin>
         <footer className={blogStyle.footerBlog}>
           EduHealth © 2025 - Hệ thống quản lý sức khỏe học đường
         </footer>

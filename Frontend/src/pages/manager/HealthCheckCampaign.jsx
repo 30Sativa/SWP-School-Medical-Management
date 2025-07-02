@@ -7,6 +7,7 @@ import dayjs from "dayjs";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 const API_BASE = "/api";
 const PAGE_SIZE = 8;
@@ -373,6 +374,7 @@ const HealthCheckCampaign = () => {
             )}
           </AntForm>
         </Modal>
+        {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
         <Notification />
       </main>
     </div>

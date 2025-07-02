@@ -24,6 +24,7 @@ dayjs.extend(isoWeek);
 import Select from "react-select";
 import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 const COLORS = ["#F4C430", "#FF6B6B", "#4D96FF", "#9AE6B4", "#FFA500"];
 
@@ -637,11 +638,7 @@ const Incident = () => {
       <Sidebar />
       <div className={style.contentArea}>
         {/* LOADING OVERLAY */}
-        {(loading || modalLoading) && (
-          <div className={style.loadingOverlay}>
-            <div className={style.spinner}></div>
-          </div>
-        )}
+        {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
         <div className={style.header}>
           <h2>Báo cáo sự cố y tế học đường</h2>
           <div className={style.headerButtons}>

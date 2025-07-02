@@ -5,6 +5,7 @@ import style from "../../assets/css/studentDetail.module.css";
 import axios from "axios";
 import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 const StudentDetail = () => {
   const { id } = useParams();
@@ -211,6 +212,7 @@ const StudentDetail = () => {
           </div>
         )}
         <Notification />
+        {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
       </main>
     </div>
   );

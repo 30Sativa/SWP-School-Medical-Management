@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import style from "../../assets/css/ResultPage.module.css";
 import Notification from "../../components/Notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
 import { notifySuccess, notifyError } from "../../utils/notification";
 
 const VaccineResult = () => {
@@ -129,11 +130,7 @@ const VaccineResult = () => {
 
   return (
     <div className={style.container}>
-      {(loading || modalLoading) && (
-        <div className={style.loadingOverlay}>
-          <div className={style.spinner}></div>
-        </div>
-      )}
+      {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
       <h2 className={style.title}>Kết quả tiêm chủng</h2>
       <button className={style.btnBack} onClick={() => navigate(-1)}>
         ← Quay lại

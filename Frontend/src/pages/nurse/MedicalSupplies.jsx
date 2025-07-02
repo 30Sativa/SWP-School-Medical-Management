@@ -17,6 +17,7 @@ import Sidebar from "../../components/sidebar/Sidebar";
 import style from "../../assets/css/medicalSupplies.module.css";
 import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 const MedicalSupplies = () => {
   const [supplies, setSupplies] = useState([]);
@@ -126,11 +127,7 @@ const MedicalSupplies = () => {
       <Sidebar />
       <div className={style.content}>
         {/* LOADING OVERLAY */}
-        {(loading || modalLoading) && (
-          <div className={style.loadingOverlay}>
-            <div className={style.spinner}></div>
-          </div>
-        )}
+        {(loading || modalLoading) && <LoadingOverlay text="Đang tải dữ liệu..." />}
         <div className={style.header}>
           <h2 className={style.title}>Danh sách vật tư y tế</h2>
           <div className={style.actions}>

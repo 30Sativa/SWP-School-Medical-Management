@@ -14,6 +14,7 @@ import * as XLSX from "xlsx";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import Notification from "../../components/Notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
 // import { notifySuccess, notifyError } from "../../utils/notification";
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f7f"];
@@ -54,11 +55,7 @@ const NurseReport = () => {
   }, []);
 
   if (loading)
-    return (
-      <div className={style.loadingOverlay}>
-        <div className={style.spinner}></div>
-      </div>
-    );
+    return <LoadingOverlay text="Đang tải dữ liệu..." />;
   if (!stats.vaccination || !stats.medical || !stats.health || !stats.medication)
     return <div>Đang tải dữ liệu báo cáo...</div>;
 
@@ -199,6 +196,7 @@ const NurseReport = () => {
           </div>
         </div>
       </main>
+      {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
       <Notification />
     </div>
   );

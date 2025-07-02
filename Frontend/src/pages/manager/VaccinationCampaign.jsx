@@ -9,6 +9,7 @@ import dayjs from "dayjs";
 import { Edit2, Trash2, Plus } from "lucide-react";
 import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 const apiUrl = "https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns";
 
@@ -338,6 +339,7 @@ const VaccinationCampaign = () => {
             )}
           </Form>
         </Modal>
+        {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
         <Notification />
       </main>
     </div>

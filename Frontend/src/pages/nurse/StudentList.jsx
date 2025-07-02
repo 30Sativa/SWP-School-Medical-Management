@@ -5,6 +5,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 const StudentList = () => {
   const [students, setStudents] = useState([]);
@@ -131,6 +132,8 @@ const StudentList = () => {
             )}
           </tbody>
         </table>
+
+        {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
 
         <div className={style.pagination}>
           {[...Array(totalPages)].map((_, index) => (
