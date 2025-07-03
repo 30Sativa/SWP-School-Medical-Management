@@ -44,6 +44,7 @@ const SendMedicine = () => {
     if (trimmedTitle.length < 3) {
       return toast.error("Tên thuốc phải có ít nhất 3 ký tự!", { position: "top-center", autoClose: 2500, theme: "colored" });
     }
+
     const titleRegex = /^[\p{L}0-9\s\-+®.™]+$/u;
     if (!titleRegex.test(trimmedTitle)) {
       return toast.error("Tên thuốc chỉ được chứa chữ, số và các ký tự hợp lệ như -, +, ®, ™, .", {
@@ -52,6 +53,7 @@ const SendMedicine = () => {
         theme: "colored",
       });
     }
+
     if (!trimmedUsage) {
       return toast.error("Vui lòng nhập liều dùng!", { position: "top-center", autoClose: 2500, theme: "colored" });
     }
@@ -60,7 +62,7 @@ const SendMedicine = () => {
       return toast.error("Liều dùng phải có ít nhất 3 ký tự!", { position: "top-center", autoClose: 2500, theme: "colored" });
     }
 
-     const dosageRegex = /^[\p{L}0-9\s\/\-×]+$/u;
+    const dosageRegex = /^[\p{L}0-9\s\/\-×]+$/u;
     if (!dosageRegex.test(trimmedUsage)) {
       return toast.error("Liều dùng chỉ được chứa chữ, số và ký tự hợp lệ như /, -, ×", {
         position: "top-center",
@@ -68,13 +70,16 @@ const SendMedicine = () => {
         theme: "colored",
       });
     }
-        const noteRegex = /^[\p{L}0-9\s.,;:()\-\u2013\u2014]+$/u;
+
+    const noteRegex = /^[\p{L}0-9\s.,;:()\-\u2013\u2014]+$/u;
     if (trimmedNote && !noteRegex.test(trimmedNote)) {
       return toast.error("Ghi chú chỉ được chứa chữ, số và các ký tự như dấu chấm, phẩy, ngoặc đơn.", {
         position: "top-center",
         autoClose: 3000,
         theme: "colored",
-  });}
+      });
+    }
+
     if (file) {
       const allowedTypes = [
         "application/pdf",
@@ -139,6 +144,7 @@ const SendMedicine = () => {
       setLoading(false);
     }
   };
+
   const fetchStudentList = async () => {
     try {
       const res = await axios.get(
@@ -263,10 +269,15 @@ const SendMedicine = () => {
                 className={styles.inputField}
               ></textarea>
             </div>
+
             <div className={styles.uploadSection}>
               <label htmlFor="file-upload" style={{ cursor: "pointer" }}>
-                <p className={styles.uploadText}>Tải lên tài liệu hoặc kéo thả file vào đây</p>
-                <p>PDF, DOC, JPG, PNG - tối đa 10MB</p>
+                {!file && (
+                  <>
+                    <p className={styles.uploadText}>Tải lên tài liệu hoặc kéo thả file vào đây</p>
+                    <p>PDF, DOC, JPG, PNG - tối đa 10MB</p>
+                  </>
+                )}
                 <input
                   id="file-upload"
                   type="file"
@@ -275,12 +286,16 @@ const SendMedicine = () => {
                   onChange={handleFileChange}
                 />
               </label>
+
+              {file && (
+                <div className={styles.fileInfo}>
+                  <strong>{file.name}</strong> ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                  <button onClick={() => setFile(null)} className={styles.removeFileBtn}>❌</button>
+                </div>
+              )}
             </div>
-            <button
-              className={styles.sendBtn}
-              onClick={handleSend}
-              disabled={loading}
-            >
+
+            <button className={styles.sendBtn} onClick={handleSend} disabled={loading}>
               {loading ? "Đang gửi..." : "Gửi"}
             </button>
           </div>
