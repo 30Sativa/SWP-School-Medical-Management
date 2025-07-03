@@ -21,5 +21,8 @@ namespace SchoolMedicalManagement.Service.Interface
         /// <param name="otp">The OTP to include in the email</param>
         /// <returns>A task representing the asynchronous operation</returns>
         Task SendOtpEmailAsync(string to, string otp);
+
+        // Gửi email bằng userId
+        Task<SchoolMedicalManagement.Models.Response.BaseResponse> SendEmailByUserIdAsync(Guid userId, string subject, string body);
     }
 }

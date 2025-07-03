@@ -4,6 +4,8 @@ using System;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using SchoolMedicalManagement.Repository.Repository;
+using SchoolMedicalManagement.Models.Response;
 
 namespace SchoolMedicalManagement.Service.Implement
 {
@@ -16,8 +18,9 @@ namespace SchoolMedicalManagement.Service.Implement
         private readonly string _smtpPassword;
         private readonly string _senderEmail;
         private readonly string _senderName;
+        private readonly UserRepository _userRepository;
 
-        public EmailService(IConfiguration configuration)
+        public EmailService(IConfiguration configuration, UserRepository userRepository)
         {
             _configuration = configuration;
             _smtpServer = _configuration["EmailSettings:SmtpServer"];
@@ -26,6 +29,7 @@ namespace SchoolMedicalManagement.Service.Implement
             _smtpPassword = _configuration["EmailSettings:SmtpPassword"];
             _senderEmail = _configuration["EmailSettings:SenderEmail"];
             _senderName = _configuration["EmailSettings:SenderName"];
+            _userRepository = userRepository;
         }
         
         // Gửi email thông thường
@@ -90,6 +94,40 @@ namespace SchoolMedicalManagement.Service.Implement
                 </html>";
 
             await SendEmailAsync(to, subject, body);
+        }
+
+        // Gửi email bằng userId
+        public async Task<BaseResponse> SendEmailByUserIdAsync(Guid userId, string subject, string body)
+        {
+            var user = await _userRepository.GetUserById(userId);
+            if (user == null || string.IsNullOrEmpty(user.Email))
+            {
+                return new BaseResponse
+                {
+                    Status = "400",
+                    Message = "User not found or email is empty.",
+                    Data = null
+                };
+            }
+            try
+            {
+                await SendEmailAsync(user.Email, subject, body);
+                return new BaseResponse
+                {
+                    Status = "200",
+                    Message = "Email sent successfully.",
+                    Data = null
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse
+                {
+                    Status = "500",
+                    Message = $"Failed to send email: {ex.Message}",
+                    Data = null
+                };
+            }
         }
     }
 }
