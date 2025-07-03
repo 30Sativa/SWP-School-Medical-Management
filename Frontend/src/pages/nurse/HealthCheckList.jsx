@@ -16,6 +16,9 @@ import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
 import LoadingOverlay from "../../components/LoadingOverlay";
 
+// API URL constants
+const HEALTH_CHECK_CAMPAIGN_API = "https://swp-school-medical-management.onrender.com/api/HealthCheckCampaign";
+
 const HealthCheckList = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState(""); // Tìm kiếm theo tiêu đề
@@ -36,7 +39,7 @@ const HealthCheckList = () => {
       setLoading(true);
       try {
         const res = await axios.get(
-          "/api/HealthCheckCampaign"
+          HEALTH_CHECK_CAMPAIGN_API
         );
         console.log("API Response from HealthCheckList:", res.data); // Log the response
         const campaignsData = Array.isArray(res.data) ? res.data : res.data.data;
@@ -124,7 +127,7 @@ const HealthCheckList = () => {
     try {
       const apiStatus = statusMap[newStatus] || newStatus;
       const res = await axios.put(
-        `/api/HealthCheckCampaign/${campaignId}`,
+        `${HEALTH_CHECK_CAMPAIGN_API}/${campaignId}`,
         { statusId: apiStatus }
       );
       console.log("PUT response:", res.data);

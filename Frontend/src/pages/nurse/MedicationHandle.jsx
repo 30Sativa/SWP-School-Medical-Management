@@ -11,10 +11,12 @@ const MedicationHandle = () => {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [approvedRequests, setApprovedRequests] = useState([]);
   const [rejectedRequests, setRejectedRequests] = useState([]);
+  const [givenRequests, setGivenRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [approvedPage, setApprovedPage] = useState(1);
   const [rejectedPage, setRejectedPage] = useState(1);
+  const [givenPage, setGivenPage] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const itemsPerPage = 3;
 
@@ -30,7 +32,12 @@ const MedicationHandle = () => {
       );
       const all = res.data || [];
       setPendingRequests(all.filter((item) => item.status === "Chờ duyệt"));
-      setApprovedRequests(all.filter((item) => item.status === "Đã duyệt"));
+      setApprovedRequests(
+        all.filter((item) => item.status === "Đã duyệt")
+      );
+      setGivenRequests(
+        all.filter((item) => item.status === "Đã hoàn thành")
+      );
       setRejectedRequests(all.filter((item) => item.status === "Từ chối"));
       return all;
     } catch (error) {
@@ -46,6 +53,11 @@ const MedicationHandle = () => {
     const token = localStorage.getItem("token");
     if (!nurseID) {
       alert("Không tìm thấy thông tin y tá. Vui lòng đăng nhập lại.");
+      return;
+    }
+    if (!requestID || !nurseID || isNaN(requestID) || nurseID.length < 10) {
+      alert("Thiếu hoặc sai requestID/nurseID!");
+      setSubmitting(false);
       return;
     }
     setSubmitting(true);
@@ -82,6 +94,27 @@ const MedicationHandle = () => {
     }
   };
 
+  const handleMarkAsGiven = async (requestID) => {
+    const token = localStorage.getItem("token");
+    setSubmitting(true);
+    const payload = { statusId: 4 };
+    try {
+      await axios.put(
+        `https://swp-school-medical-management.onrender.com/api/MedicationRequest/${requestID}/status`,
+        payload,
+        token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
+      );
+      notifySuccess("Đã cập nhật trạng thái 'Đã cho uống'!");
+    } catch (error) {
+      console.error("Chi tiết lỗi:", error.response?.data || error.message);
+      notifyError("Cập nhật trạng thái thất bại. Vui lòng thử lại sau.");
+    } finally {
+      await fetchRequests();
+      setGivenPage(1);
+      setSubmitting(false);
+    }
+  };
+
   // Skeleton row for loading state
   const renderSkeletonRows = (rowCount = 3) => (
     <>
@@ -97,7 +130,7 @@ const MedicationHandle = () => {
     </>
   );
 
-  const renderTable = (data, showActions = false, isLoading = false) => (
+  const renderTable = (data, tableType = "", isLoading = false) => (
     <table className={clsx(style.table, style.fadeIn)}>
       <thead>
         <tr>
@@ -110,7 +143,8 @@ const MedicationHandle = () => {
           <th>Ngày yêu cầu</th>
           <th>Trạng thái</th>
           <th>Y tá xác nhận</th>
-          {showActions && <th>Hành động</th>}
+          {tableType === "pending" && <th>Hành động</th>}
+          {tableType === "approved" && <th>Thao tác</th>}
         </tr>
       </thead>
       <tbody>
@@ -141,18 +175,20 @@ const MedicationHandle = () => {
                 <td>
                   <span
                     className={`${style.statusBadge} ${
-                      req.status === "Đã duyệt"
+                      req.status === "Đã hoàn thành"
+                        ? style.given
+                        : req.status === "Đã duyệt"
                         ? style.approved
                         : req.status === "Từ chối"
                         ? style.rejected
                         : ""
                     }`}
                   >
-                    {req.status}
+                    {req.status === "Đã hoàn thành" ? "Đã cho uống" : req.status}
                   </span>
                 </td>
                 <td>{req.receivedByName || "-"}</td>
-                {showActions && (
+                {tableType === "pending" && (
                   <td>
                     <div className={style.actionButtons}>
                       <button
@@ -170,6 +206,19 @@ const MedicationHandle = () => {
                         Từ chối
                       </button>
                     </div>
+                  </td>
+                )}
+                {tableType === "approved" && (
+                  <td>
+                    {req.status === "Đã duyệt" && (
+                      <button
+                        className={clsx(style.confirmBtn, style.animatedBtn)}
+                        onClick={() => handleMarkAsGiven(req.requestID)}
+                        disabled={submitting}
+                      >
+                        Xác nhận uống thuốc
+                      </button>
+                    )}
                   </td>
                 )}
               </tr>
@@ -212,6 +261,12 @@ const MedicationHandle = () => {
   );
   const totalRejectedPages = Math.ceil(rejectedRequests.length / itemsPerPage);
 
+  const paginatedGiven = givenRequests.slice(
+    (givenPage - 1) * itemsPerPage,
+    givenPage * itemsPerPage
+  );
+  const totalGivenPages = Math.ceil(givenRequests.length / itemsPerPage);
+
   return (
     <div className={style.container}>
       <Sidebar />
@@ -228,16 +283,20 @@ const MedicationHandle = () => {
         )}
         <Notification />
         <h2 className={style.title}>Danh sách yêu cầu gửi thuốc (chờ xử lý)</h2>
-        {renderTable(paginatedPending, true, loading)}
+        {renderTable(paginatedPending, "pending", loading)}
         {paginate(totalPendingPages, currentPage, setCurrentPage)}
 
         <h2 className={style.title}>Danh sách đã duyệt</h2>
-        {renderTable(paginatedApproved, false, loading)}
+        {renderTable(paginatedApproved, "approved", loading)}
         {paginate(totalApprovedPages, approvedPage, setApprovedPage)}
 
         <h2 className={style.title}>Danh sách bị từ chối</h2>
-        {renderTable(paginatedRejected, false, loading)}
+        {renderTable(paginatedRejected, "", loading)}
         {paginate(totalRejectedPages, rejectedPage, setRejectedPage)}
+
+        <h2 className={style.title}>Danh sách đã cho uống</h2>
+        {renderTable(paginatedGiven, "given", loading)}
+        {paginate(totalGivenPages, givenPage, setGivenPage)}
       </div>
     </div>
   );

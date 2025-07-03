@@ -26,6 +26,13 @@ import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
 import LoadingOverlay from "../../components/LoadingOverlay";
 
+// API URL constants
+const MEDICAL_EVENT_API = "https://swp-school-medical-management.onrender.com/api/MedicalEvent";
+const STUDENT_API = "https://swp-school-medical-management.onrender.com/api/Student";
+const USER_API = "https://swp-school-medical-management.onrender.com/api/User";
+const MEDICAL_SUPPLIES_API = "https://swp-school-medical-management.onrender.com/api/MedicalSupplies";
+const NOTIFICATION_API = "https://swp-school-medical-management.onrender.com/api/Notification/send";
+
 const COLORS = ["#F4C430", "#FF6B6B", "#4D96FF", "#9AE6B4", "#FFA500"];
 
 const Incident = () => {
@@ -82,7 +89,6 @@ const Incident = () => {
   const [bulkSuppliesUsed, setBulkSuppliesUsed] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true); // loading fetch list
-  const [modalLoading, setModalLoading] = useState(false); // loading khi submit modal
 
   const eventTypes = [
     { id: "1", name: "Sốt" },
@@ -101,7 +107,7 @@ const Incident = () => {
     setLoading(true);
     const token = localStorage.getItem("token");
     axios
-      .get("/api/MedicalEvent", {
+      .get(MEDICAL_EVENT_API, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -134,7 +140,7 @@ const Incident = () => {
     fetchEvents();
 
     axios
-      .get("/api/Student", {
+      .get(STUDENT_API, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -160,7 +166,7 @@ const Incident = () => {
       });
 
     axios
-      .get("/api/User", {
+      .get(USER_API, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -173,7 +179,7 @@ const Incident = () => {
       });
 
     axios
-      .get("/api/MedicalSupplies", {
+      .get(MEDICAL_SUPPLIES_API, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       .then((res) => {
@@ -188,7 +194,7 @@ const Incident = () => {
   useEffect(() => {
     if (selectedEvent?.studentId) {
       axios
-        .get(`/api/MedicalHistory/student/${selectedEvent.studentId}`, {
+        .get(`${STUDENT_API}/${selectedEvent.studentId}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
@@ -284,7 +290,6 @@ const Incident = () => {
   };
 
   const handleCreate = () => {
-    setModalLoading(true);
     const currentUserId = localStorage.getItem("userId");
     const token = localStorage.getItem("token");
 
@@ -295,7 +300,6 @@ const Incident = () => {
       Number(newEvent.studentId) === 0
     ) {
       alert("Vui lòng chọn học sinh!");
-      setModalLoading(false);
       return;
     }
     if (
@@ -304,7 +308,6 @@ const Incident = () => {
       Number(newEvent.eventTypeId) === 0
     ) {
       alert("Vui lòng chọn loại sự cố!");
-      setModalLoading(false);
       return;
     }
     if (
@@ -313,22 +316,18 @@ const Incident = () => {
       Number(newEvent.severityId) === 0
     ) {
       alert("Vui lòng chọn mức độ!");
-      setModalLoading(false);
       return;
     }
     if (!newEvent.eventDate) {
       alert("Vui lòng chọn thời gian!");
-      setModalLoading(false);
       return;
     }
     if (!newEvent.description) {
       alert("Vui lòng nhập mô tả!");
-      setModalLoading(false);
       return;
     }
     if (!currentUserId) {
       alert("Vui lòng đăng nhập lại!");
-      setModalLoading(false);
       return;
     }
 
@@ -361,7 +360,7 @@ const Incident = () => {
     console.log("🔑 Token:", token);
 
     axios
-      .post("/api/MedicalEvent", payload, {
+      .post(MEDICAL_EVENT_API, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -393,8 +392,7 @@ const Incident = () => {
           err.response?.data?.errors || err.response?.data || err.message;
         console.error("❌ Lỗi tạo sự cố:", errorDetail);
         notifyError("Lỗi khi tạo mới sự cố!");
-      })
-      .finally(() => setModalLoading(false));
+      });
   };
 
   const handleEdit = (event) => {
@@ -412,7 +410,6 @@ const Incident = () => {
 
   const handleUpdate = () => {
     if (!editingEvent) return;
-    setModalLoading(true);
 
     const token = localStorage.getItem("token");
     const payload = {
@@ -438,7 +435,7 @@ const Incident = () => {
     console.log("📤 Payload cập nhật:", payload);
 
     axios
-      .put(`/api/MedicalEvent/${editingEvent.eventId}`, payload, {
+      .put(`${MEDICAL_EVENT_API}/${editingEvent.eventId}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -453,22 +450,19 @@ const Incident = () => {
           err.response?.data?.errors || err.response?.data || err.message;
         console.error("❌ Lỗi cập nhật sự cố:", errorDetail);
         notifyError("Lỗi khi cập nhật sự cố!");
-      })
-      .finally(() => setModalLoading(false));
+      });
   };
 
   const handleDelete = (id) => {
     if (window.confirm("Bạn có chắc chắn muốn xoá sự cố này?")) {
       axios
-        .delete(
-          `https://swp-school-medical-management.onrender.com/api/MedicalEvent/${id}`
-        )
+        .delete(`${MEDICAL_EVENT_API}/${id}`)
         .then(() => {
           setEvents((prev) => prev.filter((e) => e.eventId !== id));
           setSelectedEvent(null);
           notifySuccess("Đã xoá sự cố!");
         })
-        .catch((err) => notifyError("Lỗi khi xoá sự cố!"));
+        .catch(() => notifyError("Lỗi khi xoá sự cố!"));
     }
   };
 
@@ -542,7 +536,7 @@ const Incident = () => {
         request: "Không có yêu cầu đặc biệt",
       };
 
-      return axios.post("/api/MedicalEvent", payload, {
+      return axios.post(MEDICAL_EVENT_API, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -977,7 +971,7 @@ const Incident = () => {
                   try {
                     const token = localStorage.getItem("token");
                     const res = await axios.get(
-                      `/api/Student/${selectedEvent.studentId}`,
+                      `${STUDENT_API}/${selectedEvent.studentId}`,
                       {
                         headers: { Authorization: `Bearer ${token}` },
                       }
@@ -998,7 +992,7 @@ const Incident = () => {
                       selectedEvent.severityLevelName
                     }\nMô tả: ${selectedEvent.description}`;
                     await axios.post(
-                      "/api/Notification/send",
+                      NOTIFICATION_API,
                       {
                         receiverId: parentId,
                         title: "Thông báo sự cố y tế học đường",
@@ -1043,7 +1037,7 @@ const Incident = () => {
                   try {
                     const token = localStorage.getItem("token");
                     const res = await axios.get(
-                      `/api/Student/by-class/${encodeURIComponent(className)}`,
+                      `${STUDENT_API}/by-class/${encodeURIComponent(className)}`,
                       {
                         headers: { Authorization: `Bearer ${token}` },
                       }
