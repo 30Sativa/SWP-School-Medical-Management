@@ -132,7 +132,7 @@ const HealthProfile = () => {
                   />
                   <div>
                     <h3 className={styles.name}>👦 {studentInfo.fullName}</h3>
-                    <p className={styles.subInfo}>🏫 Lớp: {studentInfo.className}</p>
+                    <p className={styles.subInfo}>Lớp: {studentInfo.className}</p>
                   </div>
                 </div>
                  <h4 className={styles.sectionTitle}>👤 Thông tin cá nhân</h4>
