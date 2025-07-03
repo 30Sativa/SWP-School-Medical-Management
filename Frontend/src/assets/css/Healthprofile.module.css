@@ -409,3 +409,48 @@ select:disabled {
   margin-top: 8px;
   justify-content: center
 }
+
+.infoLabel {
+  display: block;
+  color: #64748b;
+  font-weight: 500;
+  margin-bottom: 2px;
+  font-size: 0.97rem;
+}
+
+.infoValue {
+  color: #0e2a47;
+  font-weight: 600;
+  font-size: 1.05rem;
+  word-break: break-word;
+}
+.infoBox {
+  background-color: #f9fafb;
+  padding: 20px 24px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 28px;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 16px;
+  column-gap: 40px;
+  font-size: 15px;
+  color: #1f2937;
+}
+
+.sectionTitle {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 14px;
+}
+.label {
+  font-weight: 600;
+  color: #334155; /* thay vì #475569 */
+}
+.infoBox {
+  background-color: #f8fafc; /* sáng hơn chút để nổi bật */
+}
