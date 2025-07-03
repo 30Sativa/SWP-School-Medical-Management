@@ -118,6 +118,7 @@ const Login = () => {
             }
 
             localStorage.setItem("parentId", resData.userId);
+            localStorage.setItem("fullname", resData.fullName || "Phụ huynh");
 
             (async () => {
               try {
