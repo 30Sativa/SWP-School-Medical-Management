@@ -11,7 +11,7 @@ import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
 import LoadingOverlay from "../../components/LoadingOverlay";
 
-const apiUrl = "https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns";
+const VACCINATION_CAMPAIGN_API = "https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns";
 
 // Cập nhật lại các trạng thái phù hợp với backend
 const statusOptions = [
@@ -37,7 +37,7 @@ const VaccinationCampaign = () => {
   const fetchCampaigns = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(apiUrl);
+      const res = await axios.get(VACCINATION_CAMPAIGN_API);
       // API trả về { status, message, data: [...] }
       setCampaigns(res.data.data || []);
     } catch {
@@ -93,7 +93,7 @@ const VaccinationCampaign = () => {
           statusId: Number(values.statusId),
           campaignId: editing.campaignId,
         };
-        await axios.put(apiUrl, putData);
+        await axios.put(VACCINATION_CAMPAIGN_API, putData);
         notifySuccess("Đã cập nhật chiến dịch!");
       } else {
         const postData = {
@@ -103,7 +103,7 @@ const VaccinationCampaign = () => {
           createdBy: getCurrentUserId(),
           statusId: 1, // Luôn là "Chưa bắt đầu"
         };
-        await axios.post(apiUrl, postData);
+        await axios.post(VACCINATION_CAMPAIGN_API, postData);
         notifySuccess("Đã tạo chiến dịch mới!");
       }
       setModalOpen(false);
@@ -115,29 +115,6 @@ const VaccinationCampaign = () => {
     }
   };
 
-  const columns = [
-    { title: "Tên vắc xin", dataIndex: "vaccineName", key: "vaccineName" },
-    { title: "Ngày tổ chức", dataIndex: "date", key: "date" },
-    { title: "Mô tả", dataIndex: "description", key: "description", render: (text) => text || "" },
-    { title: "Người tạo", dataIndex: "createdByName", key: "createdByName" },
-    { title: "Trạng thái", dataIndex: "statusName", key: "statusName" },
-    {
-      title: "Thao tác",
-      key: "actions",
-      render: (_, record) => (
-        <div style={{ display: "flex", gap: 12 }}>
-          <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} shape="circle" />
-          {record.statusId === 2 && (
-            <Button icon={<DeleteOutlined />} onClick={() => handleDeactivate(record.campaignId)} shape="circle" danger title="Ẩn chiến dịch (Huỷ)" />
-          )}
-          {record.statusId === 3 && (
-            <Button icon={<PlusOutlined />} onClick={() => handleActivate(record.campaignId)} shape="circle" title="Kích hoạt lại chiến dịch" />
-          )}
-        </div>
-      ),
-    },
-  ];
-
   // Hàm deactivate (chuyển statusId thành 4 - Đã huỷ)
   const handleDeactivate = async (id) => {
     Modal.confirm({
@@ -146,7 +123,7 @@ const VaccinationCampaign = () => {
       onOk: async () => {
         setLoading(true);
         try {
-          await axios.put(`${apiUrl}/${id}/deactivate`, {}); // backend sẽ chuyển statusId thành 4
+          await axios.put(`${VACCINATION_CAMPAIGN_API}/${id}/deactivate`, {}); // backend sẽ chuyển statusId thành 4
           notifySuccess("Đã huỷ chiến dịch!");
           fetchCampaigns();
         } catch {
@@ -166,7 +143,7 @@ const VaccinationCampaign = () => {
       onOk: async () => {
         setLoading(true);
         try {
-          await axios.put(`${apiUrl}/${id}/activate`, {}); // backend sẽ chuyển statusId thành 2
+          await axios.put(`${VACCINATION_CAMPAIGN_API}/${id}/activate`, {}); // backend sẽ chuyển statusId thành 2
           notifySuccess("Đã kích hoạt lại chiến dịch!");
           fetchCampaigns();
         } catch {
