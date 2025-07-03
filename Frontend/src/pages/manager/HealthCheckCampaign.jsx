@@ -8,8 +8,10 @@ import { Plus, Edit2, Trash2 } from "lucide-react";
 import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
+// import { Modal } from "antd";
 
-const HEALTH_CHECK_CAMPAIGN_API = "https://swp-school-medical-management.onrender.com/api/HealthCheckCampaign";
+const API_BASE = "/api";
 const PAGE_SIZE = 8;
 
 const statusOptions = [
@@ -35,7 +37,7 @@ const HealthCheckCampaign = () => {
   const fetchCampaigns = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(HEALTH_CHECK_CAMPAIGN_API, {
+      const res = await axios.get(`${API_BASE}/HealthCheckCampaign`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
 
@@ -124,7 +126,7 @@ const HealthCheckCampaign = () => {
       };
       if (pendingCampaign) {
         await axios.put(
-          `${HEALTH_CHECK_CAMPAIGN_API}/${pendingCampaign.campaignId}`,
+          `${API_BASE}/HealthCheckCampaign/${pendingCampaign.campaignId}`,
           payload,
           {
             headers: {
@@ -134,7 +136,7 @@ const HealthCheckCampaign = () => {
         );
         notifySuccess("Cập nhật thành công!");
       } else {
-        await axios.post(HEALTH_CHECK_CAMPAIGN_API, payload, {
+        await axios.post(`${API_BASE}/HealthCheckCampaign`, payload, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         notifySuccess("Tạo mới thành công!");
@@ -147,17 +149,26 @@ const HealthCheckCampaign = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Bạn chắc chắn muốn xóa?")) return;
-    try {
-      await axios.delete(`${HEALTH_CHECK_CAMPAIGN_API}/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      fetchCampaigns();
-      notifySuccess("Xóa thành công!");
-    } catch {
-      notifyError("Xóa thất bại!");
-    }
-  };
+  Modal.confirm({
+    title: "Bạn chắc chắn muốn xóa chiến dịch này?",
+    icon: <ExclamationCircleOutlined />,
+    okText: "Xóa",
+    cancelText: "Hủy",
+    async onOk() {
+      try {
+        await axios.delete(`${API_BASE}/HealthCheckCampaign/${id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        notifySuccess("Xóa thành công!");
+        fetchCampaigns();
+      } catch {
+        notifyError("Xóa thất bại!");
+      }
+    },
+  });
+};
 
   // Search + Pagination logic
   const filteredCampaigns = campaigns.filter(

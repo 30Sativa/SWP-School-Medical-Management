@@ -23,7 +23,8 @@ import isoWeek from "dayjs/plugin/isoWeek";
 dayjs.extend(isoWeek);
 import Select from "react-select";
 import Notification from "../../components/Notification";
-import { notifySuccess, notifyError } from "../../utils/notification";
+import { notifySuccess, notifyError, notifyInfo, notifyWarn } from "../../utils/notification";
+import { toast } from "react-toastify";
 import LoadingOverlay from "../../components/LoadingOverlay";
 
 // API URL constants
@@ -454,16 +455,36 @@ const Incident = () => {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm("Bạn có chắc chắn muốn xoá sự cố này?")) {
-      axios
-        .delete(`${MEDICAL_EVENT_API}/${id}`)
-        .then(() => {
-          setEvents((prev) => prev.filter((e) => e.eventId !== id));
-          setSelectedEvent(null);
-          notifySuccess("Đã xoá sự cố!");
-        })
-        .catch(() => notifyError("Lỗi khi xoá sự cố!"));
-    }
+    toast.warn(
+      <div>
+        <div>Bạn có chắc chắn muốn xoá sự cố này?</div>
+        <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+          <button
+            style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: 4, padding: '4px 12px', cursor: 'pointer' }}
+            onClick={() => {
+              toast.dismiss();
+              axios
+                .delete(`https://swp-school-medical-management.onrender.com/api/MedicalEvent/${id}`)
+                .then(() => {
+                  setEvents((prev) => prev.filter((e) => e.eventId !== id));
+                  setSelectedEvent(null);
+                  notifySuccess("Đã xoá sự cố!");
+                })
+                .catch(() => notifyError("Lỗi khi xoá sự cố!"));
+            }}
+          >
+            Xoá
+          </button>
+          <button
+            style={{ background: '#fff', color: '#333', border: '1px solid #ccc', borderRadius: 4, padding: '4px 12px', cursor: 'pointer' }}
+            onClick={() => toast.dismiss()}
+          >
+            Huỷ
+          </button>
+        </div>
+      </div>,
+      { autoClose: false, closeOnClick: false, closeButton: false, position: "top-center" }
+    );
   };
 
   const handleBulkCreate = () => {
@@ -967,21 +988,19 @@ const Incident = () => {
               <button
                 className={style.sendBtn}
                 onClick={async () => {
-                  // Lấy parentId từ API Student
                   try {
                     const token = localStorage.getItem("token");
                     const res = await axios.get(
-                      `${STUDENT_API}/${selectedEvent.studentId}`,
+                      `/api/Student/${selectedEvent.studentId}`,
                       {
                         headers: { Authorization: `Bearer ${token}` },
                       }
                     );
                     const parentId = res.data?.data?.parentId;
                     if (!parentId) {
-                      alert("Không tìm thấy phụ huynh của học sinh này!");
+                      notifyError("Không tìm thấy phụ huynh của học sinh này!");
                       return;
                     }
-                    // Soạn message
                     const message = `Học sinh: ${
                       selectedEvent.studentName
                     }\nLoại sự cố: ${
@@ -992,7 +1011,7 @@ const Incident = () => {
                       selectedEvent.severityLevelName
                     }\nMô tả: ${selectedEvent.description}`;
                     await axios.post(
-                      NOTIFICATION_API,
+                      "/api/Notification/send",
                       {
                         receiverId: parentId,
                         title: "Thông báo sự cố y tế học đường",
@@ -1002,9 +1021,9 @@ const Incident = () => {
                       },
                       { headers: { Authorization: `Bearer ${token}` } }
                     );
-                    alert("Đã gửi thông báo cho phụ huynh!");
+                    notifySuccess("Đã gửi thông báo cho phụ huynh!");
                   } catch {
-                    alert("Gửi thông báo thất bại!");
+                    notifyError("Gửi thông báo thất bại!");
                   }
                 }}
               >

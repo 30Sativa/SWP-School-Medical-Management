@@ -32,6 +32,7 @@ import HealthCheckDetail from "../pages/nurse/HealthCheckDetail";
 import HealthCheckRecord from "../pages/nurse/HealthCheckRecord";
 import NurseReport from "../pages/nurse/NurseReport";
 import ViewBlog from "../pages/nurse/viewBlog";
+
 const AppRouter = () => {
   return (
     <Routes>
