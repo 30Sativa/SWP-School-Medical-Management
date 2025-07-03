@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Hangfire;
 
 namespace SchoolMedicalManagement.Service.Implement
 {
@@ -275,6 +276,12 @@ namespace SchoolMedicalManagement.Service.Implement
                     Data = null
                 };
             }
+
+            // Lên lịch Hangfire job tự động từ chối sau 1 ngày
+            BackgroundJob.Schedule<VaccinationCampaignService>(
+                x => x.AutoDeclineConsentRequest(created.RequestId),
+                TimeSpan.FromDays(3)
+            );
 
             // TODO: Send email notification to parent (mở rộng trong tương lai)
 
@@ -853,6 +860,14 @@ namespace SchoolMedicalManagement.Service.Implement
                     ConsentStatusId = cr.ConsentStatusId,
                     ConsentStatusName = cr.ConsentStatus?.ConsentStatusName
                 }).ToList();
+                // Lên lịch Hangfire job cho từng phiếu
+                foreach (var cr in createdRequests)
+                {
+                    BackgroundJob.Schedule<VaccinationCampaignService>(
+                        x => x.AutoDeclineConsentRequest(cr.RequestId),
+                        TimeSpan.FromDays(3)
+                    );
+                }
             }
 
             return new BaseResponse
@@ -946,6 +961,14 @@ namespace SchoolMedicalManagement.Service.Implement
                     ConsentStatusId = cr.ConsentStatusId,
                     ConsentStatusName = cr.ConsentStatus?.ConsentStatusName
                 }).ToList();
+                // Lên lịch Hangfire job cho từng phiếu
+                foreach (var cr in createdRequests)
+                {
+                    BackgroundJob.Schedule<VaccinationCampaignService>(
+                        x => x.AutoDeclineConsentRequest(cr.RequestId),
+                        TimeSpan.FromDays(3)
+                    );
+                }
             }
 
             return new BaseResponse
@@ -1057,6 +1080,14 @@ namespace SchoolMedicalManagement.Service.Implement
                     ConsentStatusId = cr.ConsentStatusId,
                     ConsentStatusName = cr.ConsentStatus?.ConsentStatusName
                 }).ToList();
+                // Lên lịch Hangfire job cho từng phiếu
+                foreach (var cr in createdRequests)
+                {
+                    BackgroundJob.Schedule<VaccinationCampaignService>(
+                        x => x.AutoDeclineConsentRequest(cr.RequestId),
+                        TimeSpan.FromDays(3)
+                    );
+                }
             }
 
             return new BaseResponse
@@ -1140,6 +1171,18 @@ namespace SchoolMedicalManagement.Service.Implement
                 Message = "Successfully retrieved consent requests by studentId",
                 Data = response
             };
+        }
+
+        // Thêm method cho Hangfire tự động từ chối phiếu đồng ý
+        public async Task AutoDeclineConsentRequest(int requestId)
+        {
+            var consentRequest = await _campaignRepository.GetConsentRequestById(requestId);
+            if (consentRequest != null && consentRequest.ConsentStatusId == 1) // 1: Chờ xác nhận
+            {
+                consentRequest.ConsentStatusId = 3; // 3: Đã từ chối
+                consentRequest.ConsentDate = DateTime.UtcNow;
+                await _campaignRepository.UpdateConsentRequest(consentRequest);
+            }
         }
     }
 }

@@ -8,6 +8,8 @@ using SchoolMedicalManagement.Service.Interface;
 using Microsoft.EntityFrameworkCore;
 using SchoolMedicalManagement.Models.Entity;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
+using Hangfire;
+using Hangfire.MemoryStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +56,8 @@ builder.Services.AddScoped<ParentFeedbackRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+// Đăng ký VaccinationCampaignService cho Hangfire job
+builder.Services.AddScoped<VaccinationCampaignService>();
 
 builder.Services.AddScoped<IMedicalHistoryService, MedicalHistoryService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -168,6 +172,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+// Hangfire cấu hình MemoryStorage cho dev/test
+builder.Services.AddHangfire(config =>
+    config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+          .UseSimpleAssemblyNameTypeSerializer()
+          .UseRecommendedSerializerSettings()
+          .UseMemoryStorage());
+builder.Services.AddHangfireServer();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -182,5 +194,8 @@ app.UseCors("AllowReactApp");
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Bật Hangfire Dashboard tại /hangfire
+app.UseHangfireDashboard();
 
 app.Run();
