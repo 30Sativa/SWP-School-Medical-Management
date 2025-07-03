@@ -29,17 +29,86 @@ const SendMedicine = () => {
   };
 
   const handleSend = async () => {
-    if (!title.trim()) return toast.error("Vui lòng nhập tên thuốc!");
-    if (!usage.trim()) return toast.error("Vui lòng nhập liều dùng!");
-    if (!studentId) return toast.error("Vui lòng chọn học sinh!");
+    const trimmedTitle = title.trim();
+    const trimmedUsage = usage.trim();
+    const trimmedNote = note.trim();
+
+    if (!studentId) {
+      return toast.error("Vui lòng chọn học sinh!", { position: "top-center", autoClose: 2500, theme: "colored" });
+    }
+
+    if (!trimmedTitle) {
+      return toast.error("Vui lòng nhập tên thuốc!", { position: "top-center", autoClose: 2500, theme: "colored" });
+    }
+
+    if (trimmedTitle.length < 3) {
+      return toast.error("Tên thuốc phải có ít nhất 3 ký tự!", { position: "top-center", autoClose: 2500, theme: "colored" });
+    }
+    const titleRegex = /^[\p{L}0-9\s\-+®.™]+$/u;
+    if (!titleRegex.test(trimmedTitle)) {
+      return toast.error("Tên thuốc chỉ được chứa chữ, số và các ký tự hợp lệ như -, +, ®, ™, .", {
+        position: "top-center",
+        autoClose: 3000,
+        theme: "colored",
+      });
+    }
+    if (!trimmedUsage) {
+      return toast.error("Vui lòng nhập liều dùng!", { position: "top-center", autoClose: 2500, theme: "colored" });
+    }
+
+    if (trimmedUsage.length < 3) {
+      return toast.error("Liều dùng phải có ít nhất 3 ký tự!", { position: "top-center", autoClose: 2500, theme: "colored" });
+    }
+
+     const dosageRegex = /^[\p{L}0-9\s\/\-×]+$/u;
+    if (!dosageRegex.test(trimmedUsage)) {
+      return toast.error("Liều dùng chỉ được chứa chữ, số và ký tự hợp lệ như /, -, ×", {
+        position: "top-center",
+        autoClose: 3000,
+        theme: "colored",
+      });
+    }
+        const noteRegex = /^[\p{L}0-9\s.,;:()\-\u2013\u2014]+$/u;
+    if (trimmedNote && !noteRegex.test(trimmedNote)) {
+      return toast.error("Ghi chú chỉ được chứa chữ, số và các ký tự như dấu chấm, phẩy, ngoặc đơn.", {
+        position: "top-center",
+        autoClose: 3000,
+        theme: "colored",
+  });}
+    if (file) {
+      const allowedTypes = [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "image/png",
+        "image/jpeg",
+      ];
+      const maxSizeMB = 10;
+
+      if (!allowedTypes.includes(file.type)) {
+        return toast.error("Định dạng file không hợp lệ! Chỉ hỗ trợ PDF, DOC, DOCX, PNG, JPG.", {
+          position: "top-center",
+          autoClose: 3000,
+          theme: "colored",
+        });
+      }
+
+      if (file.size > maxSizeMB * 1024 * 1024) {
+        return toast.error("Kích thước file vượt quá 10MB!", {
+          position: "top-center",
+          autoClose: 3000,
+          theme: "colored",
+        });
+      }
+    }
 
     try {
       setLoading(true);
       const formData = new FormData();
       formData.append("studentId", studentId);
-      formData.append("medicationName", title);
-      formData.append("dosage", usage);
-      formData.append("instructions", note);
+      formData.append("medicationName", trimmedTitle);
+      formData.append("dosage", trimmedUsage);
+      formData.append("instructions", trimmedNote);
       if (file) formData.append("imageFile", file);
 
       await axios.post(
@@ -48,7 +117,12 @@ const SendMedicine = () => {
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      toast.success("Đã gửi đơn thuốc!");
+      toast.success("Đã gửi đơn thuốc!", {
+        position: "top-center",
+        autoClose: 2500,
+        theme: "colored",
+      });
+
       setTitle("");
       setUsage("");
       setNote("");
@@ -56,12 +130,15 @@ const SendMedicine = () => {
       fetchHistory();
     } catch (err) {
       console.error(err);
-      toast.error("Gửi thất bại!");
+      toast.error("Gửi đơn thuốc thất bại!", {
+        position: "top-center",
+        autoClose: 2500,
+        theme: "colored",
+      });
     } finally {
       setLoading(false);
     }
   };
-
   const fetchStudentList = async () => {
     try {
       const res = await axios.get(
