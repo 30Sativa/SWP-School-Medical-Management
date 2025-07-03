@@ -20,9 +20,7 @@ const HealthProfile = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-
         const students = studentRes.data.data || [];
-
         const fetchedData = await Promise.all(
           students.map(async (student) => {
             try {
@@ -40,12 +38,10 @@ const HealthProfile = () => {
                   }
                 ),
               ]);
-
               const summaries = summaryRes.data.data;
               const matchedSummaries = Array.isArray(summaries)
                 ? summaries.filter((s) => s.studentId === student.studentId)
                 : [];
-
               return {
                 studentInfo: student,
                 profile: profileRes.data.data,
@@ -144,31 +140,21 @@ const HealthProfile = () => {
                   />
                   <div>
                     <h3 className={styles.name}>👦 {studentInfo.fullName}</h3>
-                    <p className={styles.subInfo}>🏫 Lớp: {studentInfo.className}</p>
+                    <p className={styles.subInfo}>Lớp: {studentInfo.className}</p>
                   </div>
                 </div>
-
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns:
-                      window.innerWidth < 600
-                        ? "1fr"
-                        : "repeat(auto-fit, minmax(280px, 1fr))",
-                    gap: "18px",
-                    marginBottom: "28px",
-                    fontSize: "1rem",
-                    color: "#1e293b",
-                  }}
-                >
-                  <div>👨‍⚕️ <strong>Giới tính:</strong> {studentInfo.gender}</div>
-                  <div>🎂 <strong>Tuổi:</strong> {calculateAge(studentInfo.dateOfBirth)}</div>
-                  <div>📏 <strong>Chiều cao:</strong> {profile.height} cm</div>
-                  <div>⚖️ <strong>Cân nặng:</strong> {profile.weight} kg</div>
-                  <div>🏥 <strong>Bệnh mãn tính:</strong> {profile.chronicDiseases}</div>
-                  <div>🌼 <strong>Dị ứng:</strong> {profile.allergies}</div>
-                  <div>📝 <strong>Ghi chú:</strong> {profile.generalNote}</div>
-                  <div>✅ <strong>Trạng thái:</strong> {profile.isActive ? "Đang hoạt động" : "Ngừng hoạt động"}</div>
+                 <h4 className={styles.sectionTitle}>👤 Thông tin cá nhân</h4>
+                 <div className={styles.infoBox}>
+                  <div className={styles.infoGrid}>
+                    <div><span className={styles.label}>Giới tính:</span> {studentInfo.gender}</div>
+                    <div><span className={styles.label}>Tuổi:</span> {calculateAge(studentInfo.dateOfBirth)}</div>
+                    <div><span className={styles.label}>Chiều cao:</span> {profile.height > 0 ? `${profile.height} cm` : "Chưa có thông tin"}</div>
+                    <div><span className={styles.label}>Cân nặng:</span> {profile.weight > 0 ? `${profile.weight} kg` : "Chưa có thông tin"}</div>
+                    <div><span className={styles.label}>Bệnh mãn tính:</span> {profile.chronicDiseases !== "string" ? profile.chronicDiseases : "Không có"}</div>
+                    <div><span className={styles.label}>Dị ứng:</span> {profile.allergies !== "string" ? profile.allergies : "Không có"}</div>
+                    <div><span className={styles.label}>Ghi chú:</span> {profile.generalNote !== "string" ? profile.generalNote : "Không có"}</div>
+                    <div><span className={styles.label}>Trạng thái:</span> {profile.isActive ? "Đang hoạt động" : "Ngừng hoạt động"}</div>
+                  </div>
                 </div>
 
                 {summaries.length > 0 && (
@@ -233,13 +219,13 @@ const HealthProfile = () => {
                               color: "#1e293b",
                             }}
                           >
-                            <div>📏 <strong>Chiều cao:</strong> {item.height} cm</div>
-                            <div>⚖️ <strong>Cân nặng:</strong> {item.weight} kg</div>
-                            <div>❤️ <strong>Huyết áp:</strong> {item.bloodPressure}</div>
-                            <div>👁️ <strong>Thị lực:</strong> {item.visionSummary}</div>
-                            <div>👂 <strong>Tai mũi họng:</strong> {item.ent}</div>
-                            <div>📝 <strong>Ghi chú:</strong> {item.generalNote}</div>
-                            <div>🔍 <strong>Theo dõi:</strong> {item.followUpNote}</div>
+                            <div> <strong>Chiều cao:</strong> {item.height} cm</div>
+                            <div> <strong>Cân nặng:</strong> {item.weight} kg</div>
+                            <div> <strong>Huyết áp:</strong> {item.bloodPressure}</div>
+                            <div> <strong>Thị lực:</strong> {item.visionSummary}</div>
+                            <div> <strong>Tai mũi họng:</strong> {item.ent}</div>
+                            <div> <strong>Ghi chú:</strong> {item.generalNote}</div>
+                            <div> <strong>Theo dõi:</strong> {item.followUpNote}</div>
                           </div>
                         </div>
                       ))}
@@ -255,6 +241,4 @@ const HealthProfile = () => {
 };
 
 export default HealthProfile;
-
-
 
