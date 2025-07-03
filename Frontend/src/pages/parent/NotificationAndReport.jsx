@@ -100,7 +100,7 @@ const NotificationAndReport = () => {
       ...consentForms.map((f) => ({ ...f, itemType: "consent" })),
     ];
 
-    return combined.filter((item) => {
+    const filtered = combined.filter((item) => {
       if (!item) return false;
       if (activeTab === "all")
         return (
@@ -130,6 +130,12 @@ const NotificationAndReport = () => {
           ["Đồng ý", "Từ chối"].includes(item.consentStatusName)
         );
       return true;
+    });
+
+    return filtered.sort((a, b) => {
+      const dateA = new Date(a.requestDate || a.sentDate);
+      const dateB = new Date(b.requestDate || b.sentDate);
+      return dateB - dateA;
     });
   };
 
