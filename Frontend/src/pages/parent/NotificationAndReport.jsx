@@ -111,7 +111,6 @@ const NotificationAndReport = () => {
       if (activeTab === "vaccine")
         return (
           item.itemType === "consent" &&
-          item.campaignName?.toLowerCase().includes("tiêm chủng") &&
           !["Đồng ý", "Từ chối"].includes(item.consentStatusName)
         );
       if (activeTab === "result-health")
