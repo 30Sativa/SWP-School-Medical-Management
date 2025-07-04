@@ -125,9 +125,7 @@ const CampaignDetail = () => {
   const handleStartCampaign = async () => {
     try {
       if (!isChuaBatDau(campaign.statusName)) {
-        alert(
-          "Chỉ chiến dịch ở trạng thái 'Chưa bắt đầu' mới có thể khởi động."
-        );
+        notifyError("Chỉ chiến dịch ở trạng thái 'Chưa bắt đầu' mới có thể khởi động.");
         return;
       }
       const agreedStudents = consents
@@ -135,7 +133,7 @@ const CampaignDetail = () => {
         .map((c) => parseInt(c.studentId));
 
       if (agreedStudents.length === 0) {
-        alert("Không có học sinh nào đồng ý để khởi động.");
+        notifyError("Không có học sinh nào đồng ý để khởi động.");
         return;
       }
 
@@ -151,7 +149,7 @@ const CampaignDetail = () => {
         }
       );
 
-      alert("Chiến dịch đã được khởi động!");
+      notifySuccess("Chiến dịch đã được khởi động!");
       setCampaign((prev) => ({
         ...prev,
         statusName: "Đang diễn ra",
@@ -160,7 +158,7 @@ const CampaignDetail = () => {
       }));
     } catch (err) {
       console.error("Lỗi khi khởi động chiến dịch:", err, err.response?.data);
-      alert(
+      notifyError(
         "Không thể khởi động chiến dịch: " +
           (err.response?.data?.message || err.message)
       );
@@ -172,14 +170,14 @@ const CampaignDetail = () => {
       await axios.put(
         `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${id}/deactivate`
       );
-      alert("Chiến dịch đã được đánh dấu hoàn thành.");
+      notifySuccess("Chiến dịch đã được đánh dấu hoàn thành.");
       setCampaign((prev) => ({
         ...prev,
         statusName: "Đã hoàn thành",
       }));
     } catch (err) {
       console.error("Lỗi khi đánh dấu hoàn thành:", err);
-      alert("Không thể cập nhật trạng thái chiến dịch.");
+      notifyError("Không thể cập nhật trạng thái chiến dịch.");
     }
   };
 
@@ -346,7 +344,7 @@ const CampaignDetail = () => {
                   notifyError("Gửi phiếu xác nhận thất bại!");
                 }
               } else {
-                alert("Vui lòng chọn lớp!");
+                notifyError("Vui lòng chọn lớp!");
               }
             }}
           >

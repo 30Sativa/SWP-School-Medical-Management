@@ -52,71 +52,72 @@ const MedicationHandle = () => {
   };
 
   const handleConfirm = async (requestID, statusId = 2) => {
-    const nurseID = localStorage.getItem("userId");
-    const token = localStorage.getItem("token");
-    if (!nurseID) {
-      alert("Không tìm thấy thông tin y tá. Vui lòng đăng nhập lại.");
-      return;
-    }
-    if (!requestID || !nurseID || isNaN(requestID) || nurseID.length < 10) {
-      alert("Thiếu hoặc sai requestID/nurseID!");
-      setSubmitting(false);
-      return;
-    }
-    setSubmitting(true);
-    const payload = {
-      requestId: requestID,
-      statusId,
-      nurseId: nurseID,
-    };
-    try {
-      await axios.post(
-        "https://swp-school-medical-management.onrender.com/api/MedicationRequest/handle",
-        payload,
-        token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
-      );
-      notifySuccess("Xử lý yêu cầu thành công!");
-    } catch (error) {
-      console.error("Chi tiết lỗi:", error.response?.data || error.message);
-      notifyError("Xử lý yêu cầu thất bại. Vui lòng thử lại sau.");
-    } finally {
-      const all = await fetchRequests();
-      if (all) {
-        const stillPending = all
-          .filter((item) => item.status === "Chờ duyệt")
-          .some((item) => item.requestID === requestID);
-        if (!stillPending) {
-          alert(
-            statusId === 2 ? " Đã xác nhận yêu cầu." : " Đã từ chối yêu cầu."
-          );
-        } else {
-          alert(" Xác nhận thất bại.");
-        }
-      }
-      setSubmitting(false);
-    }
+  const nurseID = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
+
+  if (!nurseID) {
+    notifyError("Không tìm thấy thông tin y tá. Vui lòng đăng nhập lại.");
+    return;
+  }
+
+  if (!requestID || isNaN(requestID) || nurseID.length < 10) {
+    notifyError("Thiếu hoặc sai requestID/nurseID!");
+    return;
+  }
+
+  setSubmitting(true);
+  const payload = {
+    requestId: requestID,
+    statusId,
+    nurseId: nurseID,
   };
 
+  try {
+    await axios.post(
+      "https://swp-school-medical-management.onrender.com/api/MedicationRequest/handle",
+      payload,
+      token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
+    );
+
+    // ✅ Chỉ hiển thị thành công dựa trên kết quả POST
+    notifySuccess(statusId === 2 ? "✅ Đã xác nhận yêu cầu!" : "🚫 Đã từ chối yêu cầu!");
+
+    // 🔄 Sau đó cập nhật danh sách (không kiểm tra trạng thái)
+    await fetchRequests();
+  } catch (error) {
+    console.error("Chi tiết lỗi:", error.response?.data || error.message);
+    notifyError("❌ Xử lý yêu cầu thất bại. Vui lòng thử lại sau.");
+  } finally {
+    setSubmitting(false);
+  }
+};
+
+
+
   const handleMarkAsGiven = async (requestID) => {
-    const token = localStorage.getItem("token");
-    setSubmitting(true);
-    const payload = { statusId: 4 };
-    try {
-      await axios.put(
-        `https://swp-school-medical-management.onrender.com/api/MedicationRequest/${requestID}/status`,
-        payload,
-        token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
-      );
-      notifySuccess("Đã cập nhật trạng thái 'Đã cho uống'!");
-    } catch (error) {
-      console.error("Chi tiết lỗi:", error.response?.data || error.message);
-      notifyError("Cập nhật trạng thái thất bại. Vui lòng thử lại sau.");
-    } finally {
-      await fetchRequests();
-      setGivenPage(1);
-      setSubmitting(false);
-    }
-  };
+  const token = localStorage.getItem("token");
+  setSubmitting(true);
+  const payload = { statusId: 4 };
+
+  try {
+    await axios.put(
+      `https://swp-school-medical-management.onrender.com/api/MedicationRequest/${requestID}/status`,
+      payload,
+      token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
+    );
+
+    notifySuccess("Cập nhật trạng thái 'Đã cho uống' thành công!");
+
+    await fetchRequests(); // Cập nhật lại bảng
+    setGivenPage(1);
+  } catch (error) {
+    console.error("Chi tiết lỗi:", error.response?.data || error.message);
+    notifyError("Cập nhật thất bại. Vui lòng thử lại sau.");
+  } finally {
+    setSubmitting(false);
+  }
+};
+
 
   // Skeleton row for loading state
   const renderSkeletonRows = (rowCount = 3) => (

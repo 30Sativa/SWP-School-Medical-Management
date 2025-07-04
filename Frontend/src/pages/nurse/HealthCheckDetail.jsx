@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import Modal from "../../components/Modal";
 import styles from "../../assets/css/HealthCheckDetail.module.css";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const HealthCheckDetail = () => {
   const { campaignId } = useParams(); // Lấy campaignId từ URL
@@ -60,7 +62,7 @@ const HealthCheckDetail = () => {
         dataToSubmit
       );
       console.log("Dữ liệu đã được lưu:", response.data);
-      alert("Thông tin sức khỏe đã được ghi nhận!");
+      notifySuccess("Thông tin sức khỏe đã được ghi nhận!");
       setShowModal(false); // Đóng modal sau khi lưu thành công
       // Reload data
       fetchData();
@@ -68,11 +70,9 @@ const HealthCheckDetail = () => {
       console.error("Lỗi khi gửi dữ liệu:", error);
       if (error.response) {
         console.error("Lỗi từ server:", error.response.data);
-        alert(
-          "Có lỗi xảy ra khi lưu thông tin: " + error.response.data.message
-        );
+       notifyError("Có lỗi xảy ra khi lưu thông tin: " + error.response.data.message);
       } else {
-        alert("Có lỗi xảy ra khi gửi yêu cầu!");
+        notifyError("Có lỗi xảy ra khi gửi yêu cầu!");
       }
     } finally {
       setModalLoading(false);
@@ -112,16 +112,16 @@ const HealthCheckDetail = () => {
         dataToUpdate
       );
       console.log("Dữ liệu đã được cập nhật:", response.data);
-      alert("Cập nhật thông tin sức khỏe thành công!");
+      notifySuccess("Cập nhật thông tin sức khỏe thành công!");
       setShowModal(false); // Đóng modal sau khi cập nhật thành công
       // Reload data
       fetchData();
     } catch (error) {
       console.error("Lỗi khi cập nhật dữ liệu:", error);
       if (error.response) {
-        alert("Có lỗi xảy ra khi cập nhật: " + error.response.data.message);
+        notifyError("Có lỗi xảy ra khi cập nhật: " + error.response.data.message);
       } else {
-        alert("Có lỗi xảy ra khi gửi yêu cầu cập nhật!");
+        notifyError("Có lỗi xảy ra khi gửi yêu cầu cập nhật!");
       }
     } finally {
       setModalLoading(false);
@@ -149,10 +149,10 @@ const HealthCheckDetail = () => {
           );
         })
       );
-      alert("Đã gửi thông báo cho tất cả phụ huynh!");
+      notifySuccess("Đã gửi thông báo cho tất cả phụ huynh!");
     } catch (error) {
       console.error("Lỗi khi gửi thông báo hàng loạt:", error);
-      alert("Gửi thông báo thất bại. Vui lòng thử lại!");
+      notifyError("Gửi thông báo thất bại. Vui lòng thử lại!");
     }
   };
 
@@ -530,8 +530,10 @@ const HealthCheckDetail = () => {
           </div>
         </form>
       </Modal>
+      <Notification />
     </div>
   );
+  
 };
 
 export default HealthCheckDetail;

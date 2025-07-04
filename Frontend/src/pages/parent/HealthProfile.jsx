@@ -16,9 +16,7 @@ const HealthProfile = () => {
       try {
         const studentRes = await axios.get(
           `https://swp-school-medical-management.onrender.com/api/Student/by-parent/${parentId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         const students = studentRes.data.data || [];
         const fetchedData = await Promise.all(
@@ -27,15 +25,11 @@ const HealthProfile = () => {
               const [profileRes, summaryRes] = await Promise.all([
                 axios.get(
                   `https://swp-school-medical-management.onrender.com/api/health-profiles/student/${student.studentId}`,
-                  {
-                    headers: { Authorization: `Bearer ${token}` },
-                  }
+                  { headers: { Authorization: `Bearer ${token}` } }
                 ),
                 axios.get(
                   `https://swp-school-medical-management.onrender.com/api/health-checks/summaries`,
-                  {
-                    headers: { Authorization: `Bearer ${token}` },
-                  }
+                  { headers: { Authorization: `Bearer ${token}` } }
                 ),
               ]);
               const summaries = summaryRes.data.data;
@@ -47,7 +41,7 @@ const HealthProfile = () => {
                 profile: profileRes.data.data,
                 summaries: matchedSummaries,
               };
-            } catch (error) {
+            } catch {
               return {
                 studentInfo: student,
                 profile: null,
@@ -85,6 +79,15 @@ const HealthProfile = () => {
     return age;
   };
 
+  const getPriority = (title) => {
+    if (!title) return 0;
+    const lower = title.toLowerCase();
+    if (lower.includes("giữa kỳ 2025")) return 3;
+    if (lower.includes("cuối năm 2025")) return 2;
+    if (lower.includes("định kỳ")) return 1;
+    return 0;
+  };
+
   if (loading)
     return (
       <div className={styles.loadingOverlay}>
@@ -94,6 +97,7 @@ const HealthProfile = () => {
         </div>
       </div>
     );
+
   if (studentList.length === 0) return <p>Không có hồ sơ sức khỏe nào.</p>;
 
   return (
@@ -143,8 +147,9 @@ const HealthProfile = () => {
                     <p className={styles.subInfo}>Lớp: {studentInfo.className}</p>
                   </div>
                 </div>
-                 <h4 className={styles.sectionTitle}>👤 Thông tin cá nhân</h4>
-                 <div className={styles.infoBox}>
+
+                <h4 className={styles.sectionTitle}>👤 Thông tin cá nhân</h4>
+                <div className={styles.infoBox}>
                   <div className={styles.infoGrid}>
                     <div><span className={styles.label}>Giới tính:</span> {studentInfo.gender}</div>
                     <div><span className={styles.label}>Tuổi:</span> {calculateAge(studentInfo.dateOfBirth)}</div>
@@ -166,26 +171,12 @@ const HealthProfile = () => {
                       border: "1px solid #e2e8f0",
                     }}
                   >
-                    <h4
-                      style={{
-                        marginBottom: "16px",
-                        color: "#0e2a47",
-                        fontSize: "1.1rem",
-                      }}
-                    >
+                    <h4 style={{ marginBottom: "16px", color: "#0e2a47", fontSize: "1.1rem" }}>
                       📋 Thông tin khám sức khỏe
                     </h4>
+
                     {[...summaries]
-                      .sort((a, b) => {
-                        const getPriority = (title) => {
-                          title = title.toLowerCase();
-                          if (title.includes("giữa kỳ 2025")) return 3;
-                          if (title.includes("cuối năm 2025")) return 2;
-                          if (title.includes("định kỳ")) return 1;
-                          return 0;
-                        };
-                        return getPriority(b.campaignTitle) - getPriority(a.campaignTitle);
-                      })
+                      .sort((a, b) => getPriority(b.campaignTitle) - getPriority(a.campaignTitle))
                       .map((item, index) => (
                         <div
                           key={index}
@@ -198,13 +189,7 @@ const HealthProfile = () => {
                             boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
                           }}
                         >
-                          <h5
-                            style={{
-                              marginBottom: "10px",
-                              fontSize: "1.05rem",
-                              color: "#0284c7",
-                            }}
-                          >
+                          <h5 style={{ marginBottom: "10px", fontSize: "1.05rem", color: "#0284c7" }}>
                             📌 {item.campaignTitle}
                           </h5>
                           <div
@@ -219,13 +204,13 @@ const HealthProfile = () => {
                               color: "#1e293b",
                             }}
                           >
-                            <div> <strong>Chiều cao:</strong> {item.height} cm</div>
-                            <div> <strong>Cân nặng:</strong> {item.weight} kg</div>
-                            <div> <strong>Huyết áp:</strong> {item.bloodPressure}</div>
-                            <div> <strong>Thị lực:</strong> {item.visionSummary}</div>
-                            <div> <strong>Tai mũi họng:</strong> {item.ent}</div>
-                            <div> <strong>Ghi chú:</strong> {item.generalNote}</div>
-                            <div> <strong>Theo dõi:</strong> {item.followUpNote}</div>
+                            <div><strong>Chiều cao:</strong> {item.height} cm</div>
+                            <div><strong>Cân nặng:</strong> {item.weight} kg</div>
+                            <div><strong>Huyết áp:</strong> {item.bloodPressure}</div>
+                            <div><strong>Thị lực:</strong> {item.visionSummary}</div>
+                            <div><strong>Tai mũi họng:</strong> {item.ent}</div>
+                            <div><strong>Ghi chú:</strong> {item.generalNote}</div>
+                            <div><strong>Theo dõi:</strong> {item.followUpNote}</div>
                           </div>
                         </div>
                       ))}
@@ -241,4 +226,5 @@ const HealthProfile = () => {
 };
 
 export default HealthProfile;
+
 

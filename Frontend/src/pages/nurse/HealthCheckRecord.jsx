@@ -369,7 +369,7 @@ const HealthCheckRecord = () => {
       const parentId = studentRes.data?.data?.parentId;
 
       if (!parentId) {
-        alert("Không tìm thấy phụ huynh của học sinh này.");
+        notifyError("Không tìm thấy phụ huynh của học sinh này.");
         return;
       }
 
@@ -414,16 +414,16 @@ Trường Mầm Non
       );
 
       if (response.status === 200 || response.status === 201) {
-        alert("✅ Đã gửi kết quả khám sức khỏe cho phụ huynh!");
+        notifySuccess(" Đã gửi kết quả khám sức khỏe cho phụ huynh!");
       } else {
-        alert("❌ Gửi thất bại: " + (response.data?.message || "Không rõ lỗi"));
+        notifyError("Gửi thất bại: " + (response.data?.message || "Không rõ lỗi"));
       }
     } catch (error) {
       console.error("Lỗi khi gửi kết quả:", error);
-      alert(
-        "Đã xảy ra lỗi khi gửi kết quả: " +
-          (error.response?.data?.message || error.message)
-      );
+      notifyError(
+  "Đã xảy ra lỗi khi gửi kết quả: " +
+    (error.response?.data?.message || error.message)
+);
     }
   };
 

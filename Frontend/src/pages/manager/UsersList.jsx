@@ -208,7 +208,7 @@ const handleModalSubmit = async (values) => {
         username: values.username,
         password: values.password,
         fullName: values.fullName,
-        roleID: Number(values.roleId), // Đổi tên trường cho đúng chuẩn API
+        roleID: Number(values.roleId), 
         phone: values.phone,
         email: values.email,
         address: values.address,
@@ -241,9 +241,17 @@ const handleModalSubmit = async (values) => {
     }
     fetchUsers();
     setModalVisible(false);
-  } catch {
-    notifyError("Có lỗi khi lưu người dùng!");
+  } catch (error) {
+  console.error("Lỗi khi lưu người dùng:", error);
+  const errorMessage = error?.response?.data?.message || "Có lỗi khi lưu người dùng!";
+  
+  // Kiểm tra thông điệp từ backend
+  if (errorMessage.includes("Username already exists")) {
+    notifyError("Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác!");
+  } else {
+    notifyError(errorMessage);
   }
+}
 };
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);

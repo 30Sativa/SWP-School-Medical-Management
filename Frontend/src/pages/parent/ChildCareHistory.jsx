@@ -128,7 +128,7 @@ const ChildCareHistory = () => {
           onChange={(e) => {
             const selected = Number(e.target.value);
             localStorage.setItem("studentId", selected);
-            window.location.reload();
+            setSelectedStudentId(selected); 
           }}
           style={{
             padding: "10px 16px",
