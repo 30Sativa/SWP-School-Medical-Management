@@ -319,7 +319,7 @@ const SendMedicine = () => {
                 )}
                 <div className={styles.statusRow}>
                   <span className={`${styles.status} ${item.status === "Đã duyệt" ? styles.done : item.status === "Chờ duyệt" ? styles.pending : styles.reject}`}>
-                    {item.status === "Đã duyệt" ? "Đã duyệt" : item.status === "Chờ duyệt" ? "Chờ duyệt" : "Từ chối"}
+                    {item.status === "Đã duyệt" ? "Đã duyệt" : item.status === "Chờ duyệt" ? "Chờ duyệt" : item.status === "Đã hoàn thành" ? "Đã lên lịch" : "Bị từ chối"}
                   </span>
                 </div>
               </div>
@@ -357,7 +357,7 @@ const SendMedicine = () => {
                     )}
                     <div className={styles.statusRow}>
                       <span className={`${styles.status} ${item.status === "Đã duyệt" ? styles.done : item.status === "Chờ duyệt" ? styles.pending : styles.reject}`}>
-                        {item.status}
+                        {item.status === "Đã duyệt" ? "Đã duyệt" : item.status === "Chờ duyệt" ? "Chờ duyệt" : item.status === "Đã hoàn thành" ? "Đã lên lịch" : "Bị từ chối"}
                       </span>
                     </div>
                   </div>

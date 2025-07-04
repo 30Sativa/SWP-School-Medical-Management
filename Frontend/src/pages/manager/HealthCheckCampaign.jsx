@@ -11,7 +11,6 @@ import LoadingOverlay from "../../components/LoadingOverlay";
 
 const HEALTH_CHECK_CAMPAIGN_API = "https://swp-school-medical-management.onrender.com/api/HealthCheckCampaign";
 const PAGE_SIZE = 8;
-
 const statusOptions = [
   { value: 1, label: "Chưa bắt đầu" },
   { value: 2, label: "Đang diễn ra" },

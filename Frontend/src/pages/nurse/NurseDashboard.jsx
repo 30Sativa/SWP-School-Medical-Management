@@ -97,7 +97,7 @@ const NurseDashBoard = () => {
                       <td>{req.medicationName}</td>
                       <td><span className={`${style.pill} ${req.status === "Đã duyệt" ? style.green : style.yellow}`}>{req.status}</span></td>
                       <td>{new Date(req.requestDate).toLocaleString()}</td>
-                      <td><button className={style.btnAction}>Đã cấp</button></td>
+                      <td><button className={style.btnAction}>Xác nhận</button></td>
                     </tr>
                   ))}
                 </tbody>

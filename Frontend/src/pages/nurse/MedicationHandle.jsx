@@ -36,9 +36,12 @@ const MedicationHandle = () => {
         all.filter((item) => item.status === "Đã duyệt")
       );
       setGivenRequests(
-        all.filter((item) => item.status === "Đã hoàn thành")
+        all.filter((item) => 
+          item.status && item.status.replace(/['"]/g, "").trim() === "Đã lên lịch" ||
+          item.status && item.status.replace(/['"]/g, "").trim() === "Đã hoàn thành"
+        )
       );
-      setRejectedRequests(all.filter((item) => item.status === "Từ chối"));
+      setRejectedRequests(all.filter((item) => item.status === "Bị từ chối"));
       return all;
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu:", error);
@@ -175,16 +178,18 @@ const MedicationHandle = () => {
                 <td>
                   <span
                     className={`${style.statusBadge} ${
-                      req.status === "Đã hoàn thành"
+                      ["Đã lên lịch", "Đã hoàn thành", "Đã lên lịch'", "Đã hoàn thành'"].includes(req.status.replace(/['"]/g, "").trim())
                         ? style.given
                         : req.status === "Đã duyệt"
                         ? style.approved
-                        : req.status === "Từ chối"
+                        : req.status === "Bị từ chối"
                         ? style.rejected
                         : ""
                     }`}
                   >
-                    {req.status === "Đã hoàn thành" ? "Đã cho uống" : req.status}
+                    {["Đã lên lịch", "Đã hoàn thành", "Đã lên lịch'", "Đã hoàn thành'"].includes(req.status.replace(/['"]/g, "").trim())
+                      ? "Đã cho uống thuốc"
+                      : req.status}
                   </span>
                 </td>
                 <td>{req.receivedByName || "-"}</td>
@@ -261,7 +266,11 @@ const MedicationHandle = () => {
   );
   const totalRejectedPages = Math.ceil(rejectedRequests.length / itemsPerPage);
 
-  const paginatedGiven = givenRequests.slice(
+  // Sort theo updatedAt (mới nhất lên đầu) rồi phân trang cho bảng đã lên lịch
+  const sortedGivenRequests = [...givenRequests].sort(
+    (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+  );
+  const paginatedGiven = sortedGivenRequests.slice(
     (givenPage - 1) * itemsPerPage,
     givenPage * itemsPerPage
   );
@@ -294,7 +303,7 @@ const MedicationHandle = () => {
         {renderTable(paginatedRejected, "", loading)}
         {paginate(totalRejectedPages, rejectedPage, setRejectedPage)}
 
-        <h2 className={style.title}>Danh sách đã cho uống</h2>
+        <h2 className={style.title}>Danh sách đã cho uống thuốc</h2>
         {renderTable(paginatedGiven, "given", loading)}
         {paginate(totalGivenPages, givenPage, setGivenPage)}
       </div>
