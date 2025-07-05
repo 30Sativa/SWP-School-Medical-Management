@@ -11,6 +11,7 @@ const SendMedicine = () => {
   const [usage, setUsage] = useState("");
   const [note, setNote] = useState("");
   const [file, setFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [history, setHistory] = useState([]);
   const [studentName, setStudentName] = useState("");
   const [studentId, setStudentId] = useState(localStorage.getItem("studentId"));
@@ -25,7 +26,13 @@ const SendMedicine = () => {
   const historyTopRef = useRef(null);
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+    if (selectedFile && selectedFile.type.startsWith("image/")) {
+      setPreviewUrl(URL.createObjectURL(selectedFile));
+    } else {
+      setPreviewUrl(null);
+    }
   };
 
   const handleSend = async () => {
@@ -132,6 +139,7 @@ const SendMedicine = () => {
       setUsage("");
       setNote("");
       setFile(null);
+      setPreviewUrl(null);
       fetchHistory();
     } catch (err) {
       console.error(err);
@@ -290,7 +298,16 @@ const SendMedicine = () => {
               {file && (
                 <div className={styles.fileInfo}>
                   <strong>{file.name}</strong> ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                  <button onClick={() => setFile(null)} className={styles.removeFileBtn}>❌</button>
+                  <button onClick={() => { setFile(null); setPreviewUrl(null); }} className={styles.removeFileBtn}>❌</button>
+                  {previewUrl && (
+                    <div style={{ marginTop: 10 }}>
+                      <img
+                        src={previewUrl}
+                        alt="preview"
+                        style={{ maxWidth: 180, maxHeight: 180, borderRadius: 8, border: "1px solid #e5e7eb" }}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
