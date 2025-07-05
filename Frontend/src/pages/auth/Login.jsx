@@ -190,7 +190,12 @@ const Login = () => {
 
   return (
     <div className="login-page-wrapper">
-      <ToastContainer />
+      <ToastContainer
+      position="top-center"
+      autoClose={2500}
+      theme="colored"
+    />
+    <div className="login-page-wrapper">...</div>
       <div className="login-container">
         <div className="left-section">
           <h1>Hệ thống quản lý sức khỏe học đường</h1>
