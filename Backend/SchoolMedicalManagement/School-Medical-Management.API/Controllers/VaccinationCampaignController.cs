@@ -110,9 +110,13 @@ namespace School_Medical_Management.API.Controllers
 
         // Gửi phiếu đồng ý tiêm chủng cho phụ huynh
         [HttpPost("campaigns/{campaignId}/send-consent/{studentId}")]
-        public async Task<IActionResult> SendConsentRequest([FromRoute] int campaignId, [FromRoute] int studentId, [FromQuery] Guid parentId)
+        public async Task<IActionResult> SendConsentRequest(
+            [FromRoute] int campaignId,
+            [FromRoute] int studentId,
+            [FromQuery] Guid parentId,
+            [FromQuery] int? autoDeclineAfterDays = null)
         {
-            var response = await _vaccinationCampaignService.SendConsentRequestAsync(campaignId, studentId, parentId);
+            var response = await _vaccinationCampaignService.SendConsentRequestAsync(campaignId, studentId, parentId, autoDeclineAfterDays);
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
@@ -126,9 +130,9 @@ namespace School_Medical_Management.API.Controllers
 
         // Gửi phiếu đồng ý cho tất cả phụ huynh
         [HttpPost("campaigns/{campaignId}/send-consent-to-all-parents")]
-        public async Task<IActionResult> SendConsentRequestsToAllParents([FromRoute] int campaignId)
+        public async Task<IActionResult> SendConsentRequestsToAllParents([FromRoute] int campaignId, [FromQuery] int? autoDeclineAfterDays = null)
         {
-            var response = await _vaccinationCampaignService.SendConsentRequestsToAllParentsAsync(campaignId);
+            var response = await _vaccinationCampaignService.SendConsentRequestsToAllParentsAsync(campaignId, autoDeclineAfterDays);
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 

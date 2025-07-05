@@ -38,7 +38,7 @@ namespace SchoolMedicalManagement.Service.Interface
         Task<BaseResponse> GetCampaignConsentRequestsAsync(int campaignId);
 
         // Gửi phiếu đồng ý cho phụ huynh
-        Task<BaseResponse> SendConsentRequestAsync(int campaignId, int studentId, Guid parentId);
+        Task<BaseResponse> SendConsentRequestAsync(int campaignId, int studentId, Guid parentId, int? autoDeclineAfterDays = null);
 
         // Phụ huynh phản hồi đồng ý/từ chối
         Task<BaseResponse> UpdateConsentRequestAsync(int requestId, UpdateConsentRequestRequest request);
@@ -66,7 +66,7 @@ namespace SchoolMedicalManagement.Service.Interface
         Task<BaseResponse> SendConsentRequestsByClassAsync(int campaignId, SendConsentByClassRequest request);
 
         // Gửi phiếu đồng ý cho tất cả phụ huynh
-        Task<BaseResponse> SendConsentRequestsToAllParentsAsync(int campaignId);
+        Task<BaseResponse> SendConsentRequestsToAllParentsAsync(int campaignId, int? autoDeclineAfterDays = null);
 
         // Gửi phiếu đồng ý theo danh sách học sinh
         Task<BaseResponse> SendConsentRequestsBulkAsync(int campaignId, SendConsentBulkRequest request);

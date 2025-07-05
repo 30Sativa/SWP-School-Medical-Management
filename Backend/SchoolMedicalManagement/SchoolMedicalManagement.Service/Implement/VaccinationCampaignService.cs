@@ -222,7 +222,7 @@ namespace SchoolMedicalManagement.Service.Implement
         }
 
         // Gửi phiếu đồng ý tiêm chủng cho phụ huynh
-        public async Task<BaseResponse> SendConsentRequestAsync(int campaignId, int studentId, Guid parentId)
+        public async Task<BaseResponse> SendConsentRequestAsync(int campaignId, int studentId, Guid parentId, int? autoDeclineAfterDays = null)
         {
             var campaign = await _campaignRepository.GetCampaignById(campaignId);
             if (campaign == null)
@@ -277,10 +277,11 @@ namespace SchoolMedicalManagement.Service.Implement
                 };
             }
 
-            // Lên lịch Hangfire job tự động từ chối sau 1 ngày
+            // Lên lịch Hangfire job tự động từ chối sau số ngày truyền vào (hoặc mặc định 3 ngày)
+            int days = autoDeclineAfterDays ?? 3;
             BackgroundJob.Schedule<VaccinationCampaignService>(
                 x => x.AutoDeclineConsentRequest(created.RequestId),
-                TimeSpan.FromDays(3)
+                TimeSpan.FromDays(days)
             );
 
             // TODO: Send email notification to parent (mở rộng trong tương lai)
@@ -861,11 +862,12 @@ namespace SchoolMedicalManagement.Service.Implement
                     ConsentStatusName = cr.ConsentStatus?.ConsentStatusName
                 }).ToList();
                 // Lên lịch Hangfire job cho từng phiếu
+                int days = request.AutoDeclineAfterDays ?? 3;
                 foreach (var cr in createdRequests)
                 {
                     BackgroundJob.Schedule<VaccinationCampaignService>(
                         x => x.AutoDeclineConsentRequest(cr.RequestId),
-                        TimeSpan.FromDays(3)
+                        TimeSpan.FromDays(days)
                     );
                 }
             }
@@ -879,7 +881,7 @@ namespace SchoolMedicalManagement.Service.Implement
         }
 
         // Gửi phiếu đồng ý cho tất cả phụ huynh
-        public async Task<BaseResponse> SendConsentRequestsToAllParentsAsync(int campaignId)
+        public async Task<BaseResponse> SendConsentRequestsToAllParentsAsync(int campaignId, int? autoDeclineAfterDays = null)
         {
             var campaign = await _campaignRepository.GetCampaignById(campaignId);
             if (campaign == null)
@@ -962,11 +964,12 @@ namespace SchoolMedicalManagement.Service.Implement
                     ConsentStatusName = cr.ConsentStatus?.ConsentStatusName
                 }).ToList();
                 // Lên lịch Hangfire job cho từng phiếu
+                int days = autoDeclineAfterDays ?? 3;
                 foreach (var cr in createdRequests)
                 {
                     BackgroundJob.Schedule<VaccinationCampaignService>(
                         x => x.AutoDeclineConsentRequest(cr.RequestId),
-                        TimeSpan.FromDays(3)
+                        TimeSpan.FromDays(days)
                     );
                 }
             }
@@ -1081,11 +1084,12 @@ namespace SchoolMedicalManagement.Service.Implement
                     ConsentStatusName = cr.ConsentStatus?.ConsentStatusName
                 }).ToList();
                 // Lên lịch Hangfire job cho từng phiếu
+                int days = request.AutoDeclineAfterDays ?? 3;
                 foreach (var cr in createdRequests)
                 {
                     BackgroundJob.Schedule<VaccinationCampaignService>(
                         x => x.AutoDeclineConsentRequest(cr.RequestId),
-                        TimeSpan.FromDays(3)
+                        TimeSpan.FromDays(days)
                     );
                 }
             }
