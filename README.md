@@ -119,45 +119,52 @@ SWP-School-Medical-Management/
 - **Bảo mật**: Đảm bảo an toàn dữ liệu, bảo vệ thông tin cá nhân, tuân thủ các tiêu chuẩn bảo mật.
 - **Khả năng sử dụng**: Giao diện thân thiện, dễ sử dụng cho cả phụ huynh, nhân viên y tế và quản trị viên.
 
-## 👤 Author
+## 👥 Author & Contributors
 
-**Mai Văn Thành**  
-Team Leader | Full-Stack Developer | DevOps | SQL Server DB Designer
+---
 
-### 📌 Responsibilities:
-- Led the development of the SchoolMedicalManager project
-- Designed and implemented both frontend (ReactJS) and backend (.NET 8 Web API)
-- Created and optimized SQL Server database (schema, stored procedures, seed data)
-- Built and deployed backend and database using Docker and Docker Compose
-- Deployed frontend to Vercel, backend to Render, database to Linux server via Docker
-- Registered and configured custom domain with DNS for production
-- Coordinated team tasks, tracked progress, and ensured on-time delivery
-- Reviewed code, performed testing, and managed overall project quality
+### 🧑‍💼 Mai Văn Thành  
+**Team Leader** | Full-Stack Developer | DevOps | SQL Server DB Designer  
 
-**Nguyễn Ngọc Viên**
-Full-Stack Developer | DevOps | SQL Server DB Designer
-### 📌 Responsibilities:
-- Contributed to both frontend and backend development
-- Participated in designing and optimizing the SQL Server database schema
-- Wrote stored procedures, seed scripts, and data migration scripts
-- Deployed and configured SQL Server on a Linux environment using Docker
-- Managed remote access, backup, and performance tuning for the database
+- Led the development of the SchoolMedicalManager project  
+- Built both frontend (ReactJS) and backend (.NET 8 Web API)  
+- Designed and optimized SQL Server database (schema, procedures, seed data)  
+- Deployed backend & DB using Docker; frontend to Vercel, backend to Render  
+- Registered custom domain and configured DNS for production  
+- Managed team progress, code quality, and final delivery
 
-**Lạc Đông**
-Frontend Developer | SQL Server DB Designer
-### 📌 Responsibilities:
-- Developed and styled UI components for the frontend (ReactJS)
-- Participated in UI/UX design and user interaction flow
-- Helped design the SQL Server database schema (tables, relationships, constraints)
-- Assisted in writing seed scripts and initial data
+---
 
-**Anh Quốc**
-Frontend Developer
-### 📌 Responsibilities:
-- Developed and styled UI components for the frontend (ReactJS)
-- Participated in UI/UX design and user interaction flow
+### 👨‍💻 Nguyễn Ngọc Viên  
+**Full-Stack Developer** | DevOps | SQL Server DB Designer  
 
-**Thế Anh**
-### 📌 Responsibilities:
-- Developed and styled UI components for the frontend (ReactJS)
-- Participated in UI/UX design and user interaction flow
+- Contributed to frontend and backend development  
+- Co-designed and optimized SQL Server database  
+- Wrote stored procedures, seed/migration scripts  
+- Deployed SQL Server on Linux via Docker  
+- Handled backup, remote access, and DB performance tuning
+
+---
+
+### 🎨 Lạc Đông  
+**Frontend Developer** | SQL Server DB Designer  
+
+- Developed UI components with ReactJS  
+- Participated in UI/UX design and user flow  
+- Assisted in SQL Server schema design and seed data
+
+---
+
+### 💻 Anh Quốc  
+**Frontend Developer**  
+
+- Developed and styled frontend components (ReactJS)  
+- Participated in UI/UX design
+
+---
+
+### 💻 Thế Anh  
+**Frontend Developer**  
+
+- Developed and styled frontend components (ReactJS)  
+- Participated in UI/UX design
