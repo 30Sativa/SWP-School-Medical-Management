@@ -448,3 +448,7 @@
 .removeFileBtn:hover {
   transform: scale(1.1);
 }
+
+.Toastify__toast-container {
+  z-index: 99999 !important;
+}

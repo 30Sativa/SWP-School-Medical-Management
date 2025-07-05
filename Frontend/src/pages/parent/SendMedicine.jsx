@@ -24,6 +24,7 @@ const SendMedicine = () => {
   const parentId = localStorage.getItem("parentId");
   const historyEndRef = useRef(null);
   const historyTopRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -33,6 +34,7 @@ const SendMedicine = () => {
     } else {
       setPreviewUrl(null);
     }
+    if (fileInputRef.current) fileInputRef.current.value = null;
   };
 
   const handleSend = async () => {
@@ -140,6 +142,7 @@ const SendMedicine = () => {
       setNote("");
       setFile(null);
       setPreviewUrl(null);
+      if (fileInputRef.current) fileInputRef.current.value = null;
       fetchHistory();
     } catch (err) {
       console.error(err);
@@ -218,7 +221,18 @@ const SendMedicine = () => {
 
   return (
     <div className={styles.container}>
-      <ToastContainer />
+      <ToastContainer
+        position="top-center"
+        autoClose={2500}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
       <Sidebar />
       <div className={styles.content}>
         <h2 className={styles.title}>Prescription |</h2>
@@ -292,6 +306,7 @@ const SendMedicine = () => {
                   style={{ display: "none" }}
                   accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
                   onChange={handleFileChange}
+                  ref={fileInputRef}
                 />
               </label>
 
