@@ -4,6 +4,8 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import styles from "../../assets/css/HealthCheckRecord.module.css";
 import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
+
 
 const HealthCheckRecord = () => {
   const { recordId } = useParams();
@@ -129,7 +131,8 @@ const HealthCheckRecord = () => {
     // eslint-disable-next-line
   }, [isEditing, record?.height, record?.weight]);
 
-  if (loading) return <div>Đang tải dữ liệu...</div>;
+  if (loading) return <LoadingOverlay text="Đang tải dữ liệu khám sức khỏe..." />;
+
 
   if (!record)
     return (
