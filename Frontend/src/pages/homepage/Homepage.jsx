@@ -29,6 +29,7 @@ const Homepage = () => {
   const ctaRef = useRef();
   const [slideIdx, setSlideIdx] = React.useState(0);
   const heroImages = [school1, school2, school3];
+  const [feedbacks, setFeedbacks] = React.useState([]);
 
   // Hiệu ứng xuất hiện khi cuộn
   useEffect(() => {
@@ -84,6 +85,17 @@ const Homepage = () => {
     if (document.readyState === "complete") onLoad();
     else window.addEventListener("load", onLoad);
   }, []);
+
+  useEffect(() => {
+    fetch('https://swp-school-medical-management.onrender.com/api/ParentFeedback')
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === "200" && Array.isArray(data.data)) {
+          setFeedbacks(data.data);
+        }
+      });
+  }, []);
+
   useAosInit();
 
   // Scroll đến section theo ref
@@ -122,7 +134,7 @@ const Homepage = () => {
         <nav className={style.navLinks}>
           <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); scrollToRef(heroRef); }}>Trang chủ</a>
           <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); scrollToRef(featuresRef); }}>Giới thiệu</a>
-          <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); scrollToRef(featuresRef); }}>Dịch vụ</a>
+          <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); navigate('/blog'); }}>Blog Y Tế</a>
           <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); scrollToRef(ctaRef); }}>Liên hệ</a>
           <button className={style.loginBtn} onClick={() => navigate("/login")}>Đăng nhập</button>
         </nav>
@@ -157,7 +169,10 @@ const Homepage = () => {
           <h1 className={style.fadeInDown}>
             Hệ thống quản lý <span className={style.highlight}>sức khỏe học đường</span>
           </h1>
-          <p className={style.fadeInUp}>Kết nối phụ huynh, nhà trường và đội ngũ y tế...</p>
+          <p className={style.heroDesc}>
+            EduHealth là hệ thống phần mềm hỗ trợ quản lý toàn diện các hoạt động y tế trong trường học. Hệ thống giúp phụ huynh, nhân viên y tế và nhà trường phối hợp hiệu quả trong việc chăm sóc sức khỏe học sinh – từ khai báo thông tin y tế, xử lý các tình huống khẩn cấp, đến quản lý tiêm chủng và kiểm tra sức khỏe định kỳ.
+          </p>
+          
           <div className={style.heroButtons}>
             <button className={style.primaryBtn + ' ' + style.btnPulse} onClick={e => { e.preventDefault(); scrollToRef(featuresRef); }}>Tìm hiểu thêm </button>
           </div>
@@ -219,11 +234,22 @@ const Homepage = () => {
       </section>
 
       <section className={style.feedback + ' ' + style.sectionVisible} ref={feedbackRef} data-aos="fade-up">
-        <h2 className={style.fadeInUp}>Khách hàng nói gì về chúng tôi</h2>
+        <h2 className={style.fadeInUp}>Phụ huynh nói gì về chúng tôi</h2>
         <div className={style.feedbackCards}>
-          <div className={style.feedbackCard + ' ' + style.cardSlideUp} data-aos="zoom-in" data-aos-delay="0"><p>“Ứng dụng dễ sử dụng...”</p><div className={style.feedbackUser}><img src={feedback} alt="" className={style.userIcon} /><strong>Nguyễn Thị Hương</strong></div></div>
-          <div className={style.feedbackCard + ' ' + style.cardSlideUp} data-aos="zoom-in" data-aos-delay="100"><p>“Tôi không phải ghi giấy...”</p><div className={style.feedbackUser}><img src={feedback} alt="" className={style.userIcon} /><strong>Trần Văn Duy</strong></div></div>
-          <div className={style.feedbackCard + ' ' + style.cardSlideUp} data-aos="zoom-in" data-aos-delay="200"><p>“Giúp tôi nắm được sức khỏe...”</p><div className={style.feedbackUser}><img src={feedback} alt="" className={style.userIcon} /><strong>Nguyễn Thị Ánh Dương</strong></div></div>
+          {feedbacks.slice(0, 3).map((fb, idx) => (
+            <div
+              key={fb.feedbackId || fb.feedbackID || fb.id || idx}
+              className={style.feedbackCard + ' ' + style.cardSlideUp}
+              data-aos="zoom-in"
+              data-aos-delay={idx * 100}
+            >
+              <p>{fb.content}</p>
+              <div className={style.feedbackUser}>
+                <img src={feedback} alt="" className={style.userIcon} />
+                <strong>{fb.parentName}</strong>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -256,9 +282,9 @@ const Homepage = () => {
           onClick={handleScrollTop}
           aria-label="Lên đầu trang"
         >
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="18" cy="18" r="16" fill="#06b6d4" stroke="#fff" strokeWidth="2"/>
-            <polyline points="12,20 18,14 24,20" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="8" fill="#06b6d4"/>
+            <path d="M16 22V10M16 10L10 16M16 10L22 16" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
       )}

@@ -18,7 +18,15 @@ const HealthProfile = () => {
           `https://swp-school-medical-management.onrender.com/api/Student/by-parent/${parentId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        const students = studentRes.data.data || [];
+
+        const students = Array.isArray(studentRes.data.data) ? studentRes.data.data : [];
+
+        if (students.length === 0) {
+          toast.warning("Tài khoản chưa có học sinh nào được liên kết.");
+          setStudentList([]);
+          return;
+        }
+
         const fetchedData = await Promise.all(
           students.map(async (student) => {
             try {
@@ -32,14 +40,14 @@ const HealthProfile = () => {
                   { headers: { Authorization: `Bearer ${token}` } }
                 ),
               ]);
-              const summaries = summaryRes.data.data;
-              const matchedSummaries = Array.isArray(summaries)
-                ? summaries.filter((s) => s.studentId === student.studentId)
+              const summaries = Array.isArray(summaryRes.data.data)
+                ? summaryRes.data.data.filter((s) => s.studentId === student.studentId)
                 : [];
+
               return {
                 studentInfo: student,
                 profile: profileRes.data.data,
-                summaries: matchedSummaries,
+                summaries: summaries,
               };
             } catch {
               return {
@@ -98,7 +106,18 @@ const HealthProfile = () => {
       </div>
     );
 
-  if (studentList.length === 0) return <p>Không có hồ sơ sức khỏe nào.</p>;
+  if (studentList.length === 0)
+    return (
+      <div className={styles.container}>
+        <Sidebar />
+        <main className={styles.content}>
+          <p style={{ padding: "20px", color: "#f59e0b" }}>
+            ⚠️ Tài khoản hiện chưa có hồ sơ sức khỏe nào. Vui lòng liên hệ nhà trường để được hỗ trợ!
+          </p>
+          <ToastContainer />
+        </main>
+      </div>
+    );
 
   return (
     <div className={styles.container}>
@@ -226,5 +245,6 @@ const HealthProfile = () => {
 };
 
 export default HealthProfile;
+
 
 

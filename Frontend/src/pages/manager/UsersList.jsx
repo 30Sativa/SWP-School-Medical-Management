@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Input, Table, message, Modal, Form, Select, Typography, Avatar, Tag } from "antd";
+import { Button, Input, Table, message, Modal, Form, Select, Typography, Avatar, Tag, DatePicker } from "antd";
 import { SearchOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import { Edit2, Trash2 } from "lucide-react";
 import Sidebar from "../../components/sb-Manager/Sidebar";
@@ -23,6 +23,9 @@ const UsersList = () => {
   const [currentPage, setCurrentPage] = useState(1); // Trạng thái trang hiện tại
   const [modalForm] = Form.useForm();
   const usersPerPage = 10; // Số người dùng mỗi trang
+  const [studentModalVisible, setStudentModalVisible] = useState(false);
+  const [selectedParent, setSelectedParent] = useState(null);
+  const [studentForm] = Form.useForm();
 
   const apiUrl = "https://swp-school-medical-management.onrender.com/api/User"; 
 
@@ -70,60 +73,6 @@ const UsersList = () => {
   const handlePageChange = (page) => {
     setCurrentPage(page); // Cập nhật trang hiện tại khi chuyển trang
   };
-
-  const columns = [
-    {
-      title: "Họ và tên",
-      dataIndex: "fullName",
-      key: "fullName",
-      render: (text) => (
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <Avatar>{text.charAt(0)}</Avatar> {/* Show first letter as avatar */}
-          <span>{text}</span>
-        </div>
-      ),
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-    },
-    {
-      title: "Số điện thoại",
-      dataIndex: "phone",
-      key: "phone",
-    },
-    {
-      title: "Vai trò",
-      dataIndex: "role",
-      key: "role",
-      render: (role) => {
-        let color = "blue";
-        if (role.roleName === "Nurse") color = "green";
-        else if (role.roleName === "Manager") color = "purple";
-        return <Tag color={color}>{role.roleName}</Tag>;
-      },
-    },
-    {
-      title: "Địa chỉ",
-      dataIndex: "address", // This will now display the address of the user
-      key: "address",
-    },
-    {
-      title: "Hành động",
-      key: "action",
-      render: (_, record) => (
-        <div className={style.actionGroup}>
-          <button className={style.editBtn} onClick={() => showModal("edit", record)}>
-            <Edit2 size={16} /> Sửa
-          </button>
-          <button className={style.deleteBtn} onClick={() => handleDelete(record.userID)}>
-            <Trash2 size={16} /> Xóa
-          </button>
-        </div>
-      ),
-    },
-  ];
 
   // Hiển thị modal thêm/sửa người dùng
 const showModal = (mode, user = null) => {
@@ -256,6 +205,36 @@ const handleModalSubmit = async (values) => {
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
+  // Thêm hàm handleAddStudent
+  const handleAddStudent = (parent) => {
+    setSelectedParent(parent);
+    studentForm.resetFields(); // Reset form khi mở modal
+    setStudentModalVisible(true);
+  };
+
+  const handleStudentSubmit = async (values) => {
+    console.log("Submit values:", values);
+    try {
+      const token = localStorage.getItem("token");
+      const payload = {
+        ...values,
+        class: values.className,
+        dateOfBirth: values.dateOfBirth.format("YYYY-MM-DD"),
+        parentId: selectedParent.userID,
+      };
+      delete payload.className;
+      await axios.post(
+        "https://swp-school-medical-management.onrender.com/api/Student",
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      message.success("Thêm học sinh thành công!");
+      setStudentModalVisible(false);
+    } catch {
+      message.error("Thêm học sinh thất bại!");
+    }
+  };
+
   return (
     <div className={style.layoutContainer}>
       <Notification />
@@ -305,6 +284,7 @@ const handleModalSubmit = async (values) => {
             ) : filteredUsers.length > 0 ? (
               filteredUsers.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage).map((user, index) => {
                 const realUserId = user.userID;
+                console.log('user:', user);
                 return (
                   <tr key={realUserId || index}>
                     <td>{(currentPage - 1) * usersPerPage + index + 1}</td>
@@ -320,6 +300,13 @@ const handleModalSubmit = async (values) => {
                         <button className={style.deleteBtn} onClick={() => handleDelete(realUserId)}>
                           <Trash2 size={16} /> Xóa
                         </button>
+                        {user.roleName === "Parent" ? (
+                          <button className={style.addStudentBtn} onClick={() => handleAddStudent(user)}>
+                            + Thêm học sinh
+                          </button>
+                        ) : (
+                          <span style={{ minWidth: 110 }}></span>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -396,6 +383,53 @@ const handleModalSubmit = async (values) => {
 </Modal>
       </main>
       {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
+      {/* Modal thêm học sinh đặt ngoài cùng */}
+      <Modal
+        open={studentModalVisible}
+        title="Thêm học sinh cho phụ huynh"
+        onCancel={() => setStudentModalVisible(false)}
+        onOk={() => studentForm.submit()}
+        okText="Thêm"
+      >
+        <Form
+          form={studentForm}
+          layout="vertical"
+          onFinish={handleStudentSubmit}
+          validateTrigger="onChange"
+        >
+          <Form.Item
+            name="fullName"
+            label="Họ tên học sinh"
+            rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="dateOfBirth"
+            label="Ngày sinh"
+            rules={[{ required: true, message: "Vui lòng chọn ngày sinh" }]}
+          >
+            <DatePicker style={{ width: '100%' }} format="YYYY-MM-DD" />
+          </Form.Item>
+          <Form.Item
+            name="genderId"
+            label="Giới tính"
+            rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
+          >
+            <Select>
+              <Option value={0}>Nam</Option>
+              <Option value={1}>Nữ</Option>
+            </Select>
+          </Form.Item>
+          <Form.Item
+            name="className"
+            label="Lớp"
+            rules={[{ required: true, message: "Vui lòng nhập lớp" }]}
+          >
+            <Input />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

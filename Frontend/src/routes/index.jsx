@@ -32,6 +32,7 @@ import HealthCheckDetail from "../pages/nurse/HealthCheckDetail";
 import HealthCheckRecord from "../pages/nurse/HealthCheckRecord";
 import NurseReport from "../pages/nurse/NurseReport";
 import ViewBlog from "../pages/nurse/viewBlog";
+import BlogPublic from '../pages/homepage/BlogPublic';
 
 const AppRouter = () => {
   return (
@@ -49,7 +50,7 @@ const AppRouter = () => {
       <Route path="/sendmedicine" element={<SendMedicine />} />
       <Route path="/hisofcare" element={<ChildCareHistory />} />
       <Route path="/notification" element={<NotificationAndReport />} />
-      <Route path="/blog" element={<Blog />} />
+      <Route path="/blog" element={<BlogPublic />} />
       <Route path="/blog/create" element={<BlogCreate />} />
       <Route path="/firstlogin" element={<FirstLogin />} />
       <Route path="/sendnotifications" element={<SendNotifications />} />

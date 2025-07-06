@@ -5,6 +5,7 @@ import Modal from "../../components/Modal";
 import styles from "../../assets/css/HealthCheckDetail.module.css";
 import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 const HealthCheckDetail = () => {
   const { campaignId } = useParams(); // Lấy campaignId từ URL
