@@ -10,8 +10,8 @@ const SendMedicine = () => {
   const [title, setTitle] = useState("");
   const [usage, setUsage] = useState("");
   const [note, setNote] = useState("");
-  const [file, setFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [files, setFiles] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
   const [history, setHistory] = useState([]);
   const [studentName, setStudentName] = useState("");
   const [studentId, setStudentId] = useState(localStorage.getItem("studentId"));
@@ -27,13 +27,14 @@ const SendMedicine = () => {
   const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    setFile(selectedFile);
-    if (selectedFile && selectedFile.type.startsWith("image/")) {
-      setPreviewUrl(URL.createObjectURL(selectedFile));
-    } else {
-      setPreviewUrl(null);
-    }
+    const selectedFiles = Array.from(e.target.files);
+    setFiles(selectedFiles);
+
+    const previews = selectedFiles.map(file =>
+      file.type.startsWith("image/") ? URL.createObjectURL(file) : null
+    );
+    setPreviewUrls(previews);
+
     if (fileInputRef.current) fileInputRef.current.value = null;
   };
 
@@ -89,7 +90,8 @@ const SendMedicine = () => {
       });
     }
 
-    if (file) {
+    // Kiểm tra file
+    for (let file of files) {
       const allowedTypes = [
         "application/pdf",
         "application/msword",
@@ -98,7 +100,6 @@ const SendMedicine = () => {
         "image/jpeg",
       ];
       const maxSizeMB = 10;
-
       if (!allowedTypes.includes(file.type)) {
         return toast.error("Định dạng file không hợp lệ! Chỉ hỗ trợ PDF, DOC, DOCX, PNG, JPG.", {
           position: "top-center",
@@ -106,7 +107,6 @@ const SendMedicine = () => {
           theme: "colored",
         });
       }
-
       if (file.size > maxSizeMB * 1024 * 1024) {
         return toast.error("Kích thước file vượt quá 10MB!", {
           position: "top-center",
@@ -123,7 +123,9 @@ const SendMedicine = () => {
       formData.append("medicationName", trimmedTitle);
       formData.append("dosage", trimmedUsage);
       formData.append("instructions", trimmedNote);
-      if (file) formData.append("imageFile", file);
+      files.forEach((file) => {
+        formData.append("imageFile", file);
+      });
 
       await axios.post(
         `https://swp-school-medical-management.onrender.com/api/MedicationRequest/create?parentId=${parentId}`,
@@ -140,8 +142,8 @@ const SendMedicine = () => {
       setTitle("");
       setUsage("");
       setNote("");
-      setFile(null);
-      setPreviewUrl(null);
+      setFiles([]);
+      setPreviewUrls([]);
       if (fileInputRef.current) fileInputRef.current.value = null;
       fetchHistory();
     } catch (err) {
@@ -163,6 +165,10 @@ const SendMedicine = () => {
       );
       const data = res.data.data;
       setStudentList(data);
+          if (data.length === 0) {
+      setStudentId(null);
+      localStorage.removeItem("studentId");
+    }
       if (!studentId && data.length > 0) {
         setStudentId(data[0].studentId);
         localStorage.setItem("studentId", data[0].studentId);
@@ -219,6 +225,8 @@ const SendMedicine = () => {
       .includes(searchTerm.toLowerCase())
   );
 
+  const hasStudent = studentList && studentList.length > 0;
+
   return (
     <div className={styles.container}>
       <ToastContainer
@@ -238,161 +246,150 @@ const SendMedicine = () => {
         <h2 className={styles.title}>Prescription |</h2>
         <div className={styles.marquee}>
           <span className={styles.marqueeText}>
-            Xin chào, bạn đang đăng nhập với tư cách phụ huynh em {studentName || "..."}
+            Xin chào, bạn đang đăng nhập với tư cách phụ huynh em{" "}
+            {hasStudent ? (studentName || "...") : "..."}
           </span>
         </div>
 
         <div style={{ marginTop: 20, marginBottom: 20 }}>
           <label style={{ fontWeight: 600, fontSize: "16px", color: "#1e3a8a" }}>Chọn học sinh:</label>
           <select
-            value={studentId}
+            value={studentId || ""}
             onChange={(e) => {
               setStudentId(e.target.value);
               localStorage.setItem("studentId", e.target.value);
             }}
             className={styles.selectStudent}
+            disabled={!hasStudent}
           >
-            {studentList.map((student) => (
-              <option key={student.studentId} value={student.studentId}>
-                {student.fullName} - {student.className}
-              </option>
-            ))}
+            {hasStudent ? (
+              studentList.map((student) => (
+                <option key={student.studentId} value={student.studentId}>
+                  {student.fullName} - {student.className}
+                </option>
+              ))
+            ) : (
+              <option value="">Chưa có học sinh</option>
+            )}
           </select>
         </div>
 
-        <div className={styles.mainSection}>
-          <div className={styles.medicineInfo}>
-            <div className={styles.medicineSectionTitle}>Thông tin thuốc</div>
-            <div className={`${styles.box} ${styles.boxYellow}`}>
-              <h3><FiInfo style={{ marginRight: 8, color: "#f59e42" }} /> Thông tin bệnh</h3>
-              <textarea
-                placeholder="Nhập tên thuốc hoặc thông tin bệnh..."
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className={styles.inputField}
-              ></textarea>
-            </div>
-            <div className={`${styles.box} ${styles.boxBlue}`}>
-              <h3><FiEdit style={{ marginRight: 8, color: "#3b82f6" }} /> Liều dùng</h3>
-              <input
-                type="text"
-                placeholder="3 lần/ngày..."
-                value={usage}
-                onChange={(e) => setUsage(e.target.value)}
-                className={styles.inputField}
-              />
-            </div>
-            <div className={`${styles.box} ${styles.boxGreen}`}>
-              <h3><FiClipboard style={{ marginRight: 8, color: "#10b981" }} /> Ghi chú thêm</h3>
-              <textarea
-                placeholder="Uống sau khi ăn 30 phút"
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                className={styles.inputField}
-              ></textarea>
-            </div>
+        {!hasStudent ? (
+          <div style={{ color: "#dc2626", fontWeight: 600, marginTop: 24 }}>
+            ⚠️ Tài khoản của bạn chưa liên kết với học sinh nào. Vui lòng liên hệ nhà trường để được hỗ trợ.
+          </div>
+        ) : (
+          <>
+            <div className={styles.mainSection}>
+              <div className={styles.medicineInfo}>
+                <div className={styles.medicineSectionTitle}>Thông tin thuốc</div>
+                <div className={`${styles.box} ${styles.boxYellow}`}>
+                  <h3><FiInfo style={{ marginRight: 8, color: "#f59e42" }} /> Thông tin bệnh</h3>
+                  <textarea
+                    placeholder="Nhập tên thuốc hoặc thông tin bệnh..."
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className={styles.inputField}
+                  ></textarea>
+                </div>
+                <div className={`${styles.box} ${styles.boxBlue}`}>
+                  <h3><FiEdit style={{ marginRight: 8, color: "#3b82f6" }} /> Liều dùng</h3>
+                  <input
+                    type="text"
+                    placeholder="3 lần/ngày..."
+                    value={usage}
+                    onChange={(e) => setUsage(e.target.value)}
+                    className={styles.inputField}
+                  />
+                </div>
+                <div className={`${styles.box} ${styles.boxGreen}`}>
+                  <h3><FiClipboard style={{ marginRight: 8, color: "#10b981" }} /> Ghi chú thêm</h3>
+                  <textarea
+                    placeholder="Uống sau khi ăn 30 phút"
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    className={styles.inputField}
+                  ></textarea>
+                </div>
 
-            <div className={styles.uploadSection}>
-              <label htmlFor="file-upload" style={{ cursor: "pointer" }}>
-                {!file && (
-                  <>
-                    <p className={styles.uploadText}>Tải lên tài liệu hoặc kéo thả file vào đây</p>
-                    <p>PDF, DOC, JPG, PNG - tối đa 10MB</p>
-                  </>
-                )}
-                <input
-                  id="file-upload"
-                  type="file"
-                  style={{ display: "none" }}
-                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                  onChange={handleFileChange}
-                  ref={fileInputRef}
-                />
-              </label>
+                <div className={styles.uploadSection}>
+                  <label htmlFor="file-upload" style={{ cursor: "pointer" }}>
+                    {!files.length > 0 && (
+                      <>
+                        <p className={styles.uploadText}>Tải lên tài liệu hoặc kéo thả file vào đây</p>
+                        <p>PDF, DOC, JPG, PNG - tối đa 10MB</p>
+                      </>
+                    )}
+                    <input
+                      id="file-upload"
+                      type="file"
+                      style={{ display: "none" }}
+                      accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                      multiple
+                      onChange={handleFileChange}
+                      ref={fileInputRef}
+                    />
+                  </label>
 
-              {file && (
-                <div className={styles.fileInfo}>
-                  <strong>{file.name}</strong> ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                  <button onClick={() => { setFile(null); setPreviewUrl(null); }} className={styles.removeFileBtn}>❌</button>
-                  {previewUrl && (
-                    <div style={{ marginTop: 10 }}>
-                      <img
-                        src={previewUrl}
-                        alt="preview"
-                        style={{ maxWidth: 180, maxHeight: 180, borderRadius: 8, border: "1px solid #e5e7eb" }}
-                      />
+                  {files.length > 0 && (
+                    <div className={styles.fileInfo}>
+                      {files.map((file, idx) => (
+                        <div key={idx} style={{ marginBottom: 10 }}>
+                          <strong>{file.name}</strong> ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                          <button
+                            onClick={() => {
+                              const newFiles = files.filter((_, i) => i !== idx);
+                              setFiles(newFiles);
+                              setPreviewUrls(previewUrls.filter((_, i) => i !== idx));
+                            }}
+                            className={styles.removeFileBtn}
+                            style={{ marginLeft: 8 }}
+                          >
+                            ❌
+                          </button>
+                          {previewUrls[idx] && (
+                            <div style={{ marginTop: 6 }}>
+                              <img
+                                src={previewUrls[idx]}
+                                alt="preview"
+                                style={{ maxWidth: 120, maxHeight: 120, borderRadius: 8, border: "1px solid #e5e7eb" }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
-              )}
-            </div>
 
-            <button className={styles.sendBtn} onClick={handleSend} disabled={loading}>
-              {loading ? "Đang gửi..." : "Gửi"}
-            </button>
-          </div>
+                <button className={styles.sendBtn} onClick={handleSend} disabled={loading}>
+                  {loading ? "Đang gửi..." : "Gửi"}
+                </button>
+              </div>
 
-          <div className={styles.historySection}>
-            <div className={styles.historyHeader}>
-              <span>Lịch sử gửi thuốc {history.length > 0 && `(${history.length})`}</span>
-              <button
-                className={styles.reviewBtn}
-                onClick={() => setShowPopup(true)}
-              >
-                Xem thêm
-              </button>
-            </div>
-            <input
-              type="text"
-              placeholder="🔍 Tìm theo tên thuốc hoặc ghi chú..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className={styles.searchBox}
-            />
-            {(showAll ? filteredHistory : filteredHistory.slice(0, 3)).map((item, index) => (
-              <div
-                key={index}
-                className={`${styles.historyItem} ${styles.fadeIn}`}
-                ref={index === 0 ? historyTopRef : null}
-              >
-                <h4>{item.medicationName}</h4>
-                <p>📅 {new Date(item.requestDate).toLocaleDateString("vi-VN")}</p>
-                <p>💊 {item.dosage}</p>
-                <p>📝 {item.instructions}</p>
-                {item.imagePath && (
-                  <p>
-                    📄 File: <a href={`https://swp-school-medical-management.onrender.com${item.imagePath}`} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600, color: "#2563eb", textDecoration: "underline" }}>Xem file</a>
-                  </p>
-                )}
-                <div className={styles.statusRow}>
-                  <span className={`${styles.status} ${item.status === "Đã duyệt" ? styles.done : item.status === "Chờ duyệt" ? styles.pending : styles.reject}`}>
-                    {item.status === "Đã duyệt" ? "Đã duyệt" : item.status === "Chờ duyệt" ? "Chờ duyệt" : item.status === "Đã hoàn thành" ? "Đã lên lịch" : "Bị từ chối"}
-                  </span>
+              <div className={styles.historySection}>
+                <div className={styles.historyHeader}>
+                  <span>Lịch sử gửi thuốc {history.length > 0 && `(${history.length})`}</span>
+                  <button
+                    className={styles.reviewBtn}
+                    onClick={() => setShowPopup(true)}
+                  >
+                    Xem thêm
+                  </button>
                 </div>
-              </div>
-            ))}
-            <div ref={historyEndRef} />
-          </div>
-        </div>
-
-        {showPopup && (
-          <div className={styles.popupOverlay}>
-            <div className={styles.popupContent}>
-              <div className={styles.popupHeader}>
-                <span>Lịch sử gửi thuốc ({filteredHistory.length})</span>
-                <button className={styles.closeBtn} onClick={() => setShowPopup(false)}>✖</button>
-              </div>
-              <input
-                type="text"
-                placeholder="🔍 Tìm theo tên thuốc hoặc ghi chú..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={styles.searchBox}
-                style={{ marginBottom: 18 }}
-              />
-              <div className={styles.popupBody}>
-                {filteredHistory.map((item, index) => (
-                  <div key={index} className={styles.historyItem}>
+                <input
+                  type="text"
+                  placeholder="🔍 Tìm theo tên thuốc hoặc ghi chú..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className={styles.searchBox}
+                />
+                {(showAll ? filteredHistory : filteredHistory.slice(0, 3)).map((item, index) => (
+                  <div
+                    key={index}
+                    className={`${styles.historyItem} ${styles.fadeIn}`}
+                    ref={index === 0 ? historyTopRef : null}
+                  >
                     <h4>{item.medicationName}</h4>
                     <p>📅 {new Date(item.requestDate).toLocaleDateString("vi-VN")}</p>
                     <p>💊 {item.dosage}</p>
@@ -409,11 +406,50 @@ const SendMedicine = () => {
                     </div>
                   </div>
                 ))}
+                <div ref={historyEndRef} />
               </div>
             </div>
-          </div>
-        )}
 
+            {showPopup && (
+              <div className={styles.popupOverlay}>
+                <div className={styles.popupContent}>
+                  <div className={styles.popupHeader}>
+                    <span>Lịch sử gửi thuốc ({filteredHistory.length})</span>
+                    <button className={styles.closeBtn} onClick={() => setShowPopup(false)}>✖</button>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="🔍 Tìm theo tên thuốc hoặc ghi chú..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className={styles.searchBox}
+                    style={{ marginBottom: 18 }}
+                  />
+                  <div className={styles.popupBody}>
+                    {filteredHistory.map((item, index) => (
+                      <div key={index} className={styles.historyItem}>
+                        <h4>{item.medicationName}</h4>
+                        <p>📅 {new Date(item.requestDate).toLocaleDateString("vi-VN")}</p>
+                        <p>💊 {item.dosage}</p>
+                        <p>📝 {item.instructions}</p>
+                        {item.imagePath && (
+                          <p>
+                            📄 File: <a href={`https://swp-school-medical-management.onrender.com${item.imagePath}`} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600, color: "#2563eb", textDecoration: "underline" }}>Xem file</a>
+                          </p>
+                        )}
+                        <div className={styles.statusRow}>
+                          <span className={`${styles.status} ${item.status === "Đã duyệt" ? styles.done : item.status === "Chờ duyệt" ? styles.pending : styles.reject}`}>
+                            {item.status === "Đã duyệt" ? "Đã duyệt" : item.status === "Chờ duyệt" ? "Chờ duyệt" : item.status === "Đã hoàn thành" ? "Đã lên lịch" : "Bị từ chối"}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
