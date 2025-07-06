@@ -250,3 +250,20 @@
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+.addStudentBtn {
+  background: #06b6d4;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  margin-right: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+}
+.addStudentBtn:hover {
+  background: #0891b2;
+}
