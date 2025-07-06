@@ -161,10 +161,5 @@ SWP-School-Medical-Management/
 - Developed and styled frontend components (ReactJS)  
 - Participated in UI/UX design
 
----
 
-### 💻 Thế Anh  
-**Frontend Developer**  
 
-- Developed and styled frontend components (ReactJS)  
-- Participated in UI/UX design
