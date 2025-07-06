@@ -134,7 +134,7 @@ const Homepage = () => {
         <nav className={style.navLinks}>
           <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); scrollToRef(heroRef); }}>Trang chủ</a>
           <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); scrollToRef(featuresRef); }}>Giới thiệu</a>
-          <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); scrollToRef(featuresRef); }}>Dịch vụ</a>
+          <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); navigate('/blog'); }}>Blog Y Tế</a>
           <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); scrollToRef(ctaRef); }}>Liên hệ</a>
           <button className={style.loginBtn} onClick={() => navigate("/login")}>Đăng nhập</button>
         </nav>
