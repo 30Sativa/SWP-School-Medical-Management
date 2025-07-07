@@ -305,7 +305,7 @@ const handleModalSubmit = async (values) => {
                             + Thêm học sinh
                           </button>
                         ) : (
-                          <span style={{ minWidth: 110 }}></span>
+                          <span className={style.addStudentBtn} style={{ visibility: "hidden" }}>+ Thêm học sinh</span>
                         )}
                       </div>
                     </td>

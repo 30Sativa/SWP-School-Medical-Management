@@ -187,6 +187,7 @@
   gap: 8px;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .editBtn {
@@ -266,4 +267,23 @@
 }
 .addStudentBtn:hover {
   background: #0891b2;
+}
+
+.studentTable th:last-child,
+.studentTable td:last-child {
+  min-width: 240px;
+  max-width: 1%;
+  text-align: center;
+  vertical-align: middle;
+}
+
+@media (max-width: 900px) {
+  .studentTable th:last-child,
+  .studentTable td:last-child {
+    min-width: 160px;
+  }
+  .actionGroup {
+    flex-direction: column;
+    gap: 6px;
+  }
 }
