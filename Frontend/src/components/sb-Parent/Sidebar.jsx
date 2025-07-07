@@ -8,6 +8,11 @@ import {
   Bell,
   LogOut,
   Menu,
+<<<<<<< Updated upstream
+=======
+  User,
+  Globe,
+>>>>>>> Stashed changes
 } from "lucide-react";
 import styles from "./Sidebar.module.css";
 
@@ -31,12 +36,12 @@ const Sidebar = () => {
 
       <nav>
         <NavLink
-          to="/parent"
+          to="/"
           className={({ isActive }) =>
             `${styles.navItem} ${isActive ? styles.active : ""}`
           }
         >
-          <Home size={20} />
+          <Globe size={20} stroke="#fff" />
           <span>Trang chủ</span>
         </NavLink>
 

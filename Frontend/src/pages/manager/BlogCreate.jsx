@@ -3,7 +3,15 @@ import Sidebar from "../../components/sb-Manager/Sidebar";
 import style from "../../components/sb-Manager/MainLayout.module.css";
 import blogStyle from "../../assets/css/Blog.module.css";
 import axios from "axios";
+<<<<<<< Updated upstream
 import { message, Spin } from "antd";
+=======
+import { Spin } from "antd";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
+import { useNavigate } from "react-router-dom";
+>>>>>>> Stashed changes
 
 function getQueryParam(name) {
   const url = new URL(window.location.href);
@@ -17,6 +25,16 @@ const BlogCreate = () => {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [editId, setEditId] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    if (!token || !role) {
+      localStorage.clear();
+      navigate("/login");
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const id = getQueryParam('id');
@@ -57,7 +75,7 @@ const BlogCreate = () => {
         });
         message.success('Tạo bài viết thành công!');
       }
-      window.location.href = "/blog";
+      navigate("/manager/blog");
     } catch {
       message.error('Lưu bài viết thất bại!');
     } finally {
@@ -79,7 +97,7 @@ const BlogCreate = () => {
           <button
             type="button"
             className={blogStyle.backBtn}
-            onClick={() => window.location.href = '/blog'}
+            onClick={() => navigate('/manager/blog')}
           >
             ← Quay lại trang Blog
           </button>

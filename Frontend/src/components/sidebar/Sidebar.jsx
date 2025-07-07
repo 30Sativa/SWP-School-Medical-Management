@@ -16,6 +16,7 @@ import {
   User, 
   CalendarPlus, 
   ClipboardPlus,
+  Globe,
 } from "lucide-react";
 import style from "./Sidebar.module.css";
 import { useEffect } from "react";
@@ -63,6 +64,15 @@ const Sidebar = () => {
       </div>
 
       <nav>
+        <NavLink
+          to="/"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
+          <Globe size={20} stroke="#fff" />
+          <span>Trang chủ</span>
+        </NavLink>
         <NavLink
           to="/nurse"
           className={({ isActive }) =>

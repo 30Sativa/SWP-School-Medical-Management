@@ -5,6 +5,13 @@ import blogStyle from "../../assets/css/Blog.module.css";
 import { BookOutlined, EyeOutlined, MessageOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import { message, Modal, Spin } from "antd";
 import axios from "axios";
+<<<<<<< Updated upstream
+=======
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
+import { useNavigate } from "react-router-dom";
+>>>>>>> Stashed changes
 
 const apiUrl = "https://swp-school-medical-management.onrender.com/api/BlogPost";
 
@@ -15,6 +22,7 @@ const Blog = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const blogsPerPage = 5;
+  const navigate = useNavigate();
 
   // Fetch blogs from API
   const fetchBlogs = async () => {
@@ -39,6 +47,15 @@ const Blog = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    if (!token || !role) {
+      localStorage.clear();
+      navigate("/login");
+    }
+  }, [navigate]);
 
   useEffect(() => {
     fetchBlogs();
@@ -66,21 +83,27 @@ const Blog = () => {
 
   // Sửa bài viết
   const handleEdit = (id) => {
-    window.location.href = `/blog/create?id=${id}`;
+    navigate(`/manager/blog/create?id=${id}`);
   };
 
   // Lọc theo category và search
   const filteredBlogs = blogs.filter(blog => {
-    
     const matchSearch =
       blog.title.toLowerCase().includes(searchText.toLowerCase()) ||
       blog.content.toLowerCase().includes(searchText.toLowerCase());
     return  matchSearch;
   });
 
+  // Sắp xếp theo thời gian tạo mới nhất lên đầu
+  const sortedBlogs = [...filteredBlogs].sort((a, b) => {
+    const dateA = new Date(a.postedDate);
+    const dateB = new Date(b.postedDate);
+    return dateB - dateA;
+  });
+
   // Phân trang
-  const totalPages = Math.ceil(filteredBlogs.length / blogsPerPage);
-  const paginatedBlogs = filteredBlogs.slice((currentPage - 1) * blogsPerPage, currentPage * blogsPerPage);
+  const totalPages = Math.ceil(sortedBlogs.length / blogsPerPage);
+  const paginatedBlogs = sortedBlogs.slice((currentPage - 1) * blogsPerPage, currentPage * blogsPerPage);
 
   return (
     <div className={style.layoutContainer}>
@@ -145,7 +168,7 @@ const Blog = () => {
             <button
               className={blogStyle.createBtn + ' ' + blogStyle.createBtnPrimary}
               style={{marginLeft: 12}}
-              onClick={() => window.location.href='/blog/create'}
+              onClick={() => navigate('/manager/blog/create')}
             >
               <span style={{fontWeight:700, fontSize:'1.1rem', letterSpacing:0.5, padding:'0 2px'}}>+ Tạo bài viết mới</span>
             </button>

@@ -3,6 +3,7 @@ import axios from "axios";
 import Sidebar from "../../components/sidebar/Sidebar";
 import style from "../../assets/css/nursedashboard.module.css";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import UserMenu from "../../components/UserMenu";
 
 const NurseDashBoard = () => {
   const [dashboardData, setDashboardData] = useState(null);
@@ -36,10 +37,17 @@ const NurseDashBoard = () => {
     <div className={style.container}>
       <Sidebar />
       <main className={style.dashboardWrapper}>
-        <div className={style.header}>
-          <h2>Nurse Dashboard</h2>
-          <p>Hệ thống y tế học đường EduHealth</p>
-        </div>
+        <header className={style.dashboardHeaderBar}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className={style.titleGroup}>
+              <h1>
+                <span className={style.textBlack}>Bảng điều khiển</span>
+                <span className={style.textAccent}> Y tế</span>
+              </h1>
+            </div>
+            <UserMenu />
+          </div>
+        </header>
 
         <div className={style.summaryGrid}>
           <div className={style.summaryBox}>

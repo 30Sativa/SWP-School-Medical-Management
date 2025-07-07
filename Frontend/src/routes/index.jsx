@@ -70,6 +70,8 @@ const AppRouter = () => {
       <Route path="/health-record/:recordId" element={<HealthCheckRecord />} />
       <Route path="/report" element={<NurseReport />} />
       <Route path="/viewBlog" element={<ViewBlog />} />
+      <Route path="/manager/blog" element={<Blog />} />
+      <Route path="/manager/blog/create" element={<BlogCreate />} />
     </Routes>
   );
 };

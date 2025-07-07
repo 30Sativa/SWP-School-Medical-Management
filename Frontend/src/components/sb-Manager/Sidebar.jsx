@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+<<<<<<< Updated upstream
 import { Home, Users, ClipboardList, Rss, Flag, LogOut, Menu, Bell, ClipboardPlus, User } from "lucide-react";
+=======
+import { Home, Home as Home2, Users, Rss, Bell, LogOut, Menu, User, Globe } from "lucide-react";
+>>>>>>> Stashed changes
 import style from "./Sidebar.module.css";
 import { jwtDecode } from "jwt-decode";
 
@@ -41,6 +45,10 @@ const Sidebar = () => {
         </button>
       </div>
       <nav>
+        <NavLink to="/" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
+          <Globe size={20} stroke="#fff" />
+          <span>Trang chủ</span>
+        </NavLink>
         <NavLink to="/manager" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
           <Home size={20} />
           <span>Bảng điều khiển</span>
@@ -53,7 +61,7 @@ const Sidebar = () => {
           <Users size={20} />
           <span>Danh sách người dùng</span>
         </NavLink>
-        <NavLink to="/blog" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
+        <NavLink to="/manager/blog" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
           <Rss size={20} />
           <span>Blog</span>
         </NavLink>

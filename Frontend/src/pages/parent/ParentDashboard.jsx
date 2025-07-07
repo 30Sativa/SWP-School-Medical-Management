@@ -5,6 +5,7 @@ import axios from "axios";
 import dayjs from "dayjs";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import UserMenu from "../../components/UserMenu";
 
 const ParentDashboard = () => {
   const parentId = localStorage.getItem("userId");
@@ -87,18 +88,15 @@ const ParentDashboard = () => {
     <div className={styles.container}>
       <Sidebar />
       <main className={styles.content}>
-        <header>
-          <div className={styles["dashboard-header-bar"]}>
-            <div className={styles["title-group"]}>
+        <header className={styles.dashboardHeaderBar}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className={styles.titleGroup}>
               <h1>
-                <span className={styles["text-accent"]}>|</span>
-                <span className={styles["text-black"]}>Dash</span>
-                <span className={styles["text-accent"]}>board</span>
+                <span className={styles.textBlack}>Bảng điều khiển</span>
+                <span className={styles.textAccent}> Phụ huynh</span>
               </h1>
-              <h5 className={styles["text-welcome"]}>
-                Chào mừng trở lại, phụ huynh của {myStudents[0]?.fullName}!
-              </h5>
             </div>
+            <UserMenu />
           </div>
         </header>
         <div className={styles["top-action-row"]}>

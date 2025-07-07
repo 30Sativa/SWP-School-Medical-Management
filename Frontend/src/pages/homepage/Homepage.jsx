@@ -14,9 +14,18 @@ import reportLogo from "../../assets/icon/report.png";
 import notifyLogo from "../../assets/icon/notify.png";
 import vacxinLogo from "../../assets/icon/vacxin.png";
 import feedback from "../../assets/icon/feedback.png";
+
 import school1 from "../../assets/img/school1.jpg";
 import school2 from "../../assets/img/school2.jpg";
 import school3 from "../../assets/img/school3.jpg";
+
+import school1 from "../../assets/img/school1.jpeg";
+import school2 from "../../assets/img/school2.jpeg";
+import school3 from "../../assets/img/school3.jpeg";
+import useAosInit from "../../hooks/useAosInit";
+import "aos/dist/aos.css";
+import UserMenu from "../../components/UserMenu";
+
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -90,11 +99,23 @@ const Homepage = () => {
           <img src={logo} alt="EduHealth Logo" className={style.logoImg} />
         </div>
         <nav className={style.navLinks}>
+
           <a href="#" className={style.navLink} onClick={() => navigate("/")} >Trang chủ</a>
           <a href="#" className={style.navLink}>Giới thiệu</a>
           <a href="#" className={style.navLink}>Dịch vụ</a>
           <a href="#" className={style.navLink}>Liên hệ</a>
           <button className={style.loginBtn} onClick={() => navigate("/login")}>Đăng nhập</button>
+
+          <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); scrollToRef(heroRef); }}>Trang chủ</a>
+          <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); scrollToRef(featuresRef); }}>Giới thiệu</a>
+          <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); navigate('/blog'); }}>Blog Y Tế</a>
+          <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); scrollToRef(ctaRef); }}>Liên hệ</a>
+          {localStorage.getItem("token") ? (
+            <UserMenu />
+          ) : (
+            <button className={style.loginBtn} onClick={() => navigate("/login")}>Đăng nhập</button>
+          )}
+
         </nav>
       </header>
 

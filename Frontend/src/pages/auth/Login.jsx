@@ -46,6 +46,7 @@ const Login = () => {
       ) {
         localStorage.setItem("token", token);
         localStorage.setItem("userId", resData.userId);
+        localStorage.setItem("fullname", resData.fullName || "Người dùng");
 
         let roleName = "";
 
@@ -76,6 +77,7 @@ const Login = () => {
         });
 
         setTimeout(() => {
+<<<<<<< Updated upstream
           console.log(
             "Role for redirect:",
             roleName,
@@ -140,6 +142,11 @@ const Login = () => {
             alert("❗ Vai trò không xác định!");
             navigate("/");
           }
+=======
+          // Lưu role, fullname, ...
+          // Chuyển hướng về homepage sau đăng nhập thành công
+          navigate("/");
+>>>>>>> Stashed changes
         }, 2000);
       } else {
         alert("Đăng nhập thất bại!");
