@@ -1,5 +1,5 @@
 // Homepage.jsx - đã sửa dùng module CSS
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import style from "../../assets/css/homepage.module.css";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/icon/eduhealth.jpg";
@@ -19,6 +19,7 @@ import school2 from "../../assets/img/school2.jpeg";
 import school3 from "../../assets/img/school3.jpeg";
 import useAosInit from "../../hooks/useAosInit";
 import "aos/dist/aos.css";
+import { jwtDecode } from "jwt-decode";
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -30,6 +31,9 @@ const Homepage = () => {
   const [slideIdx, setSlideIdx] = React.useState(0);
   const heroImages = [school1, school2, school3];
   const [feedbacks, setFeedbacks] = React.useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [username, setUsername] = useState("");
+  const [role, setRole] = useState("");
 
   // Hiệu ứng xuất hiện khi cuộn
   useEffect(() => {
@@ -96,6 +100,25 @@ const Homepage = () => {
       });
   }, []);
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        const name = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"];
+        const roleName = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+        setUsername(name);
+        setRole(roleName);
+      } catch (e) {
+        setUsername("");
+        setRole("");
+      }
+    } else {
+      setUsername("");
+      setRole("");
+    }
+  }, []);
+
   useAosInit();
 
   // Scroll đến section theo ref
@@ -125,6 +148,17 @@ const Homepage = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleDashboard = () => {
+    if (role === "Manager") navigate("/manager");
+    else if (role === "Nurse") navigate("/nurse");
+    else if (role === "Parent") navigate("/parent");
+    else navigate("/");
+  };
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
+
   return (
     <>
       <header className={style.navbar}>
@@ -136,7 +170,36 @@ const Homepage = () => {
           <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); scrollToRef(featuresRef); }}>Giới thiệu</a>
           <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); navigate('/blog'); }}>Blog Y Tế</a>
           <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); scrollToRef(ctaRef); }}>Liên hệ</a>
-          <button className={style.loginBtn} onClick={() => navigate("/login")}>Đăng nhập</button>
+          {username ? (
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <button
+                className={style.loginBtn}
+                style={{ minWidth: 120, fontWeight: 600 }}
+                onClick={() => setShowDropdown((v) => !v)}
+              >
+                {username} &#9662;
+              </button>
+              {showDropdown && (
+                <div style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: '100%',
+                  background: '#fff',
+                  color: '#222',
+                  border: '1px solid #eee',
+                  borderRadius: 8,
+                  minWidth: 150,
+                  boxShadow: '0 4px 16px #0001',
+                  zIndex: 1000,
+                }}>
+                  <button style={{ width: '100%', padding: 10, border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer' }} onClick={() => { setShowDropdown(false); handleDashboard(); }}>MyDashboard</button>
+                  <button style={{ width: '100%', padding: 10, border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', color: '#e11d48' }} onClick={handleLogout}>Logout</button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button className={style.loginBtn} onClick={() => navigate("/login")}>Đăng nhập</button>
+          )}
         </nav>
       </header>
 

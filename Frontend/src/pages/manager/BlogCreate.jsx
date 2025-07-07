@@ -60,7 +60,7 @@ const BlogCreate = () => {
         });
         notifySuccess('Tạo bài viết thành công!');
       }
-      window.location.href = "/blog";
+      window.location.href = "/manager/blog";
     } catch {
       notifyError('Lưu bài viết thất bại!');
     } finally {
@@ -82,7 +82,7 @@ const BlogCreate = () => {
           <button
             type="button"
             className={blogStyle.backBtn}
-            onClick={() => window.location.href = '/blog'}
+            onClick={() => window.location.href = '/manager/blog'}
           >
             ← Quay lại trang Blog
           </button>

@@ -1,11 +1,11 @@
-/* Sidebar.module.css */
+/* Sidebar.module.css - ĐỒNG BỘ VỚI NURSE */
 .sbSidebar {
   background-color: #20b2aa;
   color: white;
   padding: 20px 12px;
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* ✅ Đổi thành min-height để match nội dung dài */
+  min-height: 100vh;
   transition: width 0.3s ease;
   overflow: hidden;
 }
@@ -45,20 +45,6 @@ nav {
   font-weight: 500;
   border-radius: 8px;
   transition: background-color 0.2s ease;
-  height: 48px;
-}
-.logoutButton {
-  background-color: #000 !important;
-  color: #fff !important;
-  border: none;
-  margin-top: 16px;
-  border-radius: 8px;
-  transition: background-color 0.2s ease;
-}
-
-.logoutButton:hover {
-  background-color: #333 !important;
-  cursor: pointer;
 }
 
 .navItem:hover {
@@ -77,7 +63,7 @@ nav {
 .sidebarHeader {
   display: flex;
   align-items: center;
-  height: 48px; /* giống navItem */
+  height: 48px;
   padding: 0 20px;
   gap: 12px;
 }
@@ -95,26 +81,51 @@ nav {
   white-space: nowrap;
 }
 
-.userSection {
-  text-align: center;
-  padding: 20px 0 10px;
-  background-color: #24b4aa;
+.logoutButton {
+  background-color: #000 !important;
+  color: #fff !important;
+  border: none;
+  margin-top: 16px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
 }
 
-.avatarCircle {
-  background-color: white;
-  width: 50px;
-  height: 50px;
-  margin: 0 auto;
+.logoutButton:hover {
+  background-color: #333 !important;
+  cursor: pointer;
+}
+
+.profileBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 8px 0 16px;
+  padding: 10px 0;
+  color: white;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
+  background-color: white;
+  color: #20b2aa;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-weight: bold;
+  margin-bottom: 6px;
+  font-size: 18px;
 }
 
-.username {
-  margin-top: 8px;
-  color: white;
-  font-weight: bold;
-  font-size: 14px;
+.avatarIcon {
+  font-size: 18px;
+}
+
+.profileName {
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
 }

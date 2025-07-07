@@ -1,11 +1,11 @@
-/* Sidebar.module.css */
+/* Sidebar.module.css - ĐỒNG BỘ VỚI NURSE */
 .sbSidebar {
   background-color: #20b2aa;
   color: white;
   padding: 20px 12px;
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* ✅ Đổi thành min-height để match nội dung dài */
+  min-height: 100vh;
   transition: width 0.3s ease;
   overflow: hidden;
 }
@@ -23,19 +23,10 @@
   border: none;
   color: white;
   cursor: pointer;
-  padding: 10px 12px;
+  padding: 8px;
+  margin-bottom: 24px;
   font-size: 20px;
-  align-self: stretch;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  transition: background-color 0.2s;
-}
-
-.toggleBtn:hover {
-  background-color: rgba(255, 255, 255, 0.12);
+  align-self: flex-start;
 }
 
 nav {
@@ -72,10 +63,9 @@ nav {
 .sidebarHeader {
   display: flex;
   align-items: center;
-  gap: 12px;
   height: 48px;
-  padding: 13px 12px 10px 0px;
-  margin-bottom: 8px;
+  padding: 0 20px;
+  gap: 12px;
 }
 
 .menuIcon {
@@ -105,13 +95,6 @@ nav {
   cursor: pointer;
 }
 
-.toggleBtn:focus,
-.navItem:focus,
-.logoutButton:focus {
-  outline: none;
-  box-shadow: none;
-}
-
 .profileBox {
   display: flex;
   flex-direction: column;
@@ -125,8 +108,8 @@ nav {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: white; /* ✅ avatar trắng */
-  color: #20b2aa; /* ✅ chữ xanh nổi bật */
+  background-color: white;
+  color: #20b2aa;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -16,6 +16,8 @@ import {
   User, 
   CalendarPlus, 
   ClipboardPlus,
+  LayoutDashboard,
+  Rss,
 } from "lucide-react";
 import style from "./Sidebar.module.css";
 import { useEffect } from "react";
@@ -63,14 +65,22 @@ const Sidebar = () => {
       </div>
 
       <nav>
+        <div
+          className={style.navItem}
+          style={{ cursor: 'pointer' }}
+          onClick={() => navigate('/')}
+        >
+          <Home size={20} />
+          <span>Trang chủ</span>
+        </div>
         <NavLink
           to="/nurse"
           className={({ isActive }) =>
             `${style.navItem} ${isActive ? style.active : ""}`
           }
         >
-          <Home size={20} />
-          <span>Trang chủ</span>
+          <LayoutDashboard size={20} />
+          <span>Bảng điều khiển</span>
         </NavLink>
         <NavLink
           to="/students"
@@ -79,7 +89,7 @@ const Sidebar = () => {
           }
         >
           <Users size={20} />
-          <span>Danh sách học sinh</span>
+          <span>Quản lý học sinh</span>
         </NavLink>
         <NavLink
           to="/medicine"
@@ -97,18 +107,8 @@ const Sidebar = () => {
             `${style.navItem} ${isActive ? style.active : ""}`
           }
         >
-          <ClipboardPlus size={20} />
-          <span>Tạo tiêm chủng</span>
-        </NavLink>
-
-        <NavLink
-          to="/vaccines"
-          className={({ isActive }) =>
-            `${style.navItem} ${isActive ? style.active : ""}`
-          }
-        >
           <Syringe size={20} />
-          <span>QL Tiêm chủng</span>
+          <span>Quản lý tiêm chủng</span>
         </NavLink>
 
         <NavLink
@@ -118,7 +118,7 @@ const Sidebar = () => {
           }
         >
           <CalendarPlus size={20} />
-          <span>Tạo lịch kiểm tra</span>
+          <span>Lịch kiểm tra sức khỏe</span>
         </NavLink>
 
         <NavLink
@@ -128,7 +128,7 @@ const Sidebar = () => {
           }
         >
           <HeartPulse size={20} />
-          <span> QL Khám sức khỏe</span>
+          <span>Khám sức khỏe</span>
         </NavLink>
 
         <NavLink
@@ -137,7 +137,7 @@ const Sidebar = () => {
             `${style.navItem} ${isActive ? style.active : ""}`
           }
         >
-          <Bell size={20} />
+          <Rss size={20} />
           <span>Blog</span>
         </NavLink>
         <NavLink
@@ -147,26 +147,7 @@ const Sidebar = () => {
           }
         >
           <Package size={20} />
-          <span>Vật tư y tế</span>
-        </NavLink>
-        {/* ✅ Mục Sự cố y tế */}
-        <NavLink
-          to="/incidents"
-          className={({ isActive }) =>
-            `${style.navItem} ${isActive ? style.active : ""}`
-          }
-        >
-          <AlertTriangle size={20} />
-          <span>Sự cố y tế</span>
-        </NavLink>
-        <NavLink
-          to="/report"
-          className={({ isActive }) =>
-            `${style.navItem} ${isActive ? style.active : ""}`
-          }
-        >
-          <BarChart2 size={20} />
-          <span>Báo cáo thống kê</span>
+          <span>Hàng hóa</span>
         </NavLink>
         <button
           className={`${style.navItem} ${style.logoutButton}`}

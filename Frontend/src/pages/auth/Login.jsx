@@ -91,6 +91,10 @@ const Login = () => {
 
         localStorage.setItem("role", roleName);
 
+        if (roleName === "Parent") {
+          localStorage.setItem("fullname", resData.fullName || "Phụ huynh");
+        }
+
         toast.success("Đăng nhập thành công!", {
           position: "top-center",
           autoClose: 2000,
@@ -98,76 +102,11 @@ const Login = () => {
         });
 
         setTimeout(() => {
-          console.log(
-            "Role for redirect:",
-            roleName,
-            "isFirstLogin:",
-            resData.isFirstLogin,
-            "resData:",
-            resData
-          );
-
-          if (roleName === "Manager") {
-            navigate("/manager");
-          } else if (roleName === "Nurse") {
-            navigate("/nurse");
-          } else if (roleName === "Parent") {
-            if (resData.isFirstLogin) {
-              navigate("/firstlogin", { state: { userId: resData.userId } });
-              return;
-            }
-
-            localStorage.setItem("parentId", resData.userId);
-            localStorage.setItem("fullname", resData.fullName || "Phụ huynh");
-
-            (async () => {
-              try {
-                const studentRes = await axios.get(
-                  "https://swp-school-medical-management.onrender.com/api/Student"
-                );
-
-                const studentList = studentRes.data?.data;
-
-                if (!Array.isArray(studentList)) {
-                  throw new Error("Dữ liệu học sinh không hợp lệ.");
-                }
-
-                const students = studentList.filter(
-                  (s) => s.parentId === resData.userId
-                );
-
-                if (students.length > 0) {
-                  localStorage.setItem(
-                    "studentIds",
-                    JSON.stringify(students.map((s) => s.studentId))
-                  );
-                  localStorage.setItem("studentId", students[0].studentId);
-                } else {
-                  toast.warn("Không tìm thấy học sinh thuộc tài khoản này.", {
-                    position: "top-center",
-                    autoClose: 3000,
-                    theme: "colored",
-                  });
-                }
-
-                navigate("/parent");
-              } catch (studentError) {
-                console.error("❌ Lỗi khi lấy học sinh:", studentError);
-                toast.error("Lỗi khi tải danh sách học sinh.", {
-                  position: "top-center",
-                  autoClose: 3000,
-                  theme: "colored",
-                });
-              }
-            })();
-          } else {
-            toast.error("❗ Vai trò không xác định!", {
-              position: "top-center",
-              autoClose: 2500,
-              theme: "colored",
-            });
-            navigate("/");
+          if (roleName === "Parent" && resData.isFirstLogin) {
+            navigate("/firstlogin", { state: { userId: resData.userId } });
+            return;
           }
+          navigate("/");
         }, 2000);
       } else {
         toast.error("Đăng nhập thất bại!", {
@@ -195,7 +134,7 @@ const Login = () => {
       autoClose={2500}
       theme="colored"
     />
-    <div className="login-page-wrapper">...</div>
+    <div className="login-page-wrapper"></div>
       <div className="login-container">
         <div className="left-section">
           <h1>Hệ thống quản lý sức khỏe học đường</h1>

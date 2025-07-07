@@ -28,7 +28,11 @@ const Blog = () => {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const blogsData = Array.isArray(res.data) ? res.data : res.data?.data || [];
-      setBlogs(blogsData.filter(blog => blog.isActive !== false));
+      // Sắp xếp theo ngày tạo mới nhất lên đầu
+      const sortedBlogs = blogsData
+        .filter(blog => blog.isActive !== false)
+        .sort((a, b) => new Date(b.postedDate) - new Date(a.postedDate));
+      setBlogs(sortedBlogs);
     } catch (err) {
       notifyError("Không thể tải danh sách blog!");
       setBlogs([]);
