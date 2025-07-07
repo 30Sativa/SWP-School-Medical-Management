@@ -3,6 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/sidebar/Sidebar";
 import style from "../../assets/css/studentDetail.module.css";
 import axios from "axios";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 const StudentDetail = () => {
   const { id } = useParams();
@@ -16,14 +19,18 @@ const StudentDetail = () => {
     parent: "",
     class: "",
   });
+  const [loading, setLoading] = useState(true);
+  const [modalLoading, setModalLoading] = useState(false); // loading khi submit modal
 
   useEffect(() => {
+    setLoading(true);
     axios
       .get(
         `https://swp-school-medical-management.onrender.com/api/Student/${id}`
       )
       .then((res) => setStudent(res.data.data))
-      .catch((err) => console.error("Lỗi khi tải dữ liệu:", err));
+      .catch((err) => console.error("Lỗi khi tải dữ liệu:", err))
+      .finally(() => setLoading(false));
   }, [id]);
 
   const handleBack = () => {
@@ -39,12 +46,12 @@ const StudentDetail = () => {
         `https://swp-school-medical-management.onrender.com/api/Student/${student.studentId}`
       )
       .then(() => {
-        alert("Đã xoá học sinh.");
+        notifySuccess("Đã xoá học sinh.");
         navigate("/students");
       })
       .catch((err) => {
         console.error("Lỗi xoá học sinh:", err);
-        alert("Xoá thất bại!");
+        notifyError("Xoá thất bại!");
       });
   };
 
@@ -60,6 +67,7 @@ const StudentDetail = () => {
   };
 
   const handleUpdate = () => {
+    setModalLoading(true);
     const updatedData = {
       studentId: student.studentId,
       fullName: formData.fullName,
@@ -75,7 +83,7 @@ const StudentDetail = () => {
         updatedData
       )
       .then(() => {
-        alert("Cập nhật thành công!");
+        notifySuccess("Cập nhật thành công!");
         setStudent({ ...student, ...formData });
         setShowForm(false);
       })
@@ -83,12 +91,17 @@ const StudentDetail = () => {
         console.error("Lỗi cập nhật:", err);
         const errorMessage =
           err.response?.data?.message || "Cập nhật thất bại. Vui lòng thử lại!";
-        alert(errorMessage); // Show detailed error message
-      });
+        notifyError(errorMessage); // Show detailed error message
+      })
+      .finally(() => setModalLoading(false));
   };
 
-  if (!student)
-    return <div className={style.loading}>Đang tải thông tin học sinh...</div>;
+  if (loading || modalLoading)
+    return (
+      <div className={style.loadingOverlay}>
+        <div className={style.spinner}></div>
+      </div>
+    );
 
   return (
     <div className={style.layoutContainer}>
@@ -198,6 +211,8 @@ const StudentDetail = () => {
             </div>
           </div>
         )}
+        <Notification />
+        {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
       </main>
     </div>
   );

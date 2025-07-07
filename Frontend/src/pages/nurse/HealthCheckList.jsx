@@ -12,6 +12,12 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts"; // Import PieChart components
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
+
+// API URL constants
+const HEALTH_CHECK_CAMPAIGN_API = "https://swp-school-medical-management.onrender.com/api/HealthCheckCampaign";
 
 const HealthCheckList = () => {
   const [campaigns, setCampaigns] = useState([]);
@@ -25,13 +31,15 @@ const HealthCheckList = () => {
     "Đã hoàn thành": 0,
     "Đã huỷ": 0,
   });
+  const [loading, setLoading] = useState(true); // Thêm trạng thái loading
   const itemsPerPage = 3;
 
   useEffect(() => {
     const fetchCampaigns = async () => {
+      setLoading(true);
       try {
         const res = await axios.get(
-          "/api/HealthCheckCampaign"
+          HEALTH_CHECK_CAMPAIGN_API
         );
         console.log("API Response from HealthCheckList:", res.data); // Log the response
         const campaignsData = Array.isArray(res.data) ? res.data : res.data.data;
@@ -55,6 +63,8 @@ const HealthCheckList = () => {
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu chiến dịch:", error);
         setCampaigns([]); // Ensure campaigns is an array on error
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -117,13 +127,13 @@ const HealthCheckList = () => {
     try {
       const apiStatus = statusMap[newStatus] || newStatus;
       const res = await axios.put(
-        `/api/HealthCheckCampaign/${campaignId}`,
+        `${HEALTH_CHECK_CAMPAIGN_API}/${campaignId}`,
         { statusId: apiStatus }
       );
       console.log("PUT response:", res.data);
 
       if (res.status === 200) {
-        alert("Cập nhật trạng thái thành công!");
+        notifySuccess("Cập nhật trạng thái thành công!");
         const updatedCampaigns = campaigns.map((campaign) =>
           campaign.id === campaignId
             ? { ...campaign, statusName: newStatus }
@@ -135,19 +145,30 @@ const HealthCheckList = () => {
     } catch (error) {
       if (error.response) {
         console.error("API error:", error.response.data);
-        alert("Lỗi cập nhật trạng thái: " + (error.response.data.message || ""));
+        notifyError("Lỗi cập nhật trạng thái: " + (error.response.data.message || ""));
       } else {
         console.error("Lỗi khi cập nhật trạng thái chiến dịch:", error);
-        alert("Lỗi cập nhật trạng thái.");
+        notifyError("Lỗi cập nhật trạng thái.");
       }
     }
   };
+
+  // Skeleton loading rows
+  const skeletonRows = Array.from({ length: itemsPerPage }, (_, i) => (
+    <tr key={i} className={style.skeletonRow}>
+      <td colSpan={6}>
+        <div className={style.skeletonBox} style={{ height: 32, width: "100%" }} />
+      </td>
+    </tr>
+  ));
 
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       <Sidebar />
       <main style={{ flex: 1 }}>
         <div className={style.campaignPage}>
+          {/* LOADING OVERLAY */}
+          {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
           {/* HEADER */}
           <div className={style.pageHeader}>
             <div>
@@ -169,6 +190,7 @@ const HealthCheckList = () => {
                   setSearchKeyword(e.target.value);
                   setCurrentPage(1);
                 }}
+                className={style.inputSearch}
               />
             </div>
 
@@ -190,9 +212,7 @@ const HealthCheckList = () => {
           </div>
 
           {/* TABLE */}
-          {campaigns.length === 0 ? (
-            <p style={{ padding: "1rem" }}>Không có dữ liệu chiến dịch.</p>
-          ) : (
+          <div className={style.fadeInTable}>
             <table className={style.campaignTable}>
               <thead>
                 <tr>
@@ -205,42 +225,51 @@ const HealthCheckList = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentCampaigns.map((c) => (
-                  <tr key={c.id}>
-                    <td>{c.title}</td>
-                    <td>{c.description}</td>
-                    <td>{new Date(c.date).toLocaleDateString()}</td>
-                    <td>{c.createdByName}</td>
-                    <td>
-                      <select
-                        value={c.statusName}
-                        onChange={(e) =>
-                          handleStatusChange(c.id, e.target.value)
-                        }
-                        className={style.statusDropdown}
-                      >
-                        <option>Đang diễn ra</option>
-                        <option>Chưa bắt đầu</option>
-                        <option>Đã hoàn thành</option>
-                        <option>Đã huỷ</option>
-                      </select>
-                    </td>
-                    <td>
-                      <Link to={`/healthcheck/${c.id}`}>
-                        <button className={style.btnDetail}>Chi tiết</button>
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+                {loading
+                  ? skeletonRows
+                  : currentCampaigns.length === 0
+                  ? (
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: "center", padding: 24 }}>
+                        Không có dữ liệu chiến dịch.
+                      </td>
+                    </tr>
+                  )
+                  : currentCampaigns.map((c) => (
+                      <tr key={c.id} className={style.tableRow}>
+                        <td>{c.title}</td>
+                        <td>{c.description}</td>
+                        <td>{new Date(c.date).toLocaleDateString()}</td>
+                        <td>{c.createdByName}</td>
+                        <td>
+                          <select
+                            value={c.statusName}
+                            onChange={(e) => handleStatusChange(c.id, e.target.value)}
+                            className={style.statusDropdown}
+                          >
+                            <option>Đang diễn ra</option>
+                            <option>Chưa bắt đầu</option>
+                            <option>Đã hoàn thành</option>
+                            <option>Đã huỷ</option>
+                          </select>
+                        </td>
+                        <td>
+                          <Link to={`/healthcheck/${c.id}`}>
+                            <button className={style.btnDetail}>Chi tiết</button>
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
               </tbody>
             </table>
-          )}
+          </div>
 
           {/* PAGINATION */}
           <div className={style.pagination}>
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
+              className={style.pageBtn}
             >
               «
             </button>
@@ -248,7 +277,11 @@ const HealthCheckList = () => {
               <button
                 key={i + 1}
                 onClick={() => handlePageChange(i + 1)}
-                className={currentPage === i + 1 ? style.activePage : ""}
+                className={
+                  currentPage === i + 1
+                    ? `${style.activePage} ${style.pageBtn}`
+                    : style.pageBtn
+                }
               >
                 {i + 1}
               </button>
@@ -256,13 +289,14 @@ const HealthCheckList = () => {
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
+              className={style.pageBtn}
             >
               »
             </button>
           </div>
 
           {/* PIE CHART */}
-          <div style={{ marginTop: "30px" }}>
+          <div style={{ marginTop: "30px" }} className={style.fadeInBox}>
             <h3>Biểu đồ tròn thống kê theo trạng thái chiến dịch</h3>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -288,6 +322,7 @@ const HealthCheckList = () => {
               </PieChart>
             </ResponsiveContainer>
           </div>
+          <Notification />
         </div>
       </main>
     </div>

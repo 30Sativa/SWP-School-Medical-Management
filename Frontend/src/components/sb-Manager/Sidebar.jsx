@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Home, Users, ClipboardList, Rss, Flag, LogOut, Menu, Bell, ClipboardPlus, User } from "lucide-react";
+import { Home, Users, Rss, Bell, LogOut, Menu, User } from "lucide-react";
 import style from "./Sidebar.module.css";
 import { jwtDecode } from "jwt-decode";
 
@@ -45,10 +45,6 @@ const Sidebar = () => {
           <Home size={20} />
           <span>Bảng điều khiển</span>
         </NavLink>
-        <NavLink to="/logs" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
-          <ClipboardList size={20} />
-          <span>Nhật ký hoạt động</span>
-        </NavLink>
         <NavLink to="/users" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
           <Users size={20} />
           <span>Danh sách người dùng</span>
@@ -56,10 +52,6 @@ const Sidebar = () => {
         <NavLink to="/blog" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
           <Rss size={20} />
           <span>Blog</span>
-        </NavLink>
-        <NavLink to="/reports" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
-          <Flag size={20} />
-          <span>Báo cáo thống kê</span>
         </NavLink>
         <NavLink to="/sendnotifications" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
           <Bell size={20} />

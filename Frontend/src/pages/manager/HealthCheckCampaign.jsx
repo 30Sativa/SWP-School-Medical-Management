@@ -2,13 +2,17 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import campaignStyle from "../../assets/css/HealthCheckCampaign.module.css";
 import Sidebar from "../../components/sidebar/Sidebar";
-import { Modal, Form as AntForm, Input, DatePicker, message } from "antd";
+import { Modal, Form as AntForm, Input, DatePicker } from "antd";
 import dayjs from "dayjs";
 import { Plus, Edit2, Trash2 } from "lucide-react";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
+// import { Modal } from "antd";
 
 const API_BASE = "/api";
 const PAGE_SIZE = 8;
-
 const statusOptions = [
   { value: 1, label: "Chưa bắt đầu" },
   { value: 2, label: "Đang diễn ra" },
@@ -129,12 +133,12 @@ const HealthCheckCampaign = () => {
             },
           }
         );
-        message.success("Cập nhật thành công!");
+        notifySuccess("Cập nhật thành công!");
       } else {
         await axios.post(`${API_BASE}/HealthCheckCampaign`, payload, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        message.success("Tạo mới thành công!");
+        notifySuccess("Tạo mới thành công!");
       }
       setShowModal(false);
       fetchCampaigns();
@@ -144,17 +148,26 @@ const HealthCheckCampaign = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Bạn chắc chắn muốn xóa?")) return;
-    try {
-      await axios.delete(`${API_BASE}/HealthCheckCampaign/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      fetchCampaigns();
-      message.success("Xóa thành công!");
-    } catch {
-      message.error("Xóa thất bại!");
-    }
-  };
+  Modal.confirm({
+    title: "Bạn chắc chắn muốn xóa chiến dịch này?",
+    icon: <ExclamationCircleOutlined />,
+    okText: "Xóa",
+    cancelText: "Hủy",
+    async onOk() {
+      try {
+        await axios.delete(`${API_BASE}/HealthCheckCampaign/${id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        notifySuccess("Xóa thành công!");
+        fetchCampaigns();
+      } catch {
+        notifyError("Xóa thất bại!");
+      }
+    },
+  });
+};
 
   // Search + Pagination logic
   const filteredCampaigns = campaigns.filter(
@@ -229,11 +242,13 @@ const HealthCheckCampaign = () => {
             </thead>
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan={7} style={{ textAlign: "center" }}>
-                    Đang tải...
-                  </td>
-                </tr>
+                Array.from({ length: 8 }).map((_, idx) => (
+                  <tr key={idx} className={campaignStyle.skeletonRow}>
+                    {Array.from({ length: 7 }).map((_, cidx) => (
+                      <td key={cidx}><div className={campaignStyle.skeletonCell}></div></td>
+                    ))}
+                  </tr>
+                ))
               ) : pagedCampaigns.length === 0 ? (
                 <tr>
                   <td colSpan={7} style={{ textAlign: "center" }}>
@@ -369,6 +384,8 @@ const HealthCheckCampaign = () => {
             )}
           </AntForm>
         </Modal>
+        {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
+        <Notification />
       </main>
     </div>
   );

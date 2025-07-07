@@ -15,5 +15,7 @@ public partial class MedicalSupply
 
     public DateOnly? ExpiryDate { get; set; }
 
+    public bool? IsActive { get; set; }
+
     public virtual ICollection<HandleRecord> HandleRecords { get; set; } = new List<HandleRecord>();
 }

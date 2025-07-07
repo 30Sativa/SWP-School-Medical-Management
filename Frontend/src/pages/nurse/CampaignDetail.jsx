@@ -13,6 +13,8 @@ import {
 } from "recharts";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const CampaignDetail = () => {
   const { id } = useParams();
@@ -21,6 +23,7 @@ const CampaignDetail = () => {
   const [campaign, setCampaign] = useState(null);
   const [consents, setConsents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalLoading, setModalLoading] = useState(false); // loading khi gửi phiếu xác nhận
   const [sendResult, setSendResult] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
@@ -93,6 +96,7 @@ const CampaignDetail = () => {
 
   const handleSendConsentToAll = async () => {
     try {
+      setModalLoading(true);
       if (!campaign || !campaign.campaignId) {
         alert("Không tìm thấy thông tin chiến dịch.");
         return;
@@ -101,7 +105,7 @@ const CampaignDetail = () => {
         `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/send-consent-to-all-parents`
       );
       setSendResult(res.data.data);
-      alert("Đã gửi thông báo đến cho phụ huynh.");
+      notifySuccess("Đã gửi thông báo đến cho phụ huynh.");
       setShowModal(true);
       const consentsRes = await axios.get(
         `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/consent-requests`
@@ -109,19 +113,19 @@ const CampaignDetail = () => {
       setConsents(consentsRes.data.data);
     } catch (err) {
       console.error("Gửi phiếu xác nhận thất bại:", err, err.response?.data);
-      alert(
+      notifyError(
         "Không thể gửi phiếu xác nhận: " +
           (err.response?.data?.message || err.message)
       );
+    } finally {
+      setModalLoading(false);
     }
   };
 
   const handleStartCampaign = async () => {
     try {
       if (!isChuaBatDau(campaign.statusName)) {
-        alert(
-          "Chỉ chiến dịch ở trạng thái 'Chưa bắt đầu' mới có thể khởi động."
-        );
+        notifyError("Chỉ chiến dịch ở trạng thái 'Chưa bắt đầu' mới có thể khởi động.");
         return;
       }
       const agreedStudents = consents
@@ -129,7 +133,7 @@ const CampaignDetail = () => {
         .map((c) => parseInt(c.studentId));
 
       if (agreedStudents.length === 0) {
-        alert("Không có học sinh nào đồng ý để khởi động.");
+        notifyError("Không có học sinh nào đồng ý để khởi động.");
         return;
       }
 
@@ -145,7 +149,7 @@ const CampaignDetail = () => {
         }
       );
 
-      alert("Chiến dịch đã được khởi động!");
+      notifySuccess("Chiến dịch đã được khởi động!");
       setCampaign((prev) => ({
         ...prev,
         statusName: "Đang diễn ra",
@@ -154,7 +158,7 @@ const CampaignDetail = () => {
       }));
     } catch (err) {
       console.error("Lỗi khi khởi động chiến dịch:", err, err.response?.data);
-      alert(
+      notifyError(
         "Không thể khởi động chiến dịch: " +
           (err.response?.data?.message || err.message)
       );
@@ -166,14 +170,14 @@ const CampaignDetail = () => {
       await axios.put(
         `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${id}/deactivate`
       );
-      alert("Chiến dịch đã được đánh dấu hoàn thành.");
+      notifySuccess("Chiến dịch đã được đánh dấu hoàn thành.");
       setCampaign((prev) => ({
         ...prev,
         statusName: "Đã hoàn thành",
       }));
     } catch (err) {
       console.error("Lỗi khi đánh dấu hoàn thành:", err);
-      alert("Không thể cập nhật trạng thái chiến dịch.");
+      notifyError("Không thể cập nhật trạng thái chiến dịch.");
     }
   };
 
@@ -223,7 +227,12 @@ const CampaignDetail = () => {
     );
   };
 
-  if (loading || !campaign) return <p>Đang tải dữ liệu...</p>;
+  if (loading || !campaign || modalLoading)
+    return (
+      <div className={style.loadingOverlay}>
+        <div className={style.spinner}></div>
+      </div>
+    );
 
   const totalAgreed = consents.filter(
     (c) => c.consentStatusName === "Đồng ý"
@@ -325,17 +334,17 @@ const CampaignDetail = () => {
                     `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/send-consent-by-class`,
                     { className: selectedClass }
                   );
-                  alert("Đã gửi phiếu xác nhận cho lớp " + selectedClass);
+                  notifySuccess("Đã gửi phiếu xác nhận cho lớp " + selectedClass);
                   // Load lại consents nếu cần
                   const consentsRes = await axios.get(
                     `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/consent-requests`
                   );
                   setConsents(consentsRes.data.data);
                 } catch {
-                  alert("Gửi phiếu xác nhận thất bại!");
+                  notifyError("Gửi phiếu xác nhận thất bại!");
                 }
               } else {
-                alert("Vui lòng chọn lớp!");
+                notifyError("Vui lòng chọn lớp!");
               }
             }}
           >
@@ -556,6 +565,8 @@ const CampaignDetail = () => {
           </div>
         </div>
       )}
+
+      <Notification />
     </div>
   );
 };

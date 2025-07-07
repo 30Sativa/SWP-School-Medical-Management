@@ -3,12 +3,16 @@ import Sidebar from "../../components/sidebar/Sidebar";
 import style from "../../assets/css/studentList.module.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 const StudentList = () => {
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
   const studentsPerPage = 10;
   const navigate = useNavigate();
 
@@ -18,7 +22,8 @@ const StudentList = () => {
 
   const fetchStudents = async () => {
     try {
-      const response = await axios.get("/api/Student");
+      setLoading(true);
+      const response = await axios.get("https://swp-school-medical-management.onrender.com/api/Student");
       let studentArray = response.data?.data || [];
 
       // Sắp xếp theo mã học sinh (studentId) tăng dần
@@ -29,7 +34,9 @@ const StudentList = () => {
 
       setStudents(studentArray);
       setFilteredStudents(studentArray);
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       console.error("Có lỗi khi gọi API:", error);
     }
   };
@@ -90,7 +97,15 @@ const StudentList = () => {
             </tr>
           </thead>
           <tbody>
-            {currentStudents.length > 0 ? (
+            {loading ? (
+              Array.from({ length: 8 }).map((_, idx) => (
+                <tr key={idx} className={style.skeletonRow}>
+                  {Array.from({ length: 6 }).map((_, cidx) => (
+                    <td key={cidx}><div className={style.skeletonCell}></div></td>
+                  ))}
+                </tr>
+              ))
+            ) : currentStudents.length > 0 ? (
               currentStudents.map((student, index) => (
                 <tr key={student.id || index}>
                   <td>{indexOfFirstStudent + index + 1}</td>
@@ -118,6 +133,8 @@ const StudentList = () => {
           </tbody>
         </table>
 
+        {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
+
         <div className={style.pagination}>
           {[...Array(totalPages)].map((_, index) => (
             <button
@@ -130,6 +147,7 @@ const StudentList = () => {
           ))}
         </div>
       </main>
+      <Notification />
     </div>
   );
 };

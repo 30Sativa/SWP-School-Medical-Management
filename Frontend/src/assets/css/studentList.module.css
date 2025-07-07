@@ -50,7 +50,9 @@
 .searchBar:focus {
   outline: none;
   border-color: #20b2aa;
-  background-color: #ffffff;
+  box-shadow: 0 0 0 2px #20b2aa33;
+  background: #fff;
+  transition: box-shadow 0.2s, border-color 0.2s;
 }
 
 .searchBar::placeholder {
@@ -79,6 +81,7 @@
   background-color: white;
   border-radius: 6px;
   overflow: hidden;
+  animation: fadeInTable 0.7s cubic-bezier(.4,0,.2,1);
 }
 
 .studentTable th,
@@ -94,6 +97,12 @@
   color: white;
 }
 
+/* Hiệu ứng hover cho dòng bảng */
+.studentTable tbody tr:hover {
+  background: #f0f9ff;
+  transition: background 0.2s;
+}
+
 /* Action Button */
 .btn {
   background-color: #20b2aa;
@@ -102,11 +111,13 @@
   border: none;
   cursor: pointer;
   border-radius: 5px;
-  transition: background-color 0.3s ease;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.15s;
 }
 
 .btn:hover {
   background-color: #20b2aa;
+  box-shadow: 0 2px 8px rgba(32,178,170,0.10);
+  transform: translateY(-2px) scale(1.04);
 }
 
 /* Pagination */
@@ -124,11 +135,13 @@
   color: #222; /* chữ đen */
   font-weight: 500;
   cursor: pointer;
-  transition: 0.2s;
+  transition: background 0.2s, color 0.2s, transform 0.15s;
 }
 
 .pagination button:hover {
-  background-color: #ccc;
+  background: #20b2aa;
+  color: #fff;
+  transform: scale(1.08);
 }
 
 .pagination .activePage {
@@ -248,4 +261,29 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Skeleton loading for student table */
+.skeletonRow {
+  background: linear-gradient(90deg, #f3f3f3 25%, #e0e7ef 50%, #f3f3f3 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.2s infinite linear;
+}
+.skeletonCell {
+  height: 18px;
+  border-radius: 6px;
+  background: #e5e7eb;
+  margin: 6px 0;
+  width: 100%;
+  animation: skeletonShimmer 1.2s infinite linear;
+}
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Hiệu ứng fade-in cho bảng */
+@keyframes fadeInTable {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
 }

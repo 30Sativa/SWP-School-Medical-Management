@@ -8,7 +8,7 @@ import StudentList from "../pages/nurse/StudentList";
 import StudentDetail from "../pages/nurse/StudentDetail";
 import ParentDashboard from "../pages/parent/ParentDashboard";
 import HealthProfile from "../pages/parent/HealthProfile";
-import LogsPage from "../pages/manager/Logs";
+
 import SendMedicine from "../pages/parent/SendMedicine";
 import VaccinCampaign from "../pages/nurse/VaccinCampaign";
 import ChildCareHistory from "../pages/parent/ChildCareHistory";
@@ -32,6 +32,8 @@ import HealthCheckDetail from "../pages/nurse/HealthCheckDetail";
 import HealthCheckRecord from "../pages/nurse/HealthCheckRecord";
 import NurseReport from "../pages/nurse/NurseReport";
 import ViewBlog from "../pages/nurse/viewBlog";
+import BlogPublic from '../pages/homepage/BlogPublic';
+
 const AppRouter = () => {
   return (
     <Routes>
@@ -44,11 +46,11 @@ const AppRouter = () => {
       <Route path="/students" element={<StudentList />} />
       <Route path="/students/:id" element={<StudentDetail />} />
       <Route path="/healthprofile" element={<HealthProfile />} />
-      <Route path="/logs" element={<LogsPage />} />
+      
       <Route path="/sendmedicine" element={<SendMedicine />} />
       <Route path="/hisofcare" element={<ChildCareHistory />} />
       <Route path="/notification" element={<NotificationAndReport />} />
-      <Route path="/blog" element={<Blog />} />
+      <Route path="/blog" element={<BlogPublic />} />
       <Route path="/blog/create" element={<BlogCreate />} />
       <Route path="/firstlogin" element={<FirstLogin />} />
       <Route path="/sendnotifications" element={<SendNotifications />} />

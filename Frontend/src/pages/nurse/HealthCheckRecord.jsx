@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import styles from "../../assets/css/HealthCheckRecord.module.css";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
+
 
 const HealthCheckRecord = () => {
   const { recordId } = useParams();
@@ -71,10 +75,10 @@ const HealthCheckRecord = () => {
           bmi: Number(newRecord.bmi),
         }
       );
-      alert("Ghi nhận thành công!");
+      notifySuccess("Ghi nhận thành công!");
       navigate(-1);
     } catch (error) {
-      alert(
+      notifyError(
         "Lỗi ghi nhận! " + (error.response?.data?.message || error.message)
       );
     }
@@ -127,7 +131,8 @@ const HealthCheckRecord = () => {
     // eslint-disable-next-line
   }, [isEditing, record?.height, record?.weight]);
 
-  if (loading) return <div>Đang tải dữ liệu...</div>;
+  if (loading) return <LoadingOverlay text="Đang tải dữ liệu khám sức khỏe..." />;
+
 
   if (!record)
     return (
@@ -158,7 +163,7 @@ const HealthCheckRecord = () => {
             bmi: Number(record.bmi),
           }
         );
-        alert("Ghi nhận thành công!");
+        notifySuccess("Ghi nhận thành công!");
         navigate(-1);
       } else {
         // Cập nhật
@@ -178,14 +183,14 @@ const HealthCheckRecord = () => {
           }
         );
         if (res.status === 200) {
-          alert("Cập nhật thành công!");
+          notifySuccess("Cập nhật thành công!");
           setIsEditing(false);
         } else {
-          alert("Lỗi cập nhật! " + (res.data?.message || ""));
+          notifyError("Lỗi cập nhật! " + (res.data?.message || ""));
         }
       }
     } catch (error) {
-      alert(
+      notifyError(
         "Lỗi khi gửi dữ liệu: " +
           (error.response?.data?.message || error.message)
       );
@@ -367,7 +372,7 @@ const HealthCheckRecord = () => {
       const parentId = studentRes.data?.data?.parentId;
 
       if (!parentId) {
-        alert("Không tìm thấy phụ huynh của học sinh này.");
+        notifyError("Không tìm thấy phụ huynh của học sinh này.");
         return;
       }
 
@@ -412,21 +417,22 @@ Trường Mầm Non
       );
 
       if (response.status === 200 || response.status === 201) {
-        alert("✅ Đã gửi kết quả khám sức khỏe cho phụ huynh!");
+        notifySuccess(" Đã gửi kết quả khám sức khỏe cho phụ huynh!");
       } else {
-        alert("❌ Gửi thất bại: " + (response.data?.message || "Không rõ lỗi"));
+        notifyError("Gửi thất bại: " + (response.data?.message || "Không rõ lỗi"));
       }
     } catch (error) {
       console.error("Lỗi khi gửi kết quả:", error);
-      alert(
-        "Đã xảy ra lỗi khi gửi kết quả: " +
-          (error.response?.data?.message || error.message)
-      );
+      notifyError(
+  "Đã xảy ra lỗi khi gửi kết quả: " +
+    (error.response?.data?.message || error.message)
+);
     }
   };
 
   return (
     <div className={styles.container}>
+      <Notification />
       <h2>Thông tin khám sức khỏe: {record.studentName}</h2>
       <button className={styles.backButton} onClick={() => navigate(-1)}>
         ⬅ Quay lại

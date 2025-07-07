@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/sb-Parent/Sidebar";
-import styles from "../../assets/css/ParentDashboard.module.css";
+import styles from "../../assets/css/parentDashboard.module.css";
 import axios from "axios";
 import dayjs from "dayjs";
 import { toast, ToastContainer } from "react-toastify";
@@ -12,11 +12,9 @@ const ParentDashboard = () => {
   const [myStudents, setMyStudents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Feedback
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [feedbackContent, setFeedbackContent] = useState("");
 
-  // Tìm kiếm và lọc
   const [searchKeyword, setSearchKeyword] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filterSeverity, setFilterSeverity] = useState("");
@@ -32,7 +30,8 @@ const ParentDashboard = () => {
         const studentRes = await axios.get(
           `https://swp-school-medical-management.onrender.com/api/Student/by-parent/${parentId}`
         );
-        setMyStudents(studentRes.data.data || []);
+        const studentList = Array.isArray(studentRes.data.data) ? studentRes.data.data : [];
+        setMyStudents(studentList);
       } catch (error) {
         console.error("❌ Lỗi khi tải dữ liệu:", error);
       } finally {
@@ -62,8 +61,28 @@ const ParentDashboard = () => {
     }
   };
 
-  if (loading) return <p>🔄 Đang tải dữ liệu...</p>;
-  if (!overview || myStudents.length === 0) return <p>⚠️ Không có dữ liệu để hiển thị.</p>;
+  if (loading)
+    return (
+      <div className={styles.loadingOverlay}>
+        <div className={styles.customSpinner}>
+          <div className={styles.spinnerIcon}></div>
+          <div className={styles.spinnerText}>Đang tải dữ liệu...</div>
+        </div>
+      </div>
+    );
+
+  if (!overview || myStudents.length === 0)
+    return (
+      <div className={styles.container}>
+        <Sidebar />
+        <main className={styles.content}>
+          <p style={{ padding: 20, color: "#f59e0b" }}>
+            ⚠️ Tài khoản chưa được liên kết với học sinh nào. Vui lòng liên hệ nhà trường để được hỗ trợ!
+          </p>
+          <ToastContainer />
+        </main>
+      </div>
+    );
 
   const myStudentNames = myStudents.map((s) => s.fullName);
 
@@ -101,6 +120,7 @@ const ParentDashboard = () => {
             </div>
           </div>
         </header>
+
         <div className={styles["top-action-row"]}>
           <div className={styles["action-card-v2"]}>
             <div className={styles["card-text"]}>
@@ -124,7 +144,6 @@ const ParentDashboard = () => {
           </div>
         </div>
 
-        {/* THÔNG TIN CHUNG */}
         <div className={styles["info-section"]}>
           <div className={styles["info-header"]}>
             <h3>Thông tin chung</h3>
@@ -165,7 +184,6 @@ const ParentDashboard = () => {
           </div>
         </div>
 
-        {/* GRID PHẢI 2 CỘT */}
         <div className={styles["main-right-grid"]}>
           <div className={styles["health-check-box"]}>
             <h4>Đơn thuốc gần đây</h4>
@@ -209,7 +227,6 @@ const ParentDashboard = () => {
           </div>
         </div>
 
-        {/* FORM GÓP Ý */}
         {showFeedbackForm && (
           <div className={styles.feedbackOverlay}>
             <div className={styles.feedbackModal}>
@@ -235,5 +252,6 @@ const ParentDashboard = () => {
 };
 
 export default ParentDashboard;
+
 
 

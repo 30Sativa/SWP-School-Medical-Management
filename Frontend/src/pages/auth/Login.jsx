@@ -1,4 +1,4 @@
-import "../../assets/CSS/Login.css";
+import "../../assets/css/login.css";
 import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -20,10 +20,33 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { username, password } = form;
+    const trimmedUsername = form.username.trim();
+    const trimmedPassword = form.password.trim();
 
-    if (!username || !password) {
-      alert("Vui lòng nhập đầy đủ tài khoản và mật khẩu!");
+    if (!trimmedUsername || !trimmedPassword) {
+      toast.error("Vui lòng nhập đầy đủ tài khoản và mật khẩu!", {
+        position: "top-center",
+        autoClose: 2500,
+        theme: "colored",
+      });
+      return;
+    }
+    const usernameRegex = /^[a-zA-Z0-9_@-]+$/;
+    if (!usernameRegex.test(trimmedUsername)) {
+      toast.error("Tài khoản chỉ được chứa chữ, số, dấu _ , - và @!", {
+      position: "top-center",
+      autoClose: 2500,
+      theme: "colored",
+  });
+  return;
+}
+
+    if (trimmedPassword.length < 6) {
+      toast.error("Mật khẩu phải có ít nhất 6 ký tự!", {
+        position: "top-center",
+        autoClose: 2500,
+        theme: "colored",
+      });
       return;
     }
 
@@ -32,7 +55,7 @@ const Login = () => {
       console.log("🔁 Đang gửi request đăng nhập...");
       const response = await axios.post(
         "https://swp-school-medical-management.onrender.com/api/User/login",
-        { username, password }
+        { username: trimmedUsername, password: trimmedPassword }
       );
 
       const resData = response.data?.data;
@@ -58,7 +81,11 @@ const Login = () => {
           console.log("Role:", roleName);
         } catch (decodeError) {
           console.error("❌ Lỗi giải mã token:", decodeError);
-          alert("Không xác định được vai trò người dùng.");
+          toast.error("Không xác định được vai trò người dùng.", {
+            position: "top-center",
+            autoClose: 2500,
+            theme: "colored",
+          });
           return;
         }
 
@@ -67,11 +94,6 @@ const Login = () => {
         toast.success("Đăng nhập thành công!", {
           position: "top-center",
           autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
           theme: "colored",
         });
 
@@ -96,6 +118,7 @@ const Login = () => {
             }
 
             localStorage.setItem("parentId", resData.userId);
+            localStorage.setItem("fullname", resData.fullName || "Phụ huynh");
 
             (async () => {
               try {
@@ -113,7 +136,6 @@ const Login = () => {
                   (s) => s.parentId === resData.userId
                 );
 
-
                 if (students.length > 0) {
                   localStorage.setItem(
                     "studentIds",
@@ -124,6 +146,7 @@ const Login = () => {
                   toast.warn("Không tìm thấy học sinh thuộc tài khoản này.", {
                     position: "top-center",
                     autoClose: 3000,
+                    theme: "colored",
                   });
                 }
 
@@ -133,27 +156,31 @@ const Login = () => {
                 toast.error("Lỗi khi tải danh sách học sinh.", {
                   position: "top-center",
                   autoClose: 3000,
+                  theme: "colored",
                 });
               }
             })();
           } else {
-            alert("❗ Vai trò không xác định!");
+            toast.error("❗ Vai trò không xác định!", {
+              position: "top-center",
+              autoClose: 2500,
+              theme: "colored",
+            });
             navigate("/");
           }
         }, 2000);
       } else {
-        alert("Đăng nhập thất bại!");
+        toast.error("Đăng nhập thất bại!", {
+          position: "top-center",
+          autoClose: 2500,
+          theme: "colored",
+        });
       }
     } catch (error) {
       console.error("❌ Lỗi khi gọi API:", error);
       toast.error("Lỗi kết nối đến server hoặc sai thông tin đăng nhập!", {
         position: "top-center",
         autoClose: 2500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
         theme: "colored",
       });
     } finally {
@@ -163,7 +190,12 @@ const Login = () => {
 
   return (
     <div className="login-page-wrapper">
-      <ToastContainer />
+      <ToastContainer
+      position="top-center"
+      autoClose={2500}
+      theme="colored"
+    />
+    <div className="login-page-wrapper">...</div>
       <div className="login-container">
         <div className="left-section">
           <h1>Hệ thống quản lý sức khỏe học đường</h1>
@@ -228,4 +260,5 @@ const Login = () => {
 };
 
 export default Login;
+
 

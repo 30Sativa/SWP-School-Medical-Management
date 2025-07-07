@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 const ChildCareHistory = () => {
   const parentId = localStorage.getItem("userId");
   const [students, setStudents] = useState([]);
-  const [selectedStudentId, setSelectedStudentId] = useState(Number(localStorage.getItem("studentId")) || null);
+  const [selectedStudentId, setSelectedStudentId] = useState(null);
 
   const [medicalHistory, setMedicalHistory] = useState([]);
   const [vaccinationHistory, setVaccinationHistory] = useState([]);
@@ -24,11 +24,15 @@ const ChildCareHistory = () => {
         const res = await axios.get(
           `https://swp-school-medical-management.onrender.com/api/Student/by-parent/${parentId}`
         );
-        const studentList = res.data?.data || [];
+        const studentList = Array.isArray(res.data?.data) ? res.data.data : [];
         setStudents(studentList);
-        if (!selectedStudentId && studentList.length > 0) {
-          setSelectedStudentId(studentList[0].studentId);
-          localStorage.setItem("studentId", studentList[0].studentId);
+
+        if (studentList.length > 0) {
+          const defaultId = studentList[0].studentId;
+          setSelectedStudentId(defaultId);
+          localStorage.setItem("studentId", defaultId);
+        } else {
+          localStorage.removeItem("studentId");
         }
       } catch (err) {
         console.error("Lỗi khi tải danh sách học sinh:", err);
@@ -40,9 +44,12 @@ const ChildCareHistory = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        if (!selectedStudentId) return;
+      if (!selectedStudentId) {
+        setLoading(false);
+        return;
+      }
 
+      try {
         const fetchWith404Handling = async (url) => {
           try {
             const res = await axios.get(url);
@@ -110,6 +117,20 @@ const ChildCareHistory = () => {
     );
   };
 
+  if (students.length === 0) {
+    return (
+      <div className={styles.container}>
+        <Sidebar />
+        <div className={styles.content}>
+          <h2 className={styles.title}>Lịch Sử Chăm Sóc Sức Khỏe</h2>
+          <p style={{ color: "#f59e0b", fontSize: "16px", padding: "20px" }}>
+            ⚠️ Hiện bạn chưa được liên kết với học sinh nào. Vui lòng liên hệ nhà trường để được hỗ trợ.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
       <Sidebar />
@@ -119,7 +140,6 @@ const ChildCareHistory = () => {
           Xin chào, bạn đang đăng nhập với tư cách phụ huynh em <strong>{studentName || "..."}</strong>
         </p>
 
-        {/* Dropdown chọn học sinh */}
         <label style={{ color: '#059669', fontWeight: 'bold', marginBottom: '8px', display: 'inline-block' }}>
           Chọn học sinh:
         </label>
@@ -128,7 +148,7 @@ const ChildCareHistory = () => {
           onChange={(e) => {
             const selected = Number(e.target.value);
             localStorage.setItem("studentId", selected);
-            window.location.reload();
+            setSelectedStudentId(selected);
           }}
           style={{
             padding: "10px 16px",
@@ -148,7 +168,6 @@ const ChildCareHistory = () => {
           ))}
         </select>
 
-        {/* Thanh tìm kiếm */}
         <div style={{ marginBottom: "20px" }}>
           <input
             type="text"

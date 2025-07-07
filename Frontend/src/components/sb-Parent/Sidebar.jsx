@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   Home,
@@ -8,12 +8,19 @@ import {
   Bell,
   LogOut,
   Menu,
+  User,
 } from "lucide-react";
 import styles from "./Sidebar.module.css";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
   const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    const name = localStorage.getItem("fullname") || "Tên phụ huynh";
+    setUsername(name);
+  }, []);
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
@@ -23,7 +30,15 @@ const Sidebar = () => {
         isOpen ? styles.expanded : styles.collapsed
       }`}
     >
-      {/* DÙNG navItem để đảm bảo icon và chữ thẳng hàng tuyệt đối */}
+      {/* Logo và tên người dùng */}
+      <div className={styles.userSection}>
+        <div className={styles.avatarCircle}>
+          <User size={28} color="#24b4aa" />
+        </div>
+        {isOpen && <p className={styles.username}>{username}</p>}
+      </div>
+
+      {/* Nút menu thu gọn/mở rộng */}
       <div className={styles.navItem} onClick={toggleSidebar}>
         <Menu size={20} />
         {isOpen && <span className={styles.systemName}>EduHealth</span>}

@@ -14,7 +14,10 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import Sidebar from "../../components/sidebar/Sidebar";
-import style from "../../assets/css/MedicalSupplies.module.css";
+import style from "../../assets/css/medicalSupplies.module.css";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 const MedicalSupplies = () => {
   const [supplies, setSupplies] = useState([]);
@@ -30,6 +33,8 @@ const MedicalSupplies = () => {
   const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+  const [loading, setLoading] = useState(true); // loading fetch list
+  const [modalLoading, setModalLoading] = useState(false); // loading khi submit modal
 
   const API_URL =
     "https://swp-school-medical-management.onrender.com/api/MedicalSupplies";
@@ -38,13 +43,15 @@ const MedicalSupplies = () => {
     fetchSupplies();
   }, []);
   const fetchSupplies = () => {
+    setLoading(true);
     axios
       .get(API_URL)
       .then((res) => {
         console.log("API data:", res.data);
         setSupplies(Array.isArray(res.data.data) ? res.data.data : []);
       })
-      .catch((err) => console.error("❌ Lỗi khi tải vật tư:", err));
+      .catch((err) => console.error("❌ Lỗi khi tải vật tư:", err))
+      .finally(() => setLoading(false));
   };
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -54,6 +61,7 @@ const MedicalSupplies = () => {
   };
 
   const handleSubmit = () => {
+    setModalLoading(true);
     const url = editingId ? `${API_URL}/${editingId}` : API_URL;
     const method = editingId ? "put" : "post";
 
@@ -63,8 +71,15 @@ const MedicalSupplies = () => {
         setShowModal(false);
         setEditingId(null);
         setFormData({ name: "", quantity: "", unit: "", expiryDate: "" });
+        notifySuccess(
+          editingId ? "Cập nhật vật tư thành công!" : "Thêm vật tư thành công!"
+        );
       })
-      .catch((err) => console.error("❌ Lỗi thêm/cập nhật:", err));
+      .catch((err) => {
+        console.error("❌ Lỗi thêm/cập nhật:", err);
+        notifyError("Lỗi khi lưu vật tư!");
+      })
+      .finally(() => setModalLoading(false));
   };
 
   const filteredSupplies = Array.isArray(supplies)
@@ -98,10 +113,21 @@ const MedicalSupplies = () => {
     ? [...supplies].sort((a, b) => b.quantity - a.quantity).slice(0, 5)
     : [];
 
+  // Skeleton loading rows
+  const skeletonRows = Array.from({ length: itemsPerPage }, (_, i) => (
+    <tr key={i} className={style.skeletonRow}>
+      <td colSpan={5}>
+        <div className={style.skeletonBox} style={{ height: 32, width: "100%" }} />
+      </td>
+    </tr>
+  ));
+
   return (
     <div className={style.wrapper}>
       <Sidebar />
       <div className={style.content}>
+        {/* LOADING OVERLAY */}
+        {(loading || modalLoading) && <LoadingOverlay text="Đang tải dữ liệu..." />}
         <div className={style.header}>
           <h2 className={style.title}>Danh sách vật tư y tế</h2>
           <div className={style.actions}>
@@ -146,50 +172,52 @@ const MedicalSupplies = () => {
             </tr>
           </thead>
           <tbody>
-            {paginatedSupplies.length > 0 ? (
-              paginatedSupplies.map((item) => (
-                <tr key={item.supplyID}>
-                  <td>{item.name}</td>
-                  <td>{item.quantity}</td>
-                  <td>{item.unit}</td>
-                  <td
-                    style={{
-                      color: isNearExpiry(item.expiryDate) ? "red" : "#333",
-                      fontWeight: isNearExpiry(item.expiryDate)
-                        ? "bold"
-                        : "normal",
-                    }}
-                  >
-                    {new Date(item.expiryDate).toLocaleDateString("vi-VN")}
-                  </td>
-                  <td>
-                    <button
-                      className={style.editBtn}
-                      onClick={() => {
-                        setFormData(item);
-                        setEditingId(item.supplyID);
-                        setShowModal(true);
+            {loading
+              ? skeletonRows
+              : paginatedSupplies.length > 0
+              ? paginatedSupplies.map((item) => (
+                  <tr key={item.supplyID} className={style.tableRow}>
+                    <td>{item.name}</td>
+                    <td>{item.quantity}</td>
+                    <td>{item.unit}</td>
+                    <td
+                      style={{
+                        color: isNearExpiry(item.expiryDate) ? "red" : "#333",
+                        fontWeight: isNearExpiry(item.expiryDate)
+                          ? "bold"
+                          : "normal",
                       }}
                     >
-                      Sửa
-                    </button>
+                      {new Date(item.expiryDate).toLocaleDateString("vi-VN")}
+                    </td>
+                    <td>
+                      <button
+                        className={style.editBtn}
+                        onClick={() => {
+                          setFormData(item);
+                          setEditingId(item.supplyID);
+                          setShowModal(true);
+                        }}
+                      >
+                        Sửa
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              : (
+                <tr>
+                  <td
+                    colSpan="5"
+                    style={{
+                      textAlign: "center",
+                      padding: "16px",
+                      color: "#888",
+                    }}
+                  >
+                    Không có dữ liệu vật tư.
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="5"
-                  style={{
-                    textAlign: "center",
-                    padding: "16px",
-                    color: "#888",
-                  }}
-                >
-                  Không có dữ liệu vật tư.
-                </td>
-              </tr>
-            )}
+              )}
           </tbody>
         </table>
 
@@ -261,6 +289,7 @@ const MedicalSupplies = () => {
             </div>
           </div>
         )}
+        <Notification />
       </div>
     </div>
   );

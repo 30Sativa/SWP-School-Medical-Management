@@ -257,9 +257,68 @@
   transition: 0.2s;
 }
 .pagination button:hover {
-  background-color: #ccc;
-}
-.pagination .activePage {
-  background-color: #20b2aa;
+  background: #1677ff;
   color: #fff;
+  transform: scale(1.08);
+}
+
+/* Skeleton loading for campaign table */
+.skeletonRow {
+  background: linear-gradient(90deg, #f3f3f3 25%, #e0e7ef 50%, #f3f3f3 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.2s infinite linear;
+}
+.skeletonCell {
+  height: 18px;
+  border-radius: 6px;
+  background: #e5e7eb;
+  margin: 6px 0;
+  width: 100%;
+  animation: skeletonShimmer 1.2s infinite linear;
+}
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Hiệu ứng hover cho dòng bảng */
+.studentTable tbody tr:hover {
+  background: #f0f9ff;
+  transition: background 0.2s;
+}
+
+/* Hiệu ứng hover cho nút thao tác */
+.editBtn, .deleteBtn {
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+.editBtn:hover, .deleteBtn:hover {
+  box-shadow: 0 2px 8px rgba(32,178,170,0.10);
+  transform: translateY(-2px) scale(1.04);
+}
+
+/* Hiệu ứng focus cho ô tìm kiếm */
+.searchBar:focus {
+  border-color: #1677ff;
+  box-shadow: 0 0 0 2px #1677ff33;
+  background: #fff;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+/* Hiệu ứng nút phân trang */
+.pagination button {
+  transition: background 0.2s, color 0.2s, transform 0.15s;
+}
+.pagination button:hover {
+  background: #1677ff;
+  color: #fff;
+  transform: scale(1.08);
+}
+
+/* Hiệu ứng fade-in cho bảng */
+.studentTable {
+  animation: fadeInTable 0.7s cubic-bezier(.4,0,.2,1);
+}
+@keyframes fadeInTable {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
 }

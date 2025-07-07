@@ -22,6 +22,17 @@ import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 dayjs.extend(isoWeek);
 import Select from "react-select";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError, notifyInfo, notifyWarn } from "../../utils/notification";
+import { toast } from "react-toastify";
+import LoadingOverlay from "../../components/LoadingOverlay";
+
+// API URL constants
+const MEDICAL_EVENT_API = "https://swp-school-medical-management.onrender.com/api/MedicalEvent";
+const STUDENT_API = "https://swp-school-medical-management.onrender.com/api/Student";
+const USER_API = "https://swp-school-medical-management.onrender.com/api/User";
+const MEDICAL_SUPPLIES_API = "https://swp-school-medical-management.onrender.com/api/MedicalSupplies";
+const NOTIFICATION_API = "https://swp-school-medical-management.onrender.com/api/Notification/send";
 
 const COLORS = ["#F4C430", "#FF6B6B", "#4D96FF", "#9AE6B4", "#FFA500"];
 
@@ -78,6 +89,10 @@ const Incident = () => {
   const [suppliesUsed, setSuppliesUsed] = useState([]);
   const [bulkSuppliesUsed, setBulkSuppliesUsed] = useState([]);
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true); // loading fetch list
+  const [showSendOption, setShowSendOption] = useState(false);
+  const [showEmailInput, setShowEmailInput] = useState(false);
+  const [manualEmail, setManualEmail] = useState("");
 
   const eventTypes = [
     { id: "1", name: "Sốt" },
@@ -93,9 +108,10 @@ const Incident = () => {
   ];
 
   const fetchEvents = () => {
+    setLoading(true);
     const token = localStorage.getItem("token");
     axios
-      .get("/api/MedicalEvent", {
+      .get(MEDICAL_EVENT_API, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -108,7 +124,8 @@ const Incident = () => {
       })
       .catch((err) => {
         console.error("❌ Lỗi lấy danh sách sự cố:", err);
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   const getStaffName = (id, handledByName) => {
@@ -127,7 +144,7 @@ const Incident = () => {
     fetchEvents();
 
     axios
-      .get("/api/Student", {
+      .get(STUDENT_API, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -153,7 +170,7 @@ const Incident = () => {
       });
 
     axios
-      .get("/api/User", {
+      .get(USER_API, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -166,7 +183,7 @@ const Incident = () => {
       });
 
     axios
-      .get("/api/MedicalSupplies", {
+      .get(MEDICAL_SUPPLIES_API, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       .then((res) => {
@@ -181,7 +198,7 @@ const Incident = () => {
   useEffect(() => {
     if (selectedEvent?.studentId) {
       axios
-        .get(`/api/MedicalHistory/student/${selectedEvent.studentId}`, {
+        .get(`${STUDENT_API}/${selectedEvent.studentId}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
@@ -347,7 +364,7 @@ const Incident = () => {
     console.log("🔑 Token:", token);
 
     axios
-      .post("/api/MedicalEvent", payload, {
+      .post(MEDICAL_EVENT_API, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -372,14 +389,13 @@ const Incident = () => {
         });
         setSuppliesUsed([]);
         fetchEvents();
+        notifySuccess("Tạo sự cố thành công!");
       })
       .catch((err) => {
         const errorDetail =
           err.response?.data?.errors || err.response?.data || err.message;
         console.error("❌ Lỗi tạo sự cố:", errorDetail);
-        alert(
-          "Lỗi khi tạo mới sự cố:\n" + JSON.stringify(errorDetail, null, 2)
-        );
+        notifyError("Lỗi khi tạo mới sự cố!");
       });
   };
 
@@ -423,7 +439,7 @@ const Incident = () => {
     console.log("📤 Payload cập nhật:", payload);
 
     axios
-      .put(`/api/MedicalEvent/${editingEvent.eventId}`, payload, {
+      .put(`${MEDICAL_EVENT_API}/${editingEvent.eventId}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -431,29 +447,47 @@ const Incident = () => {
         fetchEvents();
         setShowEditForm(false);
         setEditingEvent(null);
+        notifySuccess("Cập nhật sự cố thành công!");
       })
       .catch((err) => {
         const errorDetail =
           err.response?.data?.errors || err.response?.data || err.message;
         console.error("❌ Lỗi cập nhật sự cố:", errorDetail);
-        alert(
-          "Lỗi khi cập nhật sự cố:\n" + JSON.stringify(errorDetail, null, 2)
-        );
+        notifyError("Lỗi khi cập nhật sự cố!");
       });
   };
 
   const handleDelete = (id) => {
-    if (window.confirm("Bạn có chắc chắn muốn xoá sự cố này?")) {
-      axios
-        .delete(
-          `https://swp-school-medical-management.onrender.com/api/MedicalEvent/${id}`
-        )
-        .then(() => {
-          setEvents((prev) => prev.filter((e) => e.eventId !== id));
-          setSelectedEvent(null);
-        })
-        .catch((err) => alert("Lỗi khi xoá: " + err));
-    }
+    toast.warn(
+      <div>
+        <div>Bạn có chắc chắn muốn xoá sự cố này?</div>
+        <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+          <button
+            style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: 4, padding: '4px 12px', cursor: 'pointer' }}
+            onClick={() => {
+              toast.dismiss();
+              axios
+                .delete(`https://swp-school-medical-management.onrender.com/api/MedicalEvent/${id}`)
+                .then(() => {
+                  setEvents((prev) => prev.filter((e) => e.eventId !== id));
+                  setSelectedEvent(null);
+                  notifySuccess("Đã xoá sự cố!");
+                })
+                .catch(() => notifyError("Lỗi khi xoá sự cố!"));
+            }}
+          >
+            Xoá
+          </button>
+          <button
+            style={{ background: '#fff', color: '#333', border: '1px solid #ccc', borderRadius: 4, padding: '4px 12px', cursor: 'pointer' }}
+            onClick={() => toast.dismiss()}
+          >
+            Huỷ
+          </button>
+        </div>
+      </div>,
+      { autoClose: false, closeOnClick: false, closeButton: false, position: "top-center" }
+    );
   };
 
   const handleBulkCreate = () => {
@@ -526,7 +560,7 @@ const Incident = () => {
         request: "Không có yêu cầu đặc biệt",
       };
 
-      return axios.post("/api/MedicalEvent", payload, {
+      return axios.post(MEDICAL_EVENT_API, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -555,16 +589,13 @@ const Incident = () => {
         setShowAllStudents(false);
         setSearchStudent("");
         fetchEvents();
-        alert(`Đã tạo thành công ${responses.length} sự cố y tế!`);
+        notifySuccess(`Đã tạo thành công ${responses.length} sự cố y tế!`);
       })
       .catch((err) => {
         const errorDetail =
           err.response?.data?.errors || err.response?.data || err.message;
         console.error("❌ Lỗi tạo hàng loạt sự cố:", errorDetail);
-        alert(
-          "Lỗi khi tạo hàng loạt sự cố:\n" +
-            JSON.stringify(errorDetail, null, 2)
-        );
+        notifyError("Lỗi khi tạo hàng loạt sự cố!");
       });
   };
 
@@ -610,10 +641,22 @@ const Incident = () => {
     );
   };
 
+  // Skeleton loading rows
+  const skeletonRows = Array.from({ length: itemsPerPage }, (_, i) => (
+    <tr key={i} className={style.skeletonRow}>
+      <td colSpan={5}>
+        <div className={style.skeletonBox} style={{ height: 32, width: "100%" }} />
+      </td>
+    </tr>
+  ));
+
   return (
     <div className={style.pageContainer}>
+      <Notification />
       <Sidebar />
       <div className={style.contentArea}>
+        {/* LOADING OVERLAY */}
+        {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
         <div className={style.header}>
           <h2>Báo cáo sự cố y tế học đường</h2>
           <div className={style.headerButtons}>
@@ -677,37 +720,39 @@ const Incident = () => {
               </tr>
             </thead>
             <tbody>
-              {currentItems.map((event) => (
-                <tr key={event.eventId}>
-                  <td>{event.studentName}</td>
-                  <td>
-                    <span className={style.tagBlue}>{event.eventType}</span>
-                  </td>
-                  <td>{new Date(event.eventDate).toLocaleString()}</td>
-                  <td>
-                    <span
-                      className={
-                        event.severityLevelName === "Nhẹ"
-                          ? style.tagYellow
-                          : event.severityLevelName === "Trung bình"
-                          ? style.tagOrange
-                          : style.tagRed
-                      }
-                    >
-                      {event.severityLevelName}
-                    </span>
-                  </td>
+              {loading
+                ? skeletonRows
+                : currentItems.map((event) => (
+                    <tr key={event.eventId} className={style.tableRow}>
+                      <td>{event.studentName}</td>
+                      <td>
+                        <span className={style.tagBlue}>{event.eventType}</span>
+                      </td>
+                      <td>{new Date(event.eventDate).toLocaleString()}</td>
+                      <td>
+                        <span
+                          className={
+                            event.severityLevelName === "Nhẹ"
+                              ? style.tagYellow
+                              : event.severityLevelName === "Trung bình"
+                              ? style.tagOrange
+                              : style.tagRed
+                          }
+                        >
+                          {event.severityLevelName}
+                        </span>
+                      </td>
 
-                  <td>
-                    <button
-                      className={style.viewDetail}
-                      onClick={() => setSelectedEvent(event)}
-                    >
-                      Xem chi tiết
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                      <td>
+                        <button
+                          className={style.viewDetail}
+                          onClick={() => setSelectedEvent(event)}
+                        >
+                          Xem chi tiết
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
             </tbody>
           </table>
         </div>
@@ -945,51 +990,126 @@ const Incident = () => {
               <button onClick={() => setSelectedEvent(null)}>Đóng</button>
               <button
                 className={style.sendBtn}
-                onClick={async () => {
-                  // Lấy parentId từ API Student
-                  try {
-                    const token = localStorage.getItem("token");
-                    const res = await axios.get(
-                      `/api/Student/${selectedEvent.studentId}`,
-                      {
-                        headers: { Authorization: `Bearer ${token}` },
-                      }
-                    );
-                    const parentId = res.data?.data?.parentId;
-                    if (!parentId) {
-                      alert("Không tìm thấy phụ huynh của học sinh này!");
-                      return;
-                    }
-                    // Soạn message
-                    const message = `Học sinh: ${
-                      selectedEvent.studentName
-                    }\nLoại sự cố: ${
-                      selectedEvent.eventType
-                    }\nThời gian: ${new Date(
-                      selectedEvent.eventDate
-                    ).toLocaleString()}\nMức độ: ${
-                      selectedEvent.severityLevelName
-                    }\nMô tả: ${selectedEvent.description}`;
-                    await axios.post(
-                      "/api/Notification/send",
-                      {
-                        receiverId: parentId,
-                        title: "Thông báo sự cố y tế học đường",
-                        message,
-                        typeId: 2,
-                        isRead: false,
-                      },
-                      { headers: { Authorization: `Bearer ${token}` } }
-                    );
-                    alert("Đã gửi thông báo cho phụ huynh!");
-                  } catch {
-                    alert("Gửi thông báo thất bại!");
-                  }
-                }}
+                onClick={() => setShowSendOption(true)}
               >
                 Gửi thông báo
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {showSendOption && (
+        <div className={style.modalOverlay}>
+          <div className={style.modalContent}>
+            <h4>Bạn muốn gửi thông báo bằng cách nào?</h4>
+            <button
+              className={style.sendBtn}
+              onClick={async () => {
+                // Gửi qua hệ thống (giữ nguyên logic cũ)
+                try {
+                  const token = localStorage.getItem("token");
+                  const res = await axios.get(
+                    `${STUDENT_API}/${selectedEvent.studentId}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                  );
+                  const parentId = res.data?.data?.parentId;
+                  if (!parentId) {
+                    alert("Không tìm thấy phụ huynh của học sinh này!");
+                    return;
+                  }
+                  const message = `Học sinh: ${selectedEvent.studentName}\nLoại sự cố: ${selectedEvent.eventType}\nThời gian: ${new Date(selectedEvent.eventDate).toLocaleString()}\nMức độ: ${selectedEvent.severityLevelName}\nMô tả: ${selectedEvent.description}`;
+                  await axios.post(
+                    NOTIFICATION_API,
+                    {
+                      receiverId: parentId,
+                      title: "Thông báo sự cố y tế học đường",
+                      message,
+                      typeId: 2,
+                      isRead: false,
+                    },
+                    { headers: { Authorization: `Bearer ${token}` } }
+                  );
+                  alert("Đã gửi thông báo cho phụ huynh!");
+                  setShowSendOption(false);
+                } catch {
+                  alert("Gửi thông báo thất bại!");
+                }
+              }}
+            >
+              Gửi qua hệ thống
+            </button>
+            <button
+              className={style.sendBtn}
+              onClick={async () => {
+                // Lấy email từ API, gán vào state và mở modal nhập email
+                try {
+                  const token = localStorage.getItem("token");
+                  const res = await axios.get(
+                    `${STUDENT_API}/${selectedEvent.studentId}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                  );
+                  const email = res.data?.data?.email || "";
+                  setManualEmail(email);
+                  setShowSendOption(false);
+                  setShowEmailInput(true);
+                } catch {
+                  setManualEmail("");
+                  setShowSendOption(false);
+                  setShowEmailInput(true);
+                }
+              }}
+            >
+              Gửi qua email
+            </button>
+            <button
+              className={style.closeBtn}
+              onClick={() => setShowSendOption(false)}
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
+      )}
+      {showEmailInput && (
+        <div className={style.modalOverlay}>
+          <div className={style.modalContent}>
+            <h4>Nhập email phụ huynh muốn gửi</h4>
+            <input
+              type="email"
+              value={manualEmail}
+              onChange={e => setManualEmail(e.target.value)}
+              placeholder="Nhập email phụ huynh"
+              style={{ width: '100%', marginBottom: 12 }}
+            />
+            <button
+              className={style.sendBtn}
+              onClick={async () => {
+                if (!manualEmail) {
+                  alert("Vui lòng nhập email!");
+                  return;
+                }
+                const subject = "Thông báo sự cố y tế học đường";
+                const body = `Học sinh: ${selectedEvent.studentName}\nLoại sự cố: ${selectedEvent.eventType}\nThời gian: ${new Date(selectedEvent.eventDate).toLocaleString()}\nMức độ: ${selectedEvent.severityLevelName}\nMô tả: ${selectedEvent.description}`;
+                try {
+                  await axios.post(
+                    "https://swp-school-medical-management.onrender.com/api/Email/send-by-email",
+                    { email: manualEmail, subject, body }
+                  );
+                  alert("Đã gửi email cho phụ huynh!");
+                  setShowEmailInput(false);
+                } catch {
+                  alert("Gửi email thất bại!");
+                }
+              }}
+            >
+              Gửi email
+            </button>
+            <button
+              className={style.closeBtn}
+              onClick={() => setShowEmailInput(false)}
+            >
+              Đóng
+            </button>
           </div>
         </div>
       )}
@@ -1016,7 +1136,7 @@ const Incident = () => {
                   try {
                     const token = localStorage.getItem("token");
                     const res = await axios.get(
-                      `/api/Student/by-class/${encodeURIComponent(className)}`,
+                      `${STUDENT_API}/by-class/${encodeURIComponent(className)}`,
                       {
                         headers: { Authorization: `Bearer ${token}` },
                       }

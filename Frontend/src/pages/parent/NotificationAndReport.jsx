@@ -100,7 +100,7 @@ const NotificationAndReport = () => {
       ...consentForms.map((f) => ({ ...f, itemType: "consent" })),
     ];
 
-    return combined.filter((item) => {
+    const filtered = combined.filter((item) => {
       if (!item) return false;
       if (activeTab === "all")
         return (
@@ -111,7 +111,6 @@ const NotificationAndReport = () => {
       if (activeTab === "vaccine")
         return (
           item.itemType === "consent" &&
-          item.campaignName?.toLowerCase().includes("tiêm chủng") &&
           !["Đồng ý", "Từ chối"].includes(item.consentStatusName)
         );
       if (activeTab === "result-health")
@@ -130,6 +129,12 @@ const NotificationAndReport = () => {
           ["Đồng ý", "Từ chối"].includes(item.consentStatusName)
         );
       return true;
+    });
+
+    return filtered.sort((a, b) => {
+      const dateA = new Date(a.requestDate || a.sentDate);
+      const dateB = new Date(b.requestDate || b.sentDate);
+      return dateB - dateA;
     });
   };
 

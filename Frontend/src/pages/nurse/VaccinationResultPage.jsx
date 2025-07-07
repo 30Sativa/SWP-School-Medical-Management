@@ -3,12 +3,16 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import style from "../../assets/css/ResultPage.module.css";
+import Notification from "../../components/Notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const VaccineResult = () => {
   const { id } = useParams();
   const [records, setRecords] = useState([]);
   const [campaignStatus, setCampaignStatus] = useState("");
   const [loading, setLoading] = useState(true);
+  const [modalLoading, setModalLoading] = useState(false); // loading khi gửi thông báo
   const [editingIndex, setEditingIndex] = useState(null);
   const [viewingIndex, setViewingIndex] = useState(null);
   const navigate = useNavigate();
@@ -89,15 +93,16 @@ const VaccineResult = () => {
         },
         { headers: { "Content-Type": "application/json" } }
       );
-      alert("Lưu thành công!");
+      notifySuccess("Lưu thành công!");
       setEditingIndex(null);
     } catch (error) {
-      alert("Lỗi khi lưu dữ liệu: " + JSON.stringify(error.response?.data));
+      notifyError("Lỗi khi lưu dữ liệu: " + JSON.stringify(error.response?.data));
     }
   };
 
   const handleSendNotification = async (student) => {
     try {
+      setModalLoading(true);
       const note = student.followUpNote
         ? `Ghi chú: ${student.followUpNote}`
         : "Không có ghi chú.";
@@ -114,15 +119,18 @@ const VaccineResult = () => {
         },
         { headers: { "Content-Type": "application/json" } }
       );
-      alert("Đã gửi thông báo đến phụ huynh!");
+      notifySuccess("Đã gửi thông báo đến phụ huynh!");
     } catch (error) {
       console.error("Lỗi khi gửi thông báo:", error);
-      alert("Không thể gửi thông báo: " + error.response?.data?.message);
+      notifyError("Không thể gửi thông báo: " + error.response?.data?.message);
+    } finally {
+      setModalLoading(false);
     }
   };
 
   return (
     <div className={style.container}>
+      {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
       <h2 className={style.title}>Kết quả tiêm chủng</h2>
       <button className={style.btnBack} onClick={() => navigate(-1)}>
         ← Quay lại
@@ -252,6 +260,7 @@ const VaccineResult = () => {
           </div>
         </div>
       )}
+      <Notification />
     </div>
   );
 };

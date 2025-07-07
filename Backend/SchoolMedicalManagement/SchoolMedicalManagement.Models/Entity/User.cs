@@ -5,7 +5,7 @@ namespace SchoolMedicalManagement.Models.Entity;
 
 public partial class User
 {
-    public int UserId { get; set; }
+    public Guid UserId { get; set; }
 
     public string Username { get; set; } = null!;
 
@@ -23,6 +23,10 @@ public partial class User
 
     public bool? IsFirstLogin { get; set; }
 
+    public bool? IsActive { get; set; }
+
+    public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
+
     public virtual ICollection<BlogPost> BlogPosts { get; set; } = new List<BlogPost>();
 
     public virtual ICollection<HealthCheckCampaign> HealthCheckCampaigns { get; set; } = new List<HealthCheckCampaign>();
@@ -32,6 +36,10 @@ public partial class User
     public virtual ICollection<MedicationRequest> MedicationRequestParents { get; set; } = new List<MedicationRequest>();
 
     public virtual ICollection<MedicationRequest> MedicationRequestReceivedByNavigations { get; set; } = new List<MedicationRequest>();
+
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
+    public virtual ICollection<ParentFeedback> ParentFeedbacks { get; set; } = new List<ParentFeedback>();
 
     public virtual Role Role { get; set; } = null!;
 
