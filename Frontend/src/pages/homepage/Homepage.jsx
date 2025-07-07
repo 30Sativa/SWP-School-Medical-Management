@@ -25,7 +25,10 @@ import school3 from "../../assets/img/school3.jpeg";
 import useAosInit from "../../hooks/useAosInit";
 import "aos/dist/aos.css";
 import UserMenu from "../../components/UserMenu";
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -115,7 +118,10 @@ const Homepage = () => {
           ) : (
             <button className={style.loginBtn} onClick={() => navigate("/login")}>Đăng nhập</button>
           )}
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
         </nav>
       </header>
 

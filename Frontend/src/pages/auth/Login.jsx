@@ -78,6 +78,7 @@ const Login = () => {
 
         setTimeout(() => {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
           console.log(
             "Role for redirect:",
             roleName,
@@ -142,6 +143,11 @@ const Login = () => {
             alert("❗ Vai trò không xác định!");
             navigate("/");
           }
+=======
+          // Lưu role, fullname, ...
+          // Chuyển hướng về homepage sau đăng nhập thành công
+          navigate("/");
+>>>>>>> Stashed changes
 =======
           // Lưu role, fullname, ...
           // Chuyển hướng về homepage sau đăng nhập thành công

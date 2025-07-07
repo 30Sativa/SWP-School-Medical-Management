@@ -12,6 +12,9 @@ import {
 =======
   User,
   Globe,
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 } from "lucide-react";
 import styles from "./Sidebar.module.css";

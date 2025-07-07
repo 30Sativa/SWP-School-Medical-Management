@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import { Home, Users, ClipboardList, Rss, Flag, LogOut, Menu, Bell, ClipboardPlus, User } from "lucide-react";
+=======
+import { Home, Home as Home2, Users, Rss, Bell, LogOut, Menu, User, Globe } from "lucide-react";
+>>>>>>> Stashed changes
 =======
 import { Home, Home as Home2, Users, Rss, Bell, LogOut, Menu, User, Globe } from "lucide-react";
 >>>>>>> Stashed changes
