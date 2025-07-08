@@ -165,7 +165,7 @@ const HealthProfile = () => {
 
   // Helper function to safely display data
   const safeDisplayValue = useCallback((value, defaultValue = "Không có") => {
-    if (!value || value === "string" || value === "") {
+    if (!value || (typeof value === 'string' && value.trim() === '')) {
       return defaultValue;
     }
     return value;
