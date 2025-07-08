@@ -19,7 +19,7 @@ const ERROR_MESSAGES = {
 // API endpoints
 const API_ENDPOINTS = {
   STUDENTS_BY_PARENT: (parentId) => `${API_BASE_URL}/Student/by-parent/${parentId}`,
-  MEDICAL_HISTORY: (studentId) => `${API_BASE_URL}/MedicalHistory/student/${studentId}`,
+  HEALTH_SUMMARIES: `${API_BASE_URL}/health-checks/summaries`,
   VACCINATION_RECORDS: (studentId) => `${API_BASE_URL}/VaccinationCampaign/records/student/${studentId}`,
   MEDICAL_EVENTS: (studentId) => `${API_BASE_URL}/MedicalEvent/student/${studentId}`,
   STUDENT_DETAILS: (studentId) => `${API_BASE_URL}/Student/${studentId}`
@@ -29,7 +29,7 @@ const ChildCareHistory = () => {
   // State management
   const [students, setStudents] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
-  const [medicalHistory, setMedicalHistory] = useState([]);
+  const [healthSummaries, setHealthSummaries] = useState([]);
   const [vaccinationHistory, setVaccinationHistory] = useState([]);
   const [medicalEvents, setMedicalEvents] = useState([]);
   const [studentName, setStudentName] = useState("");
@@ -135,19 +135,24 @@ const ChildCareHistory = () => {
       console.log(`Fetching data for student ID: ${selectedStudentId}`);
 
       const [
-        medicalHistoryData,
+        healthSummariesData,
         vaccinationData,
         medicalEventsData,
         studentResponse
       ] = await Promise.all([
-        fetchWithErrorHandling(API_ENDPOINTS.MEDICAL_HISTORY(selectedStudentId)),
+        fetchWithErrorHandling(API_ENDPOINTS.HEALTH_SUMMARIES),
         fetchWithErrorHandling(API_ENDPOINTS.VACCINATION_RECORDS(selectedStudentId)),
         fetchWithErrorHandling(API_ENDPOINTS.MEDICAL_EVENTS(selectedStudentId)),
         fetchWithErrorHandling(API_ENDPOINTS.STUDENT_DETAILS(selectedStudentId))
       ]);
 
+      // Filter health summaries for the selected student
+      const filteredHealthSummaries = Array.isArray(healthSummariesData) 
+        ? healthSummariesData.filter(summary => summary.studentId === selectedStudentId)
+        : [];
+
       // Set data with proper validation
-      setMedicalHistory(Array.isArray(medicalHistoryData) ? medicalHistoryData : []);
+      setHealthSummaries(filteredHealthSummaries);
       setVaccinationHistory(Array.isArray(vaccinationData) ? vaccinationData : []);
       setMedicalEvents(Array.isArray(medicalEventsData) ? medicalEventsData : []);
       setStudentName(studentResponse?.fullName || "");
@@ -156,7 +161,7 @@ const ChildCareHistory = () => {
       calculateVaccineStats(vaccinationData);
 
       console.log(`Successfully loaded data for ${studentResponse?.fullName || 'student'}`);
-      console.log(`Medical history: ${medicalHistoryData?.length || 0} records`);
+      console.log(`Health summaries: ${filteredHealthSummaries?.length || 0} records`);
       console.log(`Vaccination history: ${vaccinationData?.length || 0} records`);
       console.log(`Medical events: ${medicalEventsData?.length || 0} records`);
 
@@ -191,11 +196,11 @@ const ChildCareHistory = () => {
   }, [fetchStudentData]);
 
   // Filter functions
-  const getFilteredMedicalHistory = useCallback(() => {
-    return medicalHistory.filter(item =>
-      matchesSearch(item.diseaseName, item.diagnosedDate)
+  const getFilteredHealthSummaries = useCallback(() => {
+    return healthSummaries.filter(item =>
+      matchesSearch(item.campaignTitle, item.checkDate, item.generalNote)
     );
-  }, [medicalHistory, matchesSearch]);
+  }, [healthSummaries, matchesSearch]);
 
   const getFilteredVaccinationHistory = useCallback(() => {
     return vaccinationHistory.filter(item =>
@@ -270,7 +275,7 @@ const ChildCareHistory = () => {
     <div style={{ marginBottom: "20px" }}>
       <input
         type="text"
-        placeholder="🔍 Tìm kiếm theo bệnh, chiến dịch, ngày hoặc theo dõi sau tiêm..."
+        placeholder="🔍 Tìm kiếm theo chiến dịch khám, ngày khám, ghi chú hoặc theo dõi..."
         value={searchKeyword}
         onChange={handleSearchChange}
         style={{
@@ -292,20 +297,32 @@ const ChildCareHistory = () => {
     </div>
   );
 
-  const renderMedicalHistorySection = () => {
-    const filteredData = getFilteredMedicalHistory();
+  const renderHealthSummariesSection = () => {
+    const filteredData = getFilteredHealthSummaries();
     
     return (
       <div className={styles.section}>
-        <h3>🩺 Lịch Sử Bệnh Án</h3>
+        <h3>🩺 Lịch Sử Khám Sức Khỏe Định Kỳ</h3>
         {filteredData.length === 0 ? (
-          <p>Không có bệnh án phù hợp.</p>
+          <p>Không có kết quả khám sức khỏe phù hợp.</p>
         ) : (
           filteredData.map((item) => (
-            <div className={styles.historyCard} key={item.historyId}>
-              <h4>{item.diseaseName}</h4>
-              <p><strong>Ngày chẩn đoán:</strong> {formatDate(item.diagnosedDate)}</p>
-              <p><strong>Ghi chú:</strong> {item.note || "Không có ghi chú"}</p>
+            <div className={styles.historyCard} key={item.summaryId}>
+              <h4>{item.campaignTitle}</h4>
+              <p><strong>Ngày khám:</strong> {formatDate(item.checkDate)}</p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "8px", margin: "10px 0" }}>
+                <p><strong>Chiều cao:</strong> {item.height} cm</p>
+                <p><strong>Cân nặng:</strong> {item.weight} kg</p>
+                <p><strong>Huyết áp:</strong> {item.bloodPressure}</p>
+                <p><strong>Thị lực:</strong> {item.visionSummary}</p>
+                <p><strong>Tai mũi họng:</strong> {item.ent}</p>
+              </div>
+              {item.generalNote && (
+                <p><strong>Ghi chú:</strong> {item.generalNote}</p>
+              )}
+              {item.followUpNote && (
+                <p><strong>Theo dõi:</strong> {item.followUpNote}</p>
+              )}
             </div>
           ))
         )}
@@ -386,7 +403,7 @@ const ChildCareHistory = () => {
           <p className={styles.error}>{error}</p>
         ) : (
           <>
-            {renderMedicalHistorySection()}
+            {renderHealthSummariesSection()}
             {renderVaccinationHistorySection()}
             {renderMedicalEventsSection()}
           </>

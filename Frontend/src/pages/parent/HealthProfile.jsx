@@ -7,7 +7,6 @@ import "react-toastify/dist/ReactToastify.css";
 
 // Constants
 const API_BASE_URL = "https://swp-school-medical-management.onrender.com/api";
-const RESPONSIVE_BREAKPOINT = 600;
 
 // Error messages
 const ERROR_MESSAGES = {
@@ -20,8 +19,7 @@ const ERROR_MESSAGES = {
 // API endpoints
 const API_ENDPOINTS = {
   STUDENTS_BY_PARENT: (parentId) => `${API_BASE_URL}/Student/by-parent/${parentId}`,
-  HEALTH_PROFILE: (studentId) => `${API_BASE_URL}/health-profiles/student/${studentId}`,
-  HEALTH_SUMMARIES: `${API_BASE_URL}/health-checks/summaries`
+  HEALTH_PROFILE: (studentId) => `${API_BASE_URL}/health-profiles/student/${studentId}`
 };
 
 const HealthProfile = () => {
@@ -49,16 +47,6 @@ const HealthProfile = () => {
     return age;
   }, []);
 
-  const getPriority = useCallback((title) => {
-    if (!title) return 0;
-    
-    const lowerTitle = title.toLowerCase();
-    if (lowerTitle.includes("giữa kỳ 2025")) return 3;
-    if (lowerTitle.includes("cuối năm 2025")) return 2;
-    if (lowerTitle.includes("định kỳ")) return 1;
-    return 0;
-  }, []);
-
   // API calls
   const fetchStudentHealthProfile = useCallback(async (studentId) => {
     try {
@@ -73,44 +61,24 @@ const HealthProfile = () => {
     }
   }, [token]);
 
-  const fetchHealthSummaries = useCallback(async (studentId) => {
-    try {
-      const response = await axios.get(
-        API_ENDPOINTS.HEALTH_SUMMARIES,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      
-      const summaries = Array.isArray(response.data.data) ? response.data.data : [];
-      return summaries.filter(summary => summary.studentId === studentId);
-    } catch (error) {
-      console.error(`Failed to fetch health summaries for student ${studentId}:`, error);
-      return [];
-    }
-  }, [token]);
-
   const fetchStudentData = useCallback(async (student) => {
     try {
       console.log(`Fetching data for student: ${student.fullName} (ID: ${student.studentId})`);
       
-      const [profile, summaries] = await Promise.all([
-        fetchStudentHealthProfile(student.studentId),
-        fetchHealthSummaries(student.studentId)
-      ]);
+      const profile = await fetchStudentHealthProfile(student.studentId);
 
       return {
         studentInfo: student,
-        profile,
-        summaries
+        profile
       };
     } catch (error) {
       console.error(`Failed to fetch data for student ${student.studentId}:`, error);
       return {
         studentInfo: student,
-        profile: null,
-        summaries: []
+        profile: null
       };
     }
-  }, [fetchStudentHealthProfile, fetchHealthSummaries]);
+  }, [fetchStudentHealthProfile]);
 
   const fetchProfiles = useCallback(async () => {
     if (!parentId || !token) {
@@ -193,33 +161,22 @@ const HealthProfile = () => {
     </div>
   );
 
-  const renderStudentAvatar = (studentInfo) => (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: windowWidth < RESPONSIVE_BREAKPOINT ? "column" : "row",
-        alignItems: "center",
-        gap: "24px",
-        marginBottom: "28px",
-      }}
-    >
-      <img
-        src="https://i.pravatar.cc/120"
-        alt={`Avatar của ${studentInfo.fullName}`}
-        className={styles.avatar}
-      />
-      <div>
-        <h3 className={styles.name}>👦 {studentInfo.fullName}</h3>
-        <p className={styles.subInfo}>Lớp: {studentInfo.className}</p>
-      </div>
-    </div>
-  );
-
   const renderPersonalInfo = (studentInfo, profile) => (
     <>
-      <h4 className={styles.sectionTitle}>👤 Thông tin cá nhân</h4>
+      <div className={styles.studentHeader}>
+        <h3 className={styles.name}>{studentInfo.fullName}</h3>
+        <p className={styles.subInfo}>Lớp: {studentInfo.className}</p>
+      </div>
+      
+      <h4 className={styles.sectionTitle}>Thông tin hồ sơ sức khỏe</h4>
       <div className={styles.infoBox}>
         <div className={styles.infoGrid}>
+          <div>
+            <span className={styles.label}>Họ và tên:</span> {studentInfo.fullName}
+          </div>
+          <div>
+            <span className={styles.label}>Lớp:</span> {studentInfo.className}
+          </div>
           <div>
             <span className={styles.label}>Giới tính:</span> {studentInfo.gender}
           </div>
@@ -247,12 +204,12 @@ const HealthProfile = () => {
             }
           </div>
           <div>
-            <span className={styles.label}>Ghi chú:</span> {
+            <span className={styles.label}>Ghi chú y tế:</span> {
               safeDisplayValue(profile.generalNote)
             }
           </div>
           <div>
-            <span className={styles.label}>Trạng thái:</span> {
+            <span className={styles.label}>Trạng thái hồ sơ:</span> {
               profile.isActive ? "Đang hoạt động" : "Ngừng hoạt động"
             }
           </div>
@@ -261,69 +218,7 @@ const HealthProfile = () => {
     </>
   );
 
-  const renderHealthSummaryItem = (item, index) => (
-    <div
-      key={`summary-${index}`}
-      style={{
-        marginBottom: "20px",
-        padding: "12px 16px",
-        borderRadius: "10px",
-        background: "#fff",
-        border: "1px solid #e2e8f0",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-      }}
-    >
-      <h5 style={{ marginBottom: "10px", fontSize: "1.05rem", color: "#0284c7" }}>
-        📌 {item.campaignTitle}
-      </h5>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns:
-            window.innerWidth < RESPONSIVE_BREAKPOINT
-              ? "1fr"
-              : "repeat(auto-fit, minmax(260px, 1fr))",
-          gap: "12px",
-          fontSize: "0.95rem",
-          color: "#1e293b",
-        }}
-      >
-        <div><strong>Chiều cao:</strong> {item.height} cm</div>
-        <div><strong>Cân nặng:</strong> {item.weight} kg</div>
-        <div><strong>Huyết áp:</strong> {item.bloodPressure}</div>
-        <div><strong>Thị lực:</strong> {item.visionSummary}</div>
-        <div><strong>Tai mũi họng:</strong> {item.ent}</div>
-        <div><strong>Ghi chú:</strong> {item.generalNote}</div>
-        <div><strong>Theo dõi:</strong> {item.followUpNote}</div>
-      </div>
-    </div>
-  );
-
-  const renderHealthSummaries = (summaries) => {
-    if (summaries.length === 0) return null;
-
-    const sortedSummaries = [...summaries].sort(
-      (a, b) => getPriority(b.campaignTitle) - getPriority(a.campaignTitle)
-    );
-
-    return (
-      <div
-        style={{
-          background: "#f1f5f9",
-          padding: "20px",
-          borderRadius: "14px",
-          border: "1px solid #e2e8f0",
-        }}
-      >
-        <h4 style={{ marginBottom: "16px", color: "#0e2a47", fontSize: "1.1rem" }}>
-          📋 Thông tin khám sức khỏe
-        </h4>
-        {sortedSummaries.map(renderHealthSummaryItem)}
-      </div>
-    );
-  };
-
-  const renderStudentCard = ({ studentInfo, profile, summaries }) => (
+  const renderStudentCard = ({ studentInfo, profile }) => (
     <div
       key={`student-${studentInfo.studentId}`}
       className={styles.cardBox}
@@ -337,19 +232,15 @@ const HealthProfile = () => {
       }}
     >
       <h2 style={{ color: "#0e2a47", marginBottom: "20px" }}>
-        🩺 Hồ sơ sức khỏe của bé {studentInfo.fullName}
+        Hồ sơ sức khỏe học sinh
       </h2>
 
       {!profile ? (
         <p style={{ color: "#dc2626", fontWeight: "500" }}>
-          ⚠️ Chưa có hồ sơ sức khỏe cho bé này.
+          ⚠️ Chưa có hồ sơ sức khỏe cho học sinh này.
         </p>
       ) : (
-        <>
-          {renderStudentAvatar(studentInfo)}
-          {renderPersonalInfo(studentInfo, profile)}
-          {renderHealthSummaries(summaries)}
-        </>
+        renderPersonalInfo(studentInfo, profile)
       )}
     </div>
   );
