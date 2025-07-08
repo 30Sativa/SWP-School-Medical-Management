@@ -193,7 +193,7 @@ const SendMedicine = () => {
       console.error("Không lấy được danh sách học sinh:", err);
       setStudentList([]);
     }
-  }, [parentId, studentId]);
+  }, [parentId]);
 
   const fetchStudentName = useCallback(async () => {
     if (!studentId || studentId === 'null') {
