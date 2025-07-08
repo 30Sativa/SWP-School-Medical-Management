@@ -197,7 +197,7 @@ const HealthProfile = () => {
     <div
       style={{
         display: "flex",
-        flexDirection: window.innerWidth < RESPONSIVE_BREAKPOINT ? "column" : "row",
+        flexDirection: windowWidth < RESPONSIVE_BREAKPOINT ? "column" : "row",
         alignItems: "center",
         gap: "24px",
         marginBottom: "28px",
