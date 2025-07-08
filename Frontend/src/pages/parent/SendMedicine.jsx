@@ -421,7 +421,7 @@ const SendMedicine = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className={styles.searchBox}
                 />
-                {(showAll ? filteredHistory : filteredHistory.slice(0, 3)).map((item, index) => (
+                {filteredHistory.slice(0, 3).map((item, index) => (
                   <div
                     key={index}
                     className={`${styles.historyItem} ${styles.fadeIn}`}
