@@ -10,6 +10,9 @@ namespace SchoolMedicalManagement.Service.Interface
         // ✅ Lấy danh sách tất cả hồ sơ sức khỏe (kèm thông tin học sinh)
         Task<List<ManagerHealthProfileResponse>> GetAllHealthProfilesAsync();
 
+        // ✅ Lấy danh sách tất cả hồ sơ sức khỏe bao gồm cả IsActive = false
+        Task<List<ManagerHealthProfileResponse>> GetAllHealthProfilesIncludeInactiveAsync();
+
         // ✅ Lấy chi tiết một hồ sơ sức khỏe theo ID
         Task<BaseResponse?> GetHealthProfileByIdAsync(int profileId);
 
@@ -18,6 +21,9 @@ namespace SchoolMedicalManagement.Service.Interface
 
         // ✅ Cập nhật hồ sơ sức khỏe
         Task<BaseResponse?> UpdateHealthProfileAsync(int profileId, UpdateHealthProfileRequest request);
+
+        // ✅ Cập nhật trạng thái IsActive của hồ sơ sức khỏe
+        Task<BaseResponse?> UpdateHealthProfileStatusAsync(int profileId, UpdateHealthProfileStatusRequest request);
 
         // ✅ Xoá mềm hồ sơ sức khỏe
         Task<bool> DeleteHealthProfileAsync(int profileId);
