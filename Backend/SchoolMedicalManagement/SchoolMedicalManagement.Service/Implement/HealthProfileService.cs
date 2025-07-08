@@ -36,6 +36,23 @@ namespace SchoolMedicalManagement.Service.Implement
             }).ToList();
         }
 
+        // ✅ Lấy tất cả hồ sơ sức khỏe bao gồm cả IsActive = false
+        public async Task<List<ManagerHealthProfileResponse>> GetAllHealthProfilesIncludeInactiveAsync()
+        {
+            var healthProfiles = await _healthProfileRepository.GetAllHealthProfileIncludeInactive();
+            return healthProfiles.Select(hp => new ManagerHealthProfileResponse
+            {
+                ProfileId = hp.ProfileId,
+                StudentId = hp.StudentId ?? 0,
+                Height = hp.Height,
+                Weight = hp.Weight,
+                ChronicDiseases = hp.ChronicDiseases,
+                Allergies = hp.Allergies,
+                GeneralNote = hp.GeneralNote,
+                IsActive = hp.IsActive
+            }).ToList();
+        }
+
         // ✅ Lấy 1 hồ sơ sức khỏe theo ID
         public async Task<BaseResponse?> GetHealthProfileByIdAsync(int id)
         {
@@ -149,6 +166,39 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 Status = StatusCodes.Status200OK.ToString(),
                 Message = "Cập nhật hồ sơ sức khỏe thành công.",
+                Data = new ManagerHealthProfileResponse
+                {
+                    ProfileId = updated.ProfileId,
+                    StudentId = updated.StudentId ?? 0,
+                    Height = updated.Height,
+                    Weight = updated.Weight,
+                    ChronicDiseases = updated.ChronicDiseases,
+                    Allergies = updated.Allergies,
+                    GeneralNote = updated.GeneralNote,
+                    IsActive = updated.IsActive
+                }
+            };
+        }
+
+        // ✅ Cập nhật trạng thái IsActive của hồ sơ sức khỏe
+        public async Task<BaseResponse?> UpdateHealthProfileStatusAsync(int id, UpdateHealthProfileStatusRequest request)
+        {
+            var updated = await _healthProfileRepository.UpdateHealthProfileStatus(id, request.IsActive);
+            
+            if (updated == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Không tìm thấy hồ sơ sức khỏe với ID {id}.",
+                    Data = null
+                };
+            }
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = $"Cập nhật trạng thái hồ sơ sức khỏe thành công. Trạng thái hiện tại: {(request.IsActive ? "Hoạt động" : "Không hoạt động")}",
                 Data = new ManagerHealthProfileResponse
                 {
                     ProfileId = updated.ProfileId,

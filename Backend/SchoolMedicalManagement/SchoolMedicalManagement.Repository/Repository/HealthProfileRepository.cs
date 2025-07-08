@@ -18,11 +18,23 @@ namespace SchoolMedicalManagement.Repository.Repository
                 .Where(hp => hp.IsActive == true) // ✅ Thêm điều kiện lọc nếu dùng soft delete
                 .ToListAsync();
 
+        // ✅ Lấy tất cả hồ sơ sức khỏe (bao gồm cả IsActive = false)
+        public async Task<List<HealthProfile>> GetAllHealthProfileIncludeInactive()
+            => await _context.HealthProfiles
+                .Include(hp => hp.Student)
+                .ToListAsync();
+
         // ✅ Lấy 1 hồ sơ theo ID
         public async Task<HealthProfile?> GetHealthProfileById(int id)
             => await _context.HealthProfiles
                 .Include(hp => hp.Student)
                 .FirstOrDefaultAsync(hp => hp.ProfileId == id && hp.IsActive == true);
+
+        // ✅ Lấy 1 hồ sơ theo ID (bao gồm cả IsActive = false)
+        public async Task<HealthProfile?> GetHealthProfileByIdIncludeInactive(int id)
+            => await _context.HealthProfiles
+                .Include(hp => hp.Student)
+                .FirstOrDefaultAsync(hp => hp.ProfileId == id);
 
         // ✅ Tạo mới hồ sơ
         public async Task<HealthProfile?> CreateHealthProfile(HealthProfile healthProfile)
@@ -37,6 +49,19 @@ namespace SchoolMedicalManagement.Repository.Repository
         {
             await UpdateAsync(healthProfile);
             return await GetHealthProfileById(healthProfile.ProfileId);
+        }
+
+        // ✅ Cập nhật trạng thái IsActive
+        public async Task<HealthProfile?> UpdateHealthProfileStatus(int id, bool isActive)
+        {
+            var healthProfile = await GetHealthProfileByIdIncludeInactive(id);
+            if (healthProfile == null)
+                return null;
+
+            healthProfile.IsActive = isActive;
+            healthProfile.LastUpdatedDate = DateTime.Now;
+            await UpdateAsync(healthProfile);
+            return await GetHealthProfileByIdIncludeInactive(id);
         }
 
         // ✅ Xoá mềm hồ sơ
