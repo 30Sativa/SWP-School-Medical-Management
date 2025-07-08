@@ -12,6 +12,62 @@ namespace SchoolMedicalManagement.Repository.Repository
     {
         public VaccinationCampaignRepository(SwpEduHealV5Context context) : base(context) { }
 
+        // ✅ Tối ưu: Lấy danh sách campaign KHÔNG include collections để giảm tải
+        public async Task<List<VaccinationCampaign>> GetAllCampaignsLightweight()
+            => await _context.VaccinationCampaigns
+                .AsNoTracking()
+                .Include(c => c.CreatedByNavigation)
+                .Include(c => c.Status)
+                .ToListAsync();
+
+        // ✅ Tối ưu: Lấy danh sách campaign active KHÔNG include collections
+        public async Task<List<VaccinationCampaign>> GetAllActiveCampaignsLightweight()
+            => await _context.VaccinationCampaigns
+                .Include(c => c.CreatedByNavigation)
+                .Include(c => c.Status)
+                .Where(c => c.StatusId == 2) // 2: Đang diễn ra
+                .ToListAsync();
+
+        // ✅ Tối ưu: Lấy campaign theo status KHÔNG include collections
+        public async Task<List<VaccinationCampaign>> GetCampaignsByStatusLightweight(int statusId)
+            => await _context.VaccinationCampaigns
+                .Include(c => c.CreatedByNavigation)
+                .Include(c => c.Status)
+                .Where(c => c.StatusId == statusId)
+                .ToListAsync();
+
+        // ✅ Tối ưu: Lấy campaign theo creator KHÔNG include collections
+        public async Task<List<VaccinationCampaign>> GetCampaignsByCreatorLightweight(Guid creatorId)
+            => await _context.VaccinationCampaigns
+                .Include(c => c.CreatedByNavigation)
+                .Include(c => c.Status)
+                .Where(c => c.CreatedBy == creatorId)
+                .ToListAsync();
+
+        // ✅ NEW: Count consent requests cho nhiều campaigns cùng lúc
+        public async Task<Dictionary<int, int>> GetConsentRequestsCountByCampaignIds(List<int> campaignIds)
+            => await _context.VaccinationConsentRequests
+                .Where(cr => campaignIds.Contains(cr.CampaignId))
+                .GroupBy(cr => cr.CampaignId)
+                .ToDictionaryAsync(g => g.Key, g => g.Count());
+
+        // ✅ NEW: Count vaccination records cho nhiều campaigns cùng lúc
+        public async Task<Dictionary<int, int>> GetVaccinationRecordsCountByCampaignIds(List<int> campaignIds)
+            => await _context.VaccinationRecords
+                .Where(vr => campaignIds.Contains(vr.CampaignId.Value) && vr.IsActive == true)
+                .GroupBy(vr => vr.CampaignId.Value)
+                .ToDictionaryAsync(g => g.Key, g => g.Count());
+
+        // ✅ NEW: Count consent requests cho 1 campaign
+        public async Task<int> GetConsentRequestsCountByCampaignId(int campaignId)
+            => await _context.VaccinationConsentRequests
+                .CountAsync(cr => cr.CampaignId == campaignId);
+
+        // ✅ NEW: Count vaccination records cho 1 campaign
+        public async Task<int> GetVaccinationRecordsCountByCampaignId(int campaignId)
+            => await _context.VaccinationRecords
+                .CountAsync(vr => vr.CampaignId == campaignId && vr.IsActive == true);
+
         // Lấy danh sách tất cả chiến dịch tiêm chủng đang diễn ra
         public async Task<List<VaccinationCampaign>> GetAllActiveCampaigns()
             => await _context.VaccinationCampaigns

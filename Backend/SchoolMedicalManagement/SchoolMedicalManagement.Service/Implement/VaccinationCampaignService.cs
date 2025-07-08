@@ -31,7 +31,22 @@ namespace SchoolMedicalManagement.Service.Implement
         // Lấy danh sách tất cả chiến dịch tiêm chủng
         public async Task<BaseResponse> GetVaccinationCampaignsAsync()
         {
-            var campaigns = await _campaignRepository.GetAllCampaigns();
+            var campaigns = await _campaignRepository.GetAllCampaignsLightweight();
+
+            if (!campaigns.Any())
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status200OK.ToString(),
+                    Message = "No vaccination campaigns found",
+                    Data = new List<VaccinationCampaignResponse>()
+                };
+            }
+
+            var campaignIds = campaigns.Select(c => c.CampaignId).ToList();
+            var consentRequestsCounts = await _campaignRepository.GetConsentRequestsCountByCampaignIds(campaignIds);
+            var vaccinationRecordsCounts = await _campaignRepository.GetVaccinationRecordsCountByCampaignIds(campaignIds);
+
             var response = campaigns.Select(c => new VaccinationCampaignResponse
             {
                 CampaignId = c.CampaignId,
@@ -42,8 +57,8 @@ namespace SchoolMedicalManagement.Service.Implement
                 CreatedByName = c.CreatedByNavigation?.FullName,
                 StatusId = c.StatusId,
                 StatusName = c.Status?.StatusName,
-                TotalConsentRequests = c.VaccinationConsentRequests?.Count ?? 0,
-                TotalVaccinationRecords = c.VaccinationRecords?.Count ?? 0
+                TotalConsentRequests = consentRequestsCounts.GetValueOrDefault(c.CampaignId, 0),
+                TotalVaccinationRecords = vaccinationRecordsCounts.GetValueOrDefault(c.CampaignId, 0)
             }).ToList();
 
             return new BaseResponse
@@ -57,7 +72,22 @@ namespace SchoolMedicalManagement.Service.Implement
         // Lấy danh sách chiến dịch tiêm chủng đang hoạt động
         public async Task<BaseResponse> GetActiveVaccinationCampaignsAsync()
         {
-            var campaigns = await _campaignRepository.GetAllActiveCampaigns();
+            var campaigns = await _campaignRepository.GetAllActiveCampaignsLightweight();
+
+            if (!campaigns.Any())
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status200OK.ToString(),
+                    Message = "No active vaccination campaigns found",
+                    Data = new List<VaccinationCampaignResponse>()
+                };
+            }
+
+            var campaignIds = campaigns.Select(c => c.CampaignId).ToList();
+            var consentRequestsCounts = await _campaignRepository.GetConsentRequestsCountByCampaignIds(campaignIds);
+            var vaccinationRecordsCounts = await _campaignRepository.GetVaccinationRecordsCountByCampaignIds(campaignIds);
+
             var response = campaigns.Select(c => new VaccinationCampaignResponse
             {
                 CampaignId = c.CampaignId,
@@ -68,8 +98,8 @@ namespace SchoolMedicalManagement.Service.Implement
                 CreatedByName = c.CreatedByNavigation?.FullName,
                 StatusId = c.StatusId,
                 StatusName = c.Status?.StatusName,
-                TotalConsentRequests = c.VaccinationConsentRequests?.Count ?? 0,
-                TotalVaccinationRecords = c.VaccinationRecords?.Count ?? 0
+                TotalConsentRequests = consentRequestsCounts.GetValueOrDefault(c.CampaignId, 0),
+                TotalVaccinationRecords = vaccinationRecordsCounts.GetValueOrDefault(c.CampaignId, 0)
             }).ToList();
 
             return new BaseResponse
@@ -83,7 +113,22 @@ namespace SchoolMedicalManagement.Service.Implement
         // Lấy danh sách chiến dịch theo trạng thái
         public async Task<BaseResponse> GetVaccinationCampaignsByStatusAsync(int statusId)
         {
-            var campaigns = await _campaignRepository.GetCampaignsByStatus(statusId);
+            var campaigns = await _campaignRepository.GetCampaignsByStatusLightweight(statusId);
+
+            if (!campaigns.Any())
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status200OK.ToString(),
+                    Message = $"No vaccination campaigns found with status ID {statusId}",
+                    Data = new List<VaccinationCampaignResponse>()
+                };
+            }
+
+            var campaignIds = campaigns.Select(c => c.CampaignId).ToList();
+            var consentRequestsCounts = await _campaignRepository.GetConsentRequestsCountByCampaignIds(campaignIds);
+            var vaccinationRecordsCounts = await _campaignRepository.GetVaccinationRecordsCountByCampaignIds(campaignIds);
+
             var response = campaigns.Select(c => new VaccinationCampaignResponse
             {
                 CampaignId = c.CampaignId,
@@ -94,8 +139,8 @@ namespace SchoolMedicalManagement.Service.Implement
                 CreatedByName = c.CreatedByNavigation?.FullName,
                 StatusId = c.StatusId,
                 StatusName = c.Status?.StatusName,
-                TotalConsentRequests = c.VaccinationConsentRequests?.Count ?? 0,
-                TotalVaccinationRecords = c.VaccinationRecords?.Count ?? 0
+                TotalConsentRequests = consentRequestsCounts.GetValueOrDefault(c.CampaignId, 0),
+                TotalVaccinationRecords = vaccinationRecordsCounts.GetValueOrDefault(c.CampaignId, 0)
             }).ToList();
 
             return new BaseResponse
@@ -120,6 +165,9 @@ namespace SchoolMedicalManagement.Service.Implement
                 };
             }
 
+            var totalConsentRequests = await _campaignRepository.GetConsentRequestsCountByCampaignId(campaignId);
+            var totalVaccinationRecords = await _campaignRepository.GetVaccinationRecordsCountByCampaignId(campaignId);
+
             var response = new VaccinationCampaignResponse
             {
                 CampaignId = campaign.CampaignId,
@@ -130,8 +178,8 @@ namespace SchoolMedicalManagement.Service.Implement
                 CreatedByName = campaign.CreatedByNavigation?.FullName,
                 StatusId = campaign.StatusId,
                 StatusName = campaign.Status?.StatusName,
-                TotalConsentRequests = campaign.VaccinationConsentRequests?.Count ?? 0,
-                TotalVaccinationRecords = campaign.VaccinationRecords?.Count ?? 0
+                TotalConsentRequests = totalConsentRequests,
+                TotalVaccinationRecords = totalVaccinationRecords
             };
 
             return new BaseResponse
@@ -277,14 +325,11 @@ namespace SchoolMedicalManagement.Service.Implement
                 };
             }
 
-            // Lên lịch Hangfire job tự động từ chối sau số ngày truyền vào (hoặc mặc định 3 ngày)
             int days = autoDeclineAfterDays ?? 3;
             BackgroundJob.Schedule<VaccinationCampaignService>(
                 x => x.AutoDeclineConsentRequest(created.RequestId),
                 TimeSpan.FromDays(days)
             );
-
-            // TODO: Send email notification to parent (mở rộng trong tương lai)
 
             return new BaseResponse
             {
@@ -417,10 +462,9 @@ namespace SchoolMedicalManagement.Service.Implement
                 };
             }
 
-            // Get all consent requests for the campaign and find the one for this student
             var consentRequests = await _campaignRepository.GetCampaignConsentRequests(request.CampaignId);
             var consentRequest = consentRequests.FirstOrDefault(cr => cr.StudentId == request.StudentId);
-            
+
             if (consentRequest == null)
             {
                 return new BaseResponse
@@ -436,7 +480,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 StudentId = request.StudentId,
                 CampaignId = request.CampaignId,
                 ConsentStatusId = request.ConsentStatusId,
-                ConsentDate = consentRequest.ConsentDate, // Use the ConsentDate from consent request
+                ConsentDate = consentRequest.ConsentDate,
                 VaccinationDate = request.VaccinationDate,
                 Result = request.Result,
                 FollowUpNote = request.FollowUpNote,
@@ -492,7 +536,7 @@ namespace SchoolMedicalManagement.Service.Implement
 
             var consentRequests = await _campaignRepository.GetCampaignConsentRequests(campaignId);
             var approvedRequests = consentRequests
-                .Where(cr => cr.ConsentStatusId == 2) // 2: Đồng ý
+                .Where(cr => cr.ConsentStatusId == 2)
                 .Select(cr => new ConsentRequestResponse
                 {
                     RequestId = cr.RequestId,
@@ -531,7 +575,7 @@ namespace SchoolMedicalManagement.Service.Implement
             }
 
             var consentRequests = await _campaignRepository.GetCampaignConsentRequests(campaignId);
-            var declinedRequests = consentRequests.Where(cr => cr.ConsentStatusId == 3).ToList(); // 3: Đã từ chối
+            var declinedRequests = consentRequests.Where(cr => cr.ConsentStatusId == 3).ToList();
 
             var response = declinedRequests.Select(cr => new ConsentRequestResponse
             {
@@ -570,7 +614,6 @@ namespace SchoolMedicalManagement.Service.Implement
                 };
             }
 
-            // Cập nhật thông tin chiến dịch
             campaign.VaccineName = request.VaccineName;
             campaign.Date = request.Date;
             campaign.Description = request.Description;
@@ -619,7 +662,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 };
             }
 
-            if (campaign.StatusId != 2) // Không phải trạng thái "Đang diễn ra"
+            if (campaign.StatusId != 2)
             {
                 return new BaseResponse
                 {
@@ -672,7 +715,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 };
             }
 
-            if (campaign.StatusId != 3) // Không phải trạng thái "Đã hoàn thành"
+            if (campaign.StatusId != 3)
             {
                 return new BaseResponse
                 {
@@ -711,12 +754,25 @@ namespace SchoolMedicalManagement.Service.Implement
             };
         }
 
-        
-
         // Lấy danh sách chiến dịch theo người tạo
         public async Task<BaseResponse> GetCampaignsByCreatorAsync(Guid creatorId)
         {
-            var campaigns = await _campaignRepository.GetCampaignsByCreator(creatorId);
+            var campaigns = await _campaignRepository.GetCampaignsByCreatorLightweight(creatorId);
+
+            if (!campaigns.Any())
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status200OK.ToString(),
+                    Message = "No campaigns found for this creator",
+                    Data = new List<VaccinationCampaignResponse>()
+                };
+            }
+
+            var campaignIds = campaigns.Select(c => c.CampaignId).ToList();
+            var consentRequestsCounts = await _campaignRepository.GetConsentRequestsCountByCampaignIds(campaignIds);
+            var vaccinationRecordsCounts = await _campaignRepository.GetVaccinationRecordsCountByCampaignIds(campaignIds);
+
             var response = campaigns.Select(c => new VaccinationCampaignResponse
             {
                 CampaignId = c.CampaignId,
@@ -727,8 +783,8 @@ namespace SchoolMedicalManagement.Service.Implement
                 CreatedByName = c.CreatedByNavigation?.FullName,
                 StatusId = c.StatusId,
                 StatusName = c.Status?.StatusName,
-                TotalConsentRequests = c.VaccinationConsentRequests?.Count ?? 0,
-                TotalVaccinationRecords = c.VaccinationRecords?.Count ?? 0
+                TotalConsentRequests = consentRequestsCounts.GetValueOrDefault(c.CampaignId, 0),
+                TotalVaccinationRecords = vaccinationRecordsCounts.GetValueOrDefault(c.CampaignId, 0)
             }).ToList();
 
             return new BaseResponse
@@ -784,7 +840,6 @@ namespace SchoolMedicalManagement.Service.Implement
                 };
             }
 
-            // Lấy tất cả học sinh trong lớp
             var students = await _campaignRepository.GetStudentsByClass(request.ClassName);
             if (!students.Any())
             {
@@ -807,7 +862,6 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 try
                 {
-                    // Kiểm tra học sinh có phụ huynh không
                     if (student.ParentId == null)
                     {
                         response.FailedCount++;
@@ -815,7 +869,6 @@ namespace SchoolMedicalManagement.Service.Implement
                         continue;
                     }
 
-                    // Kiểm tra phiếu đồng ý đã tồn tại chưa
                     var exists = await _campaignRepository.ConsentRequestExists(campaignId, student.StudentId);
                     if (exists)
                     {
@@ -824,14 +877,13 @@ namespace SchoolMedicalManagement.Service.Implement
                         continue;
                     }
 
-                    // Tạo phiếu đồng ý mới
                     var consentRequest = new VaccinationConsentRequest
                     {
                         CampaignId = campaignId,
                         StudentId = student.StudentId,
                         ParentId = student.ParentId.Value,
                         RequestDate = DateTime.UtcNow,
-                        ConsentStatusId = 1 // Chờ xác nhận
+                        ConsentStatusId = 1
                     };
 
                     consentRequests.Add(consentRequest);
@@ -844,7 +896,6 @@ namespace SchoolMedicalManagement.Service.Implement
                 }
             }
 
-            // Tạo tất cả phiếu đồng ý cùng lúc
             if (consentRequests.Any())
             {
                 var createdRequests = await _campaignRepository.CreateMultipleConsentRequests(consentRequests);
@@ -861,7 +912,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     ConsentStatusId = cr.ConsentStatusId,
                     ConsentStatusName = cr.ConsentStatus?.ConsentStatusName
                 }).ToList();
-                // Lên lịch Hangfire job cho từng phiếu
+
                 int days = request.AutoDeclineAfterDays ?? 3;
                 foreach (var cr in createdRequests)
                 {
@@ -894,7 +945,6 @@ namespace SchoolMedicalManagement.Service.Implement
                 };
             }
 
-            // Lấy tất cả học sinh có phụ huynh
             var students = await _campaignRepository.GetStudentsWithParents();
             if (!students.Any())
             {
@@ -917,7 +967,6 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 try
                 {
-                    // Kiểm tra phiếu đồng ý đã tồn tại chưa
                     var exists = await _campaignRepository.ConsentRequestExists(campaignId, student.StudentId);
                     if (exists)
                     {
@@ -926,14 +975,13 @@ namespace SchoolMedicalManagement.Service.Implement
                         continue;
                     }
 
-                    // Tạo phiếu đồng ý mới
                     var consentRequest = new VaccinationConsentRequest
                     {
                         CampaignId = campaignId,
                         StudentId = student.StudentId,
                         ParentId = student.ParentId.Value,
                         RequestDate = DateTime.UtcNow,
-                        ConsentStatusId = 1 // Chờ xác nhận
+                        ConsentStatusId = 1
                     };
 
                     consentRequests.Add(consentRequest);
@@ -946,7 +994,6 @@ namespace SchoolMedicalManagement.Service.Implement
                 }
             }
 
-            // Tạo tất cả phiếu đồng ý cùng lúc
             if (consentRequests.Any())
             {
                 var createdRequests = await _campaignRepository.CreateMultipleConsentRequests(consentRequests);
@@ -963,7 +1010,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     ConsentStatusId = cr.ConsentStatusId,
                     ConsentStatusName = cr.ConsentStatus?.ConsentStatusName
                 }).ToList();
-                // Lên lịch Hangfire job cho từng phiếu
+
                 int days = autoDeclineAfterDays ?? 3;
                 foreach (var cr in createdRequests)
                 {
@@ -1006,7 +1053,6 @@ namespace SchoolMedicalManagement.Service.Implement
                 };
             }
 
-            // Lấy học sinh theo danh sách ID
             var students = await _campaignRepository.GetStudentsByIds(request.StudentIds);
             if (!students.Any())
             {
@@ -1029,7 +1075,6 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 try
                 {
-                    // Kiểm tra học sinh có phụ huynh không
                     if (student.ParentId == null)
                     {
                         response.FailedCount++;
@@ -1037,7 +1082,6 @@ namespace SchoolMedicalManagement.Service.Implement
                         continue;
                     }
 
-                    // Kiểm tra phiếu đồng ý đã tồn tại chưa
                     var exists = await _campaignRepository.ConsentRequestExists(campaignId, student.StudentId);
                     if (exists)
                     {
@@ -1046,14 +1090,13 @@ namespace SchoolMedicalManagement.Service.Implement
                         continue;
                     }
 
-                    // Tạo phiếu đồng ý mới
                     var consentRequest = new VaccinationConsentRequest
                     {
                         CampaignId = campaignId,
                         StudentId = student.StudentId,
                         ParentId = student.ParentId.Value,
                         RequestDate = DateTime.UtcNow,
-                        ConsentStatusId = 1 // Chờ xác nhận
+                        ConsentStatusId = 1
                     };
 
                     consentRequests.Add(consentRequest);
@@ -1066,7 +1109,6 @@ namespace SchoolMedicalManagement.Service.Implement
                 }
             }
 
-            // Tạo tất cả phiếu đồng ý cùng lúc
             if (consentRequests.Any())
             {
                 var createdRequests = await _campaignRepository.CreateMultipleConsentRequests(consentRequests);
@@ -1083,7 +1125,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     ConsentStatusId = cr.ConsentStatusId,
                     ConsentStatusName = cr.ConsentStatus?.ConsentStatusName
                 }).ToList();
-                // Lên lịch Hangfire job cho từng phiếu
+
                 int days = request.AutoDeclineAfterDays ?? 3;
                 foreach (var cr in createdRequests)
                 {
@@ -1181,9 +1223,9 @@ namespace SchoolMedicalManagement.Service.Implement
         public async Task AutoDeclineConsentRequest(int requestId)
         {
             var consentRequest = await _campaignRepository.GetConsentRequestById(requestId);
-            if (consentRequest != null && consentRequest.ConsentStatusId == 1) // 1: Chờ xác nhận
+            if (consentRequest != null && consentRequest.ConsentStatusId == 1)
             {
-                consentRequest.ConsentStatusId = 3; // 3: Đã từ chối
+                consentRequest.ConsentStatusId = 3;
                 consentRequest.ConsentDate = DateTime.UtcNow;
                 await _campaignRepository.UpdateConsentRequest(consentRequest);
             }
