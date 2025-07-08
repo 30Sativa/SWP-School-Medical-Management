@@ -329,7 +329,7 @@ const ParentDashboard = () => {
         <div className={styles["card-text"]}>
           <h4>Đóng góp ý kiến</h4>
           <p>Hãy đóng góp ý kiến về cho trường nhé</p>
-          <a href="#" onClick={handleShowFeedbackForm}>ĐÓNG GÓP →</a>
+          <button className={styles["action-button"]} onClick={handleShowFeedbackForm}>ĐÓNG GÓP →</button>
         </div>
         <div className={styles["card-icon"]}>
           <div className={styles["icon-circle"]}>💬</div>
