@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import Sidebar from "../../components/sb-Parent/Sidebar";
 import styles from "../../assets/css/SendMedicine.module.css";
 import { FiInfo, FiEdit, FiClipboard } from "react-icons/fi";
@@ -17,11 +17,11 @@ const SendMedicine = () => {
   const [studentId, setStudentId] = useState(localStorage.getItem("studentId"));
   const [studentList, setStudentList] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [showAll, setShowAll] = useState(false);
+  // Removed unused showAll state and its setter _setShowAll
   const [searchTerm, setSearchTerm] = useState("");
   const [showPopup, setShowPopup] = useState(false);
 
-  const parentId = localStorage.getItem("parentId");
+  const parentId = localStorage.getItem("userId"); // bị lỗi chỗ này nè trc đó ai để là parent id nhưng bên đăng nhập lưu lại là userId
   const historyEndRef = useRef(null);
   const historyTopRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -42,6 +42,14 @@ const SendMedicine = () => {
     const trimmedTitle = title.trim();
     const trimmedUsage = usage.trim();
     const trimmedNote = note.trim();
+
+    if (!parentId || parentId === 'null') {
+      return toast.error("Không tìm thấy thông tin phụ huynh! Vui lòng đăng nhập lại.", { 
+        position: "top-center", 
+        autoClose: 2500, 
+        theme: "colored" 
+      });
+    }
 
     if (!studentId) {
       return toast.error("Vui lòng chọn học sinh!", { position: "top-center", autoClose: 2500, theme: "colored" });
@@ -72,7 +80,7 @@ const SendMedicine = () => {
       return toast.error("Liều dùng phải có ít nhất 3 ký tự!", { position: "top-center", autoClose: 2500, theme: "colored" });
     }
 
-    const dosageRegex = /^[\p{L}0-9\s\/\-×]+$/u;
+    const dosageRegex = /^[\p{L}0-9\s/\-×]+$/u;
     if (!dosageRegex.test(trimmedUsage)) {
       return toast.error("Liều dùng chỉ được chứa chữ, số và ký tự hợp lệ như /, -, ×", {
         position: "top-center",
@@ -158,27 +166,42 @@ const SendMedicine = () => {
     }
   };
 
-  const fetchStudentList = async () => {
+  const fetchStudentList = useCallback(async () => {
+    if (!parentId || parentId === 'null') {
+      console.error("ParentId không hợp lệ:", parentId);
+      setStudentList([]);
+      setStudentId(null);
+      localStorage.removeItem("studentId");
+      return;
+    }
+
     try {
       const res = await axios.get(
         `https://swp-school-medical-management.onrender.com/api/Student/by-parent/${parentId}`
       );
       const data = res.data.data;
       setStudentList(data);
-          if (data.length === 0) {
-      setStudentId(null);
-      localStorage.removeItem("studentId");
-    }
+      if (data.length === 0) {
+        setStudentId(null);
+        localStorage.removeItem("studentId");
+      }
       if (!studentId && data.length > 0) {
         setStudentId(data[0].studentId);
         localStorage.setItem("studentId", data[0].studentId);
       }
     } catch (err) {
       console.error("Không lấy được danh sách học sinh:", err);
+      setStudentList([]);
     }
-  };
+  }, [parentId]);
 
-  const fetchStudentName = async () => {
+  const fetchStudentName = useCallback(async () => {
+    if (!studentId || studentId === 'null') {
+      console.error("StudentId không hợp lệ:", studentId);
+      setStudentName("");
+      return null;
+    }
+
     try {
       const res = await axios.get(
         `https://swp-school-medical-management.onrender.com/api/Student/${studentId}`
@@ -188,12 +211,25 @@ const SendMedicine = () => {
       return name;
     } catch (err) {
       console.error("Không lấy được tên học sinh:", err);
+      setStudentName("");
+      return null;
     }
-  };
+  }, [studentId]);
 
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
+    if (!studentId || studentId === 'null') {
+      console.error("StudentId không hợp lệ để lấy lịch sử:", studentId);
+      setHistory([]);
+      return;
+    }
+
     try {
       const name = await fetchStudentName();
+      if (!name) {
+        setHistory([]);
+        return;
+      }
+      
       const res = await axios.get(
         "https://swp-school-medical-management.onrender.com/api/MedicationRequest/all"
       );
@@ -208,16 +244,17 @@ const SendMedicine = () => {
       setHistory(sorted);
     } catch (err) {
       console.error("Lỗi khi lọc lịch sử thuốc:", err);
+      setHistory([]);
     }
-  };
+  }, [studentId, fetchStudentName]);
 
   useEffect(() => {
     fetchStudentList();
-  }, []);
+  }, [fetchStudentList]);
 
   useEffect(() => {
     if (studentId) fetchHistory();
-  }, [studentId]);
+  }, [studentId, fetchHistory]);
 
   const filteredHistory = history.filter((item) =>
     `${item.medicationName} ${item.instructions}`
