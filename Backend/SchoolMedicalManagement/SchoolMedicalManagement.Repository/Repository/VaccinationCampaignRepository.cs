@@ -15,6 +15,7 @@ namespace SchoolMedicalManagement.Repository.Repository
         // ✅ Tối ưu: Lấy danh sách campaign KHÔNG include collections để giảm tải
         public async Task<List<VaccinationCampaign>> GetAllCampaignsLightweight()
             => await _context.VaccinationCampaigns
+                .AsNoTracking()
                 .Include(c => c.CreatedByNavigation)
                 .Include(c => c.Status)
                 .ToListAsync();
