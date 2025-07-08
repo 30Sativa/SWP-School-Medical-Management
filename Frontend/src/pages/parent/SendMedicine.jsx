@@ -17,7 +17,7 @@ const SendMedicine = () => {
   const [studentId, setStudentId] = useState(localStorage.getItem("studentId"));
   const [studentList, setStudentList] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [showAll, _setShowAll] = useState(false);
+  // Removed unused showAll state and its setter _setShowAll
   const [searchTerm, setSearchTerm] = useState("");
   const [showPopup, setShowPopup] = useState(false);
 
