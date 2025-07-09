@@ -12,6 +12,8 @@ import LoadingOverlay from "../../components/LoadingOverlay";
 const { Option } = Select;
 const { Title } = Typography;
 
+const apiUrl = "https://swp-school-medical-management.onrender.com/api/User";
+
 const UsersList = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,8 +28,6 @@ const UsersList = () => {
   const [studentModalVisible, setStudentModalVisible] = useState(false);
   const [selectedParent, setSelectedParent] = useState(null);
   const [studentForm] = Form.useForm();
-
-  const apiUrl = "https://swp-school-medical-management.onrender.com/api/User"; 
 
   // Fetch users from API
   const fetchUsers = async () => {
@@ -213,7 +213,6 @@ const handleModalSubmit = async (values) => {
   };
 
   const handleStudentSubmit = async (values) => {
-    console.log("Submit values:", values);
     try {
       const token = localStorage.getItem("token");
       const payload = {
@@ -284,7 +283,6 @@ const handleModalSubmit = async (values) => {
             ) : filteredUsers.length > 0 ? (
               filteredUsers.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage).map((user, index) => {
                 const realUserId = user.userID;
-                console.log('user:', user);
                 return (
                   <tr key={realUserId || index}>
                     <td>{(currentPage - 1) * usersPerPage + index + 1}</td>
