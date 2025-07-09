@@ -3,7 +3,7 @@ import Sidebar from "../../components/sb-Parent/Sidebar";
 import styles from "../../assets/css/parentDashboard.module.css";
 import axios from "axios";
 import dayjs from "dayjs";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // Constants
@@ -169,7 +169,16 @@ const ParentDashboard = () => {
         console.error(`⏰ Students request timeout after ${loadTime}ms`);
         throw new Error("Yêu cầu quá thời gian chờ. Vui lòng thử lại.");
       }
+      
+      // Handle 404 specifically - this means no students linked
+      if (error.response && error.response.status === 404) {
+        console.warn(`👨‍👩‍👧‍👦 No students linked to parent ${parentId} - returning empty array`);
+        setMyStudents([]);
+        return [];
+      }
+      
       console.error(`❌ Students failed after ${loadTime}ms:`, error);
+      setMyStudents([]);
       throw error;
     }
   }, [parentId]);
@@ -198,6 +207,8 @@ const ParentDashboard = () => {
       if (studentResult.status === 'rejected') {
         console.error("❌ Students fetch failed:", studentResult.reason);
         setDataError(`Không thể tải danh sách học sinh: ${studentResult.reason.message}`);
+      } else if (studentResult.value && studentResult.value.length === 0) {
+        console.log("👨‍👩‍👧‍👦 No students linked - this is normal for empty state");
       }
       
       if (overviewResult.status === 'rejected') {
@@ -293,15 +304,191 @@ const ParentDashboard = () => {
       <Sidebar />
       <main className={styles.content}>
         {dataError ? (
-          <p style={{ padding: 20, color: "#ef4444" }}>
-            ❌ {dataError}
-          </p>
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            minHeight: '60vh',
+            textAlign: 'center',
+            padding: '2rem',
+            backgroundColor: '#fef3c7',
+            borderRadius: '12px',
+            border: '2px solid #f59e0b',
+            margin: '2rem'
+          }}>
+            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>❌</div>
+            <h3 style={{ color: '#d97706', marginBottom: '1rem' }}>Có lỗi xảy ra</h3>
+            <p style={{ color: '#92400e', fontSize: '1.1rem', lineHeight: '1.6' }}>
+              {dataError}
+            </p>
+            <button 
+              onClick={fetchData}
+              style={{
+                marginTop: '1.5rem',
+                padding: '0.8rem 1.5rem',
+                backgroundColor: '#20b2aa',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                fontWeight: '500'
+              }}
+            >
+              Thử lại
+            </button>
+          </div>
         ) : (
-          <p style={{ padding: 20, color: "#f59e0b" }}>
-            ⚠️ {ERROR_MESSAGES.NO_STUDENTS_LINKED}
-          </p>
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            minHeight: '60vh',
+            textAlign: 'center',
+            padding: '40px 20px'
+          }}>
+            {/* Icon */}
+            <div style={{
+              width: '120px',
+              height: '120px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #e0f7fa 0%, #f0f4ff 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '24px',
+              boxShadow: '0 8px 32px rgba(32, 178, 170, 0.15)'
+            }}>
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#20b2aa" strokeWidth="1.5">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+
+            {/* Heading */}
+            <h2 style={{ 
+              color: '#0284c7', 
+              fontSize: '28px', 
+              fontWeight: '700', 
+              marginBottom: '16px',
+              lineHeight: '1.3'
+            }}>
+              Chưa có liên kết học sinh
+            </h2>
+
+            {/* Description */}
+            <p style={{ 
+              color: '#64748b', 
+              fontSize: '16px', 
+              lineHeight: '1.6',
+              maxWidth: '500px',
+              marginBottom: '32px'
+            }}>
+              Tài khoản của bạn chưa được liên kết với học sinh nào. Vui lòng liên hệ nhà trường để được hỗ trợ liên kết với con em mình.
+            </p>
+
+            {/* Steps */}
+            <div style={{
+              background: '#f8fafc',
+              borderRadius: '16px',
+              padding: '24px',
+              maxWidth: '600px',
+              width: '100%',
+              border: '1px solid #e2e8f0'
+            }}>
+              <h3 style={{ 
+                color: '#334155', 
+                fontSize: '18px', 
+                fontWeight: '600', 
+                marginBottom: '16px',
+                textAlign: 'center'
+              }}>
+                Các bước để sử dụng hệ thống:
+              </h3>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: '#20b2aa',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    flexShrink: 0
+                  }}>1</div>
+                  <span style={{ color: '#475569', fontSize: '15px' }}>
+                    Liên hệ với nhà trường qua số điện thoại hoặc email
+                  </span>
+                </div>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: '#20b2aa',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    flexShrink: 0
+                  }}>2</div>
+                  <span style={{ color: '#475569', fontSize: '15px' }}>
+                    Cung cấp thông tin cá nhân và thông tin con em
+                  </span>
+                </div>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: '#20b2aa',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    flexShrink: 0
+                  }}>3</div>
+                  <span style={{ color: '#475569', fontSize: '15px' }}>
+                    Đợi nhà trường xác nhận và liên kết tài khoản
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Contact info */}
+            <div style={{
+              marginTop: '24px',
+              padding: '16px 24px',
+              background: 'linear-gradient(135deg, #e0f7fa 0%, #f0f4ff 100%)',
+              borderRadius: '12px',
+              border: '1px solid #20b2aa'
+            }}>
+              <p style={{ 
+                color: '#0284c7', 
+                fontSize: '14px', 
+                fontWeight: '500',
+                margin: 0
+              }}>
+                💡 Sau khi liên kết thành công, bạn sẽ có thể sử dụng đầy đủ các tính năng của hệ thống.
+              </p>
+            </div>
+          </div>
         )}
-        <ToastContainer />
       </main>
     </div>
   );
@@ -479,7 +666,7 @@ const ParentDashboard = () => {
 
   // Main render logic
   if (loading) return renderLoadingState();
-  if (!overview || myStudents.length === 0) return renderEmptyState();
+  if (myStudents.length === 0) return renderEmptyState();
 
   return (
     <div className={styles.container}>
@@ -490,7 +677,6 @@ const ParentDashboard = () => {
         {renderInfoSection()}
         {renderMainContent()}
         {renderFeedbackModal()}
-        <ToastContainer />
       </main>
     </div>
   );
