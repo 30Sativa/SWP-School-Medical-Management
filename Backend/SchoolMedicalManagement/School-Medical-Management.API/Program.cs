@@ -75,7 +75,6 @@ builder.Services.AddScoped<IMedicalEventTypeService, MedicalEventTypeService>();
 builder.Services.AddScoped<IBlogPostService, BlogPostService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IParentFeedbackService, ParentFeedbackService>();
-
 // CORS
 builder.Services.AddCors(options =>
 {
@@ -183,6 +182,14 @@ builder.Services.AddHangfireServer();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+
+
+// Replace the problematic line with the following code:
+
+//Test UptimeRobot
+app.MapGet("/api/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+app.MapMethods("/api/health", new[] { "HEAD" }, () => Results.Ok());
+
 app.UseStaticFiles();
 app.UseSwagger();
 app.UseSwaggerUI();
