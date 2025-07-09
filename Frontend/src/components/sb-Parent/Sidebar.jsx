@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   Home,
+  House,
   Users,
   ClipboardList,
   Syringe,
@@ -47,14 +48,14 @@ const Sidebar = () => {
       </div>
 
       <nav>
-        <div
-          className={styles.navItem}
-          style={{ cursor: 'pointer' }}
-          onClick={() => navigate('/')}
-        >
-          <Home size={20} />
+        <NavLink to="/" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ""}`}>
+          <House size={20} />
           <span>Trang chủ</span>
-        </div>
+        </NavLink>
+        <NavLink to="/dashboard" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ""}`}>
+          <Home size={20} />
+          <span>Dashboard</span>
+        </NavLink>
         <NavLink to="/healthprofile" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ""}`}> 
           <Users size={20} />
           <span>Hồ sơ sức khỏe</span>

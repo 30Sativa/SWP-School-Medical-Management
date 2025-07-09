@@ -3,7 +3,7 @@ import Sidebar from "../../components/sb-Parent/Sidebar";
 import styles from "../../assets/css/ChildCareHistory.module.css";
 import axios from "axios";
 import dayjs from "dayjs";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // Constants
@@ -13,7 +13,7 @@ const API_BASE_URL = "https://swp-school-medical-management.onrender.com/api";
 const ERROR_MESSAGES = {
   FETCH_STUDENTS_FAILED: "Lỗi khi tải danh sách học sinh",
   FETCH_DATA_FAILED: "Đã xảy ra lỗi khi tải dữ liệu",
-  NO_STUDENTS_LINKED: "Hiện bạn chưa được liên kết với học sinh nào. Vui lòng liên hệ nhà trường để được hỗ trợ."
+  NO_STUDENTS_LINKED: "Tài khoản của bạn chưa được liên kết với học sinh nào. Vui lòng liên hệ nhà trường để được hỗ trợ liên kết với con em mình."
 };
 
 // API endpoints
@@ -220,10 +220,154 @@ const ChildCareHistory = () => {
       <Sidebar />
       <div className={styles.content}>
         <h2 className={styles.title}>Lịch Sử Chăm Sóc Sức Khỏe</h2>
-        <p style={{ color: "#f59e0b", fontSize: "16px", padding: "20px" }}>
-          ⚠️ {ERROR_MESSAGES.NO_STUDENTS_LINKED}
-        </p>
-        <ToastContainer />
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          minHeight: '60vh',
+          textAlign: 'center',
+          padding: '40px 20px'
+        }}>
+          {/* Icon */}
+          <div style={{
+            width: '120px',
+            height: '120px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #e0f7fa 0%, #f0f4ff 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '24px',
+            boxShadow: '0 8px 32px rgba(32, 178, 170, 0.15)'
+          }}>
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#20b2aa" strokeWidth="1.5">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+
+          {/* Heading */}
+          <h2 style={{ 
+            color: '#0284c7', 
+            fontSize: '28px', 
+            fontWeight: '700', 
+            marginBottom: '16px',
+            lineHeight: '1.3'
+          }}>
+            Chưa có liên kết học sinh
+          </h2>
+
+          {/* Description */}
+          <p style={{ 
+            color: '#64748b', 
+            fontSize: '16px', 
+            lineHeight: '1.6',
+            maxWidth: '500px',
+            marginBottom: '32px'
+          }}>
+            {ERROR_MESSAGES.NO_STUDENTS_LINKED}
+          </p>
+
+          {/* Steps */}
+          <div style={{
+            background: '#f8fafc',
+            borderRadius: '16px',
+            padding: '24px',
+            maxWidth: '600px',
+            width: '100%',
+            border: '1px solid #e2e8f0'
+          }}>
+            <h3 style={{ 
+              color: '#334155', 
+              fontSize: '18px', 
+              fontWeight: '600', 
+              marginBottom: '16px',
+              textAlign: 'center'
+            }}>
+              Các bước để xem lịch sử chăm sóc:
+            </h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: '#20b2aa',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  flexShrink: 0
+                }}>1</div>
+                <span style={{ color: '#475569', fontSize: '15px' }}>
+                  Liên hệ với nhà trường qua số điện thoại hoặc email
+                </span>
+              </div>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: '#20b2aa',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  flexShrink: 0
+                }}>2</div>
+                <span style={{ color: '#475569', fontSize: '15px' }}>
+                  Cung cấp thông tin cá nhân và thông tin con em
+                </span>
+              </div>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: '#20b2aa',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  flexShrink: 0
+                }}>3</div>
+                <span style={{ color: '#475569', fontSize: '15px' }}>
+                  Đợi nhà trường xác nhận và liên kết tài khoản
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact info */}
+          <div style={{
+            marginTop: '24px',
+            padding: '16px 24px',
+            background: 'linear-gradient(135deg, #e0f7fa 0%, #f0f4ff 100%)',
+            borderRadius: '12px',
+            border: '1px solid #20b2aa'
+          }}>
+            <p style={{ 
+              color: '#0284c7', 
+              fontSize: '14px', 
+              fontWeight: '500',
+              margin: 0
+            }}>
+              💡 Sau khi liên kết thành công, bạn sẽ có thể theo dõi lịch sử chăm sóc sức khỏe của con em tại đây.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -387,7 +531,6 @@ const ChildCareHistory = () => {
   return (
     <div className={styles.container}>
       <Sidebar />
-      <ToastContainer position="top-right" autoClose={3000} />
       <div className={styles.content}>
         <h2 className={styles.title}>Lịch Sử Chăm Sóc Sức Khỏe</h2>
         <p className={styles.subtitle}>

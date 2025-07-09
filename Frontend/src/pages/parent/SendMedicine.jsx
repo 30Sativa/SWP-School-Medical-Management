@@ -3,7 +3,7 @@ import Sidebar from "../../components/sb-Parent/Sidebar";
 import styles from "../../assets/css/SendMedicine.module.css";
 import { FiInfo, FiEdit, FiClipboard } from "react-icons/fi";
 import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const SendMedicine = () => {
@@ -25,6 +25,7 @@ const SendMedicine = () => {
   const historyEndRef = useRef(null);
   const historyTopRef = useRef(null);
   const fileInputRef = useRef(null);
+  const hasShownNoStudentToastRef = useRef(false); // Sử dụng ref thay vì state để tránh re-render
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -181,40 +182,45 @@ const SendMedicine = () => {
       );
       const data = res.data.data;
       setStudentList(data);
+      
       if (data.length === 0) {
         setStudentId(null);
         localStorage.removeItem("studentId");
+      } else {
+        // Chỉ set studentId mặc định nếu chưa có
+        const currentStudentId = localStorage.getItem("studentId");
+        if (!currentStudentId || !data.some(s => s.studentId === currentStudentId)) {
+          setStudentId(data[0].studentId);
+          localStorage.setItem("studentId", data[0].studentId);
+        }
       }
-      if (!studentId && data.length > 0) {
-        setStudentId(data[0].studentId);
-        localStorage.setItem("studentId", data[0].studentId);
-      }
+      
+      // Reset toast flag nếu fetch thành công
+      hasShownNoStudentToastRef.current = false;
     } catch (err) {
+      // Xử lý error 404 (chưa liên kết học sinh) - chỉ hiển thị toast 1 lần
+      if (err.response?.status === 404) {
+        setStudentList([]);
+        setStudentId(null);
+        localStorage.removeItem("studentId");
+        
+        // Chỉ hiển thị toast lỗi 1 lần duy nhất
+        if (!hasShownNoStudentToastRef.current) {
+          toast.warn("Tài khoản chưa được liên kết với học sinh nào. Vui lòng liên hệ nhà trường!", {
+            position: "top-center",
+            autoClose: 3000,
+            theme: "colored"
+          });
+          hasShownNoStudentToastRef.current = true;
+        }
+        return;
+      }
+      
+      // Các lỗi khác vẫn log như bình thường
       console.error("Không lấy được danh sách học sinh:", err);
       setStudentList([]);
     }
-  }, [parentId]);
-
-  const fetchStudentName = useCallback(async () => {
-    if (!studentId || studentId === 'null') {
-      console.error("StudentId không hợp lệ:", studentId);
-      setStudentName("");
-      return null;
-    }
-
-    try {
-      const res = await axios.get(
-        `https://swp-school-medical-management.onrender.com/api/Student/${studentId}`
-      );
-      const name = res.data.data.fullName;
-      setStudentName(name);
-      return name;
-    } catch (err) {
-      console.error("Không lấy được tên học sinh:", err);
-      setStudentName("");
-      return null;
-    }
-  }, [studentId]);
+  }, [parentId]); // Chỉ depend vào parentId
 
   const fetchHistory = useCallback(async () => {
     if (!studentId || studentId === 'null') {
@@ -224,8 +230,14 @@ const SendMedicine = () => {
     }
 
     try {
-      const name = await fetchStudentName();
-      if (!name) {
+      // Fetch student name inline thay vì gọi fetchStudentName để tránh dependency
+      const studentRes = await axios.get(
+        `https://swp-school-medical-management.onrender.com/api/Student/${studentId}`
+      );
+      const studentName = studentRes.data.data.fullName;
+      setStudentName(studentName);
+      
+      if (!studentName) {
         setHistory([]);
         return;
       }
@@ -236,25 +248,38 @@ const SendMedicine = () => {
       const all = res.data;
       const filtered = all.filter(
         (item) =>
-          item.studentName?.toLowerCase().trim() === name?.toLowerCase().trim()
+          item.studentName?.toLowerCase().trim() === studentName?.toLowerCase().trim()
       );
       const sorted = filtered.sort(
         (a, b) => new Date(b.requestDate) - new Date(a.requestDate)
       );
       setHistory(sorted);
     } catch (err) {
-      console.error("Lỗi khi lọc lịch sử thuốc:", err);
+      console.error("Lỗi khi lấy lịch sử thuốc:", err);
       setHistory([]);
+      setStudentName("");
     }
-  }, [studentId, fetchStudentName]);
+  }, [studentId]); // Chỉ depend vào studentId
 
+  // Chỉ fetch student list một lần khi component mount
   useEffect(() => {
     fetchStudentList();
-  }, [fetchStudentList]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Fetch history khi studentId thay đổi
   useEffect(() => {
-    if (studentId) fetchHistory();
+    if (studentId) {
+      fetchHistory();
+    } else {
+      setHistory([]);
+      setStudentName("");
+    }
   }, [studentId, fetchHistory]);
+
+  // Reset toast flag khi component mount để có thể hiện toast lại nếu cần
+  useEffect(() => {
+    hasShownNoStudentToastRef.current = false;
+  }, []);
 
   const filteredHistory = history.filter((item) =>
     `${item.medicationName} ${item.instructions}`
@@ -266,18 +291,6 @@ const SendMedicine = () => {
 
   return (
     <div className={styles.container}>
-      <ToastContainer
-        position="top-center"
-        autoClose={2500}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-      />
       <Sidebar />
       <div className={styles.content}>
         <h2 className={styles.title}>Prescription |</h2>
@@ -312,8 +325,153 @@ const SendMedicine = () => {
         </div>
 
         {!hasStudent ? (
-          <div style={{ color: "#dc2626", fontWeight: 600, marginTop: 24 }}>
-            ⚠️ Tài khoản của bạn chưa liên kết với học sinh nào. Vui lòng liên hệ nhà trường để được hỗ trợ.
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            minHeight: '60vh',
+            textAlign: 'center',
+            padding: '40px 20px'
+          }}>
+            {/* Icon */}
+            <div style={{
+              width: '120px',
+              height: '120px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #e0f7fa 0%, #f0f4ff 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '24px',
+              boxShadow: '0 8px 32px rgba(32, 178, 170, 0.15)'
+            }}>
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#20b2aa" strokeWidth="1.5">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+
+            {/* Heading */}
+            <h2 style={{ 
+              color: '#0284c7', 
+              fontSize: '28px', 
+              fontWeight: '700', 
+              marginBottom: '16px',
+              lineHeight: '1.3'
+            }}>
+              Chưa có liên kết học sinh
+            </h2>
+
+            {/* Description */}
+            <p style={{ 
+              color: '#64748b', 
+              fontSize: '16px', 
+              lineHeight: '1.6',
+              maxWidth: '500px',
+              marginBottom: '32px'
+            }}>
+              Tài khoản của bạn chưa được liên kết với học sinh nào. Vui lòng liên hệ nhà trường để được hỗ trợ liên kết với con em mình.
+            </p>
+
+            {/* Steps */}
+            <div style={{
+              background: '#f8fafc',
+              borderRadius: '16px',
+              padding: '24px',
+              maxWidth: '600px',
+              width: '100%',
+              border: '1px solid #e2e8f0'
+            }}>
+              <h3 style={{ 
+                color: '#334155', 
+                fontSize: '18px', 
+                fontWeight: '600', 
+                marginBottom: '16px',
+                textAlign: 'center'
+              }}>
+                Các bước để gửi thuốc cho y tế:
+              </h3>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: '#20b2aa',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    flexShrink: 0
+                  }}>1</div>
+                  <span style={{ color: '#475569', fontSize: '15px' }}>
+                    Liên hệ với nhà trường qua số điện thoại hoặc email
+                  </span>
+                </div>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: '#20b2aa',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    flexShrink: 0
+                  }}>2</div>
+                  <span style={{ color: '#475569', fontSize: '15px' }}>
+                    Cung cấp thông tin cá nhân và thông tin con em
+                  </span>
+                </div>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: '#20b2aa',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    flexShrink: 0
+                  }}>3</div>
+                  <span style={{ color: '#475569', fontSize: '15px' }}>
+                    Đợi nhà trường xác nhận và liên kết tài khoản
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Contact info */}
+            <div style={{
+              marginTop: '24px',
+              padding: '16px 24px',
+              background: 'linear-gradient(135deg, #e0f7fa 0%, #f0f4ff 100%)',
+              borderRadius: '12px',
+              border: '1px solid #20b2aa'
+            }}>
+              <p style={{ 
+                color: '#0284c7', 
+                fontSize: '14px', 
+                fontWeight: '500',
+                margin: 0
+              }}>
+                💡 Sau khi liên kết thành công, bạn sẽ có thể gửi thuốc cho y tế trường tại đây.
+              </p>
+            </div>
           </div>
         ) : (
           <>

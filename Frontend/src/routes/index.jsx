@@ -52,6 +52,7 @@ const AppRouter = () => {
       <Route path="/manager" element={<ProtectedRoute><ManagerDashboard /></ProtectedRoute>} />
       <Route path="/nurse" element={<ProtectedRoute><NurseDashboard /></ProtectedRoute>} />
       <Route path="/parent" element={<ProtectedRoute><ParentDashboard /></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><ParentDashboard /></ProtectedRoute>} />
       <Route path="/users" element={<ProtectedRoute><UsersList /></ProtectedRoute>} />
       <Route path="/students" element={<ProtectedRoute><StudentList /></ProtectedRoute>} />
       <Route path="/students/:id" element={<ProtectedRoute><StudentDetail /></ProtectedRoute>} />
