@@ -9,6 +9,11 @@ namespace SchoolMedicalManagement.Tests.Service.Utilities
     {
         private HealthCalculator _healthCalculator;
 
+        //Code có 3 phần chính: Arrange-Act-Assert.
+        //Arrange là chuẩn bị data,
+        //Act là chạy function,
+        //Assert là check kết quả
+
         [TestInitialize]
         public void Setup()
         {
