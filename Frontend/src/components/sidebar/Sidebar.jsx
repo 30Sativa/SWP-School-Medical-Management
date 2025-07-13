@@ -89,7 +89,7 @@ const Sidebar = () => {
           }
         >
           <Users size={20} />
-          <span>Quản lý học sinh</span>
+          <span>Danh sách học sinh</span>
         </NavLink>
         <NavLink
           to="/medicine"
@@ -102,6 +102,16 @@ const Sidebar = () => {
         </NavLink>
 
         <NavLink
+          to="/incidents"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
+          <AlertTriangle size={20} />
+          <span>Sự cố y tế</span>
+        </NavLink>
+
+        <NavLink
           to="/vaccination-campaigns"
           className={({ isActive }) =>
             `${style.navItem} ${isActive ? style.active : ""}`
@@ -109,6 +119,16 @@ const Sidebar = () => {
         >
           <Syringe size={20} />
           <span>Quản lý tiêm chủng</span>
+        </NavLink>
+
+        <NavLink
+          to="/vaccines"
+          className={({ isActive }) =>
+            `${style.navItem} ${isActive ? style.active : ""}`
+          }
+        >
+          <ClipboardPlus size={20} />
+          <span>Chi tiết đợt tiêm</span>
         </NavLink>
 
         <NavLink
@@ -128,7 +148,7 @@ const Sidebar = () => {
           }
         >
           <HeartPulse size={20} />
-          <span>Khám sức khỏe</span>
+          <span>Chi tiết khám sức khỏe</span>
         </NavLink>
 
         <NavLink
@@ -147,7 +167,7 @@ const Sidebar = () => {
           }
         >
           <Package size={20} />
-          <span>Hàng hóa</span>
+          <span>Vật tư</span>
         </NavLink>
         <button
           className={`${style.navItem} ${style.logoutButton}`}

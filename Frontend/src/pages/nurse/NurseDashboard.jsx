@@ -2,8 +2,14 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Sidebar from "../../components/sidebar/Sidebar";
 import style from "../../assets/css/nursedashboard.module.css";
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
-
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 const NurseDashBoard = () => {
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
@@ -12,7 +18,9 @@ const NurseDashBoard = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await axios.get("https://swp-school-medical-management.onrender.com/api/Dashboard/overview");
+        const res = await axios.get(
+          "https://swp-school-medical-management.onrender.com/api/Dashboard/overview"
+        );
         if (res.data.status === "200") {
           setDashboardData(res.data.data);
         }
@@ -25,18 +33,20 @@ const NurseDashBoard = () => {
     fetchData();
   }, []);
 
-  if (loading) return (
-    <div className={style.loadingOverlay}>
-      <div className={style.spinner}></div>
-      <div className={style.loadingText}>Đang tải dữ liệu...</div>
-    </div>
-  );
-  if (!dashboardData) return <div className={style.loadingText}>Không có dữ liệu dashboard</div>;
+  if (loading)
+    return (
+      <div className={style.loadingOverlay}>
+        <div className={style.spinner}></div>
+        <div className={style.loadingText}>Đang tải dữ liệu...</div>
+      </div>
+    );
+  if (!dashboardData)
+    return <div className={style.loadingText}>Không có dữ liệu dashboard</div>;
 
   const userData = [
     { name: "Admin", value: dashboardData.totalUsers.admin },
     { name: "Y tá", value: dashboardData.totalUsers.nurse },
-    { name: "Phụ huynh", value: dashboardData.totalUsers.parent }
+    { name: "Phụ huynh", value: dashboardData.totalUsers.parent },
   ];
 
   const COLORS = ["#8884d8", "#82ca9d", "#ffc658"];
@@ -54,7 +64,11 @@ const NurseDashBoard = () => {
           <div className={style.summaryBox}>
             <h4>Yêu cầu thuốc chờ xử lý</h4>
             <p>{dashboardData.pendingMedicationRequests}</p>
-            <span>{dashboardData.totalMedicationRequests - dashboardData.pendingMedicationRequests} đã xử lý</span>
+            <span>
+              {dashboardData.totalMedicationRequests -
+                dashboardData.pendingMedicationRequests}{" "}
+              đã xử lý
+            </span>
           </div>
           <div className={style.summaryBox}>
             <h4>Mũi tiêm sắp tới</h4>
@@ -69,7 +83,11 @@ const NurseDashBoard = () => {
           <div className={style.summaryBox}>
             <h4>Sự cố được báo cáo</h4>
             <p>{dashboardData.recentMedicalEvents.length}</p>
-            <span>{dashboardData.totalMedicalEvents - dashboardData.recentMedicalEvents.length} sự cố hôm qua</span>
+            <span>
+              {dashboardData.totalMedicalEvents -
+                dashboardData.recentMedicalEvents.length}{" "}
+              sự cố hôm qua
+            </span>
           </div>
         </div>
 
@@ -95,9 +113,21 @@ const NurseDashBoard = () => {
                     <tr key={req.requestId}>
                       <td>{req.studentName}</td>
                       <td>{req.medicationName}</td>
-                      <td><span className={`${style.pill} ${req.status === "Đã duyệt" ? style.green : style.yellow}`}>{req.status}</span></td>
+                      <td>
+                        <span
+                          className={`${style.pill} ${
+                            req.status === "Đã duyệt"
+                              ? style.green
+                              : style.yellow
+                          }`}
+                        >
+                          {req.status}
+                        </span>
+                      </td>
                       <td>{new Date(req.requestDate).toLocaleString()}</td>
-                      <td><button className={style.btnAction}>Xác nhận</button></td>
+                      <td>
+                        <button className={style.btnAction}>Xác nhận</button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -120,7 +150,10 @@ const NurseDashBoard = () => {
                     label
                   >
                     {userData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
                     ))}
                   </Pie>
                   <Tooltip />

@@ -100,29 +100,36 @@ const VaccineResult = () => {
     }
   };
 
-  const handleSendNotification = async (student) => {
+  const handleSendNotificationAndEmail = async (student) => {
     try {
       setModalLoading(true);
-      const note = student.followUpNote
-        ? `Ghi chú: ${student.followUpNote}`
-        : "Không có ghi chú.";
+      // Gửi notification
+      const note = student.followUpNote ? `Ghi chú: ${student.followUpNote}` : "Không có ghi chú.";
       await axios.post(
         "https://swp-school-medical-management.onrender.com/api/Notification/send",
         {
           receiverId: student.parentId,
           title: "Kết quả tiêm chủng",
-          message: `Học sinh ${
-            student.studentName
-          } đã ${student.result.toLowerCase()} trong đợt tiêm chủng.\n${note}`,
+          message: `Học sinh ${student.studentName} đã ${student.result.toLowerCase()} trong đợt tiêm chủng.\n${note}`,
           typeId: 8,
           isRead: false,
         },
         { headers: { "Content-Type": "application/json" } }
       );
-      notifySuccess("Đã gửi thông báo đến phụ huynh!");
+      // Gửi email
+      await axios.post(
+        "https://swp-school-medical-management.onrender.com/api/Email/send-by-userid",
+        {
+          userId: student.parentId,
+          subject: `Kết quả tiêm chủng cho học sinh ${student.studentName}`,
+          body: `Học sinh ${student.studentName} đã ${student.result?.toLowerCase()} trong đợt tiêm chủng.\n${note}`,
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      notifySuccess("Đã gửi thông báo và email đến phụ huynh!");
     } catch (error) {
-      console.error("Lỗi khi gửi thông báo:", error);
-      notifyError("Không thể gửi thông báo: " + error.response?.data?.message);
+      console.error("Lỗi khi gửi thông báo/email:", error);
+      notifyError("Không thể gửi thông báo/email: " + error.response?.data?.message);
     } finally {
       setModalLoading(false);
     }
@@ -221,8 +228,8 @@ const VaccineResult = () => {
                           </button>
                         ))}
                       {campaignStatus === "Đã hoàn thành" && r.result && (
-                        <button onClick={() => handleSendNotification(r)}>
-                          Gửi thông báo
+                        <button onClick={() => handleSendNotificationAndEmail(r)}>
+                          Gửi thông báo & email
                         </button>
                       )}
                     </td>

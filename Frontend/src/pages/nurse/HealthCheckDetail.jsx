@@ -129,12 +129,34 @@ const HealthCheckDetail = () => {
     }
   };
 
+  // Thêm hàm gửi email qua userId
+  const sendEmailToParent = async (userId, subject, body) => {
+    try {
+      await axios.post(
+        "https://swp-school-medical-management.onrender.com/api/Email/send-by-userid",
+        {
+          userId,
+          subject,
+          body,
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    } catch {
+      // Đã log ở nơi gọi hàm, không cần xử lý thêm ở đây
+      throw new Error("Gửi email thất bại");
+    }
+  };
+
   const sendNotificationToAll = async () => {
     if (!campaign) return;
+    let hasError = false;
     try {
       await Promise.all(
         students.map(async (student) => {
           if (!student.parentId) return;
+          // Gửi notification
           await axios.post(
             "https://swp-school-medical-management.onrender.com/api/Notification/send",
             {
@@ -148,12 +170,26 @@ const HealthCheckDetail = () => {
               headers: { "Content-Type": "application/json" },
             }
           );
+          // Gửi email
+          try {
+            await sendEmailToParent(
+              student.parentId,
+              "Thông báo kiểm tra sức khỏe học sinh",
+              `Học sinh ${student.fullName} sẽ tham gia chiến dịch kiểm tra sức khỏe: ${campaign.title}.\nMô tả: ${campaign.description}.\nNgày kiểm tra: ${campaign.date}`
+            );
+          } catch (err) {
+            hasError = true;
+          }
         })
       );
-      notifySuccess("Đã gửi thông báo cho tất cả phụ huynh!");
+      if (hasError) {
+        notifyError("Một số email gửi thất bại. Vui lòng kiểm tra lại!");
+      } else {
+        notifySuccess("Đã gửi thông báo và email cho tất cả phụ huynh!");
+      }
     } catch (error) {
-      console.error("Lỗi khi gửi thông báo hàng loạt:", error);
-      notifyError("Gửi thông báo thất bại. Vui lòng thử lại!");
+      console.error("Lỗi khi gửi thông báo/email hàng loạt:", error);
+      notifyError("Gửi thông báo/email thất bại. Vui lòng thử lại!");
     }
   };
 

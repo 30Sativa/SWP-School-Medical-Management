@@ -91,8 +91,6 @@ const Incident = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true); // loading fetch list
   const [showSendOption, setShowSendOption] = useState(false);
-  const [showEmailInput, setShowEmailInput] = useState(false);
-  const [manualEmail, setManualEmail] = useState("");
 
   const eventTypes = [
     { id: "1", name: "Sốt" },
@@ -1001,11 +999,11 @@ const Incident = () => {
       {showSendOption && (
         <div className={style.modalOverlay}>
           <div className={style.modalContent}>
-            <h4>Bạn muốn gửi thông báo bằng cách nào?</h4>
+            <h4>Bạn muốn gửi thông báo?</h4>
             <button
               className={style.sendBtn}
               onClick={async () => {
-                // Gửi qua hệ thống (giữ nguyên logic cũ)
+                // Gửi notification và email đồng thời
                 try {
                   const token = localStorage.getItem("token");
                   const res = await axios.get(
@@ -1018,95 +1016,42 @@ const Incident = () => {
                     return;
                   }
                   const message = `Học sinh: ${selectedEvent.studentName}\nLoại sự cố: ${selectedEvent.eventType}\nThời gian: ${new Date(selectedEvent.eventDate).toLocaleString()}\nMức độ: ${selectedEvent.severityLevelName}\nMô tả: ${selectedEvent.description}`;
-                  await axios.post(
-                    NOTIFICATION_API,
-                    {
-                      receiverId: parentId,
-                      title: "Thông báo sự cố y tế học đường",
-                      message,
-                      typeId: 2,
-                      isRead: false,
-                    },
-                    { headers: { Authorization: `Bearer ${token}` } }
-                  );
-                  alert("Đã gửi thông báo cho phụ huynh!");
+                  const subject = "Thông báo sự cố y tế học đường";
+                  // Gửi notification và email song song
+                  await Promise.all([
+                    axios.post(
+                      NOTIFICATION_API,
+                      {
+                        receiverId: parentId,
+                        title: subject,
+                        message,
+                        typeId: 2,
+                        isRead: false,
+                      },
+                      { headers: { Authorization: `Bearer ${token}` } }
+                    ),
+                    axios.post(
+                      "https://swp-school-medical-management.onrender.com/api/Email/send-by-userid",
+                      {
+                        userId: parentId,
+                        subject,
+                        body: message,
+                      },
+                      { headers: { Authorization: `Bearer ${token}` } }
+                    ),
+                  ]);
+                  alert("Đã gửi thông báo và email cho phụ huynh!");
                   setShowSendOption(false);
                 } catch {
-                  alert("Gửi thông báo thất bại!");
+                  alert("Gửi thông báo hoặc email thất bại!");
                 }
               }}
             >
-              Gửi qua hệ thống
-            </button>
-            <button
-              className={style.sendBtn}
-              onClick={async () => {
-                // Lấy email từ API, gán vào state và mở modal nhập email
-                try {
-                  const token = localStorage.getItem("token");
-                  const res = await axios.get(
-                    `${STUDENT_API}/${selectedEvent.studentId}`,
-                    { headers: { Authorization: `Bearer ${token}` } }
-                  );
-                  const email = res.data?.data?.email || "";
-                  setManualEmail(email);
-                  setShowSendOption(false);
-                  setShowEmailInput(true);
-                } catch {
-                  setManualEmail("");
-                  setShowSendOption(false);
-                  setShowEmailInput(true);
-                }
-              }}
-            >
-              Gửi qua email
+              Gửi thông báo
             </button>
             <button
               className={style.closeBtn}
               onClick={() => setShowSendOption(false)}
-            >
-              Đóng
-            </button>
-          </div>
-        </div>
-      )}
-      {showEmailInput && (
-        <div className={style.modalOverlay}>
-          <div className={style.modalContent}>
-            <h4>Nhập email phụ huynh muốn gửi</h4>
-            <input
-              type="email"
-              value={manualEmail}
-              onChange={e => setManualEmail(e.target.value)}
-              placeholder="Nhập email phụ huynh"
-              style={{ width: '100%', marginBottom: 12 }}
-            />
-            <button
-              className={style.sendBtn}
-              onClick={async () => {
-                if (!manualEmail) {
-                  alert("Vui lòng nhập email!");
-                  return;
-                }
-                const subject = "Thông báo sự cố y tế học đường";
-                const body = `Học sinh: ${selectedEvent.studentName}\nLoại sự cố: ${selectedEvent.eventType}\nThời gian: ${new Date(selectedEvent.eventDate).toLocaleString()}\nMức độ: ${selectedEvent.severityLevelName}\nMô tả: ${selectedEvent.description}`;
-                try {
-                  await axios.post(
-                    "https://swp-school-medical-management.onrender.com/api/Email/send-by-email",
-                    { email: manualEmail, subject, body }
-                  );
-                  alert("Đã gửi email cho phụ huynh!");
-                  setShowEmailInput(false);
-                } catch {
-                  alert("Gửi email thất bại!");
-                }
-              }}
-            >
-              Gửi email
-            </button>
-            <button
-              className={style.closeBtn}
-              onClick={() => setShowEmailInput(false)}
             >
               Đóng
             </button>
