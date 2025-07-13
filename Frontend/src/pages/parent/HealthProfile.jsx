@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/sb-Parent/Sidebar";
 import styles from "../../assets/css/Healthprofile.module.css";
 import axios from "axios";
@@ -7,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Modal from "../../components/Modal";
 
 // Constants
-const API_BASE_URL = "https://swp-school-medical-management.onrender.com/api";
+const API_BASE = "/api"; // Sử dụng proxy để tránh lỗi CORS
 
 // Error messages
 const ERROR_MESSAGES = {
@@ -20,11 +21,13 @@ const ERROR_MESSAGES = {
 
 // API endpoints
 const API_ENDPOINTS = {
-  STUDENTS_BY_PARENT: (parentId) => `${API_BASE_URL}/Student/by-parent/${parentId}`,
-  HEALTH_PROFILE: (studentId) => `${API_BASE_URL}/health-profiles/student/${studentId}`
+  STUDENTS_BY_PARENT: (parentId) => `${API_BASE}/Student/by-parent/${parentId}`,
+  HEALTH_PROFILE: (studentId) => `${API_BASE}/health-profiles/student/${studentId}`
 };
 
 const HealthProfile = () => {
+  const navigate = useNavigate();
+  
   // State management
   const [studentList, setStudentList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +49,17 @@ const HealthProfile = () => {
   // Get auth data from localStorage
   const token = localStorage.getItem("token");
   const parentId = localStorage.getItem("userId"); // Unified with SendMedicine.jsx
+
+  // Validate authentication on component mount
+  useEffect(() => {
+    if (!token || !parentId) {
+      toast.error("Vui lòng đăng nhập để truy cập trang này!");
+      setTimeout(() => {
+        localStorage.clear();
+        navigate("/login");
+      }, 2000);
+    }
+  }, [token, parentId, navigate]);
 
   // Utility functions
   const calculateAge = useCallback((dob) => {
@@ -77,7 +91,10 @@ const HealthProfile = () => {
       // 1. Lấy danh sách học sinh
       const studentResponse = await axios.get(
         API_ENDPOINTS.STUDENTS_BY_PARENT(parentId),
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 10000 // 10 seconds timeout
+        }
       );
 
       // Kiểm tra response status và xử lý trường hợp không có học sinh
@@ -102,7 +119,10 @@ const HealthProfile = () => {
         try {
           const profileResponse = await axios.get(
             API_ENDPOINTS.HEALTH_PROFILE(student.studentId),
-            { headers: { Authorization: `Bearer ${token}` } }
+            { 
+              headers: { Authorization: `Bearer ${token}` },
+              timeout: 10000 // 10 seconds timeout
+            }
           );
           return {
             studentInfo: student,
@@ -124,8 +144,11 @@ const HealthProfile = () => {
       await Promise.all(students.map(async (student) => {
         try {
           const res = await axios.get(
-            `${API_BASE_URL}/MedicalHistory/student/${student.studentId}`,
-            { headers: { Authorization: `Bearer ${token}`, Accept: '*/*' } }
+            `${API_BASE}/MedicalHistory/student/${student.studentId}`,
+            { 
+              headers: { Authorization: `Bearer ${token}`, Accept: '*/*' },
+              timeout: 10000 // 10 seconds timeout
+            }
           );
           medicalHistoryMap[student.studentId] = Array.isArray(res.data) ? res.data : [];
         } catch (err) {
@@ -139,10 +162,20 @@ const HealthProfile = () => {
       console.error("Error fetching profiles:", error);
       
       // Xử lý các loại lỗi khác nhau
-      if (error.response?.status === 404) {
+      if (error.response?.status === 401) {
+        toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+        // Redirect to login page
+        setTimeout(() => {
+          localStorage.clear();
+          navigate("/login");
+        }, 2000);
+        return;
+      } else if (error.response?.status === 404) {
         setStudentList([]);
         setMedicalHistoryMap({});
         return; // Không hiển thị toast error, sẽ hiển thị thông báo thân thiện
+      } else if (error.code === 'ECONNABORTED') {
+        toast.error("Request timeout. Vui lòng thử lại sau!");
       } else if (!error.response) {
         toast.error(ERROR_MESSAGES.NETWORK_ERROR);
       } else {
@@ -152,7 +185,7 @@ const HealthProfile = () => {
     } finally {
       setLoading(false);
     }
-  }, [parentId, token]);
+  }, [parentId, token, navigate]);
 
   const handleOpenModal = (student) => {
     setModalStudent(student);
@@ -180,14 +213,14 @@ const HealthProfile = () => {
   const handleRemoveMedicalHistory = (idx) => {
     setMedicalHistories((prev) => prev.length === 1 ? prev : prev.filter((_, i) => i !== idx));
   };
-  const handleCreateProfile = async (e) => {
+  const handleCreateProfile = useCallback(async (e) => {
     e.preventDefault();
     if (!modalStudent) return;
     setSubmitting(true);
     try {
       // 1. Tạo hồ sơ sức khỏe
       await axios.post(
-        `${API_BASE_URL}/health-profiles`,
+        `${API_BASE}/health-profiles`,
         {
           studentId: modalStudent.studentId,
           height: Number(formData.height),
@@ -197,21 +230,27 @@ const HealthProfile = () => {
           generalNote: formData.generalNote,
           isActive: true,
         },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          timeout: 10000 // 10 seconds timeout
+        }
       );
       // 2. Tạo medical history nếu có
       const validHistories = medicalHistories.filter(h => h.diseaseName && h.diagnosedDate);
       if (validHistories.length > 0) {
         await Promise.all(validHistories.map(async (h) => {
           await axios.post(
-            `${API_BASE_URL}/MedicalHistory`,
+            `${API_BASE}/MedicalHistory`,
             {
               studentId: modalStudent.studentId,
               diseaseName: h.diseaseName,
               note: h.note,
               diagnosedDate: h.diagnosedDate
             },
-            { headers: { Authorization: `Bearer ${token}` } }
+            { 
+              headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+              timeout: 10000 // 10 seconds timeout
+            }
           );
         }));
       }
@@ -221,11 +260,23 @@ const HealthProfile = () => {
       fetchProfiles();
       setMedicalHistories([{ diseaseName: '', note: '', diagnosedDate: '' }]);
     } catch (error) {
-      toast.error("Tạo hồ sơ/thêm tiền sử bệnh thất bại! " + (error.response?.data?.message || ""));
+      console.error("Error creating health profile:", error);
+      
+      if (error.response?.status === 401) {
+        toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+        setTimeout(() => {
+          localStorage.clear();
+          navigate("/login");
+        }, 2000);
+      } else if (error.code === 'ECONNABORTED') {
+        toast.error("Request timeout. Vui lòng thử lại sau!");
+      } else {
+        toast.error("Tạo hồ sơ/thêm tiền sử bệnh thất bại! " + (error.response?.data?.message || ""));
+      }
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [modalStudent, formData, medicalHistories, token, fetchProfiles, navigate]);
 
   // Effects
   useEffect(() => {
