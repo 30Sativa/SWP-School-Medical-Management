@@ -244,6 +244,66 @@ namespace SchoolMedicalManagement.Tests.Service.Utilities
             Assert.AreEqual(expected, actual, "TC11: Decimal precision should be handled correctly");
         }
 
+        [TestMethod]
+        [TestCategory("CalculateBMI")]
+        [TestCategory("BVA-Invalid")]
+        public void TC22_CalculateBMI_HeightBelowRange_ThrowsArgumentOutOfRangeException()
+        {
+            // Arrange
+            double height = 49.9; // Invalid: Dưới ngưỡng tối thiểu 50 cm
+            double weight = 60;
+
+            // Act & Assert
+            var ex = Assert.ThrowsException<ArgumentOutOfRangeException>(() => _healthCalculator.CalculateBMI(height, weight));
+            Assert.AreEqual("height", ex.ParamName, "TC22: Parameter name should be 'height'");
+            Assert.IsTrue(ex.Message.Contains("Chiều cao phải từ 50-250 cm"), "TC22: Exception message should mention valid height range");
+        }
+
+        [TestMethod]
+        [TestCategory("CalculateBMI")]
+        [TestCategory("BVA-Invalid")]
+        public void TC23_CalculateBMI_HeightAboveRange_ThrowsArgumentOutOfRangeException()
+        {
+            // Arrange
+            double height = 250.1; // Invalid: Trên ngưỡng tối đa 250 cm
+            double weight = 100;
+
+            // Act & Assert
+            var ex = Assert.ThrowsException<ArgumentOutOfRangeException>(() => _healthCalculator.CalculateBMI(height, weight));
+            Assert.AreEqual("height", ex.ParamName, "TC23: Parameter name should be 'height'");
+            Assert.IsTrue(ex.Message.Contains("Chiều cao phải từ 50-250 cm"), "TC23: Exception message should mention valid height range");
+        }
+
+        [TestMethod]
+        [TestCategory("CalculateBMI")]
+        [TestCategory("BVA-Invalid")]
+        public void TC24_CalculateBMI_WeightBelowRange_ThrowsArgumentOutOfRangeException()
+        {
+            // Arrange
+            double height = 160;
+            double weight = 0.9; // Invalid: Dưới ngưỡng tối thiểu 1 kg
+
+            // Act & Assert
+            var ex = Assert.ThrowsException<ArgumentOutOfRangeException>(() => _healthCalculator.CalculateBMI(height, weight));
+            Assert.AreEqual("weight", ex.ParamName, "TC24: Parameter name should be 'weight'");
+            Assert.IsTrue(ex.Message.Contains("Cân nặng phải từ 1-500 kg"), "TC24: Exception message should mention valid weight range");
+        }
+
+        [TestMethod]
+        [TestCategory("CalculateBMI")]
+        [TestCategory("BVA-Invalid")]
+        public void TC25_CalculateBMI_WeightAboveRange_ThrowsArgumentOutOfRangeException()
+        {
+            // Arrange
+            double height = 180;
+            double weight = 500.1; // Invalid: Trên ngưỡng tối đa 500 kg
+
+            // Act & Assert
+            var ex = Assert.ThrowsException<ArgumentOutOfRangeException>(() => _healthCalculator.CalculateBMI(height, weight));
+            Assert.AreEqual("weight", ex.ParamName, "TC25: Parameter name should be 'weight'");
+            Assert.IsTrue(ex.Message.Contains("Cân nặng phải từ 1-500 kg"), "TC25: Exception message should mention valid weight range");
+        }
+
         #endregion
 
         #region ClassifyBMI Tests - Black Box Testing
@@ -440,7 +500,7 @@ namespace SchoolMedicalManagement.Tests.Service.Utilities
             // Path 2: Exception path - covers validation logic
             bool exceptionThrown = false;
             string exceptionMessage = "";
-            
+
             try
             {
                 _healthCalculator.CalculateBMI(0, 70);
