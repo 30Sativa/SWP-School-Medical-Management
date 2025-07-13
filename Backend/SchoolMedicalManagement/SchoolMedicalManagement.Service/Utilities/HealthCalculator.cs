@@ -1,67 +1,67 @@
-using System;
+﻿using System;
 
 namespace SchoolMedicalManagement.Service.Utilities
 {
     /// <summary>
-    /// L?p ti?n �ch t�nh to�n c�c ch? s? s?c kh?e
+    /// Lớp tiện ích tính toán các chỉ số sức khỏe
     /// </summary>
     public class HealthCalculator
     {
         /// <summary>
-        /// T�nh ch? s? BMI (Body Mass Index)
+        /// Tính chỉ số BMI (Body Mass Index)
         /// </summary>
-        /// <param name="height">Chi?u cao (cm)</param>
-        /// <param name="weight">C�n n?ng (kg)</param>
+        /// <param name="height">Chiều cao (cm)</param>
+        /// <param name="weight">Cân nặng (kg)</param>
         /// <returns>Ch? s? BMI</returns>
         public double CalculateBMI(double height, double weight)
         {
             if (height <= 0 || weight <= 0)
-                throw new ArgumentException("Chi?u cao v� c�n n?ng ph?i l?n h?n 0");
+                throw new ArgumentException("Chiều cao và cân nặng phải lớn hơn 0");
 
-            // Chuy?n ??i chi?u cao t? cm sang m
+            // Chuyển đổi chiều cao từ cm sang m
             double heightInMeters = height / 100;
             
-            // T�nh BMI = weight / (height^2)
+            // Tính BMI = weight / (height^2)
             double bmi = weight / (heightInMeters * heightInMeters);
-            
-            // L�m tr�n 2 ch? s? th?p ph�n
+
+            // Làm tròn 2 chữ số thập phân
             return Math.Round(bmi, 2);
         }
 
         /// <summary>
-        /// Ph�n lo?i BMI theo WHO
+        /// Phân loại BMI theo WHO
         /// </summary>
-        /// <param name="bmi">Ch? s? BMI</param>
-        /// <returns>Ph�n lo?i BMI</returns>
+        /// <param name="bmi">Chỉ số BMI</param>
+        /// <returns>Phân loại BMI</returns>
         public string ClassifyBMI(double bmi)
         {
             if (bmi < 0)
-                throw new ArgumentException("BMI kh�ng th? �m");
+                throw new ArgumentException("BMI không thể âm");
 
             if (bmi < 18.5)
-                return "Thi?u c�n";
+                return "Thiếu cân";
             else if (bmi < 25)
-                return "B�nh th??ng";
+                return "Bình thường";
             else if (bmi < 30)
-                return "Th?a c�n";
+                return "Thừa cân";
             else
-                return "B�o ph�";
+                return "Béo phì";
         }
 
         /// <summary>
-        /// T�nh tu?i d?a tr�n ng�y sinh
+        /// Tính tuổi dựa trên ngày sinh
         /// </summary>
-        /// <param name="birthDate">Ng�y sinh</param>
-        /// <returns>Tu?i</returns>
+        /// <param name="birthDate">Ngày sinh</param>
+        /// <returns>Tuổi</returns>
         public int CalculateAge(DateTime birthDate)
         {
             if (birthDate > DateTime.Now)
-                throw new ArgumentException("Ng�y sinh kh�ng th? trong t??ng lai");
+                throw new ArgumentException("Ngày sinh không thể trong tương lai");
 
             DateTime today = DateTime.Today;
             int age = today.Year - birthDate.Year;
-            
-            // Ki?m tra xem sinh nh?t ?� qua ch?a
+
+            // Kiểm tra xem sinh nhật đã qua chưa
             if (birthDate.Date > today.AddYears(-age))
                 age--;
 
@@ -69,81 +69,81 @@ namespace SchoolMedicalManagement.Service.Utilities
         }
 
         /// <summary>
-        /// T�nh ph?n tr?m t?ng tr??ng chi?u cao
+        /// Tính phần trăm tăng trưởng chiều cao
         /// </summary>
-        /// <param name="previousHeight">Chi?u cao tr??c (cm)</param>
-        /// <param name="currentHeight">Chi?u cao hi?n t?i (cm)</param>
-        /// <returns>Ph?n tr?m t?ng tr??ng</returns>
+        /// <param name="previousHeight">Chiều cao trước (cm)</param>
+        /// <param name="currentHeight">Chiều cao hiện tại (cm)</param>
+        /// <returns>Phần trăm tăng trưởng</returns>
         public double CalculateGrowthPercentage(double previousHeight, double currentHeight)
         {
             if (previousHeight <= 0 || currentHeight <= 0)
-                throw new ArgumentException("Chi?u cao ph?i l?n h?n 0");
+                throw new ArgumentException("Chiều cao phải lớn hơn 0");
 
             if (previousHeight > currentHeight)
-                throw new ArgumentException("Chi?u cao hi?n t?i ph?i l?n h?n ho?c b?ng chi?u cao tr??c");
+                throw new ArgumentException("Chiều cao hiện tại phải lớn hơn hoặc bằng chiều cao trước");
 
             double growthPercentage = ((currentHeight - previousHeight) / previousHeight) * 100;
             return Math.Round(growthPercentage, 2);
         }
 
         /// <summary>
-        /// Ki?m tra xem m?t gi� tr? c� n?m trong kho?ng b�nh th??ng kh�ng
+        /// Kiểm tra xem một giá trị có nằm trong khoảng bình thường không
         /// </summary>
-        /// <param name="value">Gi� tr? c?n ki?m tra</param>
-        /// <param name="minValue">Gi� tr? t?i thi?u</param>
-        /// <param name="maxValue">Gi� tr? t?i ?a</param>
-        /// <returns>True n?u trong kho?ng b�nh th??ng</returns>
+        /// <param name="value">Giá trị cần kiểm tra</param>
+        /// <param name="minValue">Giá trị tối thiểu</param>
+        /// <param name="maxValue">Giá trị tối đa</param>
+        /// <returns>True nếu trong khoảng bình thường</returns>
         public bool IsInNormalRange(double value, double minValue, double maxValue)
         {
             if (minValue > maxValue)
-                throw new ArgumentException("Gi� tr? t?i thi?u ph?i nh? h?n gi� tr? t?i ?a");
+                throw new ArgumentException("Giá trị tối thiểu phải nhỏ hơn giá trị tối đa");
 
             return value >= minValue && value <= maxValue;
         }
 
         /// <summary>
-        /// T�nh ?i?m s?c kh?e t?ng th? (0-100)
+        /// Tính điểm sức khỏe tổng thể (0-100)
         /// </summary>
-        /// <param name="bmi">Ch? s? BMI</param>
-        /// <param name="age">Tu?i</param>
-        /// <param name="hasChronicDisease">C� b?nh m�n t�nh kh�ng</param>
-        /// <param name="hasAllergies">C� d? ?ng kh�ng</param>
-        /// <returns>?i?m s?c kh?e (0-100)</returns>
+        /// <param name="bmi">Chỉ số BMI</param>
+        /// <param name="age">Tuổi</param>
+        /// <param name="hasChronicDisease">Có bệnh mãn tính không</param>
+        /// <param name="hasAllergies">Có dị ứng không</param>
+        /// <returns>Điểm sức khỏe (0-100)</returns>
         public int CalculateHealthScore(double bmi, int age, bool hasChronicDisease, bool hasAllergies)
         {
             if (bmi < 0 || age < 0)
-                throw new ArgumentException("BMI v� tu?i ph?i l?n h?n ho?c b?ng 0");
+                throw new ArgumentException("BMI và tuổi phải lớn hơn hoặc bằng 0");
 
             int score = 100;
 
-            // ?i?m tr? cho BMI
+            // Điểm trừ cho BMI
             string bmiClass = ClassifyBMI(bmi);
             switch (bmiClass)
             {
-                case "Thi?u c�n":
+                case "Thiếu cân":
                     score -= 15;
                     break;
-                case "Th?a c�n":
+                case "Thừa cân":
                     score -= 10;
                     break;
-                case "B�o ph�":
+                case "Béo phì":
                     score -= 25;
                     break;
             }
 
-            // ?i?m tr? cho tu?i (tr? em d??i 5 tu?i ho?c tr�n 65 tu?i)
+            // Điểm trừ cho tuổi (trẻ em dưới 5 tuổi hoặc trên 65 tuổi)
             if (age < 5 || age > 65)
                 score -= 10;
 
-            // ?i?m tr? cho b?nh m�n t�nh
+            // Điểm trừ cho bệnh mãn tính
             if (hasChronicDisease)
                 score -= 20;
 
-            // ?i?m tr? cho d? ?ng
+            // Điểm trừ cho dị ứng
             if (hasAllergies)
                 score -= 5;
 
-            // ??m b?o ?i?m kh�ng �m
+            // Đảm bảo điểm không âm
             return Math.Max(0, score);
         }
     }
