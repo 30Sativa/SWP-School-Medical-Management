@@ -42,6 +42,7 @@ const CampaignDetail = () => {
   const [classList, setClassList] = useState([]); // Danh sách lớp
   const [studentList, setStudentList] = useState([]); // Danh sách học sinh hiển thị
   const [allStudents, setAllStudents] = useState([]); // Toàn bộ học sinh
+  const [autoDeclineAfterDays, setAutoDeclineAfterDays] = useState(1); // Số ngày tự động từ chối
 
   useEffect(() => {
     const fetchCampaignDetail = async () => {
@@ -94,6 +95,19 @@ const CampaignDetail = () => {
     }
   }, [sendScope, selectedClass, allStudents]);
 
+  // Thêm hàm gửi email qua userId
+  const sendEmailToParent = async (userId, subject, body) => {
+    try {
+      await axios.post("/api/Email/send-by-userid", {
+        userId,
+        subject,
+        body,
+      });
+    } catch (err) {
+      console.error("Gửi email thất bại cho userId:", userId, err);
+    }
+  };
+
   const handleSendConsentToAll = async () => {
     try {
       setModalLoading(true);
@@ -102,7 +116,9 @@ const CampaignDetail = () => {
         return;
       }
       const res = await axios.post(
-        `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/send-consent-to-all-parents`
+        `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/send-consent-to-all-parents`,
+        null,
+        { params: { autoDeclineAfterDays } }
       );
       setSendResult(res.data.data);
       notifySuccess("Đã gửi thông báo đến cho phụ huynh.");
@@ -111,6 +127,13 @@ const CampaignDetail = () => {
         `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/consent-requests`
       );
       setConsents(consentsRes.data.data);
+      // Gửi email cho từng phụ huynh
+      const subject = "Xác nhận tiêm chủng cho con em quý phụ huynh";
+      const body = "Kính gửi quý phụ huynh, vui lòng xác nhận phiếu tiêm chủng cho con em mình trên hệ thống.";
+      const parentIds = [...new Set(allStudents.map(stu => stu.parentId).filter(Boolean))];
+      for (const parentId of parentIds) {
+        await sendEmailToParent(parentId, subject, body);
+      }
     } catch (err) {
       console.error("Gửi phiếu xác nhận thất bại:", err, err.response?.data);
       notifyError(
@@ -301,6 +324,18 @@ const CampaignDetail = () => {
           />
           Gửi theo lớp
         </label>
+        <div style={{ marginTop: 8 }}>
+          <label>
+            Số ngày tự động từ chối nếu không xác nhận: {" "}
+            <input
+              type="number"
+              min={1}
+              value={autoDeclineAfterDays}
+              onChange={e => setAutoDeclineAfterDays(Number(e.target.value))}
+              style={{ width: 60, marginLeft: 4 }}
+            /> ngày
+          </label>
+        </div>
         {sendScope === "class" && (
           <>
             <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)} style={{ marginLeft: 8 }}>
@@ -332,7 +367,7 @@ const CampaignDetail = () => {
                 try {
                   await axios.post(
                     `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/send-consent-by-class`,
-                    { className: selectedClass }
+                    { className: selectedClass, autoDeclineAfterDays }
                   );
                   notifySuccess("Đã gửi phiếu xác nhận cho lớp " + selectedClass);
                   // Load lại consents nếu cần
@@ -340,6 +375,13 @@ const CampaignDetail = () => {
                     `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/consent-requests`
                   );
                   setConsents(consentsRes.data.data);
+                  // Gửi email cho từng phụ huynh trong lớp
+                  const subject = "Xác nhận tiêm chủng cho con em quý phụ huynh";
+                  const body = "Kính gửi quý phụ huynh, vui lòng xác nhận phiếu tiêm chủng cho con em mình trên hệ thống.";
+                  const parentIds = [...new Set(studentList.map(stu => stu.parentId).filter(Boolean))];
+                  for (const parentId of parentIds) {
+                    await sendEmailToParent(parentId, subject, body);
+                  }
                 } catch {
                   notifyError("Gửi phiếu xác nhận thất bại!");
                 }

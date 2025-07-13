@@ -3,8 +3,8 @@ import axios from "axios";
 import Sidebar from "../../components/sidebar/Sidebar";
 import style from "../../assets/css/viewBlog.module.css";
 import Notification from "../../components/Notification";
-import { notifySuccess, notifyError } from "../../utils/notification";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import FloatingChatBox from "../../components/Chatbox/FloatingChatBox";
 
 const ViewBlog = () => {
   const [blogs, setBlogs] = useState([]);
@@ -18,7 +18,9 @@ const ViewBlog = () => {
     const fetchBlogs = async () => {
       setLoading(true);
       try {
-        const res = await axios.get("https://swp-school-medical-management.onrender.com/api/BlogPost");
+        const res = await axios.get(
+          "https://swp-school-medical-management.onrender.com/api/BlogPost"
+        );
         if (res.data.status === "200") {
           setBlogs(res.data.data);
         }
@@ -48,9 +50,18 @@ const ViewBlog = () => {
   // Skeleton loading cards
   const skeletonCards = Array.from({ length: postsPerPage }, (_, i) => (
     <section key={i} className={`${style.card} ${style.skeletonCard}`}>
-      <div className={style.skeletonBox} style={{ height: 32, width: "60%", marginBottom: 12 }} />
-      <div className={style.skeletonBox} style={{ height: 18, width: "90%", marginBottom: 8 }} />
-      <div className={style.skeletonBox} style={{ height: 18, width: "80%", marginBottom: 8 }} />
+      <div
+        className={style.skeletonBox}
+        style={{ height: 32, width: "60%", marginBottom: 12 }}
+      />
+      <div
+        className={style.skeletonBox}
+        style={{ height: 18, width: "90%", marginBottom: 8 }}
+      />
+      <div
+        className={style.skeletonBox}
+        style={{ height: 18, width: "80%", marginBottom: 8 }}
+      />
       <div className={style.skeletonBox} style={{ height: 18, width: "70%" }} />
     </section>
   ));
@@ -60,7 +71,9 @@ const ViewBlog = () => {
       <Sidebar />
       <main className={style.dashboardWrapper}>
         {/* LOADING OVERLAY */}
-        {(loading || expandLoading) && <LoadingOverlay text="Đang tải dữ liệu..." />}
+        {(loading || expandLoading) && (
+          <LoadingOverlay text="Đang tải dữ liệu..." />
+        )}
         <div className={style.header}>
           <h2>Bài viết y tế</h2>
           <p>Các chia sẻ hữu ích từ y tá trường mầm non</p>
@@ -75,16 +88,23 @@ const ViewBlog = () => {
                     <>
                       <div dangerouslySetInnerHTML={{ __html: blog.content }} />
                       <p style={{ fontStyle: "italic", marginTop: "1rem" }}>
-                        🖊️ Người viết: {blog.authorName} — Ngày đăng: {new Date(blog.postedDate).toLocaleDateString("vi-VN")}
+                        🖊️ Người viết: {blog.authorName} — Ngày đăng:{" "}
+                        {new Date(blog.postedDate).toLocaleDateString("vi-VN")}
                       </p>
                     </>
                   ) : (
-                    <button className={style.btnViewMore} onClick={() => toggleExpand(blog.postId)}>
+                    <button
+                      className={style.btnViewMore}
+                      onClick={() => toggleExpand(blog.postId)}
+                    >
                       Xem thêm
                     </button>
                   )}
                   {expandedPostId === blog.postId && (
-                    <button className={style.btnViewMore} onClick={() => toggleExpand(blog.postId)}>
+                    <button
+                      className={style.btnViewMore}
+                      onClick={() => toggleExpand(blog.postId)}
+                    >
                       Thu gọn
                     </button>
                   )}
@@ -95,7 +115,9 @@ const ViewBlog = () => {
           {Array.from({ length: totalPages }, (_, i) => (
             <button
               key={i + 1}
-              className={`${style.pageBtn} ${currentPage === i + 1 ? style.active : ""}`}
+              className={`${style.pageBtn} ${
+                currentPage === i + 1 ? style.active : ""
+              }`}
               onClick={() => setCurrentPage(i + 1)}
             >
               {i + 1}
@@ -103,6 +125,7 @@ const ViewBlog = () => {
           ))}
         </div>
         <Notification />
+        <FloatingChatBox />
       </main>
     </div>
   );

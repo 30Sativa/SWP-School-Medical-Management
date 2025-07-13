@@ -402,31 +402,75 @@ Trường Mầm Non
     `.trim();
 
       // 3. Gửi thông báo qua Notification
-      const response = await axios.post(
-        "https://swp-school-medical-management.onrender.com/api/Notification/send",
-        {
-          receiverId: parentId, // ✅ đúng theo VaccineResult
-          title: "Kết quả khám sức khỏe",
-          message: message,
-          typeId: 7, // Loại thông báo khám sức khỏe
-          isRead: false,
-        },
-        {
-          headers: { "Content-Type": "application/json" },
+      let notificationSuccess = false;
+      let emailSuccess = false;
+      let notificationError = null;
+      let emailError = null;
+      try {
+        const response = await axios.post(
+          "https://swp-school-medical-management.onrender.com/api/Notification/send",
+          {
+            receiverId: parentId, // ✅ đúng theo VaccineResult
+            title: "Kết quả khám sức khỏe",
+            message: message,
+            typeId: 7, // Loại thông báo khám sức khỏe
+            isRead: false,
+          },
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+        if (response.status === 200 || response.status === 201) {
+          notificationSuccess = true;
+        } else {
+          notificationError = response.data?.message || "Không rõ lỗi";
         }
-      );
+      } catch (error) {
+        notificationError = error.response?.data?.message || error.message;
+      }
 
-      if (response.status === 200 || response.status === 201) {
-        notifySuccess(" Đã gửi kết quả khám sức khỏe cho phụ huynh!");
-      } else {
-        notifyError("Gửi thất bại: " + (response.data?.message || "Không rõ lỗi"));
+      // 4. Gửi email qua API
+      try {
+        const emailRes = await axios.post(
+          "https://swp-school-medical-management.onrender.com/api/Email/send-by-userid",
+          {
+            userId: parentId,
+            subject: "Kết quả khám sức khỏe cho học sinh " + record.studentName,
+            body: message,
+          },
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+        if (emailRes.status === 200) {
+          emailSuccess = true;
+        } else {
+          emailError = emailRes.data?.message || "Không rõ lỗi";
+        }
+      } catch (error) {
+        emailError = error.response?.data?.message || error.message;
+      }
+
+      // 5. Thông báo kết quả
+      if (notificationSuccess && emailSuccess) {
+        notifySuccess("Đã gửi kết quả khám sức khỏe cho phụ huynh qua hệ thống và email!");
+      } else if (!notificationSuccess && !emailSuccess) {
+        notifyError(
+          `Gửi thất bại cả notification và email.\nNotification: ${notificationError}\nEmail: ${emailError}`
+        );
+      } else if (!notificationSuccess) {
+        notifyError(`Notification thất bại: ${notificationError}`);
+        notifySuccess("Đã gửi email cho phụ huynh!");
+      } else if (!emailSuccess) {
+        notifyError(`Email thất bại: ${emailError}`);
+        notifySuccess("Đã gửi notification cho phụ huynh!");
       }
     } catch (error) {
       console.error("Lỗi khi gửi kết quả:", error);
       notifyError(
-  "Đã xảy ra lỗi khi gửi kết quả: " +
-    (error.response?.data?.message || error.message)
-);
+        "Đã xảy ra lỗi khi gửi kết quả: " +
+          (error.response?.data?.message || error.message)
+      );
     }
   };
 
