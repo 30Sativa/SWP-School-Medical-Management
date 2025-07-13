@@ -15,8 +15,19 @@ namespace SchoolMedicalManagement.Service.Utilities
         /// <returns>Ch? s? BMI</returns>
         public double CalculateBMI(double height, double weight)
         {
-            if (height <= 0 || weight <= 0)
-                throw new ArgumentException("Chiều cao và cân nặng phải lớn hơn 0");
+            // Validation: Kiểm tra đầu vào
+            if (height <= 0)
+                throw new ArgumentException("Chiều cao phải lớn hơn 0", nameof(height));
+
+            if (weight <= 0)
+                throw new ArgumentException("Cân nặng phải lớn hơn 0", nameof(weight));
+
+            // Validation: Kiểm tra giá trị hợp lý
+            if (height < 50 || height > 250)
+                throw new ArgumentOutOfRangeException(nameof(height), "Chiều cao phải từ 50-250 cm");
+
+            if (weight < 1 || weight > 500)
+                throw new ArgumentOutOfRangeException(nameof(weight), "Cân nặng phải từ 1-500 kg");
 
             // Chuyển đổi chiều cao từ cm sang m
             double heightInMeters = height / 100;
