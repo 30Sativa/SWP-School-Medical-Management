@@ -148,6 +148,15 @@ namespace SchoolMedicalManagement.Service.Implement
             // ✅ Load lại thông tin đầy đủ từ database bằng RequestId vừa tạo
             var createdRequest = await _medicationRequestRepository.GetByIdMedical(createdRequestId);
 
+            if (createdRequest == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = "Không tìm thấy đơn thuốc vừa tạo.",
+                    Data = null
+                };
+            }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
