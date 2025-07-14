@@ -22,6 +22,26 @@ namespace SchoolMedicalManagement.Service.Implement
             _medicationRequestRepository = medicationRequestRepository;
         }
 
+        private const int PendingStatus = 1;
+        private const int ApprovedStatus = 2;
+        private const int RejectedStatus = 3;
+        private const int ScheduledStatus = 4;
+        private const int CompletedStatus = 5;
+        private const int CancelledStatus = 6;
+
+        private string GetStatusString(int statusId)
+        {
+            return statusId switch
+            {
+                PendingStatus => "Chờ duyệt",
+                ApprovedStatus => "Đã duyệt",
+                RejectedStatus => "Bị từ chối",
+                ScheduledStatus => "Đã lên lịch",
+                CompletedStatus => "Đã hoàn thành",
+                _ => "Đã hủy"
+            };
+        }
+
 
         public async Task<List<MedicationRequestResponse>> GetPendingRequestsAsync()
         {
@@ -34,11 +54,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 MedicationName = r.MedicationName,
                 Dosage = r.Dosage,
                 Instructions = r.Instructions,
-                Status = r.Status.StatusId == 1 ? "Chờ duyệt" : 
-                         r.Status.StatusId == 2 ? "Đã duyệt" : 
-                         r.Status.StatusId == 3 ? "Bị từ chối" : 
-                         r.Status.StatusId == 4 ? "Đã lên lịch" :  
-                         r.Status.StatusId == 5 ? "Đã hoàn thành" : "Đã hủy",
+                Status = GetStatusString(r.Status.StatusId),
                 ImagePath = r.ImagePath,
                 ReceivedByName = r.ReceivedByNavigation?.FullName,
                 RequestDate = r.RequestDate
@@ -71,11 +87,7 @@ namespace SchoolMedicalManagement.Service.Implement
                         MedicationName = entity.MedicationName,
                         Dosage = entity.Dosage,
                         Instructions = entity.Instructions,
-                        Status = entity.Status.StatusId == 1 ? "Chờ duyệt" :
-                         entity.Status.StatusId == 2 ? "Đã duyệt" :
-                         entity.Status.StatusId == 3 ? "Bị từ chối" :
-                         entity.Status.StatusId == 4 ? "Đã lên lịch" :
-                         entity.Status.StatusId == 5 ? "Đã hoàn thành" : "Đã hủy",
+                        Status = GetStatusString(entity.Status.StatusId),
                         RequestDate = entity.RequestDate,
                         ReceivedByName = entity.ReceivedByNavigation?.FullName // Thông tin y tá đã duyệt
                     }
@@ -105,7 +117,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 Dosage = request.Dosage,
                 Instructions = request.Instructions,
                 RequestDate = DateTime.Now,
-                StatusId = 1,
+                StatusId = PendingStatus,
                 IsActive = true,
                 ImagePath = imagePath,
             };
@@ -124,7 +136,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     MedicationName = newRequest.MedicationName,
                     Dosage = newRequest.Dosage,
                     Instructions = newRequest.Instructions,
-                    Status = "Chờ duyệt",
+                    Status = GetStatusString(PendingStatus),
                     RequestDate = newRequest.RequestDate,
                     ImagePath = newRequest.ImagePath
                 }
@@ -145,11 +157,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     MedicationName = item.MedicationName,
                     Dosage = item.Dosage,
                     Instructions = item.Instructions,
-                    Status = item.Status.StatusId == 1 ? "Chờ duyệt" :
-                             item.Status.StatusId == 2 ? "Đã duyệt" :
-                             item.Status.StatusId == 3 ? "Bị từ chối" :
-                             item.Status.StatusId == 4 ? "Đã lên lịch" :
-                             item.Status.StatusId == 5 ? "Đã hoàn thành" : "Đã hủy",
+                    Status = GetStatusString(item.Status.StatusId),
                     ImagePath = item.ImagePath,
                     ReceivedByName = item.ReceivedByNavigation?.FullName,
                     RequestDate = item.RequestDate
@@ -183,11 +191,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     MedicationName = response.MedicationName,
                     Dosage = response.Dosage,
                     Instructions = response.Instructions,
-                    Status = response.Status.StatusId == 1 ? "Chờ duyệt" :
-                             response.Status.StatusId == 2 ? "Đã duyệt" :
-                             response.Status.StatusId == 3 ? "Bị từ chối" :
-                             response.Status.StatusId == 4 ? "Đã lên lịch" :
-                             response.Status.StatusId == 5 ? "Đã hoàn thành" : "Đã hủy",
+                    Status = GetStatusString(response.Status.StatusId),
                     ImagePath = response.ImagePath,
                     ReceivedByName = response.ReceivedByNavigation?.FullName,
                     RequestDate = response.RequestDate
@@ -207,11 +211,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 MedicationName = r.MedicationName,
                 Dosage = r.Dosage,
                 Instructions = r.Instructions,
-                Status = r.Status.StatusId == 1 ? "Chờ duyệt" :
-                          r.Status.StatusId == 2 ? "Đã duyệt" :
-                          r.Status.StatusId == 3 ? "Bị từ chối" :
-                          r.Status.StatusId == 4 ? "Đã lên lịch" :
-                          r.Status.StatusId == 5 ? "Đã hoàn thành" : "Đã hủy",
+                Status = GetStatusString(r.Status.StatusId),
                 ImagePath = r.ImagePath,
                 ReceivedByName = r.ReceivedByNavigation?.FullName,
                 RequestDate = r.RequestDate
@@ -244,11 +244,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     MedicationName = request.MedicationName,
                     Dosage = request.Dosage,
                     Instructions = request.Instructions,
-                    Status = request.Status.StatusId == 1 ? "Chờ duyệt" :
-         request.Status.StatusId == 2 ? "Đã duyệt" :
-         request.Status.StatusId == 3 ? "Bị từ chối" :
-         request.Status.StatusId == 4 ? "Đã lên lịch" :
-         request.Status.StatusId == 5 ? "Đã hoàn thành" : "Đã hủy",
+                    Status = GetStatusString(request.Status.StatusId),
                     ImagePath = request.ImagePath,
                     ReceivedByName = request.ReceivedByNavigation?.FullName,
                     RequestDate = request.RequestDate
@@ -290,11 +286,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 MedicationName = r.MedicationName,
                 Dosage = r.Dosage,
                 Instructions = r.Instructions,
-                Status = r.Status.StatusId == 1 ? "Chờ duyệt" :
-         r.Status.StatusId == 2 ? "Đã duyệt" :
-         r.Status.StatusId == 3 ? "Bị từ chối" :
-         r.Status.StatusId == 4 ? "Đã lên lịch" :
-         r.Status.StatusId == 5 ? "Đã hoàn thành" : "Đã hủy",
+                Status = GetStatusString(r.Status.StatusId),
                 ImagePath = r.ImagePath,
                 ReceivedByName = r.ReceivedByNavigation?.FullName,
                 RequestDate = r.RequestDate
