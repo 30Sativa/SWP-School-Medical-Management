@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import Sidebar from "../../components/sb-Parent/Sidebar";
 import styles from "../../assets/css/SendMedicine.module.css";
+import Notification from "../../components/Notification";
 import { FiInfo, FiEdit, FiClipboard } from "react-icons/fi";
 import axios from "axios";
 import { toast } from "react-toastify";
