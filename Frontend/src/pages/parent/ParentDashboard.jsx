@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import Sidebar from "../../components/sb-Parent/Sidebar";
 import styles from "../../assets/css/parentDashboard.module.css";
+import sendMedicineStyles from "../../assets/css/SendMedicine.module.css";
 import axios from "axios";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
@@ -48,7 +49,8 @@ const ParentDashboard = () => {
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [feedbackContent, setFeedbackContent] = useState("");
   const [feedbackLoading, setFeedbackLoading] = useState(false);
-  
+  const [healthNotifications, setHealthNotifications] = useState([]);
+
   // Filter states
   const [searchKeyword, setSearchKeyword] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
@@ -78,7 +80,7 @@ const ParentDashboard = () => {
     console.log("Filtering medications...");
     return overview.recentMedicationRequests.filter(item => {
       const matchesStudent = isMyStudent(item.studentName);
-      const matchesSearch = 
+      const matchesSearch =
         item.medicationName.toLowerCase().includes(searchKeyword.toLowerCase()) ||
         item.studentName.toLowerCase().includes(searchKeyword.toLowerCase());
       const matchesStatus = filterStatus === "" || item.status === filterStatus;
@@ -93,7 +95,7 @@ const ParentDashboard = () => {
     console.log("Filtering events...");
     return overview.recentMedicalEvents.filter(event => {
       const matchesStudent = isMyStudent(event.studentName);
-      const matchesSearch = 
+      const matchesSearch =
         event.eventType.toLowerCase().includes(searchKeyword.toLowerCase()) ||
         event.studentName.toLowerCase().includes(searchKeyword.toLowerCase());
       const matchesSeverity = filterSeverity === "" || event.severity === filterSeverity;
@@ -107,23 +109,23 @@ const ParentDashboard = () => {
     const startTime = Date.now();
     try {
       console.log("🔄 Fetching dashboard overview...");
-      
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
-      
+
       const response = await axios.get(API_ENDPOINTS.OVERVIEW, {
         signal: controller.signal,
         timeout: REQUEST_TIMEOUT
       });
-      
+
       clearTimeout(timeoutId);
       const overviewData = response.data.data;
-      
+
       setOverview(overviewData);
       const loadTime = Date.now() - startTime;
       console.log(`✅ Overview loaded in ${loadTime}ms`);
       console.log(`📊 Data: ${overviewData?.recentMedicationRequests?.length || 0} medications, ${overviewData?.recentMedicalEvents?.length || 0} events`);
-      
+
       return overviewData;
     } catch (error) {
       const loadTime = Date.now() - startTime;
@@ -145,23 +147,23 @@ const ParentDashboard = () => {
     const startTime = Date.now();
     try {
       console.log(`🔄 Fetching students for parent: ${parentId}`);
-      
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
-      
+
       const response = await axios.get(API_ENDPOINTS.STUDENTS_BY_PARENT(parentId), {
         signal: controller.signal,
         timeout: REQUEST_TIMEOUT
       });
-      
+
       clearTimeout(timeoutId);
       const studentList = Array.isArray(response.data.data) ? response.data.data : [];
-      
+
       setMyStudents(studentList);
       const loadTime = Date.now() - startTime;
       console.log(`✅ Students loaded in ${loadTime}ms`);
       console.log(`👨‍👩‍👧‍👦 Found ${studentList.length} students:`, studentList.map(s => s.fullName));
-      
+
       return studentList;
     } catch (error) {
       const loadTime = Date.now() - startTime;
@@ -169,17 +171,32 @@ const ParentDashboard = () => {
         console.error(`⏰ Students request timeout after ${loadTime}ms`);
         throw new Error("Yêu cầu quá thời gian chờ. Vui lòng thử lại.");
       }
-      
+
       // Handle 404 specifically - this means no students linked
       if (error.response && error.response.status === 404) {
         console.warn(`👨‍👩‍👧‍👦 No students linked to parent ${parentId} - returning empty array`);
         setMyStudents([]);
         return [];
       }
-      
+
       console.error(`❌ Students failed after ${loadTime}ms:`, error);
       setMyStudents([]);
       throw error;
+    }
+  }, [parentId]);
+
+  const fetchHealthNotifications = useCallback(async () => {
+    if (!parentId) return [];
+    try {
+      const res = await axios.get(
+        `https://swp-school-medical-management.onrender.com/api/Dashboard/parent/${parentId}`
+      );
+      const notifications = res.data?.data?.recentNotifications || [];
+      setHealthNotifications(notifications);
+      return notifications;
+    } catch (err) {
+      setHealthNotifications([]);
+      return [];
     }
   }, [parentId]);
 
@@ -188,42 +205,42 @@ const ParentDashboard = () => {
     try {
       setLoading(true);
       setDataError(null);
-      
+
       console.log("🚀 Starting parallel data fetch...");
-      
+
       // Parallel fetch with individual error handling
       const results = await Promise.allSettled([
         fetchStudents(),
         fetchOverview()
       ]);
-      
+
       const totalLoadTime = Date.now() - totalStartTime;
       console.log(`⏱️ Total load time: ${totalLoadTime}ms`);
-      
+
       // Check for errors
       const studentResult = results[0];
       const overviewResult = results[1];
-      
+
       if (studentResult.status === 'rejected') {
         console.error("❌ Students fetch failed:", studentResult.reason);
         setDataError(`Không thể tải danh sách học sinh: ${studentResult.reason.message}`);
       } else if (studentResult.value && studentResult.value.length === 0) {
         console.log("👨‍👩‍👧‍👦 No students linked - this is normal for empty state");
       }
-      
+
       if (overviewResult.status === 'rejected') {
         console.error("❌ Overview fetch failed:", overviewResult.reason);
-        setDataError(prev => prev ? 
-          `${prev} và dữ liệu tổng quan: ${overviewResult.reason.message}` : 
+        setDataError(prev => prev ?
+          `${prev} và dữ liệu tổng quan: ${overviewResult.reason.message}` :
           `Không thể tải dữ liệu tổng quan: ${overviewResult.reason.message}`
         );
       }
-      
+
       // Show success if at least one succeeded
       if (studentResult.status === 'fulfilled' || overviewResult.status === 'fulfilled') {
         console.log("✅ Dashboard loaded successfully");
       }
-      
+
     } catch (error) {
       const totalLoadTime = Date.now() - totalStartTime;
       console.error(`❌ Complete dashboard load failed after ${totalLoadTime}ms:`, error);
@@ -244,7 +261,7 @@ const ParentDashboard = () => {
     try {
       setFeedbackLoading(true);
       console.log("Submitting feedback...");
-      
+
       await axios.post(API_ENDPOINTS.PARENT_FEEDBACK, {
         parentId,
         content: feedbackContent,
@@ -289,6 +306,10 @@ const ParentDashboard = () => {
     fetchData();
   }, [fetchData]);
 
+  useEffect(() => {
+    fetchHealthNotifications();
+  }, [fetchHealthNotifications]);
+
   // Render functions
   const renderLoadingState = () => (
     <div className={styles.loadingOverlay}>
@@ -304,11 +325,11 @@ const ParentDashboard = () => {
       <Sidebar />
       <main className={styles.content}>
         {dataError ? (
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
             minHeight: '60vh',
             textAlign: 'center',
             padding: '2rem',
@@ -322,7 +343,7 @@ const ParentDashboard = () => {
             <p style={{ color: '#92400e', fontSize: '1.1rem', lineHeight: '1.6' }}>
               {dataError}
             </p>
-            <button 
+            <button
               onClick={fetchData}
               style={{
                 marginTop: '1.5rem',
@@ -340,11 +361,11 @@ const ParentDashboard = () => {
             </button>
           </div>
         ) : (
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
             minHeight: '60vh',
             textAlign: 'center',
             padding: '40px 20px'
@@ -362,18 +383,18 @@ const ParentDashboard = () => {
               boxShadow: '0 8px 32px rgba(32, 178, 170, 0.15)'
             }}>
               <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#20b2aa" strokeWidth="1.5">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
               </svg>
             </div>
 
             {/* Heading */}
-            <h2 style={{ 
-              color: '#0284c7', 
-              fontSize: '28px', 
-              fontWeight: '700', 
+            <h2 style={{
+              color: '#0284c7',
+              fontSize: '28px',
+              fontWeight: '700',
               marginBottom: '16px',
               lineHeight: '1.3'
             }}>
@@ -381,9 +402,9 @@ const ParentDashboard = () => {
             </h2>
 
             {/* Description */}
-            <p style={{ 
-              color: '#64748b', 
-              fontSize: '16px', 
+            <p style={{
+              color: '#64748b',
+              fontSize: '16px',
               lineHeight: '1.6',
               maxWidth: '500px',
               marginBottom: '32px'
@@ -400,16 +421,16 @@ const ParentDashboard = () => {
               width: '100%',
               border: '1px solid #e2e8f0'
             }}>
-              <h3 style={{ 
-                color: '#334155', 
-                fontSize: '18px', 
-                fontWeight: '600', 
+              <h3 style={{
+                color: '#334155',
+                fontSize: '18px',
+                fontWeight: '600',
                 marginBottom: '16px',
                 textAlign: 'center'
               }}>
                 Các bước để sử dụng hệ thống:
               </h3>
-              
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{
@@ -429,7 +450,7 @@ const ParentDashboard = () => {
                     Liên hệ với nhà trường qua số điện thoại hoặc email
                   </span>
                 </div>
-                
+
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{
                     width: '32px',
@@ -448,7 +469,7 @@ const ParentDashboard = () => {
                     Cung cấp thông tin cá nhân và thông tin con em
                   </span>
                 </div>
-                
+
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{
                     width: '32px',
@@ -478,9 +499,9 @@ const ParentDashboard = () => {
               borderRadius: '12px',
               border: '1px solid #20b2aa'
             }}>
-              <p style={{ 
-                color: '#0284c7', 
-                fontSize: '14px', 
+              <p style={{
+                color: '#0284c7',
+                fontSize: '14px',
                 fontWeight: '500',
                 margin: 0
               }}>
@@ -525,11 +546,21 @@ const ParentDashboard = () => {
 
       <div className={styles["action-card-v2"]}>
         <div className={styles["card-text"]}>
-          <h4>Hướng dẫn sử dụng</h4>
-          <a href="#">TÌM HIỂU THÊM →</a>
+          <h4>Thông báo kiểm tra sức khỏe</h4>
+          {healthNotifications.length === 0 ? (
+            <p>Không có thông báo mới.</p>
+          ) : (
+            <ul style={{ paddingLeft: 18, margin: 0 }}>
+              {healthNotifications.slice(0, 2).map((noti, idx) => (
+                <li key={noti.notificationId} style={{ fontSize: 14, marginBottom: 4 }}>
+                  <strong>{noti.title}:</strong> {noti.message.split('\n')[0]}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
         <div className={styles["card-icon"]}>
-          <div className={styles["icon-circle"]}>📘</div>
+          <div className={styles["icon-circle"]}>🩺</div>
         </div>
       </div>
     </div>
@@ -564,6 +595,13 @@ const ParentDashboard = () => {
         <div className={styles["info-card"]}>
           <h4>Số học sinh của bạn</h4>
           <p>{myStudents.length} học sinh</p>
+          <ul style={{ marginTop: '8px', paddingLeft: '16px', fontSize: '14px', color: '#334155' }}>
+            {myStudents.map((s, idx) => (
+              <li key={idx} style={{ marginBottom: '4px' }}>
+                {s.fullName} – {s.class}
+              </li>
+            ))}
+          </ul>
         </div>
         <div className={styles["info-card"]}>
           <h4>Sự kiện y tế gần đây</h4>
@@ -577,16 +615,39 @@ const ParentDashboard = () => {
     </div>
   );
 
-  const renderMedicationItem = (item, index) => (
-    <div className={styles["health-item"]} key={`medication-${index}`}>
-      <div className={styles["health-left"]}>
-        <h5>{item.studentName}</h5>
-        <p>Thuốc: {item.medicationName}</p>
-        <p>Ngày gửi: {formatDateTime(item.requestDate)}</p>
-        <span className={`${styles.tag} ${styles.blue}`}>{item.status}</span>
+  const renderMedicationItem = (item, index) => {
+    const getStatusClass = (status) => {
+      switch (status) {
+        case "Đã duyệt":
+        case "Đã hoàn thành":
+          return sendMedicineStyles.done;
+        case "Chờ duyệt":
+          return sendMedicineStyles.pending;
+        case "Bị từ chối":
+          return sendMedicineStyles.reject;
+        default:
+          return "";
+      }
+    };
+
+    const getStatusText = (status) => {
+      if (status === "Đã hoàn thành") return "Đã lên lịch";
+      return status;
+    };
+
+    return (
+      <div className={styles["health-item"]} key={`medication-${index}`}>
+        <div className={styles["health-left"]}>
+          <h5>{item.studentName}</h5>
+          <p>Thuốc: {item.medicationName}</p>
+          <p>Ngày gửi: {formatDateTime(item.requestDate)}</p>
+          <span className={`${sendMedicineStyles.status} ${getStatusClass(item.status)}`}>
+            {getStatusText(item.status)}
+          </span>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderMedicationsSection = () => (
     <div className={styles["health-check-box"]}>
@@ -602,9 +663,8 @@ const ParentDashboard = () => {
   const renderEventItem = (event, index) => (
     <div
       key={`event-${index}`}
-      className={`${styles["reminder-card"]} ${
-        SEVERITY_COLORS[event.severity] || styles.yellow
-      }`}
+      className={`${styles["reminder-card"]} ${SEVERITY_COLORS[event.severity] || styles.yellow
+        }`}
     >
       <div className={styles["reminder-icon"]}>
         <span>⚠️</span>
@@ -651,7 +711,7 @@ const ParentDashboard = () => {
             onChange={(e) => setFeedbackContent(e.target.value)}
           />
           <div className={styles.modalActions}>
-            <button 
+            <button
               onClick={handleSubmitFeedback}
               disabled={feedbackLoading || !feedbackContent.trim()}
             >
