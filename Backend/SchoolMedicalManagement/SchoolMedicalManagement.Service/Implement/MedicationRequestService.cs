@@ -29,7 +29,7 @@ namespace SchoolMedicalManagement.Service.Implement
         private const int CompletedStatus = 5;
         private const int CancelledStatus = 6;
 
-        private string GetStatusString(int statusId)
+        private string GetStatusString(int? statusId)
         {
             return statusId switch
             {
@@ -38,7 +38,8 @@ namespace SchoolMedicalManagement.Service.Implement
                 RejectedStatus => "Bị từ chối",
                 ScheduledStatus => "Đã lên lịch",
                 CompletedStatus => "Đã hoàn thành",
-                _ => "Đã hủy"
+                CancelledStatus => "Đã hủy",
+                _ => "Không xác định"
             };
         }
 
@@ -72,30 +73,43 @@ namespace SchoolMedicalManagement.Service.Implement
             var entity = await _medicationRequestRepository.GetByIdMedical(request.RequestID);
             if (entity == null)
             {
-                throw new Exception("Không tồn tại đơn thuốc");
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = "Không tìm thấy đơn thuốc với ID được cung cấp.",
+                    Data = null
+                };
             }
+
+            // ✅ Lưu trạng thái cũ để log
+            var oldStatusId = entity.StatusId;
+            
             entity.StatusId = request.StatusID;
             entity.ReceivedBy = request.NurseID;
 
-            var repsone = await _medicationRequestRepository.UpdateStatusAsync(entity);
+            var response = await _medicationRequestRepository.UpdateStatusAsync(entity);
 
-            if (repsone)
+            if (response)
             {
+                // ✅ Load lại entity với đầy đủ thông tin sau khi update
+                var updatedEntity = await _medicationRequestRepository.GetByIdMedical(request.RequestID);
+                
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status200OK.ToString(),
                     Message = "Cập nhật trạng thái đơn thuốc thành công.",
                     Data = new MedicationRequestResponse
                     {
-                        RequestID = entity.RequestId,
-                        StudentName = entity.Student?.FullName ?? "Unknown",
-                        ParentName = entity.Parent?.FullName ?? "Unknown",
-                        MedicationName = entity.MedicationName,
-                        Dosage = entity.Dosage,
-                        Instructions = entity.Instructions,
-                        Status = GetStatusString(entity.Status.StatusId),
-                        RequestDate = entity.RequestDate,
-                        ReceivedByName = entity.ReceivedByNavigation?.FullName // Thông tin y tá đã duyệt
+                        RequestID = updatedEntity.RequestId,
+                        StudentName = updatedEntity.Student?.FullName ?? "Unknown",
+                        ParentName = updatedEntity.Parent?.FullName ?? "Unknown",
+                        MedicationName = updatedEntity.MedicationName,
+                        Dosage = updatedEntity.Dosage,
+                        Instructions = updatedEntity.Instructions,
+                        Status = GetStatusString(updatedEntity.StatusId), // ✅ Sử dụng StatusId thay vì Status.StatusId
+                        RequestDate = updatedEntity.RequestDate,
+                        ImagePath = updatedEntity.ImagePath,
+                        ReceivedByName = updatedEntity.ReceivedByNavigation?.FullName // Thông tin y tá đã duyệt
                     }
                 };
             }
@@ -128,23 +142,36 @@ namespace SchoolMedicalManagement.Service.Implement
                 ImagePath = imagePath,
             };
 
-            var result = await _medicationRequestRepository.CreateMedicalRequestAsync(newRequest);
+            // ✅ Tạo đơn thuốc và lấy RequestId được tạo
+            var createdRequestId = await _medicationRequestRepository.CreateMedicalRequestAsync(newRequest);
 
+            // ✅ Load lại thông tin đầy đủ từ database bằng RequestId vừa tạo
+            var createdRequest = await _medicationRequestRepository.GetByIdMedical(createdRequestId);
+
+            if (createdRequest == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = "Không tìm thấy đơn thuốc vừa tạo.",
+                    Data = null
+                };
+            }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
                 Message = "Tạo đơn thuốc thành công.",
                 Data = new MedicationRequestResponse
                 {
-                    RequestID = newRequest.RequestId,
-                    StudentName = newRequest.Student?.FullName ?? "Unknown",
-                    ParentName = newRequest.Parent?.FullName ?? "Unknown",
-                    MedicationName = newRequest.MedicationName,
-                    Dosage = newRequest.Dosage,
-                    Instructions = newRequest.Instructions,
+                    RequestID = createdRequest.RequestId,
+                    StudentName = createdRequest.Student?.FullName ?? "Unknown",
+                    ParentName = createdRequest.Parent?.FullName ?? "Unknown",
+                    MedicationName = createdRequest.MedicationName,
+                    Dosage = createdRequest.Dosage,
+                    Instructions = createdRequest.Instructions,
                     Status = GetStatusString(PendingStatus),
-                    RequestDate = newRequest.RequestDate,
-                    ImagePath = newRequest.ImagePath
+                    RequestDate = createdRequest.RequestDate,
+                    ImagePath = createdRequest.ImagePath
                 }
             };
         }

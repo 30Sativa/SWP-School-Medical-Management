@@ -56,5 +56,14 @@ namespace School_Medical_Management.API.Controllers
             var response = await _dashboardService.GetMedicationStatisticsAsync();
             return StatusCode(int.Parse(response?.Status ?? "200"), response);
         }
+
+        // API: Dashboard cho phụ huynh
+        [HttpGet("parent/{parentId}")]
+        //[Authorize(Roles = "Parent")]
+        public async Task<IActionResult> GetParentDashboardOverview([FromRoute] Guid parentId)
+        {
+            var response = await _dashboardService.GetParentDashboardOverviewAsync(parentId);
+            return StatusCode(int.Parse(response?.Status ?? "200"), response);
+        }
     }
-} 
+}
