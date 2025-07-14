@@ -10,7 +10,7 @@ namespace SchoolMedicalManagement.Service.Interface
 {
     public interface IMedicalHistoryService
     {
-        Task<List<MedicalHistoryResponse>> GetAllByStudentIdAsync(int studentId);
+        Task<BaseResponse> GetAllByStudentIdAsync(int studentId);
         Task<BaseResponse> GetByIdAsync(int id);
         Task<BaseResponse> CreateAsync(CreateMedicalHistoryRequest request);
         Task<BaseResponse> UpdateAsync(UpdateMedicalHistoryRequest request);

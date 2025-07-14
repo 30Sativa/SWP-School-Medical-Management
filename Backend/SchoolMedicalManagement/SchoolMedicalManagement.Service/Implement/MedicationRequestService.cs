@@ -43,10 +43,10 @@ namespace SchoolMedicalManagement.Service.Implement
         }
 
 
-        public async Task<List<MedicationRequestResponse>> GetPendingRequestsAsync()
+        public async Task<BaseResponse> GetPendingRequestsAsync()
         {
             var list = await _medicationRequestRepository.GetPendingRequestsAsync();
-            return list.Select(r => new MedicationRequestResponse
+            var responseList = list.Select(r => new MedicationRequestResponse
             {   
                 RequestID = r.RequestId,
                 StudentName = r.Student?.FullName ?? "Unknown",
@@ -59,6 +59,12 @@ namespace SchoolMedicalManagement.Service.Implement
                 ReceivedByName = r.ReceivedByNavigation?.FullName,
                 RequestDate = r.RequestDate
             }).ToList();
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách đơn thuốc chờ duyệt thành công.",
+                Data = responseList
+            };
         }
 
         public async Task<BaseResponse> HandleMedicationRequest(UpdateMedicationRequestStatus request)
@@ -143,27 +149,28 @@ namespace SchoolMedicalManagement.Service.Implement
             };
         }
 
-        public async Task<List<MedicationRequestResponse>> GetAllMedicalRequest()
+        public async Task<BaseResponse> GetAllMedicalRequest()
         {
             var list = await _medicationRequestRepository.GetAllRequestsAsync();
-            List<MedicationRequestResponse> responseList = new List<MedicationRequestResponse>();
-            foreach (var item in list)
+            var responseList = list.Select(item => new MedicationRequestResponse
             {
-                responseList.Add(new MedicationRequestResponse
-                {
-                    RequestID = item.RequestId,
-                    StudentName = item.Student?.FullName ?? "Unknown",
-                    ParentName = item.Parent?.FullName ?? "Unknown",
-                    MedicationName = item.MedicationName,
-                    Dosage = item.Dosage,
-                    Instructions = item.Instructions,
-                    Status = GetStatusString(item.Status.StatusId),
-                    ImagePath = item.ImagePath,
-                    ReceivedByName = item.ReceivedByNavigation?.FullName,
-                    RequestDate = item.RequestDate
-                });
-            }
-            return responseList; 
+                RequestID = item.RequestId,
+                StudentName = item.Student?.FullName ?? "Unknown",
+                ParentName = item.Parent?.FullName ?? "Unknown",
+                MedicationName = item.MedicationName,
+                Dosage = item.Dosage,
+                Instructions = item.Instructions,
+                Status = GetStatusString(item.Status.StatusId),
+                ImagePath = item.ImagePath,
+                ReceivedByName = item.ReceivedByNavigation?.FullName,
+                RequestDate = item.RequestDate
+            }).ToList();
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách tất cả đơn thuốc thành công.",
+                Data = responseList
+            };
         }
 
         public async Task<BaseResponse> GetMedicalRequestByStudentId(string studentid)
@@ -199,11 +206,10 @@ namespace SchoolMedicalManagement.Service.Implement
             };
         }
 
-        public async Task<List<MedicationRequestResponse>> GetRequestsByParentIdAsync(Guid parentId)
+        public async Task<BaseResponse> GetRequestsByParentIdAsync(Guid parentId)
         {
             var requests = await _medicationRequestRepository.GetRequestsByParentIdAsync(parentId);
-
-            return requests.Select(r => new MedicationRequestResponse
+            var responseList = requests.Select(r => new MedicationRequestResponse
             {
                 RequestID = r.RequestId,
                 StudentName = r.Student?.FullName ?? "Unknown",
@@ -216,6 +222,12 @@ namespace SchoolMedicalManagement.Service.Implement
                 ReceivedByName = r.ReceivedByNavigation?.FullName,
                 RequestDate = r.RequestDate
             }).ToList();
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách đơn thuốc theo phụ huynh thành công.",
+                Data = responseList
+            };
         }
 
         public async Task<BaseResponse> GetRequestByIdAsync(int requestId)

@@ -11,6 +11,6 @@ namespace SchoolMedicalManagement.Service.Interface
         Task<BaseResponse?> GetMedicalEventTypeByIdAsync(int id);
         Task<BaseResponse?> CreateMedicalEventTypeAsync(CreateMedicalEventTypeRequest request);
         Task<BaseResponse?> UpdateMedicalEventTypeAsync(int id, UpdateMedicalEventTypeRequest request);
-        Task<bool> DeleteMedicalEventTypeAsync(int id);
+        Task<BaseResponse> DeleteMedicalEventTypeAsync(int id);
     }
 }

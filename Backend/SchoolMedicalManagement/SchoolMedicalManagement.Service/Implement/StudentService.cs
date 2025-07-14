@@ -31,7 +31,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 DateOfBirth = s.DateOfBirth,
                 Gender = s.Gender?.GenderName ?? "Unknown",
                 ClassName = s.Class,
-                ParentName = s.Parent?.FullName,
+                ParentName = s.Parent?.FullName ?? "No Parent",
                 ParentId = s.ParentId,
                 IsActive = s.IsActive
             }).ToList();
@@ -70,7 +70,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     GenderName = student.Gender.GenderName,
                     Class = student.Class,
                     ParentId = student.ParentId,
-                    ParentName = student.Parent?.FullName,
+                    ParentName = student.Parent?.FullName ?? "No Parent",
                 }
             };
         }
@@ -181,11 +181,10 @@ namespace SchoolMedicalManagement.Service.Implement
                 };
             }
 
-            return new BaseResponse
-            {
-                Status = StatusCodes.Status200OK.ToString(),
-                Message = "Cập nhật dữ liệu học sinh thành công.",
-                Data = new ManagerStudentResponse
+            // Adding try-catch for null handling
+            ManagerStudentResponse responseData;
+            try {
+                responseData = new ManagerStudentResponse
                 {
                     StudentId = updated.StudentId,
                     FullName = updated.FullName,
@@ -194,13 +193,36 @@ namespace SchoolMedicalManagement.Service.Implement
                     GenderName = updated.Gender.GenderName,
                     ParentId = updated.ParentId,
                     ParentName = updated.Parent.FullName
-                }
+                };
+            } catch (NullReferenceException) {
+                responseData = new ManagerStudentResponse
+                {
+                    StudentId = updated.StudentId,
+                    FullName = updated.FullName,
+                    Class = updated.Class,
+                    DateOfBirth = updated.DateOfBirth,
+                    GenderName = updated.Gender.GenderName,
+                    ParentId = updated.ParentId,
+                    ParentName = "No Parent Assigned"
+                };
+            }
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Cập nhật dữ liệu học sinh thành công.",
+                Data = responseData
             };
         }
 
-        public async Task<bool> DeleteStudent(int studentId)
+        public async Task<BaseResponse> DeleteStudent(int studentId)
         {
-            return await _studentRepository.SoftDeleteStudent(studentId);
+            var success = await _studentRepository.SoftDeleteStudent(studentId);
+            if (!success)
+            {
+                return new BaseResponse { Status = StatusCodes.Status404NotFound.ToString(), Message = "Không tìm thấy học sinh để xóa.", Data = null };
+            }
+            return new BaseResponse { Status = StatusCodes.Status200OK.ToString(), Message = "Xóa học sinh thành công.", Data = null };
         }
 
         public async Task<BaseResponse> GetHealthProfileByStudentId(GetHealthProfileRequest request)
@@ -292,7 +314,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 DateOfBirth = s.DateOfBirth,
                 Gender = s.Gender?.GenderName ?? "Unknown",
                 ClassName = s.Class,
-                ParentName = s.Parent?.FullName,
+                ParentName = s.Parent?.FullName ?? "No Parent",
                 ParentId = s.ParentId,
                 IsActive = s.IsActive
             }).ToList();

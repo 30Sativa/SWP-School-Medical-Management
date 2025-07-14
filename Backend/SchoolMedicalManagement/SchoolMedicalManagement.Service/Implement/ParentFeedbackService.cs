@@ -29,7 +29,7 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 FeedbackId = f.FeedbackId,
                 ParentId = f.ParentId,
-                ParentName = f.Parent?.FullName,
+                ParentName = f.Parent?.FullName ?? "Unknown Parent",
                 RelatedType = f.RelatedType,
                 RelatedId = f.RelatedId,
                 Content = f.Content,
@@ -61,7 +61,7 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 FeedbackId = f.FeedbackId,
                 ParentId = f.ParentId,
-                ParentName = f.Parent?.FullName,
+                ParentName = f.Parent?.FullName ?? "Unknown Parent",
                 RelatedType = f.RelatedType,
                 RelatedId = f.RelatedId,
                 Content = f.Content,

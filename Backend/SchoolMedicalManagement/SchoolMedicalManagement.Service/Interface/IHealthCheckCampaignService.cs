@@ -15,6 +15,6 @@ namespace SchoolMedicalManagement.Service.Interface
         Task<BaseResponse?> GetHealthCheckCampaignByIdAsync(int id);
         Task<BaseResponse?> CreateHealthCheckCampaignAsync(CreateHealthCheckCampaignRequest campaign);
         Task<BaseResponse?> UpdateHealthCheckCampaignAsync(int id, UpdateHealthCheckCampaignRequest campaign);
-        Task<bool> DeleteHealthCheckCampaignAsync(int id);
+        Task<BaseResponse> DeleteHealthCheckCampaignAsync(int id);
     }
 }

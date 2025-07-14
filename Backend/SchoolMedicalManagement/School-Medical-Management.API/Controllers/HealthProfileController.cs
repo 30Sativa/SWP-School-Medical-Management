@@ -21,20 +21,16 @@ namespace School_Medical_Management.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var profiles = await _healthProfileService.GetAllHealthProfilesAsync();
-            return profiles == null || profiles.Count == 0
-                ? NotFound("Danh sách hồ sơ sức khỏe trống!")
-                : Ok(profiles);
+            var response = await _healthProfileService.GetAllHealthProfilesAsync();
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         // ✅ Lấy danh sách tất cả hồ sơ sức khỏe (bao gồm cả IsActive = false)
         [HttpGet("include-inactive")]
         public async Task<IActionResult> GetAllIncludeInactive()
         {
-            var profiles = await _healthProfileService.GetAllHealthProfilesIncludeInactiveAsync();
-            return profiles == null || profiles.Count == 0
-                ? NotFound("Danh sách hồ sơ sức khỏe trống!")
-                : Ok(profiles);
+            var response = await _healthProfileService.GetAllHealthProfilesIncludeInactiveAsync();
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         // ✅ Lấy chi tiết theo ID

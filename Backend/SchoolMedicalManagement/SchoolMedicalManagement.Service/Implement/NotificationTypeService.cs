@@ -125,9 +125,14 @@ namespace SchoolMedicalManagement.Service.Implement
             };
         }
 
-        public async Task<bool> DeleteNotificationTypeAsync(int id)
+        public async Task<BaseResponse> DeleteNotificationTypeAsync(int id)
         {
-            return await _notificationTypeRepository.DeleteNotificationType(id);
+            var success = await _notificationTypeRepository.DeleteNotificationType(id);
+            if (!success)
+            {
+                return new BaseResponse { Status = StatusCodes.Status404NotFound.ToString(), Message = "Không tìm thấy loại thông báo để xóa.", Data = null };
+            }
+            return new BaseResponse { Status = StatusCodes.Status200OK.ToString(), Message = "Xóa loại thông báo thành công.", Data = null };
         }
     }
 } 

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolMedicalManagement.Models.Request;
+using SchoolMedicalManagement.Models.Response;
 using SchoolMedicalManagement.Service.Interface;
 
 namespace School_Medical_Management.API.Controllers
@@ -21,15 +22,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpGet("pending")]
         public async Task<IActionResult> GetPendingRequests()
         {
-            try
-            {
-                var requests = await _medicationRequestService.GetPendingRequestsAsync();
-                return Ok(requests);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving requests: {ex.Message}");
-            }
+            var response = await _medicationRequestService.GetPendingRequestsAsync();
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         // ✅ 2. Xử lý đơn thuốc (duyệt hoặc từ chối)
@@ -40,16 +34,8 @@ namespace School_Medical_Management.API.Controllers
             {
                 return BadRequest("Dữ liệu yêu cầu không hợp lệ.");
             }
-
-            try
-            {
-                var result = await _medicationRequestService.HandleMedicationRequest(request);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Lỗi khi xử lý yêu cầu: {ex.Message}");
-            }
+            var result = await _medicationRequestService.HandleMedicationRequest(request);
+            return StatusCode(int.Parse(result.Status ?? "200"), result);
         }
 
         // ✅ 3. Tạo đơn thuốc mới (cho phép upload ảnh đơn thuốc)
@@ -87,28 +73,19 @@ namespace School_Medical_Management.API.Controllers
 
                 var response = await _medicationRequestService.CreateMedicationRequestAsync(request, parentId, imagePath);
 
-                return response.Status == StatusCodes.Status200OK.ToString()
-                    ? Ok(response)
-                    : BadRequest(response);
+                return StatusCode(int.Parse(response.Status), response);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Lỗi tạo yêu cầu: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, new BaseResponse { Status = "500", Message = $"Lỗi tạo yêu cầu: {ex.Message}", Data = null });
             }
         }
 
         [HttpGet("all")]
         public async Task<IActionResult> GetAllMedicalRequests()
         {
-            try
-            {
-                var requests = await _medicationRequestService.GetAllMedicalRequest();
-                return Ok(requests);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Lỗi lấy tất cả yêu cầu: {ex.Message}");
-            }
+            var response = await _medicationRequestService.GetAllMedicalRequest();
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         [HttpGet("student/{studentId}")]
@@ -129,15 +106,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpGet("parent/{parentId}")]
         public async Task<IActionResult> GetRequestsByParent(Guid parentId)
         {
-            try
-            {
-                var requests = await _medicationRequestService.GetRequestsByParentIdAsync(parentId);
-                return Ok(requests);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Lỗi lấy yêu cầu của phụ huynh: {ex.Message}");
-            }
+            var response = await _medicationRequestService.GetRequestsByParentIdAsync(parentId);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         // Get medication request by ID

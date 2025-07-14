@@ -11,6 +11,6 @@ namespace SchoolMedicalManagement.Service.Interface
         Task<BaseResponse?> GetNotificationTypeByIdAsync(int id);
         Task<BaseResponse?> CreateNotificationTypeAsync(CreateNotificationTypeRequest request);
         Task<BaseResponse?> UpdateNotificationTypeAsync(int id, UpdateNotificationTypeRequest request);
-        Task<bool> DeleteNotificationTypeAsync(int id);
+        Task<BaseResponse> DeleteNotificationTypeAsync(int id);
     }
 } 

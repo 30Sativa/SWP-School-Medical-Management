@@ -11,6 +11,6 @@ namespace SchoolMedicalManagement.Service.Interface
         Task<BaseResponse?> GetBlogPostByIdAsync(int id);
         Task<BaseResponse?> CreateBlogPostAsync(CreateBlogPostRequest request);
         Task<BaseResponse?> UpdateBlogPostAsync(int id, UpdateBlogPostRequest request);
-        Task<bool> DeleteBlogPostAsync(int id);
+        Task<BaseResponse> DeleteBlogPostAsync(int id);
     }
 } 

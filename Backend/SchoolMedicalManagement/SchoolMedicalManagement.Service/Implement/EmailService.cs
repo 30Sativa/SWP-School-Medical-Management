@@ -33,29 +33,37 @@ namespace SchoolMedicalManagement.Service.Implement
         }
         
         // Gửi email thông thường
-        public async Task SendEmailAsync(string to, string subject, string body)
+        public async Task<BaseResponse> SendEmailAsync(string to, string subject, string body)
         {
-            if (string.IsNullOrEmpty(to))
-                throw new ArgumentException("Recipient email cannot be null or empty", nameof(to));
-
-            var message = new MailMessage
+            try
             {
-                From = new MailAddress(_senderEmail, _senderName),
-                Subject = subject,
-                Body = body,
-                IsBodyHtml = true
-            };
+                if (string.IsNullOrEmpty(to))
+                    throw new ArgumentException("Recipient email cannot be null or empty", nameof(to));
 
-            message.To.Add(new MailAddress(to));
-            
-            // Cấu hình SMTP và gửi mail
-            using var client = new SmtpClient(_smtpServer, _smtpPort)
+                var message = new MailMessage
+                {
+                    From = new MailAddress(_senderEmail, _senderName),
+                    Subject = subject,
+                    Body = body,
+                    IsBodyHtml = true
+                };
+
+                message.To.Add(new MailAddress(to));
+                
+                // Cấu hình SMTP và gửi mail
+                using var client = new SmtpClient(_smtpServer, _smtpPort)
+                {
+                    Credentials = new NetworkCredential(_smtpUsername, _smtpPassword),
+                    EnableSsl = true
+                };
+
+                await client.SendMailAsync(message);
+                return new BaseResponse { Status = "200", Message = "Gửi email thành công.", Data = null };
+            }
+            catch (Exception ex)
             {
-                Credentials = new NetworkCredential(_smtpUsername, _smtpPassword),
-                EnableSsl = true
-            };
-
-            await client.SendMailAsync(message);
+                return new BaseResponse { Status = "500", Message = $"Gửi email thất bại: {ex.Message}", Data = null };
+            }
         }
 
         // Gửi email OTP với template đẹp

@@ -35,15 +35,8 @@ namespace School_Medical_Management.API.Controllers
             {
                 return BadRequest(new { Status = "400", Message = "email, subject và body là bắt buộc." });
             }
-            try
-            {
-                await _emailService.SendEmailAsync(request.Email, request.Subject, request.Body);
-                return Ok(new { Status = "200", Message = "Gửi email thành công.", Data = (object?)null });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Status = "500", Message = $"Gửi email thất bại: {ex.Message}", Data = (object?)null });
-            }
+            var response = await _emailService.SendEmailAsync(request.Email, request.Subject, request.Body);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
     }
 } 

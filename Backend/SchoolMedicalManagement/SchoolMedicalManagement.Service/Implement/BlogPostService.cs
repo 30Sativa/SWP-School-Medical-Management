@@ -167,9 +167,14 @@ namespace SchoolMedicalManagement.Service.Implement
             };
         }
 
-        public async Task<bool> DeleteBlogPostAsync(int id)
+        public async Task<BaseResponse> DeleteBlogPostAsync(int id)
         {
-            return await _blogPostRepository.DeleteBlogPost(id);
+            var success = await _blogPostRepository.DeleteBlogPost(id);
+            if (!success)
+            {
+                return new BaseResponse { Status = StatusCodes.Status404NotFound.ToString(), Message = "Không tìm thấy bài viết để xóa.", Data = null };
+            }
+            return new BaseResponse { Status = StatusCodes.Status200OK.ToString(), Message = "Xóa bài viết thành công.", Data = null };
         }
     }
 } 

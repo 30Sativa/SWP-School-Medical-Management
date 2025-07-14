@@ -56,12 +56,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteHealthCheckSummary([FromRoute] int id)
         {
-            var result = await _healthCheckSummaryService.DeleteHealthCheckSummaryAsync(id);
-            if (!result)
-            {
-                return NotFound($"Không tìm thấy tổng hợp khám sức khỏe với ID {id} hoặc không thể xóa.");
-            }
-            return Ok($"Xóa tổng hợp khám sức khỏe với ID: {id} thành công");
+            var response = await _healthCheckSummaryService.DeleteHealthCheckSummaryAsync(id);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         [HttpGet("student/{studentId}")]

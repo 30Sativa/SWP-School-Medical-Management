@@ -56,12 +56,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteNotificationType([FromRoute] int id)
         {
-            var result = await _notificationTypeService.DeleteNotificationTypeAsync(id);
-            if (!result)
-            {
-                return NotFound($"Không tìm thấy loại thông báo với ID {id} hoặc không thể xóa.");
-            }
-            return Ok($"Xóa loại thông báo với ID: {id} thành công");
+            var response = await _notificationTypeService.DeleteNotificationTypeAsync(id);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
     }
 } 

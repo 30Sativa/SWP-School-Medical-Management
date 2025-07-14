@@ -125,9 +125,14 @@ namespace SchoolMedicalManagement.Service.Implement
             };
         }
 
-        public async Task<bool> DeleteMedicalEventTypeAsync(int id)
+        public async Task<BaseResponse> DeleteMedicalEventTypeAsync(int id)
         {
-            return await _medicalEventTypeRepository.DeleteMedicalEventType(id);
+            var success = await _medicalEventTypeRepository.DeleteMedicalEventType(id);
+            if (!success)
+            {
+                return new BaseResponse { Status = StatusCodes.Status404NotFound.ToString(), Message = "Không tìm thấy loại sự kiện để xóa.", Data = null };
+            }
+            return new BaseResponse { Status = StatusCodes.Status200OK.ToString(), Message = "Xóa loại sự kiện thành công.", Data = null };
         }
     }
 }

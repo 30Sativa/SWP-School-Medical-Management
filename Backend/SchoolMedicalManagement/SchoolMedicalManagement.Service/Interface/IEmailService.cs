@@ -8,7 +8,7 @@ namespace SchoolMedicalManagement.Service.Interface
     {
     
         //Gửi email thông thường
-        Task SendEmailAsync(string to, string subject, string body);
+        Task<BaseResponse> SendEmailAsync(string to, string subject, string body);
 
         //Gửi otp qua email
         Task SendOtpEmailAsync(string to, string otp);

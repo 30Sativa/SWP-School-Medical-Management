@@ -56,12 +56,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMedicalEventType([FromRoute] int id)
         {
-            var result = await _medicalEventTypeService.DeleteMedicalEventTypeAsync(id);
-            if (!result)
-            {
-                return NotFound($"Không tìm thấy loại sự kiện y tế với ID {id} hoặc không thể xóa.");
-            }
-            return Ok($"Xóa loại sự kiện y tế với ID: {id} thành công");
+            var response = await _medicalEventTypeService.DeleteMedicalEventTypeAsync(id);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
     }
 }
