@@ -105,7 +105,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = "400",
-                    Message = "User not found or email is empty.",
+                    Message = "Không tìm thấy người dùng hoặc email trống.",
                     Data = null
                 };
             }
@@ -115,7 +115,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = "200",
-                    Message = "Email sent successfully.",
+                    Message = "Gửi email thành công.",
                     Data = null
                 };
             }
@@ -124,7 +124,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = "500",
-                    Message = $"Failed to send email: {ex.Message}",
+                    Message = $"Gửi email thất bại: {ex.Message}",
                     Data = null
                 };
             }

@@ -43,14 +43,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Notification type with ID {id} not found.",
+                    Message = $"Không tìm thấy loại thông báo với ID {id}.",
                     Data = null
                 };
             }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Notification type found successfully.",
+                Message = "Tìm thấy loại thông báo thành công.",
                 Data = new NotificationTypeManagementResponse
                 {
                     TypeId = t.TypeId,
@@ -72,14 +72,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Create notification type failed.",
+                    Message = "Tạo loại thông báo thất bại.",
                     Data = null
                 };
             }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Create notification type successfully.",
+                Message = "Tạo loại thông báo thành công.",
                 Data = new NotificationTypeManagementResponse
                 {
                     TypeId = created.TypeId,
@@ -96,7 +96,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Notification type with ID {id} not found.",
+                    Message = $"Không tìm thấy loại thông báo với ID {id}.",
                     Data = null
                 };
             }
@@ -109,14 +109,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Update failed. Please check the request data.",
+                    Message = "Cập nhật thất bại. Vui lòng kiểm tra dữ liệu yêu cầu.",
                     Data = null
                 };
             }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Notification type updated successfully.",
+                Message = "Cập nhật loại thông báo thành công.",
                 Data = new NotificationTypeManagementResponse
                 {
                     TypeId = updated.TypeId,

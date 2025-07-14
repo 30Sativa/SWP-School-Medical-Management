@@ -55,14 +55,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Health check campaign with ID {id} not found.",
+                    Message = $"Không tìm thấy chiến dịch khám sức khỏe với ID {id}.",
                     Data = null
                 };
             }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Health check campaign found successfully.",
+                Message = "Tìm thấy chiến dịch khám sức khỏe thành công.",
                 Data = new HealthCheckCampaignManagementResponse
                 {
                     CampaignId = c.CampaignId,
@@ -105,14 +105,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Create health check campaign failed.",
+                    Message = "Tạo chiến dịch khám sức khỏe thất bại.",
                     Data = null
                 };
             }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Create health check campaign successfully.",
+                Message = "Tạo chiến dịch khám sức khỏe thành công.",
                 Data = new HealthCheckCampaignManagementResponse
                 {
                     CampaignId = created.CampaignId,
@@ -135,7 +135,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Health check campaign with ID {id} not found.",
+                    Message = $"Không tìm thấy chiến dịch khám sức khỏe với ID {id}.",
                     Data = null
                 };
             }
@@ -162,14 +162,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Update failed. Please check the request data.",
+                    Message = "Cập nhật thất bại. Vui lòng kiểm tra dữ liệu yêu cầu.",
                     Data = null
                 };
             }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Health check campaign updated successfully.",
+                Message = "Cập nhật chiến dịch khám sức khỏe thành công.",
                 Data = new HealthCheckCampaignManagementResponse
                 {
                     CampaignId = updated.CampaignId,

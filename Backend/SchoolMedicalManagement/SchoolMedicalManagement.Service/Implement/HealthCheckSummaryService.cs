@@ -65,14 +65,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Health check summary with ID {id} not found.",
+                    Message = $"Không tìm thấy tổng hợp khám sức khỏe với ID {id}.",
                     Data = null
                 };
             }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Health check summary found successfully.",
+                Message = "Tìm thấy tổng hợp khám sức khỏe thành công.",
                 Data = new HealthCheckSummaryManagementResponse
                 {
                     RecordId = s.RecordId,
@@ -129,7 +129,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = $"Student with ID {request.StudentId} not found.",
+                    Message = $"Không tìm thấy học sinh với ID {request.StudentId}.",
                     Data = null
                 };
             }
@@ -143,7 +143,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     return new BaseResponse
                     {
                         Status = StatusCodes.Status400BadRequest.ToString(),
-                        Message = $"Health check campaign with ID {request.CampaignId.Value} not found.",
+                        Message = $"Không tìm thấy chiến dịch khám sức khỏe với ID {request.CampaignId.Value}.",
                         Data = null
                     };
                 }
@@ -155,14 +155,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Create health check summary failed.",
+                    Message = "Tạo tổng hợp khám sức khỏe thất bại.",
                     Data = null
                 };
             }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Create health check summary successfully.",
+                Message = "Tạo tổng hợp khám sức khỏe thành công.",
                 Data = new HealthCheckSummaryManagementResponse
                 {
                     RecordId = created.RecordId,
@@ -197,7 +197,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Health check summary with ID {id} not found.",
+                    Message = $"Không tìm thấy tổng hợp khám sức khỏe với ID {id}.",
                     Data = null
                 };
             }
@@ -224,14 +224,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Update failed. Please check the request data.",
+                    Message = "Cập nhật thất bại. Vui lòng kiểm tra dữ liệu yêu cầu.",
                     Data = null
                 };
             }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Health check summary updated successfully.",
+                Message = "Cập nhật tổng hợp khám sức khỏe thành công.",
                 Data = new HealthCheckSummaryManagementResponse
                 {
                     RecordId = updated.RecordId,
@@ -271,7 +271,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Student with ID {studentId} not found.",
+                    Message = $"Không tìm thấy học sinh với ID {studentId}.",
                     Data = null
                 };
             }
@@ -282,7 +282,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"No health check summaries found for student with ID {studentId}.",
+                    Message = $"Không tìm thấy tổng hợp khám sức khỏe cho học sinh với ID {studentId}.",
                     Data = null
                 };
             }
@@ -318,7 +318,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Health check summaries retrieved successfully.",
+                Message = "Lấy tổng hợp khám sức khỏe thành công.",
                 Data = result
             };
         }

@@ -81,14 +81,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Notification with ID {id} not found.",
+                    Message = $"Không tìm thấy thông báo với ID {id}.",
                     Data = null
                 };
             }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Notification found successfully.",
+                Message = "Tìm thấy thông báo thành công.",
                 Data = new NotificationManagementResponse
                 {
                     NotificationId = n.NotificationId,
@@ -122,7 +122,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = $"User with ID {request.ReceiverId} not found.",
+                    Message = $"Không tìm thấy người dùng với ID {request.ReceiverId}.",
                     Data = null
                 };
             }
@@ -133,7 +133,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = $"Notification type with ID {request.TypeId} not found.",
+                    Message = $"Không tìm thấy loại thông báo với ID {request.TypeId}.",
                     Data = null
                 };
             }
@@ -144,14 +144,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Create notification failed.",
+                    Message = "Tạo thông báo thất bại.",
                     Data = null
                 };
             }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Create notification successfully.",
+                Message = "Tạo thông báo thành công.",
                 Data = new NotificationManagementResponse
                 {
                     NotificationId = created.NotificationId,

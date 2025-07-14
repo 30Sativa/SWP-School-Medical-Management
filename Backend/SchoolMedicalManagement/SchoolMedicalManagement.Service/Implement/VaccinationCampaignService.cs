@@ -38,7 +38,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status200OK.ToString(),
-                    Message = "No vaccination campaigns found",
+                    Message = "Không tìm thấy chiến dịch tiêm chủng nào",
                     Data = new List<VaccinationCampaignResponse>()
                 };
             }
@@ -64,7 +64,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Successfully get list vaccination campaigns",
+                Message = "Lấy danh sách chiến dịch tiêm chủng thành công",
                 Data = response
             };
         }
@@ -79,7 +79,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status200OK.ToString(),
-                    Message = "No active vaccination campaigns found",
+                    Message = "Không tìm thấy chiến dịch tiêm chủng đang hoạt động",
                     Data = new List<VaccinationCampaignResponse>()
                 };
             }
@@ -105,7 +105,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Successfully get list active vaccination campaigns",
+                Message = "Lấy danh sách chiến dịch tiêm chủng đang hoạt động thành công",
                 Data = response
             };
         }
@@ -120,7 +120,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status200OK.ToString(),
-                    Message = $"No vaccination campaigns found with status ID {statusId}",
+                    Message = $"Không tìm thấy chiến dịch tiêm chủng với trạng thái ID {statusId}",
                     Data = new List<VaccinationCampaignResponse>()
                 };
             }
@@ -146,7 +146,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = $"Successfully get vaccination campaigns with status ID {statusId}",
+                Message = $"Lấy danh sách chiến dịch tiêm chủng với trạng thái ID {statusId} thành công",
                 Data = response
             };
         }
@@ -160,7 +160,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Vaccination campaign with ID {campaignId} not found",
+                    Message = $"Không tìm thấy chiến dịch tiêm chủng với ID {campaignId}",
                     Data = null
                 };
             }
@@ -185,7 +185,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Successfully retrieved vaccination campaign",
+                Message = "Lấy thông tin chiến dịch tiêm chủng thành công",
                 Data = response
             };
         }
@@ -208,7 +208,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Failed to create vaccination campaign",
+                    Message = "Tạo chiến dịch tiêm chủng thất bại",
                     Data = null
                 };
             }
@@ -216,7 +216,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status201Created.ToString(),
-                Message = "Successfully created vaccination campaign",
+                Message = "Tạo chiến dịch tiêm chủng thành công",
                 Data = new VaccinationCampaignResponse
                 {
                     CampaignId = created.CampaignId,
@@ -240,7 +240,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Vaccination campaign with ID {campaignId} not found",
+                    Message = $"Không tìm thấy chiến dịch tiêm chủng với ID {campaignId}",
                     Data = null
                 };
             }
@@ -264,7 +264,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "List agree",
+                Message = "Danh sách đồng ý",
                 Data = response
             };
         }
@@ -278,7 +278,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Vaccination campaign with ID {campaignId} not found",
+                    Message = $"Không tìm thấy chiến dịch tiêm chủng với ID {campaignId}",
                     Data = null
                 };
             }
@@ -289,7 +289,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Student with ID {studentId} not found",
+                    Message = $"Không tìm thấy học sinh với ID {studentId}",
                     Data = null
                 };
             }
@@ -300,7 +300,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Parent with ID {parentId} not found",
+                    Message = $"Không tìm thấy phụ huynh với ID {parentId}",
                     Data = null
                 };
             }
@@ -320,7 +320,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Failed to create consent request",
+                    Message = "Tạo yêu cầu đồng ý thất bại",
                     Data = null
                 };
             }
@@ -334,7 +334,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status201Created.ToString(),
-                Message = "Successfully sent consent request",
+                Message = "Gửi yêu cầu đồng ý thành công",
                 Data = new ConsentRequestResponse
                 {
                     RequestId = created.RequestId,
@@ -358,7 +358,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Consent request with ID {requestId} not found",
+                    Message = $"Không tìm thấy yêu cầu đồng ý với ID {requestId}",
                     Data = null
                 };
             }
@@ -372,7 +372,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Failed to update consent request",
+                    Message = "Cập nhật yêu cầu đồng ý thất bại",
                     Data = null
                 };
             }
@@ -380,7 +380,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Successfully updated consent request",
+                Message = "Cập nhật yêu cầu đồng ý thành công",
                 Data = new ConsentRequestResponse
                 {
                     RequestId = updated.RequestId,
@@ -407,7 +407,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Student with ID {studentId} not found",
+                    Message = $"Không tìm thấy học sinh với ID {studentId}",
                     Data = null
                 };
             }
@@ -432,7 +432,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Successfully retrieved vaccination records",
+                Message = "Lấy danh sách hồ sơ tiêm chủng thành công",
                 Data = response
             };
         }
@@ -446,7 +446,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Student with ID {request.StudentId} not found",
+                    Message = $"Không tìm thấy học sinh với ID {request.StudentId}",
                     Data = null
                 };
             }
@@ -457,7 +457,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Vaccination campaign with ID {request.CampaignId} not found",
+                    Message = $"Không tìm thấy chiến dịch tiêm chủng với ID {request.CampaignId}",
                     Data = null
                 };
             }
@@ -470,7 +470,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = "Consent request not found for this student and campaign",
+                    Message = "Không tìm thấy yêu cầu đồng ý cho học sinh và chiến dịch này",
                     Data = null
                 };
             }
@@ -493,7 +493,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Failed to create vaccination record",
+                    Message = "Tạo hồ sơ tiêm chủng thất bại",
                     Data = null
                 };
             }
@@ -501,7 +501,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status201Created.ToString(),
-                Message = "Successfully created vaccination record",
+                Message = "Tạo hồ sơ tiêm chủng thành công",
                 Data = new VaccinationRecordResponse
                 {
                     RecordId = created.RecordId,
@@ -555,7 +555,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Lấy danh sách yêu cầu đã đồng ý thành công",
+                Message = "Lấy danh sách yêu cầu đồng ý thành công",
                 Data = approvedRequests
             };
         }
@@ -569,7 +569,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Vaccination campaign with ID {campaignId} not found",
+                    Message = $"Không tìm thấy chiến dịch tiêm chủng với ID {campaignId}",
                     Data = null
                 };
             }
@@ -595,7 +595,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = $"Successfully get {response.Count} declined consent requests for campaign {campaignId}",
+                Message = $"Lấy {response.Count} yêu cầu từ chối thành công cho chiến dịch {campaignId}",
                 Data = response
             };
         }
@@ -609,7 +609,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Vaccination campaign with ID {request.CampaignId} not found",
+                    Message = $"Không tìm thấy chiến dịch tiêm chủng với ID {request.CampaignId}",
                     Data = null
                 };
             }
@@ -625,7 +625,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Failed to update vaccination campaign",
+                    Message = "Cập nhật chiến dịch tiêm chủng thất bại",
                     Data = null
                 };
             }
@@ -633,7 +633,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Successfully updated vaccination campaign",
+                Message = "Cập nhật chiến dịch tiêm chủng thành công",
                 Data = new VaccinationCampaignResponse
                 {
                     CampaignId = updated.CampaignId,
@@ -657,7 +657,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Vaccination campaign with ID {campaignId} not found",
+                    Message = $"Không tìm thấy chiến dịch tiêm chủng với ID {campaignId}",
                     Data = null
                 };
             }
@@ -667,7 +667,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Only campaigns with status 'Đang diễn ra' can be deactivated",
+                    Message = "Chỉ chiến dịch với trạng thái 'Đang diễn ra' có thể bị hủy kích hoạt",
                     Data = null
                 };
             }
@@ -678,7 +678,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Failed to deactivate vaccination campaign",
+                    Message = "Hủy kích hoạt chiến dịch tiêm chủng thất bại",
                     Data = null
                 };
             }
@@ -686,7 +686,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Successfully deactivated vaccination campaign",
+                Message = "Hủy kích hoạt chiến dịch tiêm chủng thành công",
                 Data = new VaccinationCampaignResponse
                 {
                     CampaignId = deactivated.CampaignId,
@@ -710,7 +710,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Vaccination campaign with ID {campaignId} not found",
+                    Message = $"Không tìm thấy chiến dịch tiêm chủng với ID {campaignId}",
                     Data = null
                 };
             }
@@ -720,7 +720,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Only campaigns with status 'Đã hoàn thành' can be activated",
+                    Message = "Chỉ chiến dịch với trạng thái 'Đã hoàn thành' có thể được kích hoạt",
                     Data = null
                 };
             }
@@ -731,7 +731,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Failed to activate vaccination campaign",
+                    Message = "Kích hoạt chiến dịch tiêm chủng thất bại",
                     Data = null
                 };
             }
@@ -739,7 +739,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Successfully activated vaccination campaign",
+                Message = "Kích hoạt chiến dịch tiêm chủng thành công",
                 Data = new VaccinationCampaignResponse
                 {
                     CampaignId = activated.CampaignId,
@@ -764,7 +764,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status200OK.ToString(),
-                    Message = "No campaigns found for this creator",
+                    Message = "Không tìm thấy chiến dịch cho người tạo này",
                     Data = new List<VaccinationCampaignResponse>()
                 };
             }
@@ -790,7 +790,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Successfully get campaigns by creator",
+                Message = "Lấy danh sách chiến dịch theo người tạo thành công",
                 Data = response
             };
         }
@@ -804,7 +804,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Campaign with ID {campaignId} not found",
+                    Message = $"Không tìm thấy chiến dịch với ID {campaignId}",
                     Data = null
                 };
             }
@@ -821,7 +821,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Successfully retrieved campaign status",
+                Message = "Lấy trạng thái chiến dịch thành công",
                 Data = new { CampaignId = campaignId, StatusId = status.Value, StatusName = statusName }
             };
         }
@@ -1153,7 +1153,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Consent request with ID {requestId} not found",
+                    Message = $"Không tìm thấy yêu cầu đồng ý với ID {requestId}",
                     Data = null
                 };
             }
@@ -1176,7 +1176,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Successfully retrieved consent request",
+                Message = "Lấy yêu cầu đồng ý thành công",
                 Data = response
             };
         }
@@ -1190,7 +1190,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Student with ID {studentId} not found",
+                    Message = $"Không tìm thấy học sinh với ID {studentId}",
                     Data = null
                 };
             }
@@ -1214,7 +1214,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Successfully retrieved consent requests by studentId",
+                Message = "Lấy danh sách yêu cầu đồng ý theo học sinh thành công",
                 Data = response
             };
         }
