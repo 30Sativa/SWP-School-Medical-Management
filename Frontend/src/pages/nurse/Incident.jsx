@@ -115,13 +115,13 @@ const Incident = () => {
         },
       })
       .then((res) => {
-        console.log("📥 Danh sách sự cố:", res.data);
-        // Sắp xếp theo thời gian tạo mới nhất
-        const sortedEvents = [...res.data].sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate));
-        setEvents(sortedEvents);
+        // Đúng với API trả về: { status, message, data: [...] }
+        const eventList = Array.isArray(res.data?.data) ? res.data.data : [];
+        setEvents(eventList.sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate)));
       })
       .catch((err) => {
         console.error("❌ Lỗi lấy danh sách sự cố:", err);
+        setEvents([]);
       })
       .finally(() => setLoading(false));
   };

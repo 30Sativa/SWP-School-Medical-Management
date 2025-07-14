@@ -30,15 +30,16 @@ const MedicationHandle = () => {
       const res = await axios.get(
         "https://swp-school-medical-management.onrender.com/api/MedicationRequest/all"
       );
-      const all = res.data || [];
+      // Đảm bảo lấy đúng mảng data từ response
+      const all = Array.isArray(res.data?.data) ? res.data.data : [];
       setPendingRequests(all.filter((item) => item.status === "Chờ duyệt"));
       setApprovedRequests(
         all.filter((item) => item.status === "Đã duyệt")
       );
       setGivenRequests(
         all.filter((item) => 
-          item.status && item.status.replace(/['"]/g, "").trim() === "Đã lên lịch" ||
-          item.status && item.status.replace(/['"]/g, "").trim() === "Đã hoàn thành"
+          (item.status && item.status.replace(/['"]/g, "").trim() === "Đã lên lịch") ||
+          (item.status && item.status.replace(/['"]/g, "").trim() === "Đã hoàn thành")
         )
       );
       setRejectedRequests(all.filter((item) => item.status === "Bị từ chối"));
