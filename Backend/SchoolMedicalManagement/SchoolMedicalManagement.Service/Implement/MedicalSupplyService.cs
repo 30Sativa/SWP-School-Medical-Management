@@ -37,7 +37,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status500InternalServerError.ToString(),
-                    Message = "Failed to create medical supply.",
+                    Message = "Tạo vật tư y tế thất bại.",
                     Data = null
                 };
             }
@@ -45,7 +45,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status201Created.ToString(),
-                Message = "Medical supply created successfully.",
+                Message = "Tạo vật tư y tế thành công.",
                 Data = new MedicalSupplyResponse
                 {
                     SupplyID = created.SupplyId,
@@ -84,7 +84,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = "Medical supply not found.",
+                    Message = "Không tìm thấy vật tư y tế.",
                     Data = null
                 };
             }
@@ -92,7 +92,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Medical supply retrieved successfully.",
+                Message = "Lấy vật tư y tế thành công.",
                 Data = new MedicalSupplyResponse
                 {
                     SupplyID = supply.SupplyId,
@@ -112,7 +112,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = "Medical supply not found.",
+                    Message = "Không tìm thấy vật tư y tế.",
                     Data = null
                 };
             }
@@ -128,7 +128,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status500InternalServerError.ToString(),
-                    Message = "Failed to update medical supply.",
+                    Message = "Cập nhật vật tư y tế thất bại.",
                     Data = null
                 };
             }
@@ -136,7 +136,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Medical supply updated successfully.",
+                Message = "Cập nhật vật tư y tế thành công.",
                 Data = new MedicalSupplyResponse
                 {
                     SupplyID = updated.SupplyId,

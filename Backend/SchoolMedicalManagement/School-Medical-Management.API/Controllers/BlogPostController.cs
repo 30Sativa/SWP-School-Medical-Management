@@ -30,7 +30,7 @@ namespace School_Medical_Management.API.Controllers
             var response = await _blogPostService.GetBlogPostByIdAsync(id);
             if (response == null)
             {
-                return NotFound($"Blog post with ID {id} not found.");
+                return NotFound($"Không tìm thấy bài viết với ID {id}.");
             }
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
@@ -48,7 +48,7 @@ namespace School_Medical_Management.API.Controllers
             var response = await _blogPostService.UpdateBlogPostAsync(id, request);
             if (response == null)
             {
-                return NotFound($"Blog post with ID {id} not found or could not be updated.");
+                return NotFound($"Không tìm thấy bài viết với ID {id} hoặc không thể cập nhật.");
             }
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
@@ -59,9 +59,9 @@ namespace School_Medical_Management.API.Controllers
             var result = await _blogPostService.DeleteBlogPostAsync(id);
             if (!result)
             {
-                return NotFound($"Blog post with ID {id} not found or could not be deleted.");
+                return NotFound($"Không tìm thấy bài viết với ID {id} hoặc không thể xóa.");
             }
-            return Ok($"Delete blog post with ID: {id} successfully");
+            return Ok($"Xóa bài viết với ID: {id} thành công");
         }
     }
 } 

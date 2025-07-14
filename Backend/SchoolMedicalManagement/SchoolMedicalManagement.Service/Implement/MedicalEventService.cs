@@ -59,7 +59,7 @@ public class MedicalEventService : IMedicalEventService
             return new BaseResponse
             {
                 Status = StatusCodes.Status500InternalServerError.ToString(),
-                Message = "Lỗi tạo Medical Event.",
+                Message = "Lỗi tạo sự kiện y tế.",
                 Data = null
             };
         }
@@ -124,7 +124,7 @@ public class MedicalEventService : IMedicalEventService
             return new BaseResponse
             {
                 Status = StatusCodes.Status404NotFound.ToString(),
-                Message = "Medical event not found.",
+                Message = "Không tìm thấy sự kiện y tế.",
                 Data = null
             };
         }
@@ -138,7 +138,7 @@ public class MedicalEventService : IMedicalEventService
         return new BaseResponse
         {
             Status = StatusCodes.Status200OK.ToString(),
-            Message = "Medical event retrieved successfully.",
+            Message = "Lấy sự kiện y tế thành công.",
             Data = new CreateMedicalEventResponse
             {
                 EventId = getid.EventId,
@@ -352,7 +352,7 @@ public class MedicalEventService : IMedicalEventService
         return new BaseResponse
         {
             Status = StatusCodes.Status200OK.ToString(),
-            Message = "Medical event retrieved successfully.",
+            Message = "Lấy sự kiện y tế thành công.",
             Data = new CreateMedicalEventResponse
             {
                 EventId = events.EventId,

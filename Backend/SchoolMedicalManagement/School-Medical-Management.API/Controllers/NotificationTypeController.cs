@@ -30,7 +30,7 @@ namespace School_Medical_Management.API.Controllers
             var response = await _notificationTypeService.GetNotificationTypeByIdAsync(id);
             if (response == null)
             {
-                return NotFound($"Notification type with ID {id} not found.");
+                return NotFound($"Không tìm thấy loại thông báo với ID {id}.");
             }
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
@@ -48,7 +48,7 @@ namespace School_Medical_Management.API.Controllers
             var response = await _notificationTypeService.UpdateNotificationTypeAsync(id, request);
             if (response == null)
             {
-                return NotFound($"Notification type with ID {id} not found or could not be updated.");
+                return NotFound($"Không tìm thấy loại thông báo với ID {id} hoặc không thể cập nhật.");
             }
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
@@ -59,9 +59,9 @@ namespace School_Medical_Management.API.Controllers
             var result = await _notificationTypeService.DeleteNotificationTypeAsync(id);
             if (!result)
             {
-                return NotFound($"Notification type with ID {id} not found or could not be deleted.");
+                return NotFound($"Không tìm thấy loại thông báo với ID {id} hoặc không thể xóa.");
             }
-            return Ok($"Delete notification type with ID: {id} successfully");
+            return Ok($"Xóa loại thông báo với ID: {id} thành công");
         }
     }
 } 

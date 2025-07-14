@@ -54,7 +54,7 @@ namespace School_Medical_Management.API.Controllers
         {
             if (id != request.SupplyId)
             {
-                return BadRequest("Supply ID không khớp giữa URL và request body.");
+                return BadRequest("ID vật tư y tế không khớp giữa URL và body yêu cầu.");
             }
 
             var response = await _medicalSupplyService.UpdateSupplyAsync(request);

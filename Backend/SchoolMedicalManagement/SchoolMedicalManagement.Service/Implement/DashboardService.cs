@@ -113,7 +113,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status200OK.ToString(),
-                    Message = "Dashboard overview data retrieved successfully.",
+                    Message = "Lấy dữ liệu tổng quan dashboard thành công.",
                     Data = overview
                 };
             }
@@ -123,7 +123,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status500InternalServerError.ToString(),
-                    Message = "An error occurred while retrieving dashboard data.",
+                    Message = "Đã xảy ra lỗi khi lấy dữ liệu dashboard.",
                     Data = null
                 };
             }
@@ -158,7 +158,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status200OK.ToString(),
-                    Message = "Vaccination campaign statistics retrieved successfully.",
+                    Message = "Lấy thống kê chiến dịch tiêm chủng thành công.",
                     Data = statistics
                 };
             }
@@ -167,7 +167,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status500InternalServerError.ToString(),
-                    Message = "An error occurred while retrieving vaccination campaign statistics.",
+                    Message = "Đã xảy ra lỗi khi lấy thống kê chiến dịch tiêm chủng.",
                     Data = null
                 };
             }
@@ -191,7 +191,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status200OK.ToString(),
-                    Message = "Health statistics retrieved successfully.",
+                    Message = "Lấy thống kê sức khỏe thành công.",
                     Data = data
                 };
             }
@@ -200,7 +200,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status500InternalServerError.ToString(),
-                    Message = "An error occurred while retrieving health statistics.",
+                    Message = "Đã xảy ra lỗi khi lấy thống kê sức khỏe.",
                     Data = null
                 };
             }
@@ -235,7 +235,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status200OK.ToString(),
-                    Message = "Medical events statistics retrieved successfully.",
+                    Message = "Lấy thống kê sự kiện y tế thành công.",
                     Data = data
                 };
             }
@@ -244,7 +244,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status500InternalServerError.ToString(),
-                    Message = "An error occurred while retrieving medical events statistics.",
+                    Message = "Đã xảy ra lỗi khi lấy thống kê sự kiện y tế.",
                     Data = null
                 };
             }
@@ -282,7 +282,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status200OK.ToString(),
-                    Message = "Medication statistics retrieved successfully.",
+                    Message = "Lấy thống kê dùng thuốc thành công.",
                     Data = data
                 };
             }
@@ -291,7 +291,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status500InternalServerError.ToString(),
-                    Message = "An error occurred while retrieving medication statistics.",
+                    Message = "Đã xảy ra lỗi khi lấy thống kê dùng thuốc.",
                     Data = null
                 };
             }
