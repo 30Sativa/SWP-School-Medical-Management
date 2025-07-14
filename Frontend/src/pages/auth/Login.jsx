@@ -64,7 +64,9 @@ const Login = () => {
       console.log("📥 Phản hồi từ server:", response.data);
 
       if (
-        response.data.message?.toLowerCase().includes("login successful") &&
+        ((response.data.message?.toLowerCase().includes("login successful") ||
+          response.data.message?.toLowerCase().includes("đăng nhập thành công")) ||
+          response.data.status === 200) &&
         token
       ) {
         localStorage.setItem("token", token);
