@@ -30,7 +30,7 @@ namespace School_Medical_Management.API.Controllers
             var response = await _healthCheckSummaryService.GetHealthCheckSummaryByIdAsync(id);
             if (response == null)
             {
-                return NotFound($"Health check summary with ID {id} not found.");
+                return NotFound($"Không tìm thấy tổng hợp khám sức khỏe với ID {id}.");
             }
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
@@ -48,7 +48,7 @@ namespace School_Medical_Management.API.Controllers
             var response = await _healthCheckSummaryService.UpdateHealthCheckSummaryAsync(id, request);
             if (response == null)
             {
-                return NotFound($"Health check summary with ID {id} not found or could not be updated.");
+                return NotFound($"Không tìm thấy tổng hợp khám sức khỏe với ID {id} hoặc không thể cập nhật.");
             }
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
@@ -59,9 +59,9 @@ namespace School_Medical_Management.API.Controllers
             var result = await _healthCheckSummaryService.DeleteHealthCheckSummaryAsync(id);
             if (!result)
             {
-                return NotFound($"Health check summary with ID {id} not found or could not be deleted.");
+                return NotFound($"Không tìm thấy tổng hợp khám sức khỏe với ID {id} hoặc không thể xóa.");
             }
-            return Ok($"Delete Health check summary with ID: {id} successfully");
+            return Ok($"Xóa tổng hợp khám sức khỏe với ID: {id} thành công");
         }
 
         [HttpGet("student/{studentId}")]
@@ -70,7 +70,7 @@ namespace School_Medical_Management.API.Controllers
             var response = await _healthCheckSummaryService.GetHealthCheckSummariesByStudentIdAsync(studentId);
             if (response == null || response.Data == null)
             {
-                return NotFound(response?.Message ?? $"No health check summaries found for student with ID {studentId}.");
+                return NotFound(response?.Message ?? $"Không tìm thấy tổng hợp khám sức khỏe cho học sinh với ID {studentId}.");
             }
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }

@@ -38,7 +38,7 @@ namespace School_Medical_Management.API.Controllers
             var response = await _notificationService.GetNotificationByIdAsync(id);
             if (response == null)
             {
-                return NotFound($"Notification with ID {id} not found.");
+                return NotFound($"Không tìm thấy thông báo với ID {id}.");
             }
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
@@ -56,9 +56,9 @@ namespace School_Medical_Management.API.Controllers
             var result = await _notificationService.DeleteNotificationAsync(id);
             if (!result)
             {
-                return NotFound($"Notification with ID {id} not found or could not be deleted.");
+                return NotFound($"Không tìm thấy thông báo với ID {id} hoặc không thể xóa.");
             }
-            return Ok($"Delete notification with ID: {id} successfully");
+            return Ok($"Xóa thông báo với ID: {id} thành công");
         }
     }
 } 

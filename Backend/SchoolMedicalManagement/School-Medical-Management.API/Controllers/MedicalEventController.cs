@@ -43,9 +43,9 @@ public class MedicalEventController : ControllerBase
         var isDeleted = await _medicalEventService.DeleteMedicalEvent(id);
         if (!isDeleted)
         {
-            return NotFound($"Medical Event with ID {id} not found or could not be deleted.");
+            return NotFound($"Không tìm thấy sự kiện y tế với ID {id} hoặc không thể xóa.");
         }
-        return Ok($"Medical Event with ID: {id} deleted successfully");
+        return Ok($"Xóa sự kiện y tế với ID: {id} thành công");
     }
 
     // Lấy danh sách sự kiện y tế đang hoạt động

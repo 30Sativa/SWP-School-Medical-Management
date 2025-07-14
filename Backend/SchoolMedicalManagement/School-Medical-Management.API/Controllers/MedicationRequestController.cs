@@ -38,7 +38,7 @@ namespace School_Medical_Management.API.Controllers
         {
             if (request == null || request.RequestID <= 0 || (request.StatusID != 2 && request.StatusID != 3) || request.NurseID == Guid.Empty)
             {
-                return BadRequest("Invalid request data.");
+                return BadRequest("Dữ liệu yêu cầu không hợp lệ.");
             }
 
             try
@@ -48,7 +48,7 @@ namespace School_Medical_Management.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Error handling request: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Lỗi khi xử lý yêu cầu: {ex.Message}");
             }
         }
 
@@ -61,7 +61,7 @@ namespace School_Medical_Management.API.Controllers
                 string.IsNullOrWhiteSpace(request.Dosage) ||
                 string.IsNullOrWhiteSpace(request.Instructions))
             {
-                return BadRequest("Invalid medication request data.");
+                return BadRequest("Dữ liệu yêu cầu đơn thuốc không hợp lệ.");
             }
 
             try
@@ -93,7 +93,7 @@ namespace School_Medical_Management.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Error creating request: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Lỗi tạo yêu cầu: {ex.Message}");
             }
         }
 
@@ -107,7 +107,7 @@ namespace School_Medical_Management.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving all requests: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Lỗi lấy tất cả yêu cầu: {ex.Message}");
             }
         }
 
@@ -121,7 +121,7 @@ namespace School_Medical_Management.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving student requests: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Lỗi lấy yêu cầu của học sinh: {ex.Message}");
             }
         }
 
@@ -136,7 +136,7 @@ namespace School_Medical_Management.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving parent requests: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Lỗi lấy yêu cầu của phụ huynh: {ex.Message}");
             }
         }
 
@@ -151,7 +151,7 @@ namespace School_Medical_Management.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving request: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Lỗi lấy yêu cầu: {ex.Message}");
             }
         }
 
@@ -160,7 +160,7 @@ namespace School_Medical_Management.API.Controllers
         public async Task<IActionResult> UpdateMedicationRequestStatus(int requestId, [FromBody] UpdateMedicationStatusDto dto)
         {
             if (dto == null || dto.StatusId <= 0)
-                return BadRequest("Invalid status.");
+                return BadRequest("Trạng thái không hợp lệ.");
 
             var response = await _medicationRequestService.UpdateMedicationRequestStatusAsync(requestId, dto);
             return StatusCode(int.Parse(response.Status ?? "200"), response);

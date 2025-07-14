@@ -38,11 +38,11 @@ namespace School_Medical_Management.API.Controllers
             try
             {
                 await _emailService.SendEmailAsync(request.Email, request.Subject, request.Body);
-                return Ok(new { Status = "200", Message = "Email sent successfully.", Data = (object?)null });
+                return Ok(new { Status = "200", Message = "Gửi email thành công.", Data = (object?)null });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Status = "500", Message = $"Failed to send email: {ex.Message}", Data = (object?)null });
+                return StatusCode(500, new { Status = "500", Message = $"Gửi email thất bại: {ex.Message}", Data = (object?)null });
             }
         }
     }

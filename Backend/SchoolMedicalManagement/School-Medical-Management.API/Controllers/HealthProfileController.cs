@@ -23,7 +23,7 @@ namespace School_Medical_Management.API.Controllers
         {
             var profiles = await _healthProfileService.GetAllHealthProfilesAsync();
             return profiles == null || profiles.Count == 0
-                ? NotFound("Health profile list is empty!")
+                ? NotFound("Danh sách hồ sơ sức khỏe trống!")
                 : Ok(profiles);
         }
 
@@ -33,7 +33,7 @@ namespace School_Medical_Management.API.Controllers
         {
             var profiles = await _healthProfileService.GetAllHealthProfilesIncludeInactiveAsync();
             return profiles == null || profiles.Count == 0
-                ? NotFound("Health profile list is empty!")
+                ? NotFound("Danh sách hồ sơ sức khỏe trống!")
                 : Ok(profiles);
         }
 
@@ -43,7 +43,7 @@ namespace School_Medical_Management.API.Controllers
         {
             var response = await _healthProfileService.GetHealthProfileByIdAsync(id);
             if (response == null || response.Data == null)
-                return NotFound($"Health profile with ID {id} not found.");
+                return NotFound($"Không tìm thấy hồ sơ sức khỏe với ID {id}.");
 
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
@@ -62,7 +62,7 @@ namespace School_Medical_Management.API.Controllers
         {
             var response = await _healthProfileService.UpdateHealthProfileAsync(id, request);
             if (response == null || response.Data == null)
-                return NotFound($"Health profile with ID {id} not found or update failed.");
+                return NotFound($"Không tìm thấy hồ sơ sức khỏe với ID {id} hoặc cập nhật thất bại.");
 
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
@@ -73,7 +73,7 @@ namespace School_Medical_Management.API.Controllers
         {
             var response = await _healthProfileService.UpdateHealthProfileStatusAsync(id, request);
             if (response == null || response.Data == null)
-                return NotFound($"Health profile with ID {id} not found or status update failed.");
+                return NotFound($"Không tìm thấy hồ sơ sức khỏe với ID {id} hoặc cập nhật trạng thái thất bại.");
 
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
@@ -94,7 +94,7 @@ namespace School_Medical_Management.API.Controllers
         {
             var response = await _healthProfileService.GetHealthProfileByStudentIdAsync(studentId);
             if (response == null || response.Data == null)
-                return NotFound(response?.Message ?? $"Health profile for student with ID {studentId} not found.");
+                return NotFound(response?.Message ?? $"Không tìm thấy hồ sơ sức khỏe cho học sinh với ID {studentId}.");
 
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
@@ -105,7 +105,7 @@ namespace School_Medical_Management.API.Controllers
         {
             var response = await _healthProfileService.UpdateHealthProfileByStudentIdAsync(studentId, request);
             if (response == null || response.Data == null)
-                return NotFound(response?.Message ?? $"Health profile for student with ID {studentId} not found or update failed.");
+                return NotFound(response?.Message ?? $"Không tìm thấy hồ sơ sức khỏe cho học sinh với ID {studentId} hoặc cập nhật thất bại.");
 
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
