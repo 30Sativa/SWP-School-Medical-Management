@@ -31,7 +31,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 DateOfBirth = s.DateOfBirth,
                 Gender = s.Gender?.GenderName ?? "Unknown",
                 ClassName = s.Class,
-                ParentName = s.Parent?.FullName,
+                ParentName = s.Parent?.FullName ?? "No Parent",
                 ParentId = s.ParentId,
                 IsActive = s.IsActive
             }).ToList();
@@ -53,7 +53,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Student with ID {studentId} not found.",
+                    Message = $"Không tìm thấy học sinh với ID {studentId}.",
                     Data = null
                 };
             }
@@ -61,7 +61,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Student found successfully.",
+                Message = "Tìm thấy học sinh thành công.",
                 Data = new ManagerStudentResponse
                 {
                     StudentId = student.StudentId,
@@ -70,7 +70,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     GenderName = student.Gender.GenderName,
                     Class = student.Class,
                     ParentId = student.ParentId,
-                    ParentName = student.Parent?.FullName,
+                    ParentName = student.Parent?.FullName ?? "No Parent",
                 }
             };
         }
@@ -82,7 +82,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Parent ID is required.",
+                    Message = "ID phụ huynh là bắt buộc.",
                     Data = null
                 };
             }
@@ -93,7 +93,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Invalid Parent ID or the user is not a parent.",
+                    Message = "ID phụ huynh không hợp lệ hoặc người dùng không phải là phụ huynh.",
                     Data = null
                 };
             }
@@ -114,7 +114,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Failed to create student. Please check the request data.",
+                    Message = "Tạo học sinh thất bại. Vui lòng kiểm tra dữ liệu yêu cầu.",
                     Data = null
                 };
             }
@@ -122,7 +122,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Student created successfully.",
+                Message = "Tạo học sinh thành công.",
                 Data = new ManagerStudentResponse
                 {
                     StudentId = createdStudent.StudentId,
@@ -156,7 +156,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     return new BaseResponse 
                     {
                         Status = StatusCodes.Status400BadRequest.ToString(),
-                        Message = $"Hãy nhập đúng id phụ huynh.",
+                        Message = "Vui lòng nhập đúng ID phụ huynh.",
                         Data = null
                     };
                 studentToUpdate.ParentId = request.ParentId.Value;
@@ -181,11 +181,10 @@ namespace SchoolMedicalManagement.Service.Implement
                 };
             }
 
-            return new BaseResponse
-            {
-                Status = StatusCodes.Status200OK.ToString(),
-                Message = "Cập nhật dữ liệu học sinh thành công.",
-                Data = new ManagerStudentResponse
+            // Adding try-catch for null handling
+            ManagerStudentResponse responseData;
+            try {
+                responseData = new ManagerStudentResponse
                 {
                     StudentId = updated.StudentId,
                     FullName = updated.FullName,
@@ -194,13 +193,36 @@ namespace SchoolMedicalManagement.Service.Implement
                     GenderName = updated.Gender.GenderName,
                     ParentId = updated.ParentId,
                     ParentName = updated.Parent.FullName
-                }
+                };
+            } catch (NullReferenceException) {
+                responseData = new ManagerStudentResponse
+                {
+                    StudentId = updated.StudentId,
+                    FullName = updated.FullName,
+                    Class = updated.Class,
+                    DateOfBirth = updated.DateOfBirth,
+                    GenderName = updated.Gender.GenderName,
+                    ParentId = updated.ParentId,
+                    ParentName = "No Parent Assigned"
+                };
+            }
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Cập nhật dữ liệu học sinh thành công.",
+                Data = responseData
             };
         }
 
-        public async Task<bool> DeleteStudent(int studentId)
+        public async Task<BaseResponse> DeleteStudent(int studentId)
         {
-            return await _studentRepository.SoftDeleteStudent(studentId);
+            var success = await _studentRepository.SoftDeleteStudent(studentId);
+            if (!success)
+            {
+                return new BaseResponse { Status = StatusCodes.Status404NotFound.ToString(), Message = "Không tìm thấy học sinh để xóa.", Data = null };
+            }
+            return new BaseResponse { Status = StatusCodes.Status200OK.ToString(), Message = "Xóa học sinh thành công.", Data = null };
         }
 
         public async Task<BaseResponse> GetHealthProfileByStudentId(GetHealthProfileRequest request)
@@ -212,7 +234,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = "Health profile not found.",
+                    Message = "Không tìm thấy hồ sơ sức khỏe.",
                     Data = null
                 };
             }
@@ -232,7 +254,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Health profile found successfully.",
+                Message = "Tìm thấy hồ sơ sức khỏe thành công.",
                 Data = response
             };
         }
@@ -245,7 +267,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Invalid parent ID.",
+                    Message = "ID phụ huynh không hợp lệ.",
                     Data = null
                 };
             }
@@ -257,7 +279,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"No students found for parent with ID {parentId}.",
+                    Message = $"Không tìm thấy học sinh cho phụ huynh với ID {parentId}.",
                     Data = null
                 };
             }
@@ -277,7 +299,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Students retrieved successfully.",
+                Message = "Lấy danh sách học sinh thành công.",
                 Data = studentList
             };
         }
@@ -292,7 +314,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 DateOfBirth = s.DateOfBirth,
                 Gender = s.Gender?.GenderName ?? "Unknown",
                 ClassName = s.Class,
-                ParentName = s.Parent?.FullName,
+                ParentName = s.Parent?.FullName ?? "No Parent",
                 ParentId = s.ParentId,
                 IsActive = s.IsActive
             }).ToList();

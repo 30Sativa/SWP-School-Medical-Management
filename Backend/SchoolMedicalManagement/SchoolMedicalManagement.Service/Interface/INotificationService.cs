@@ -12,6 +12,6 @@ namespace SchoolMedicalManagement.Service.Interface
         Task<BaseResponse> GetNotificationsByUserIdAsync(Guid userId);
         Task<BaseResponse?> GetNotificationByIdAsync(int id);
         Task<BaseResponse?> CreateNotificationAsync(CreateNotificationRequest request);
-        Task<bool> DeleteNotificationAsync(int id);
+        Task<BaseResponse> DeleteNotificationAsync(int id);
     }
 } 

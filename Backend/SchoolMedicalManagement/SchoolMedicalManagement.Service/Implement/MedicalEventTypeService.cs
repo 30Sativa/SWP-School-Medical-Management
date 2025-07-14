@@ -43,14 +43,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Medical event type with ID {id} not found.",
+                    Message = $"Không tìm thấy loại sự kiện y tế với ID {id}.",
                     Data = null
                 };
             }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Medical event type found successfully.",
+                Message = "Tìm thấy loại sự kiện y tế thành công.",
                 Data = new MedicalEventTypeManagementResponse
                 {
                     EventTypeId = t.EventTypeId,
@@ -72,14 +72,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Create medical event type failed.",
+                    Message = "Tạo loại sự kiện y tế thất bại.",
                     Data = null
                 };
             }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Create medical event type successfully.",
+                Message = "Tạo loại sự kiện y tế thành công.",
                 Data = new MedicalEventTypeManagementResponse
                 {
                     EventTypeId = created.EventTypeId,
@@ -96,7 +96,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Medical event type with ID {id} not found.",
+                    Message = $"Không tìm thấy loại sự kiện y tế với ID {id}.",
                     Data = null
                 };
             }
@@ -109,14 +109,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Update failed. Please check the request data.",
+                    Message = "Cập nhật thất bại. Vui lòng kiểm tra dữ liệu yêu cầu.",
                     Data = null
                 };
             }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Medical event type updated successfully.",
+                Message = "Cập nhật loại sự kiện y tế thành công.",
                 Data = new MedicalEventTypeManagementResponse
                 {
                     EventTypeId = updated.EventTypeId,
@@ -125,9 +125,14 @@ namespace SchoolMedicalManagement.Service.Implement
             };
         }
 
-        public async Task<bool> DeleteMedicalEventTypeAsync(int id)
+        public async Task<BaseResponse> DeleteMedicalEventTypeAsync(int id)
         {
-            return await _medicalEventTypeRepository.DeleteMedicalEventType(id);
+            var success = await _medicalEventTypeRepository.DeleteMedicalEventType(id);
+            if (!success)
+            {
+                return new BaseResponse { Status = StatusCodes.Status404NotFound.ToString(), Message = "Không tìm thấy loại sự kiện để xóa.", Data = null };
+            }
+            return new BaseResponse { Status = StatusCodes.Status200OK.ToString(), Message = "Xóa loại sự kiện thành công.", Data = null };
         }
     }
 }

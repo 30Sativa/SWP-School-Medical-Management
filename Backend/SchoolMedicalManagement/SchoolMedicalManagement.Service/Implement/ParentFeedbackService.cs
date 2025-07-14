@@ -29,7 +29,7 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 FeedbackId = f.FeedbackId,
                 ParentId = f.ParentId,
-                ParentName = f.Parent?.FullName,
+                ParentName = f.Parent?.FullName ?? "Unknown Parent",
                 RelatedType = f.RelatedType,
                 RelatedId = f.RelatedId,
                 Content = f.Content,
@@ -39,7 +39,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Get all feedback successfully.",
+                Message = "Lấy tất cả phản hồi thành công.",
                 Data = data
             };
         }
@@ -53,7 +53,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = "Feedback not found.",
+                    Message = "Không tìm thấy phản hồi.",
                     Data = null
                 };
             }
@@ -61,7 +61,7 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 FeedbackId = f.FeedbackId,
                 ParentId = f.ParentId,
-                ParentName = f.Parent?.FullName,
+                ParentName = f.Parent?.FullName ?? "Unknown Parent",
                 RelatedType = f.RelatedType,
                 RelatedId = f.RelatedId,
                 Content = f.Content,
@@ -71,7 +71,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Get feedback detail successfully.",
+                Message = "Lấy chi tiết phản hồi thành công.",
                 Data = data
             };
         }
@@ -85,7 +85,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Parent not found.",
+                    Message = "Không tìm thấy phụ huynh.",
                     Data = null
                 };
             }
@@ -113,7 +113,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status201Created.ToString(),
-                Message = "Feedback created successfully.",
+                Message = "Tạo phản hồi thành công.",
                 Data = data
             };
         }

@@ -30,7 +30,7 @@ namespace School_Medical_Management.API.Controllers
             var response = await _healthCheckCampaignService.GetHealthCheckCampaignByIdAsync(id);
             if (response == null)
             {
-                return NotFound($"Health check campaign with ID {id} not found.");
+                return NotFound($"Không tìm thấy chiến dịch khám sức khỏe với ID {id}.");
             }
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
@@ -48,7 +48,7 @@ namespace School_Medical_Management.API.Controllers
             var response = await _healthCheckCampaignService.UpdateHealthCheckCampaignAsync(id, request);
             if (response == null)
             {
-                return NotFound($"Health check campaign with ID {id} not found or could not be updated.");
+                return NotFound($"Không tìm thấy chiến dịch khám sức khỏe với ID {id} hoặc không thể cập nhật.");
             }
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
@@ -56,12 +56,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteHealthCheckCampaign([FromRoute] int id)
         {
-            var result = await _healthCheckCampaignService.DeleteHealthCheckCampaignAsync(id);
-            if (!result)
-            {
-                return NotFound($"Health check campaign with ID {id} not found or could not be deleted.");
-            }
-            return Ok($"Delete Health check campaign with ID: {id} successfully");
+            var response = await _healthCheckCampaignService.DeleteHealthCheckCampaignAsync(id);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
         [HttpGet("status/{statusId}")]

@@ -30,7 +30,7 @@ namespace School_Medical_Management.API.Controllers
             var response = await _medicalEventTypeService.GetMedicalEventTypeByIdAsync(id);
             if (response == null)
             {
-                return NotFound($"Medical event type with ID {id} not found.");
+                return NotFound($"Không tìm thấy loại sự kiện y tế với ID {id}.");
             }
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
@@ -48,7 +48,7 @@ namespace School_Medical_Management.API.Controllers
             var response = await _medicalEventTypeService.UpdateMedicalEventTypeAsync(id, request);
             if (response == null)
             {
-                return NotFound($"Medical event type with ID {id} not found or could not be updated.");
+                return NotFound($"Không tìm thấy loại sự kiện y tế với ID {id} hoặc không thể cập nhật.");
             }
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
@@ -56,12 +56,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMedicalEventType([FromRoute] int id)
         {
-            var result = await _medicalEventTypeService.DeleteMedicalEventTypeAsync(id);
-            if (!result)
-            {
-                return NotFound($"Medical event type with ID {id} not found or could not be deleted.");
-            }
-            return Ok($"Delete medical event type with ID: {id} successfully");
+            var response = await _medicalEventTypeService.DeleteMedicalEventTypeAsync(id);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
     }
 }

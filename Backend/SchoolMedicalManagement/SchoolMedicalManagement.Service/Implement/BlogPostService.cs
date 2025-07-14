@@ -50,14 +50,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Blog post with ID {id} not found.",
+                    Message = $"Không tìm thấy bài viết với ID {id}.",
                     Data = null
                 };
             }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Blog post found successfully.",
+                Message = "Tìm thấy bài viết thành công.",
                 Data = new BlogPostManagementResponse
                 {
                     PostId = p.PostId,
@@ -90,7 +90,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     return new BaseResponse
                     {
                         Status = StatusCodes.Status400BadRequest.ToString(),
-                        Message = $"User with ID {request.AuthorId.Value} not found.",
+                        Message = $"Không tìm thấy người dùng với ID {request.AuthorId.Value}.",
                         Data = null
                     };
                 }
@@ -102,14 +102,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Create blog post failed.",
+                    Message = "Tạo bài viết thất bại.",
                     Data = null
                 };
             }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Create blog post successfully.",
+                Message = "Tạo bài viết thành công.",
                 Data = new BlogPostManagementResponse
                 {
                     PostId = created.PostId,
@@ -131,7 +131,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Blog post with ID {id} not found.",
+                    Message = $"Không tìm thấy bài viết với ID {id}.",
                     Data = null
                 };
             }
@@ -146,14 +146,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Update failed. Please check the request data.",
+                    Message = "Cập nhật thất bại. Vui lòng kiểm tra dữ liệu yêu cầu.",
                     Data = null
                 };
             }
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Blog post updated successfully.",
+                Message = "Cập nhật bài viết thành công.",
                 Data = new BlogPostManagementResponse
                 {
                     PostId = updated.PostId,
@@ -167,9 +167,14 @@ namespace SchoolMedicalManagement.Service.Implement
             };
         }
 
-        public async Task<bool> DeleteBlogPostAsync(int id)
+        public async Task<BaseResponse> DeleteBlogPostAsync(int id)
         {
-            return await _blogPostRepository.DeleteBlogPost(id);
+            var success = await _blogPostRepository.DeleteBlogPost(id);
+            if (!success)
+            {
+                return new BaseResponse { Status = StatusCodes.Status404NotFound.ToString(), Message = "Không tìm thấy bài viết để xóa.", Data = null };
+            }
+            return new BaseResponse { Status = StatusCodes.Status200OK.ToString(), Message = "Xóa bài viết thành công.", Data = null };
         }
     }
 } 

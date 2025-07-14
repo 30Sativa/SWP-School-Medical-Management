@@ -20,10 +20,10 @@ namespace SchoolMedicalManagement.Service.Implement
         }
 
         // ✅ Lấy tất cả hồ sơ sức khỏe
-        public async Task<List<ManagerHealthProfileResponse>> GetAllHealthProfilesAsync()
+        public async Task<BaseResponse> GetAllHealthProfilesAsync()
         {
             var healthProfiles = await _healthProfileRepository.GetAllHealthProfile();
-            return healthProfiles.Select(hp => new ManagerHealthProfileResponse
+            var list = healthProfiles.Select(hp => new ManagerHealthProfileResponse
             {
                 ProfileId = hp.ProfileId,
                 StudentId = hp.StudentId ?? 0,
@@ -34,6 +34,25 @@ namespace SchoolMedicalManagement.Service.Implement
                 GeneralNote = hp.GeneralNote,
                 IsActive = hp.IsActive
             }).ToList();
+            return new BaseResponse { Status = StatusCodes.Status200OK.ToString(), Message = "Success", Data = list };
+        }
+
+        // ✅ Lấy tất cả hồ sơ sức khỏe bao gồm cả IsActive = false
+        public async Task<BaseResponse> GetAllHealthProfilesIncludeInactiveAsync()
+        {
+            var healthProfiles = await _healthProfileRepository.GetAllHealthProfileIncludeInactive();
+            var list = healthProfiles.Select(hp => new ManagerHealthProfileResponse
+            {
+                ProfileId = hp.ProfileId,
+                StudentId = hp.StudentId ?? 0,
+                Height = hp.Height,
+                Weight = hp.Weight,
+                ChronicDiseases = hp.ChronicDiseases,
+                Allergies = hp.Allergies,
+                GeneralNote = hp.GeneralNote,
+                IsActive = hp.IsActive
+            }).ToList();
+            return new BaseResponse { Status = StatusCodes.Status200OK.ToString(), Message = "Success", Data = list };
         }
 
         // ✅ Lấy 1 hồ sơ sức khỏe theo ID
@@ -163,10 +182,58 @@ namespace SchoolMedicalManagement.Service.Implement
             };
         }
 
-        // ✅ Xoá mềm hồ sơ
-        public async Task<bool> DeleteHealthProfileAsync(int id)
+        // ✅ Cập nhật trạng thái IsActive của hồ sơ sức khỏe
+        public async Task<BaseResponse?> UpdateHealthProfileStatusAsync(int id, UpdateHealthProfileStatusRequest request)
         {
-            return await _healthProfileRepository.DeleteHealthProfile(id);
+            var updated = await _healthProfileRepository.UpdateHealthProfileStatus(id, request.IsActive);
+            
+            if (updated == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Không tìm thấy hồ sơ sức khỏe với ID {id}.",
+                    Data = null
+                };
+            }
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = $"Cập nhật trạng thái hồ sơ sức khỏe thành công. Trạng thái hiện tại: {(request.IsActive ? "Hoạt động" : "Không hoạt động")}",
+                Data = new ManagerHealthProfileResponse
+                {
+                    ProfileId = updated.ProfileId,
+                    StudentId = updated.StudentId ?? 0,
+                    Height = updated.Height,
+                    Weight = updated.Weight,
+                    ChronicDiseases = updated.ChronicDiseases,
+                    Allergies = updated.Allergies,
+                    GeneralNote = updated.GeneralNote,
+                    IsActive = updated.IsActive
+                }
+            };
+        }
+
+        // ✅ Xoá mềm hồ sơ
+        public async Task<BaseResponse> DeleteHealthProfileAsync(int id)
+        {
+            var success = await _healthProfileRepository.DeleteHealthProfile(id);
+            if (!success)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = "Không tìm thấy hồ sơ sức khỏe để xóa.",
+                    Data = null
+                };
+            }
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Xóa hồ sơ sức khỏe thành công.",
+                Data = null
+            };
         }
 
         // ✅ Lấy hồ sơ sức khỏe theo StudentId

@@ -13,7 +13,7 @@ namespace SchoolMedicalManagement.Models.Request
         public string Username { get; set; } = null!;
 
         [Required]
-        [MinLength(6, ErrorMessage = "Password must be at least 6 characters.")]
+        [MinLength(6, ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự.")]
         public string Password { get; set; } = null!;
 
         [Required]
@@ -22,10 +22,10 @@ namespace SchoolMedicalManagement.Models.Request
         [Required]
         public int RoleId { get; set; }  // ✅ Tên thuộc tính đúng chuẩn PascalCase và đồng bộ (không dùng `RoleID`)
 
-        [Phone(ErrorMessage = "Invalid phone number format.")]
+        [Phone(ErrorMessage = "Định dạng số điện thoại không hợp lệ.")]
         public string Phone { get; set; } = null!;
 
-        [EmailAddress(ErrorMessage = "Invalid email format.")]
+        [EmailAddress(ErrorMessage = "Định dạng email không hợp lệ.")]
         public string Email { get; set; } = null!;
 
         public string? Address { get; set; }

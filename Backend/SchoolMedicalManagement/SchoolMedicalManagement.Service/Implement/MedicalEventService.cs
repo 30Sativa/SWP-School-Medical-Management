@@ -59,7 +59,7 @@ public class MedicalEventService : IMedicalEventService
             return new BaseResponse
             {
                 Status = StatusCodes.Status500InternalServerError.ToString(),
-                Message = "Lỗi tạo Medical Event.",
+                Message = "Lỗi tạo sự kiện y tế.",
                 Data = null
             };
         }
@@ -124,7 +124,7 @@ public class MedicalEventService : IMedicalEventService
             return new BaseResponse
             {
                 Status = StatusCodes.Status404NotFound.ToString(),
-                Message = "Medical event not found.",
+                Message = "Không tìm thấy sự kiện y tế.",
                 Data = null
             };
         }
@@ -138,7 +138,7 @@ public class MedicalEventService : IMedicalEventService
         return new BaseResponse
         {
             Status = StatusCodes.Status200OK.ToString(),
-            Message = "Medical event retrieved successfully.",
+            Message = "Lấy sự kiện y tế thành công.",
             Data = new CreateMedicalEventResponse
             {
                 EventId = getid.EventId,
@@ -178,11 +178,10 @@ public class MedicalEventService : IMedicalEventService
     // =============================
     // LẤY TẤT CẢ SỰ KIỆN Y TẾ
     // =============================
-    public async Task<List<CreateMedicalEventResponse>> GetAllMedicalEvent()
+    public async Task<BaseResponse> GetAllMedicalEvent()
     {
         var listevent = await _medicalEventRepository.GetAllMedicalEvents();
-
-        return listevent.Select(e => new CreateMedicalEventResponse
+        var responseList = listevent.Select(e => new CreateMedicalEventResponse
         {
             EventId = e.EventId,    
             StudentId = e.Student?.StudentId ?? 0,
@@ -207,6 +206,12 @@ public class MedicalEventService : IMedicalEventService
 
             MedicalHistory = new List<MedicalHistoryResponse>() // optional: để rõ ràng
         }).ToList();
+        return new BaseResponse
+        {
+            Status = StatusCodes.Status200OK.ToString(),
+            Message = "Lấy danh sách sự kiện y tế thành công.",
+            Data = responseList
+        };
     }
 
     // =============================
@@ -325,10 +330,14 @@ public class MedicalEventService : IMedicalEventService
     // =============================
     // XÓA MỀM SỰ KIỆN Y TẾ
     // =============================
-    public async Task<bool> DeleteMedicalEvent(int eventId)
+    public async Task<BaseResponse> DeleteMedicalEvent(int eventId)
     {
         var affected = await _medicalEventRepository.DeleteMedicalEvent(eventId);
-        return affected > 0;
+        if (affected <= 0)
+        {
+            return new BaseResponse { Status = StatusCodes.Status404NotFound.ToString(), Message = "Không tìm thấy sự kiện y tế để xóa.", Data = null };
+        }
+        return new BaseResponse { Status = StatusCodes.Status200OK.ToString(), Message = "Xóa sự kiện y tế thành công.", Data = null };
     }
 
     public async Task<BaseResponse?> GetMedicalEventsByStudentId(int studentId)
@@ -352,7 +361,7 @@ public class MedicalEventService : IMedicalEventService
         return new BaseResponse
         {
             Status = StatusCodes.Status200OK.ToString(),
-            Message = "Medical event retrieved successfully.",
+            Message = "Lấy sự kiện y tế thành công.",
             Data = new CreateMedicalEventResponse
             {
                 EventId = events.EventId,

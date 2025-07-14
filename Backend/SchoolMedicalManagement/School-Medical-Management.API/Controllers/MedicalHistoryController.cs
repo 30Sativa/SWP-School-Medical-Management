@@ -19,8 +19,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpGet("student/{studentId}")]
         public async Task<IActionResult> GetAllByStudentId(int studentId)
         {
-            var data = await _service.GetAllByStudentIdAsync(studentId);
-            return Ok(data);
+            var response = await _service.GetAllByStudentIdAsync(studentId);
+            return StatusCode(int.Parse(response.Status), response);
         }
 
         [HttpGet("{id}")]

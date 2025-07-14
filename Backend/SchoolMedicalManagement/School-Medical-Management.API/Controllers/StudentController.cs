@@ -47,7 +47,7 @@ namespace School_Medical_Management.API.Controllers
         {
             var response = await _studentService.UpdateStudent(id, request);
             if (response == null || response.Data == null)
-                return NotFound($"Student profile with ID {id} not found or update failed.");
+                return NotFound($"Không tìm thấy học sinh với ID {id} hoặc cập nhật thất bại.");
 
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
@@ -55,12 +55,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStudent([FromRoute] int id)
         {
-            var result = await _studentService.DeleteStudent(id);
-            if (!result)
-            {
-                return NotFound($"Student with ID {id} not found or could not be deleted.");
-            }
-            return Ok($"Delete Student with ID: {id} successfully");
+            var response = await _studentService.DeleteStudent(id);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
 

@@ -30,7 +30,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Username already exists.",
+                    Message = "Tên đăng nhập đã tồn tại.",
                     Data = null
                 };
             }
@@ -54,7 +54,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Failed to create user.",
+                    Message = "Tạo người dùng thất bại.",
                     Data = null
                 };
             }
@@ -62,7 +62,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "User created successfully.",
+                Message = "Tạo người dùng thành công.",
                 Data = new ManagerUserResponse
                 {
                     UserId = createdUser.UserId,
@@ -86,7 +86,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"User with ID {id} not found.",
+                    Message = $"Không tìm thấy người dùng với ID {id}.",
                     Data = null
                 };
             }
@@ -95,7 +95,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = result ? "User deleted (soft) successfully." : "Soft delete failed.",
+                Message = result ? "Xóa người dùng thành công." : "Xóa người dùng thất bại.",
                 Data = null
             };
         }
@@ -118,7 +118,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Lấy danh sách user thành công.",
+                Message = "Lấy danh sách người dùng thành công.",
                 Data = data
             };
         }
@@ -131,7 +131,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"User with ID {id} not found.",
+                    Message = $"Không tìm thấy người dùng với ID {id}.",
                     Data = null
                 };
             }
@@ -139,7 +139,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "User found successfully.",
+                Message = "Tìm thấy người dùng thành công.",
                 Data = new ManagerUserResponse
                 {
                     UserId = user.UserId,
@@ -162,7 +162,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"User with ID {id} not found.",
+                    Message = $"Không tìm thấy người dùng với ID {id}.",
                     Data = null
                 };
             }
@@ -182,7 +182,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Update failed.",
+                    Message = "Cập nhật thất bại.",
                     Data = null
                 };
             }
@@ -190,7 +190,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "User updated successfully.",
+                Message = "Cập nhật người dùng thành công.",
                 Data = new ManagerUserResponse
                 {
                     UserId = updatedUser.UserId,

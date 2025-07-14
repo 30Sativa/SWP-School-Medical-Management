@@ -20,10 +20,10 @@ namespace SchoolMedicalManagement.Service.Implement
             _medicalHistoryRepository = medicalHistoryRepository;
         }
 
-        public async Task<List<MedicalHistoryResponse>> GetAllByStudentIdAsync(int studentId)
+        public async Task<BaseResponse> GetAllByStudentIdAsync(int studentId)
         {
             var list = await _medicalHistoryRepository.GetAllByStudentIdMedicalHistory(studentId);
-            return list.Select(h => new MedicalHistoryResponse
+            var responseList = list.Select(h => new MedicalHistoryResponse
             {
                 HistoryId = h.HistoryId,
                 StudentId = h.StudentId,
@@ -32,18 +32,24 @@ namespace SchoolMedicalManagement.Service.Implement
                 DiagnosedDate = h.DiagnosedDate,
                 Note = h.Note
             }).ToList();
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách lịch sử y tế thành công.",
+                Data = responseList
+            };
         }
 
         public async Task<BaseResponse> GetByIdAsync(int id)
         {
             var data = await _medicalHistoryRepository.GetByIdMedicalHistory(id);
             if (data == null)
-                return new BaseResponse { Status = "404", Message = "Not found" };
+                return new BaseResponse { Status = "404", Message = "Không tìm thấy" };
 
             return new BaseResponse
             {
                 Status = "200",
-                Message = "Success",
+                Message = "Thành công",
                 Data = new MedicalHistoryResponse
                 {
                     HistoryId = data.HistoryId,
@@ -68,12 +74,12 @@ namespace SchoolMedicalManagement.Service.Implement
 
             var result = await _medicalHistoryRepository.CreateMedicalHistory(entity);
             if (result == null)
-                return new BaseResponse { Status = "400", Message = "Failed to create medical history" };
+                return new BaseResponse { Status = "400", Message = "Tạo lịch sử y tế thất bại" };
 
             return new BaseResponse
             {
                 Status = "201",
-                Message = "Created",
+                Message = "Đã tạo",
                 Data = new MedicalHistoryResponse
                 {
                     HistoryId = result.HistoryId,
@@ -90,7 +96,7 @@ namespace SchoolMedicalManagement.Service.Implement
         {
             var entity = await _medicalHistoryRepository.GetByIdMedicalHistory(request.HistoryId);
             if (entity == null)
-                return new BaseResponse { Status = "404", Message = "Not found" };
+                return new BaseResponse { Status = "404", Message = "Không tìm thấy" };
 
             entity.DiseaseName = request.DiseaseName;
             entity.DiagnosedDate = request.DiagnosedDate;
@@ -98,12 +104,12 @@ namespace SchoolMedicalManagement.Service.Implement
 
             var updated = await _medicalHistoryRepository.UpdateMedicalHistory(entity);
             if (updated == null)
-                return new BaseResponse { Status = "400", Message = "Failed to update medical history" };
+                return new BaseResponse { Status = "400", Message = "Cập nhật lịch sử y tế thất bại" };
 
             return new BaseResponse
             {
                 Status = "200",
-                Message = "Updated",
+                Message = "Đã cập nhật",
                 Data = new MedicalHistoryResponse
                 {
                     HistoryId = updated.HistoryId,
@@ -120,9 +126,9 @@ namespace SchoolMedicalManagement.Service.Implement
         {
             var result = await _medicalHistoryRepository.DeleteMedicalHistory(id);
             if (result == 0)
-                return new BaseResponse { Status = "404", Message = "Not found or failed to delete" };
+                return new BaseResponse { Status = "404", Message = "Không tìm thấy hoặc xóa thất bại" };
 
-            return new BaseResponse { Status = "200", Message = "Deleted" };
+            return new BaseResponse { Status = "200", Message = "Đã xóa" };
         }
     }
 }

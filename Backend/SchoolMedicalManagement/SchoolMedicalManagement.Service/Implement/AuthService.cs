@@ -47,7 +47,7 @@ namespace SchoolMedicalManagement.Service.Implement
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Change password fail",
+                    Message = "Đổi mật khẩu thất bại",
                     Data = null
                 };
 
@@ -59,7 +59,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Password changed successfully.",
+                Message = "Đổi mật khẩu thành công.",
                 Data = new ChangePasswordUserResponse
                 {
                     UserId = user.UserId,
@@ -81,7 +81,7 @@ namespace SchoolMedicalManagement.Service.Implement
             if (user == null) {
                 return new BaseResponse{
                     Status = StatusCodes.Status401Unauthorized.ToString(),
-                    Message = "Invalid username or password.",
+                    Message = "Tên đăng nhập hoặc mật khẩu không đúng.",
                     Data = null
                 }
             ;
@@ -107,7 +107,7 @@ namespace SchoolMedicalManagement.Service.Implement
             return new BaseResponse
             {
                 Status = StatusCodes.Status200OK.ToString(),
-                Message = "Login successful.",
+                Message = "Đăng nhập thành công.",
                 Data = new LoginUserResponse
                 {
                     UserId = user.UserId,

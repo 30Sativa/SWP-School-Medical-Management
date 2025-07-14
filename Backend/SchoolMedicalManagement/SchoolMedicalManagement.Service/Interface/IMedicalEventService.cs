@@ -20,10 +20,10 @@ namespace SchoolMedicalManagement.Service.Interface
         Task<BaseResponse?> UpdateMedicalEvent(int eventId, CreateMedicalEventRequest request);
 
         // ✅ Xoá mềm sự kiện y tế
-        Task<bool> DeleteMedicalEvent(int eventId);
+        Task<BaseResponse> DeleteMedicalEvent(int eventId);
 
         // ✅ Danh sách tất cả sự kiện y tế (đang hoạt động)
-        Task<List<CreateMedicalEventResponse>> GetAllMedicalEvent();
+        Task<BaseResponse> GetAllMedicalEvent();
 
         // ✅ Danh sách sự kiện y tế theo học sinh
         Task<BaseResponse?> GetMedicalEventsByStudentId(int studentId);

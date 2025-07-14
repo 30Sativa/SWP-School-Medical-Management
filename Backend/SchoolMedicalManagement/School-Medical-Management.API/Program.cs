@@ -8,6 +8,8 @@ using SchoolMedicalManagement.Service.Interface;
 using Microsoft.EntityFrameworkCore;
 using SchoolMedicalManagement.Models.Entity;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
+using Hangfire;
+using Hangfire.MemoryStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +56,8 @@ builder.Services.AddScoped<ParentFeedbackRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+// Đăng ký VaccinationCampaignService cho Hangfire job
+builder.Services.AddScoped<VaccinationCampaignService>();
 
 builder.Services.AddScoped<IMedicalHistoryService, MedicalHistoryService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -71,7 +75,6 @@ builder.Services.AddScoped<IMedicalEventTypeService, MedicalEventTypeService>();
 builder.Services.AddScoped<IBlogPostService, BlogPostService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IParentFeedbackService, ParentFeedbackService>();
-
 // CORS
 builder.Services.AddCors(options =>
 {
@@ -168,9 +171,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+// Hangfire cấu hình MemoryStorage cho dev/test
+builder.Services.AddHangfire(config =>
+    config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+          .UseSimpleAssemblyNameTypeSerializer()
+          .UseRecommendedSerializerSettings()
+          .UseMemoryStorage());
+builder.Services.AddHangfireServer();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+
+
+// Replace the problematic line with the following code:
+
+//Test UptimeRobot
+app.MapGet("/api/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+app.MapMethods("/api/health", new[] { "HEAD" }, () => Results.Ok());
+
 app.UseStaticFiles();
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -182,5 +201,8 @@ app.UseCors("AllowReactApp");
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Bật Hangfire Dashboard tại /hangfire
+app.UseHangfireDashboard();
 
 app.Run();
