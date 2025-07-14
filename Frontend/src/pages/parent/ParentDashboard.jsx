@@ -598,7 +598,7 @@ const ParentDashboard = () => {
           <ul style={{ marginTop: '8px', paddingLeft: '16px', fontSize: '14px', color: '#334155' }}>
             {myStudents.map((s, idx) => (
               <li key={idx} style={{ marginBottom: '4px' }}>
-                {s.fullName} – {s.class}
+                {s.fullName} – {s.className}
               </li>
             ))}
           </ul>
