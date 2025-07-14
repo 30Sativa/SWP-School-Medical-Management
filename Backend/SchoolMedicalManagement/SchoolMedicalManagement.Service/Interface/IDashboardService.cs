@@ -1,4 +1,5 @@
 using SchoolMedicalManagement.Models.Response;
+using System;
 using System.Threading.Tasks;
 
 namespace SchoolMedicalManagement.Service.Interface
@@ -13,5 +14,8 @@ namespace SchoolMedicalManagement.Service.Interface
         Task<BaseResponse?> GetHealthStatisticsAsync();
         Task<BaseResponse?> GetMedicalEventsStatisticsAsync();
         Task<BaseResponse?> GetMedicationStatisticsAsync();
+        
+        // Dashboard cho phụ huynh
+        Task<BaseResponse?> GetParentDashboardOverviewAsync(Guid parentId);
     }
 } 
