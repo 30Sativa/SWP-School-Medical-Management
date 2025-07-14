@@ -245,7 +245,8 @@ const SendMedicine = () => {
       const res = await axios.get(
         "https://swp-school-medical-management.onrender.com/api/MedicationRequest/all"
       );
-      const all = res.data;
+      // Sửa ở đây: lấy đúng mảng data
+      const all = Array.isArray(res.data) ? res.data : res.data.data || [];
       const filtered = all.filter(
         (item) =>
           item.studentName?.toLowerCase().trim() === studentName?.toLowerCase().trim()
