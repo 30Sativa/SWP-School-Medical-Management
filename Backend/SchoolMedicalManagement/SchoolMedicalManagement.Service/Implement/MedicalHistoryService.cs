@@ -34,7 +34,7 @@ namespace SchoolMedicalManagement.Service.Implement
             }).ToList();
             return new BaseResponse
             {
-                Status = "200",
+                Status = StatusCodes.Status200OK.ToString(),
                 Message = "Lấy danh sách lịch sử y tế thành công.",
                 Data = responseList
             };
