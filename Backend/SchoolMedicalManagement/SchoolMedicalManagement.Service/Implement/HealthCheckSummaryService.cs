@@ -258,9 +258,14 @@ namespace SchoolMedicalManagement.Service.Implement
             };
         }
 
-        public async Task<bool> DeleteHealthCheckSummaryAsync(int id)
+        public async Task<BaseResponse> DeleteHealthCheckSummaryAsync(int id)
         {
-            return await _summaryRepository.DeleteHealthCheckSummary(id);
+            var success = await _summaryRepository.DeleteHealthCheckSummary(id);
+            if (!success)
+            {
+                return new BaseResponse { Status = StatusCodes.Status404NotFound.ToString(), Message = "Không tìm thấy tổng hợp để xóa.", Data = null };
+            }
+            return new BaseResponse { Status = StatusCodes.Status200OK.ToString(), Message = "Xóa tổng hợp thành công.", Data = null };
         }
 
         public async Task<BaseResponse?> GetHealthCheckSummariesByStudentIdAsync(int studentId)

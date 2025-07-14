@@ -56,12 +56,8 @@ namespace School_Medical_Management.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBlogPost([FromRoute] int id)
         {
-            var result = await _blogPostService.DeleteBlogPostAsync(id);
-            if (!result)
-            {
-                return NotFound($"Không tìm thấy bài viết với ID {id} hoặc không thể xóa.");
-            }
-            return Ok($"Xóa bài viết với ID: {id} thành công");
+            var response = await _blogPostService.DeleteBlogPostAsync(id);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
     }
 } 

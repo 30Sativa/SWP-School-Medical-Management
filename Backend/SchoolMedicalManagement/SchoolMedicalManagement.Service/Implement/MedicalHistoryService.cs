@@ -20,10 +20,10 @@ namespace SchoolMedicalManagement.Service.Implement
             _medicalHistoryRepository = medicalHistoryRepository;
         }
 
-        public async Task<List<MedicalHistoryResponse>> GetAllByStudentIdAsync(int studentId)
+        public async Task<BaseResponse> GetAllByStudentIdAsync(int studentId)
         {
             var list = await _medicalHistoryRepository.GetAllByStudentIdMedicalHistory(studentId);
-            return list.Select(h => new MedicalHistoryResponse
+            var responseList = list.Select(h => new MedicalHistoryResponse
             {
                 HistoryId = h.HistoryId,
                 StudentId = h.StudentId,
@@ -32,6 +32,12 @@ namespace SchoolMedicalManagement.Service.Implement
                 DiagnosedDate = h.DiagnosedDate,
                 Note = h.Note
             }).ToList();
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách lịch sử y tế thành công.",
+                Data = responseList
+            };
         }
 
         public async Task<BaseResponse> GetByIdAsync(int id)
