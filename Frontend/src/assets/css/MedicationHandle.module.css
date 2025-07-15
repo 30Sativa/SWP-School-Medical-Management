@@ -87,6 +87,7 @@
   font-size: 13px;
   font-weight: 500;
   color: red;
+  white-space: nowrap !important;
 }
 
 .pending {

@@ -13,7 +13,7 @@ const StudentList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const studentsPerPage = 10;
+  const studentsPerPage = 13;
   const navigate = useNavigate();
 
   const handleViewDetail = (id) => {
