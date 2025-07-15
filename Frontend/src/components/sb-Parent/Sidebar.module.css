@@ -8,6 +8,7 @@
   min-height: 100vh;
   transition: width 0.3s ease;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .sbSidebar.expanded {
@@ -45,6 +46,7 @@ nav {
   font-weight: 500;
   border-radius: 8px;
   transition: background-color 0.2s ease;
+  font-size: 15px;
 }
 
 .navItem:hover {
