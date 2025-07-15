@@ -45,6 +45,7 @@ const HealthProfile = () => {
     { diseaseName: '', note: '', diagnosedDate: '' }
   ]);
   const [medicalHistoryMap, setMedicalHistoryMap] = useState({}); // { studentId: [medicalHistory, ...] }
+  const [isInitialized, setIsInitialized] = useState(false); // Prevent multiple calls
 
   // Get auth data from localStorage
   const token = localStorage.getItem("token");
@@ -85,8 +86,10 @@ const HealthProfile = () => {
       setLoading(false);
       return;
     }
+    
     try {
       setLoading(true);
+      setIsInitialized(true);
       
       // 1. Lấy danh sách học sinh
       const studentResponse = await axios.get(
@@ -129,17 +132,27 @@ const HealthProfile = () => {
             profile: profileResponse.data.data
           };
         } catch (error) {
-          console.error(`Failed to fetch health profile for student ${student.studentId}:`, error);
+          // Chỉ log lỗi trong development và lỗi nghiêm trọng
+          if (import.meta.env.DEV) {
+            console.error(`Failed to fetch health profile for student ${student.studentId}:`, error);
+          }
           return {
             studentInfo: student,
             profile: null
           };
         }
       });
+      
       const fetchedData = await Promise.all(studentDataPromises);
-      setStudentList(fetchedData);
+      
+      // Chỉ set studentList nếu có dữ liệu
+      if (fetchedData.length > 0) {
+        setStudentList(fetchedData);
+      }
 
       // 3. Lấy medical history cho tất cả học sinh
+      // Note: Việc call API nhiều lần là do React StrictMode trong development mode
+      // Nó sẽ chỉ chạy 1 lần trong production mode
       const medicalHistoryMap = {};
       await Promise.all(students.map(async (student) => {
         try {
@@ -150,9 +163,23 @@ const HealthProfile = () => {
               timeout: 10000 // 10 seconds timeout
             }
           );
-          medicalHistoryMap[student.studentId] = Array.isArray(res.data) ? res.data : [];
+          
+          // Kiểm tra xem response có data không
+          let medicalHistory = [];
+          if (res.data && res.data.data) {
+            // Nếu response có structure { data: [...] }
+            medicalHistory = Array.isArray(res.data.data) ? res.data.data : [];
+          } else if (Array.isArray(res.data)) {
+            // Nếu response trực tiếp là array
+            medicalHistory = res.data;
+          }
+          
+          medicalHistoryMap[student.studentId] = medicalHistory;
         } catch (err) {
-          console.error(`Error fetching medical history for student ${student.studentId}:`, err);
+          // Chỉ log lỗi nghiêm trọng, không log 404 (normal case)
+          if (err.response?.status !== 404 && import.meta.env.DEV) {
+            console.error(`Error fetching medical history for student ${student.studentId}:`, err);
+          }
           medicalHistoryMap[student.studentId] = [];
         }
       }));
@@ -187,32 +214,38 @@ const HealthProfile = () => {
     }
   }, [parentId, token, navigate]);
 
-  const handleOpenModal = (student) => {
+  const handleOpenModal = useCallback((student) => {
     setModalStudent(student);
     setFormData({ height: "", weight: "", chronicDiseases: "", allergies: "", generalNote: "" });
+    setMedicalHistories([{ diseaseName: '', note: '', diagnosedDate: '' }]);
     setShowModal(true);
-  };
-  const handleCloseModal = () => {
+  }, []);
+  const handleCloseModal = useCallback(() => {
     setShowModal(false);
     setModalStudent(null);
-  };
-  const handleFormChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-  const handleMedicalHistoryChange = (idx, e) => {
+    setMedicalHistories([{ diseaseName: '', note: '', diagnosedDate: '' }]);
+  }, []);
+  
+  const handleFormChange = useCallback((e) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  }, []);
+  
+  const handleMedicalHistoryChange = useCallback((idx, e) => {
     const { name, value } = e.target;
     setMedicalHistories((prev) => {
       const arr = [...prev];
       arr[idx][name] = value;
       return arr;
     });
-  };
-  const handleAddMedicalHistory = () => {
+  }, []);
+  
+  const handleAddMedicalHistory = useCallback(() => {
     setMedicalHistories((prev) => [...prev, { diseaseName: '', note: '', diagnosedDate: '' }]);
-  };
-  const handleRemoveMedicalHistory = (idx) => {
+  }, []);
+  
+  const handleRemoveMedicalHistory = useCallback((idx) => {
     setMedicalHistories((prev) => prev.length === 1 ? prev : prev.filter((_, i) => i !== idx));
-  };
+  }, []);
   const handleCreateProfile = useCallback(async (e) => {
     e.preventDefault();
     if (!modalStudent) return;
@@ -257,8 +290,9 @@ const HealthProfile = () => {
       toast.success("Tạo hồ sơ sức khỏe và tiền sử bệnh thành công!");
       setShowModal(false);
       setModalStudent(null);
-      fetchProfiles();
       setMedicalHistories([{ diseaseName: '', note: '', diagnosedDate: '' }]);
+      // Reload profiles to get updated medical history
+      await fetchProfiles();
     } catch (error) {
       console.error("Error creating health profile:", error);
       
@@ -280,8 +314,10 @@ const HealthProfile = () => {
 
   // Effects
   useEffect(() => {
-    fetchProfiles();
-  }, [fetchProfiles]);
+    if (!isInitialized) {
+      fetchProfiles();
+    }
+  }, [fetchProfiles, isInitialized]);
 
   // Helper function to safely display data
   const safeDisplayValue = useCallback((value, defaultValue = "Không có") => {
@@ -457,8 +493,10 @@ const HealthProfile = () => {
     </div>
   );
 
-  const renderPersonalInfo = (studentInfo, profile) => {
-    const medicalHistories = medicalHistoryMap[studentInfo.studentId] || [];
+  // Render functions - Memoized to prevent unnecessary re-renders
+  const renderPersonalInfo = useCallback((studentInfo, profile) => {
+    const studentMedicalHistory = medicalHistoryMap[studentInfo.studentId] || [];
+    
     return (
       <>
         <div className={styles.studentHeader}>
@@ -515,7 +553,7 @@ const HealthProfile = () => {
         {/* Medical History Table */}
         <div style={{ marginTop: 24 }}>
           <h4 style={{ color: '#20b2aa', marginBottom: 12, fontSize: 18, fontWeight: 600 }}>Tiền sử bệnh</h4>
-          {medicalHistories.length === 0 ? (
+          {studentMedicalHistory.length === 0 ? (
             <div style={{ 
               color: '#64748b', 
               fontStyle: 'italic', 
@@ -562,7 +600,7 @@ const HealthProfile = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {medicalHistories.map((mh, idx) => (
+                  {studentMedicalHistory.map((mh, idx) => (
                     <tr key={mh.historyId || idx} style={{ 
                       borderBottom: '1px solid #e2e8f0',
                       '&:hover': { background: '#f8fafc' }
@@ -594,9 +632,9 @@ const HealthProfile = () => {
         </div>
       </>
     );
-  };
+  }, [medicalHistoryMap, calculateAge, safeDisplayValue]);
 
-  const renderStudentCard = ({ studentInfo, profile }) => (
+  const renderStudentCard = useCallback(({ studentInfo, profile }) => (
     <div
       key={`student-${studentInfo.studentId}`}
       className={styles.cardBox}
@@ -680,7 +718,7 @@ const HealthProfile = () => {
         renderPersonalInfo(studentInfo, profile)
       )}
     </div>
-  );
+  ), [handleOpenModal, renderPersonalInfo]);
 
   // Main render
   if (loading) return renderLoadingState();
