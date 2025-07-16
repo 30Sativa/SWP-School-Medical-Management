@@ -257,7 +257,7 @@ const Incident = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    console.log("🔑 Token:", token);
+    console.log("🔑 Token: [Sanitized] " + (token ? token.substring(0, 4) + "..." : "No token found"));
     console.log("👤 UserId:", localStorage.getItem("userId"));
 
     fetchEvents();
