@@ -57,6 +57,13 @@ const HealthProfile = () => {
     generalNote: "",
   });
 
+  // State for adding medical history
+  const [isAddHistoryModalOpen, setIsAddHistoryModalOpen] = useState(false);
+  const [studentForHistory, setStudentForHistory] = useState(null);
+  const [newMedicalHistories, setNewMedicalHistories] = useState([
+    { diseaseName: '', note: '', diagnosedDate: '' }
+  ]);
+
 
   // Get auth data from localStorage
   const token = localStorage.getItem("token");
@@ -322,6 +329,82 @@ const HealthProfile = () => {
       setSubmitting(false);
     }
   }, [modalStudent, formData, medicalHistories, token, fetchProfiles, navigate]);
+
+  // Handlers for adding new medical history
+  const handleOpenAddHistoryModal = useCallback((student) => {
+    setStudentForHistory(student);
+    setNewMedicalHistories([{ diseaseName: '', note: '', diagnosedDate: '' }]);
+    setIsAddHistoryModalOpen(true);
+  }, []);
+
+  const handleCloseAddHistoryModal = useCallback(() => {
+    setIsAddHistoryModalOpen(false);
+    setStudentForHistory(null);
+  }, []);
+
+  const handleNewMedicalHistoryChange = useCallback((idx, e) => {
+    const { name, value } = e.target;
+    setNewMedicalHistories((prev) => {
+      const arr = [...prev];
+      arr[idx][name] = value;
+      return arr;
+    });
+  }, []);
+
+  const handleAddNewMedicalHistoryRow = useCallback(() => {
+    setNewMedicalHistories((prev) => [...prev, { diseaseName: '', note: '', diagnosedDate: '' }]);
+  }, []);
+
+  const handleRemoveNewMedicalHistoryRow = useCallback((idx) => {
+    setNewMedicalHistories((prev) => (prev.length === 1 ? prev : prev.filter((_, i) => i !== idx)));
+  }, []);
+
+  const handleAddMedicalHistorySubmit = useCallback(async (e) => {
+    e.preventDefault();
+    if (!studentForHistory) return;
+
+    setSubmitting(true);
+    try {
+      const validHistories = newMedicalHistories.filter(h => h.diseaseName && h.diagnosedDate);
+      if (validHistories.length > 0) {
+        await Promise.all(validHistories.map(async (h) => {
+          await axios.post(
+            `${API_BASE}/MedicalHistory`,
+            {
+              studentId: studentForHistory.studentId,
+              diseaseName: h.diseaseName,
+              note: h.note,
+              diagnosedDate: h.diagnosedDate
+            },
+            { 
+              headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+              timeout: 10000
+            }
+          );
+        }));
+        toast.success("Thêm tiền sử bệnh thành công!");
+        handleCloseAddHistoryModal();
+        await fetchProfiles();
+      } else {
+        toast.warn("Vui lòng nhập đầy đủ thông tin bệnh và ngày chẩn đoán.");
+      }
+    } catch (error) {
+      console.error("Error adding medical history:", error);
+      if (error.response?.status === 401) {
+        toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+        setTimeout(() => {
+          localStorage.clear();
+          navigate("/login");
+        }, 2000);
+      } else if (error.code === 'ECONNABORTED') {
+        toast.error("Request timeout. Vui lòng thử lại sau!");
+      } else {
+        toast.error("Thêm tiền sử bệnh thất bại! " + (error.response?.data?.message || ""));
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }, [studentForHistory, newMedicalHistories, token, fetchProfiles, navigate, handleCloseAddHistoryModal]);
 
   // Handlers for updating profile
   const handleUpdateClick = useCallback((profile) => {
@@ -763,10 +846,21 @@ const HealthProfile = () => {
               </table>
             </div>
           )}
+          <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+            <button 
+              onClick={() => handleOpenAddHistoryModal(studentInfo)}
+              style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#0ea5e9', color: 'white', cursor: 'pointer', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M12 5v14m7-7H5"/>
+              </svg>
+              Thêm Tiền sử bệnh
+            </button>
+          </div>
         </div>
       </>
     );
-  }, [medicalHistoryMap, calculateAge, safeDisplayValue, editingProfileId, editFormData, handleEditFormChange, handleSaveUpdate, handleCancelUpdate, handleUpdateClick, submitting]);
+  }, [medicalHistoryMap, calculateAge, safeDisplayValue, editingProfileId, editFormData, handleEditFormChange, handleSaveUpdate, handleCancelUpdate, handleUpdateClick, submitting, handleOpenAddHistoryModal]);
 
   const renderStudentCard = useCallback(({ studentInfo, profile }) => (
     <div
@@ -937,6 +1031,52 @@ const HealthProfile = () => {
             <button type="submit" disabled={submitting}
               style={{ marginTop: 10, background: submitting ? '#a7f3d0' : '#10b981', color: '#fff', padding: '12px 0', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 18, cursor: submitting ? 'not-allowed' : 'pointer', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)' }}>
               {submitting ? "Đang tạo..." : "Tạo hồ sơ"}
+            </button>
+          </form>
+        </Modal>
+      )}
+
+      {/* New Modal for Adding Medical History */}
+      {isAddHistoryModalOpen && (
+        <Modal isOpen={isAddHistoryModalOpen} onClose={handleCloseAddHistoryModal} title={`Thêm tiền sử bệnh cho ${studentForHistory?.fullName || ''}`}>
+          <form onSubmit={handleAddMedicalHistorySubmit} style={{ display: "flex", flexDirection: "column", gap: 18, marginTop: 16, minWidth: 450 }}>
+            <div style={{ padding: '12px', background: '#e0f7fa', borderRadius: 8 }}>
+              {newMedicalHistories.map((mh, idx) => (
+                <div key={idx} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10, flexWrap: 'wrap' }}>
+                  <input
+                    name="diseaseName"
+                    placeholder="Tên bệnh *"
+                    value={mh.diseaseName}
+                    onChange={e => handleNewMedicalHistoryChange(idx, e)}
+                    required
+                    style={{ flex: 2, minWidth: 120, padding: '8px', borderRadius: 6, border: '1px solid #cbd5e1', fontSize: 15 }}
+                  />
+                  <input
+                    name="note"
+                    placeholder="Ghi chú"
+                    value={mh.note}
+                    onChange={e => handleNewMedicalHistoryChange(idx, e)}
+                    style={{ flex: 2, minWidth: 100, padding: '8px', borderRadius: 6, border: '1px solid #cbd5e1', fontSize: 15 }}
+                  />
+                  <input
+                    name="diagnosedDate"
+                    type="date"
+                    value={mh.diagnosedDate}
+                    onChange={e => handleNewMedicalHistoryChange(idx, e)}
+                    required
+                    style={{ flex: 1, minWidth: 120, padding: '8px', borderRadius: 6, border: '1px solid #cbd5e1', fontSize: 15 }}
+                  />
+                  <button type="button" onClick={() => handleRemoveNewMedicalHistoryRow(idx)} style={{ background: '#f87171', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 10px', fontWeight: 700, cursor: 'pointer' }} disabled={newMedicalHistories.length === 1}>-</button>
+                  {idx === newMedicalHistories.length - 1 && (
+                    <button type="button" onClick={handleAddNewMedicalHistoryRow} style={{ background: '#22d3ee', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 10px', fontWeight: 700, cursor: 'pointer' }}>+</button>
+                  )}
+                </div>
+              ))}
+              <div style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>* Có thể thêm nhiều bệnh, tên bệnh và ngày chẩn đoán là bắt buộc</div>
+            </div>
+            <button type="submit" disabled={submitting}
+              style={{ marginTop: 10, background: submitting ? '#a7f3d0' : '#10b981', color: '#fff', padding: '12px 0', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 18, cursor: submitting ? 'not-allowed' : 'pointer', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)' }}>
+              {submitting ? "Đang lưu..." : "Lưu thay đổi"}
             </button>
           </form>
         </Modal>
