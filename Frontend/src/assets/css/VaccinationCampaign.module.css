@@ -164,13 +164,20 @@
   color: #888;
 }
 .addBtn {
-  padding: 10px 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px !important;
+  padding: 0 18px;
+  font-size: 1rem;
+  font-weight: 600;
   background-color: #20b2aa;
   color: white;
   border: none;
+  border-radius: 8px;
   cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
+  transition: background 0.2s, transform 0.2s;
+  white-space: nowrap !important;
 }
 .addBtn:hover {
   background-color: #178d89;

@@ -17,6 +17,10 @@ import { notifySuccess, notifyError } from "../../utils/notification";
 import LoadingOverlay from "../../components/LoadingOverlay";
 
 const VaccinCampaign = () => {
+  // Bộ lọc thời gian và trạng thái
+  // yearFilter: 0 = năm hiện tại, 1 = 1 năm gần nhất, 2 = 2 năm gần nhất, 3 = 3 năm gần nhất
+  const [yearFilter, setYearFilter] = useState(1);
+  const [quickFilter, setQuickFilter] = useState('all'); // 'all', 'latest', 'custom'
   const [campaigns, setCampaigns] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [filterStatus, setFilterStatus] = useState("Tất cả trạng thái");
@@ -56,12 +60,35 @@ const VaccinCampaign = () => {
   }, []);
 
   // FILTER + PAGINATION
-  const filteredCampaigns = campaigns.filter(
-    (c) =>
-      c.vaccineName.toLowerCase().includes(searchKeyword.toLowerCase()) &&
-      (filterStatus === "Tất cả trạng thái" || c.status === filterStatus) &&
-      c.status !== "Đã huỷ"
-  );
+  const now = new Date();
+  let fromDate, toDate;
+  if (yearFilter === 0) {
+    fromDate = new Date(now.getFullYear(), 0, 1);
+    toDate = new Date(now.getFullYear(), 11, 31);
+  } else {
+    fromDate = new Date(now.getFullYear() - yearFilter, now.getMonth(), now.getDate());
+    toDate = now;
+  }
+  let filteredCampaigns = [];
+  if (quickFilter === 'all') {
+    filteredCampaigns = campaigns.filter((c) => {
+      const matchSearch = c.vaccineName.toLowerCase().includes(searchKeyword.toLowerCase());
+      return matchSearch && c.status !== "Đã huỷ";
+    });
+  } else if (quickFilter === 'latest') {
+    const latest = campaigns.length > 0 
+      ? campaigns.reduce((max, c) => new Date(c.date) > new Date(max.date) ? c : max, campaigns[0]) 
+      : null;
+    filteredCampaigns = latest ? [latest] : [];
+  } else {
+    filteredCampaigns = campaigns.filter((c) => {
+      const matchSearch = c.vaccineName.toLowerCase().includes(searchKeyword.toLowerCase());
+      const campaignDate = new Date(c.date);
+      const matchDate = campaignDate >= fromDate && campaignDate <= toDate;
+      const matchStatus = filterStatus === "Tất cả trạng thái" || c.status === filterStatus;
+      return matchSearch && matchDate && matchStatus && c.status !== "Đã huỷ";
+    });
+  }
   const totalPages = Math.ceil(filteredCampaigns.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -122,26 +149,34 @@ const VaccinCampaign = () => {
               <input
                 placeholder="Tìm kiếm chiến dịch..."
                 value={searchKeyword}
-                onChange={(e) => {
-                  setSearchKeyword(e.target.value);
-                  setCurrentPage(1);
-                }}
+                onChange={e => { setSearchKeyword(e.target.value); setQuickFilter('custom'); setCurrentPage(1); }}
                 className={style.inputSearch}
               />
             </div>
             <select
               className={style.filterDropdown}
+              value={yearFilter}
+              onChange={e => { setYearFilter(Number(e.target.value)); setQuickFilter('custom'); setCurrentPage(1); }}
+              style={{ marginRight: 8 }}
+            >
+              <option value={0}>Năm hiện tại</option>
+              <option value={1}>1 năm gần nhất</option>
+              <option value={2}>2 năm gần nhất</option>
+              <option value={3}>3 năm gần nhất</option>
+            </select>
+            <select
+              className={style.filterDropdown}
               value={filterStatus}
-              onChange={(e) => {
-                setFilterStatus(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={e => { setFilterStatus(e.target.value); setQuickFilter('custom'); setCurrentPage(1); }}
+              style={{ marginRight: 8 }}
             >
               <option>Tất cả trạng thái</option>
               <option>Đang diễn ra</option>
               <option>Đã hoàn thành</option>
               <option>Chưa bắt đầu</option>
             </select>
+            <button style={{ background: quickFilter === 'all' ? '#23b7b7' : '#eee', color: quickFilter === 'all' ? '#fff' : '#333', border: 'none', borderRadius: 8, padding: '8px 16px', fontWeight: 500, cursor: 'pointer', marginRight: 8 }} onClick={() => { setQuickFilter('all'); setCurrentPage(1); }}>Hiển thị tất cả</button>
+            <button style={{ background: quickFilter === 'latest' ? '#23b7b7' : '#eee', color: quickFilter === 'latest' ? '#fff' : '#333', border: 'none', borderRadius: 8, padding: '8px 16px', fontWeight: 500, cursor: 'pointer' }} onClick={() => { setQuickFilter('latest'); setCurrentPage(1); }}>Chiến dịch vừa tạo</button>
           </div>
 
           {/* TABLE */}

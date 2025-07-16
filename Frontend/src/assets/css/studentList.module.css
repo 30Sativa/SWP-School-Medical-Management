@@ -32,7 +32,7 @@
 
 .header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start !important;
   align-items: center;
   margin-bottom: 20px;
 }
@@ -45,6 +45,8 @@
   border: 1px solid #ddd;
   background-color: #f4f4f4;
   color: #333;
+  height: 35px !important;
+  border-color: #bdbdbd !important;
 }
 
 .searchBar:focus {
@@ -276,6 +278,10 @@
   margin: 6px 0;
   width: 100%;
   animation: skeletonShimmer 1.2s infinite linear;
+}
+.classFilter{
+  width: 200px !important;
+  margin-left: 20px !important;
 }
 @keyframes skeletonShimmer {
   0% { background-position: 200% 0; }

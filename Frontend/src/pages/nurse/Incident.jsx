@@ -134,6 +134,54 @@ const Incident = () => {
     return "Không rõ";
   };
 
+  // Thêm hàm gửi thông báo cho phụ huynh
+  const sendNotificationToParent = async (event) => {
+    try {
+      const token = localStorage.getItem("token");
+      // Lấy thông tin học sinh để lấy parentId
+      const res = await axios.get(
+        `${STUDENT_API}/${event.studentId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const parentId = res.data?.data?.parentId;
+      if (!parentId) return;
+
+      const message = `Học sinh: ${event.studentName}\nLoại sự cố: ${event.eventType}\nThời gian: ${new Date(event.eventDate).toLocaleString()}\nMức độ: ${event.severityLevelName}\nMô tả: ${event.description}`;
+      const subject = "Thông báo sự cố y tế học đường";
+      // Gửi notification và email song song
+      await Promise.all([
+        axios.post(
+          NOTIFICATION_API,
+          {
+            receiverId: parentId,
+            title: subject,
+            message,
+            typeId: 2,
+            isRead: false,
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        ),
+        axios.post(
+          "https://swp-school-medical-management.onrender.com/api/Email/send-by-userid",
+          {
+            userId: parentId,
+            subject,
+            body: message,
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        ),
+      ]);
+      // Đánh dấu đã gửi thông báo ở frontend
+      setEvents((prev) =>
+        prev.map((e) =>
+          e.eventId === event.eventId ? { ...e, notificationSent: true } : e
+        )
+      );
+    } catch {
+      // Có thể log lỗi hoặc hiển thị thông báo nếu cần
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     console.log("🔑 Token:", token);
@@ -372,6 +420,7 @@ const Incident = () => {
         const added = {
           ...res.data,
           handledByName: "Bạn",
+          notificationSent: false, // mặc định chưa gửi, sẽ cập nhật sau khi gửi
         };
         setEvents((prev) => [...prev, added]);
         setShowCreateForm(false);
@@ -388,6 +437,8 @@ const Incident = () => {
         setSuppliesUsed([]);
         fetchEvents();
         notifySuccess("Tạo sự cố thành công!");
+        // Gửi thông báo tự động
+        sendNotificationToParent(added);
       })
       .catch((err) => {
         const errorDetail =
@@ -571,6 +622,7 @@ const Incident = () => {
         const addedEvents = responses.map((res) => ({
           ...res.data,
           handledByName: "Bạn",
+          notificationSent: false, // mặc định chưa gửi, sẽ cập nhật sau khi gửi
         }));
         setEvents((prev) => [...prev, ...addedEvents]);
         setShowBulkCreateForm(false);
@@ -588,6 +640,8 @@ const Incident = () => {
         setSearchStudent("");
         fetchEvents();
         notifySuccess(`Đã tạo thành công ${responses.length} sự cố y tế!`);
+        // Gửi thông báo tự động cho từng event
+        addedEvents.forEach((event) => sendNotificationToParent(event));
       })
       .catch((err) => {
         const errorDetail =
@@ -986,12 +1040,14 @@ const Incident = () => {
                 Xoá
               </button>
               <button onClick={() => setSelectedEvent(null)}>Đóng</button>
-              <button
-                className={style.sendBtn}
-                onClick={() => setShowSendOption(true)}
-              >
-                Gửi thông báo
-              </button>
+              {selectedEvent && !selectedEvent.notificationSent && (
+                <button
+                  className={style.sendBtn}
+                  onClick={() => setShowSendOption(true)}
+                >
+                  Gửi thông báo
+                </button>
+              )}
             </div>
           </div>
         </div>

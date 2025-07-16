@@ -8,6 +8,9 @@ import { notifySuccess, notifyError } from "../../utils/notification";
 import LoadingOverlay from "../../components/LoadingOverlay";
 
 const StudentDetail = () => {
+  // Thông tin sức khỏe
+  const [healthProfile, setHealthProfile] = useState(null);
+  const [healthLoading, setHealthLoading] = useState(true);
   const { id } = useParams();
   const navigate = useNavigate();
   const [student, setStudent] = useState(null);
@@ -31,6 +34,20 @@ const StudentDetail = () => {
       .then((res) => setStudent(res.data.data))
       .catch((err) => console.error("Lỗi khi tải dữ liệu:", err))
       .finally(() => setLoading(false));
+  }, [id]);
+
+  // Lấy thông tin sức khỏe
+  useEffect(() => {
+    if (!id) return;
+    setHealthLoading(true);
+    axios
+      .get(`https://swp-school-medical-management.onrender.com/api/health-profiles/${id}`)
+      .then((res) => setHealthProfile(res.data.data))
+      .catch((err) => {
+        setHealthProfile(null);
+        console.error("Lỗi khi tải hồ sơ sức khỏe:", err);
+      })
+      .finally(() => setHealthLoading(false));
   }, [id]);
 
   const handleBack = () => {
@@ -140,7 +157,6 @@ const StudentDetail = () => {
               <div className={style.line}>
                 <span>Lớp:</span> {student.class}
               </div>
-
               <div className={style.actionRow}>
                 <button className={style.editBtn} onClick={handleEdit}>
                   Chỉnh sửa
@@ -149,6 +165,24 @@ const StudentDetail = () => {
                   Xoá
                 </button>
               </div>
+            </div>
+            {/* Thông tin sức khỏe đặt dưới form phụ huynh */}
+            <div style={{ marginTop: "2rem" }}>
+              <h3 style={{ marginBottom: "1rem" }}>Thông tin sức khỏe</h3>
+              {healthLoading ? (
+                <div>Đang tải thông tin sức khỏe...</div>
+              ) : healthProfile ? (
+                <div>
+                  <div>Chiều cao: {healthProfile.height} cm</div>
+                  <div>Cân nặng: {healthProfile.weight} kg</div>
+                  <div>Bệnh mãn tính: {healthProfile.chronicDiseases}</div>
+                  <div>Dị ứng: {healthProfile.allergies}</div>
+                  <div>Nhận xét: {healthProfile.generalNote}</div>
+                  <div>Trạng thái: {healthProfile.isActive ? "Đang hoạt động" : "Ngừng hoạt động"}</div>
+                </div>
+              ) : (
+                <div>Không có thông tin sức khỏe.</div>
+              )}
             </div>
           </div>
         </div>
