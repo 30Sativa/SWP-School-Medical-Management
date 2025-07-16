@@ -12,10 +12,7 @@ const StudentList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [sortClassAsc, setSortClassAsc] = useState(true); // trạng thái sort lớp
-  const [sortNameAsc, setSortNameAsc] = useState(true); // trạng thái sort tên
-  const [sortIdAsc, setSortIdAsc] = useState(true); // trạng thái sort mã hs
-  const [sortType, setSortType] = useState("class"); // loại sort: class, name, id
+  const [sortConfig, setSortConfig] = useState({ key: 'studentId', direction: 'ascending' });
   const [classFilter, setClassFilter] = useState(""); // lọc theo lớp
   const studentsPerPage = 13;
   const navigate = useNavigate();
@@ -31,15 +28,7 @@ const StudentList = () => {
         "https://swp-school-medical-management.onrender.com/api/Student"
       );
       let studentArray = response.data?.data || [];
-
-      // Sắp xếp theo mã học sinh (studentId) tăng dần
-      studentArray.sort((a, b) => {
-        // Nếu mã là số, ép kiểu và so sánh số
-        return Number(a.studentId) - Number(b.studentId);
-      });
-
       setStudents(studentArray);
-      setFilteredStudents(studentArray);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -52,35 +41,62 @@ const StudentList = () => {
   }, []);
 
   useEffect(() => {
-    let filtered = students.filter((student) =>
-      student.fullName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    // Nếu chọn lớp, chỉ lấy học sinh thuộc lớp đó
+    let sortableItems = [...students];
+
+    // Filter first
+    if (searchTerm) {
+      const lowercasedFilter = searchTerm.toLowerCase();
+      sortableItems = sortableItems.filter((student) => {
+        const nameMatch = student.fullName.toLowerCase().includes(lowercasedFilter);
+        const idMatch = student.studentId.toString().includes(lowercasedFilter);
+        const classMatch = student.className.toLowerCase().includes(lowercasedFilter);
+        const parentMatch = student.parentName ? student.parentName.toLowerCase().includes(lowercasedFilter) : false;
+        return nameMatch || idMatch || classMatch || parentMatch;
+      });
+    }
     if (classFilter) {
-      filtered = filtered.filter(
+      sortableItems = sortableItems.filter(
         (student) => student.className === classFilter
       );
     }
-    // Sort theo loại sort
-    filtered = [...filtered].sort((a, b) => {
-      if (sortType === "class") {
-        return sortClassAsc
-          ? a.className.localeCompare(b.className)
-          : b.className.localeCompare(a.className);
-      } else if (sortType === "name") {
-        return sortNameAsc
-          ? a.fullName.localeCompare(b.fullName)
-          : b.fullName.localeCompare(a.fullName);
-      } else if (sortType === "id") {
-        return sortIdAsc
-          ? Number(a.studentId) - Number(b.studentId)
-          : Number(b.studentId) - Number(a.studentId);
-      }
-      return 0;
-    });
-    setFilteredStudents(filtered);
+
+    // Then sort
+    if (sortConfig.key !== null) {
+      sortableItems.sort((a, b) => {
+        let aValue = a[sortConfig.key];
+        let bValue = b[sortConfig.key];
+
+        // Handle numeric sorting for studentId
+        if (sortConfig.key === 'studentId') {
+          aValue = Number(aValue);
+          bValue = Number(bValue);
+        }
+
+        if (aValue < bValue) {
+          return sortConfig.direction === 'ascending' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'ascending' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    setFilteredStudents(sortableItems);
     setCurrentPage(1);
-  }, [searchTerm, students, sortClassAsc, classFilter, sortType, sortNameAsc, sortIdAsc]);
+  }, [students, searchTerm, classFilter, sortConfig]);
+
+  const requestSort = (key) => {
+    let direction = 'ascending';
+    if (
+      sortConfig.key === key &&
+      sortConfig.direction === 'ascending'
+    ) {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
+
 
   const indexOfLastStudent = currentPage * studentsPerPage;
   const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
@@ -89,6 +105,13 @@ const StudentList = () => {
     indexOfLastStudent
   );
   const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
+
+  const getSortIndicator = (key) => {
+    if (sortConfig.key === key) {
+      return sortConfig.direction === 'ascending' ? ' ▲' : ' ▼';
+    }
+    return null;
+  };
 
   return (
     <div className={style.layoutContainer}>
@@ -127,44 +150,21 @@ const StudentList = () => {
               <option key={className} value={className}>{className}</option>
             ))}
           </select>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button
-              className={style.sortLabel}
-              style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer", fontWeight: "bold", border: "none", background: "none", color: sortType === "class" ? "#1e88e5" : "#333", fontSize: 16 }}
-              onClick={() => { setSortType("class"); setSortClassAsc((prev) => !prev); }}
-              title="Sắp xếp theo lớp"
-            >
-              <span style={{ fontSize: 18 }}>{sortClassAsc ? "▲" : "▼"}</span>
-              <span>Lớp</span>
-            </button>
-            <button
-              className={style.sortLabel}
-              style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer", fontWeight: "bold", border: "none", background: "none", color: sortType === "name" ? "#1e88e5" : "#333", fontSize: 16 }}
-              onClick={() => { setSortType("name"); setSortNameAsc((prev) => !prev); }}
-              title="Sắp xếp theo tên"
-            >
-              <span style={{ fontSize: 18 }}>{sortNameAsc ? "▲" : "▼"}</span>
-              <span>Tên</span>
-            </button>
-            <button
-              className={style.sortLabel}
-              style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer", fontWeight: "bold", border: "none", background: "none", color: sortType === "id" ? "#1e88e5" : "#333", fontSize: 16 }}
-              onClick={() => { setSortType("id"); setSortIdAsc((prev) => !prev); }}
-              title="Sắp xếp theo mã học sinh"
-            >
-              <span style={{ fontSize: 18 }}>{sortIdAsc ? "▲" : "▼"}</span>
-              <span>Mã HS</span>
-            </button>
-          </div>
         </div>
 
         <table className={style.studentTable}>
           <thead>
             <tr>
               <th>STT</th>
-              <th>Mã học sinh</th>
-              <th>Họ và tên</th>
-              <th>Lớp</th>
+              <th onClick={() => requestSort('studentId')} className={style.sortableHeader}>
+                Mã học sinh{getSortIndicator('studentId')}
+              </th>
+              <th onClick={() => requestSort('fullName')} className={style.sortableHeader}>
+                Họ và tên{getSortIndicator('fullName')}
+              </th>
+              <th onClick={() => requestSort('className')} className={style.sortableHeader}>
+                Lớp{getSortIndicator('className')}
+              </th>
               <th>Phụ huynh</th>
               <th>Thao tác</th>
             </tr>
@@ -182,7 +182,7 @@ const StudentList = () => {
               ))
             ) : currentStudents.length > 0 ? (
               currentStudents.map((student, index) => (
-                <tr key={student.id || index}>
+                <tr key={student.studentId || index} className={style.studentRow}>
                   <td>{indexOfFirstStudent + index + 1}</td>
                   <td> HS{student.studentId}</td>
                   <td>{student.fullName}</td>
