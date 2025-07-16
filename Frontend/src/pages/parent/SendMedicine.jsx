@@ -336,17 +336,17 @@ const SendMedicine = () => {
   const getStatusInfo = (status) => {
     switch (status) {
       case "Đã duyệt":
-        return { text: "Đã duyệt", className: styles.done };
+        return { text: "Đã duyệt", className: styles.statusApproved };
       case "Chờ duyệt":
-        return { text: "Chờ duyệt", className: styles.pending };
+        return { text: "Chờ duyệt", className: styles.statusPending };
       case "Đã huỷ":
-        return { text: "Đã huỷ", className: styles.reject };
+        return { text: "Đã huỷ", className: styles.statusCancelled };
       case "Bị từ chối":
-        return { text: "Bị từ chối", className: styles.reject };
+        return { text: "Bị từ chối", className: styles.statusRejected };
       case "Đã hoàn thành":
-        return { text: "Đã lên lịch", className: styles.done }; // "Đã hoàn thành" hiển thị là "Đã lên lịch"
+        return { text: "Đã lên lịch", className: styles.statusCompleted };
       default:
-        return { text: status, className: styles.reject }; // Mặc định cho các trạng thái khác
+        return { text: status, className: styles.statusNormal };
     }
   };
 
@@ -651,22 +651,25 @@ const SendMedicine = () => {
                 {filteredHistory.slice(0, 3).map((item, index) => {
                   const statusInfo = getStatusInfo(item.status);
                   return (
-                    <div
-                      key={item.requestID}
-                      className={`${styles.historyItem} ${styles.fadeIn}`}
-                      ref={index === 0 ? historyTopRef : null}
-                    >
-                      <h4>{item.medicationName}</h4>
-                      <p>📅 {new Date(item.requestDate).toLocaleDateString("vi-VN")}</p>
-                      <p>💊 {item.dosage}</p>
-                      <p>📝 {item.instructions}</p>
-                      {item.imagePath && (
-                        <p>
-                          📄 File: <a href={`https://swp-school-medical-management.onrender.com${item.imagePath}`} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600, color: "#2563eb", textDecoration: "underline" }}>Xem file</a>
-                        </p>
-                      )}
+                    <div key={item.requestID} className={`${styles.historyItem} ${styles.fadeIn}`} ref={index === 0 ? historyTopRef : null}>
+                      <div className={styles.medicationIconWrapper}>
+                        <div className={styles.medicationIcon}>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12,2a10,10,0,0,0-10,10,10,10,0,0,0,10,10h0a10,10,0,0,0,10-10,10,10,0,0,0-10-10Z"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                        </div>
+                      </div>
+                      <div className={styles.medicationDetails}>
+                        <strong>{item.medicationName}</strong>
+                        <p>Liều dùng: {item.dosage}</p>
+                        <p>Ghi chú: {item.instructions || 'Không có'}</p>
+                        <p>Ngày gửi: {new Date(item.requestDate).toLocaleDateString("vi-VN")}</p>
+                        {item.imagePath && (
+                          <p>
+                            <a href={`https://swp-school-medical-management.onrender.com${item.imagePath}`} target="_blank" rel="noopener noreferrer">Xem file đính kèm</a>
+                          </p>
+                        )}
+                      </div>
                       <div className={styles.statusRow}>
-                        <span className={`${styles.status} ${statusInfo.className}`}>
+                        <span className={`${styles.statusBadge} ${statusInfo.className}`}>
                           {statusInfo.text}
                         </span>
                         {item.status === "Chờ duyệt" && (
@@ -705,17 +708,24 @@ const SendMedicine = () => {
                       const statusInfo = getStatusInfo(item.status);
                       return (
                         <div key={item.requestID} className={styles.historyItem}>
-                          <h4>{item.medicationName}</h4>
-                          <p>📅 {new Date(item.requestDate).toLocaleDateString("vi-VN")}</p>
-                          <p>💊 {item.dosage}</p>
-                          <p>📝 {item.instructions}</p>
-                          {item.imagePath && (
-                            <p>
-                              📄 File: <a href={`https://swp-school-medical-management.onrender.com${item.imagePath}`} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600, color: "#2563eb", textDecoration: "underline" }}>Xem file</a>
-                            </p>
-                          )}
+                           <div className={styles.medicationIconWrapper}>
+                            <div className={styles.medicationIcon}>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12,2a10,10,0,0,0-10,10,10,10,0,0,0,10,10h0a10,10,0,0,0,10-10,10,10,0,0,0-10-10Z"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                            </div>
+                          </div>
+                          <div className={styles.medicationDetails}>
+                            <strong>{item.medicationName}</strong>
+                            <p>Liều dùng: {item.dosage}</p>
+                            <p>Ghi chú: {item.instructions || 'Không có'}</p>
+                             <p>Ngày gửi: {new Date(item.requestDate).toLocaleDateString("vi-VN")}</p>
+                            {item.imagePath && (
+                              <p>
+                                <a href={`https://swp-school-medical-management.onrender.com${item.imagePath}`} target="_blank" rel="noopener noreferrer">Xem file đính kèm</a>
+                              </p>
+                            )}
+                          </div>
                           <div className={styles.statusRow}>
-                            <span className={`${styles.status} ${statusInfo.className}`}>
+                            <span className={`${styles.statusBadge} ${statusInfo.className}`}>
                               {statusInfo.text}
                             </span>
                             {item.status === "Chờ duyệt" && (
