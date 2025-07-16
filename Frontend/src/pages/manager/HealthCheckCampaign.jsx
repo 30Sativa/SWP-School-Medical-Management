@@ -12,7 +12,7 @@ import { ExclamationCircleOutlined } from "@ant-design/icons";
 // import { Modal } from "antd";
 
 const API_BASE = "/api";
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 10;
 const statusOptions = [
   { value: 1, label: "Chưa bắt đầu" },
   { value: 2, label: "Đang diễn ra" },
@@ -21,6 +21,11 @@ const statusOptions = [
 ];
 
 const HealthCheckCampaign = () => {
+  // Bộ lọc thời gian và trạng thái
+  // yearFilter: 0 = năm hiện tại, 1 = 1 năm gần nhất, 2 = 2 năm gần nhất, 3 = 3 năm gần nhất
+  const [yearFilter, setYearFilter] = useState(1);
+  const [statusFilter, setStatusFilter] = useState(0); // 0: tất cả
+  const [quickFilter, setQuickFilter] = useState('all'); // 'all', 'latest', 'custom'
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -170,11 +175,34 @@ const HealthCheckCampaign = () => {
 };
 
   // Search + Pagination logic
-  const filteredCampaigns = campaigns.filter(
-    (c) =>
-      c.title?.toLowerCase().includes(searchText.toLowerCase()) ||
-      c.description?.toLowerCase().includes(searchText.toLowerCase())
-  );
+  // Tính mốc thời gian
+  const now = dayjs();
+  let fromDate, toDate;
+  if (yearFilter === 0) {
+    fromDate = now.startOf('year');
+    toDate = now.endOf('year');
+  } else {
+    fromDate = now.subtract(yearFilter, 'year').startOf('day');
+    toDate = now;
+  }
+  let filteredCampaigns = [];
+  if (quickFilter === 'all') {
+    filteredCampaigns = campaigns.filter((c) => {
+      const matchSearch = c.title?.toLowerCase().includes(searchText.toLowerCase()) || c.description?.toLowerCase().includes(searchText.toLowerCase());
+      return matchSearch;
+    });
+  } else if (quickFilter === 'latest') {
+    const latest = campaigns.reduce((max, c) => dayjs(c.date).isAfter(dayjs(max.date)) ? c : max, campaigns[0]);
+    filteredCampaigns = latest ? [latest] : [];
+  } else {
+    filteredCampaigns = campaigns.filter((c) => {
+      const matchSearch = c.title?.toLowerCase().includes(searchText.toLowerCase()) || c.description?.toLowerCase().includes(searchText.toLowerCase());
+      const campaignDate = dayjs(c.date);
+      const matchDate = campaignDate.isAfter(fromDate) && campaignDate.isBefore(toDate);
+      const matchStatus = statusFilter === 0 || c.statusId === statusFilter;
+      return matchSearch && matchDate && matchStatus;
+    });
+  }
   const totalPage = Math.ceil(filteredCampaigns.length / PAGE_SIZE);
   const pagedCampaigns = filteredCampaigns.slice(
     (currentPage - 1) * PAGE_SIZE,
@@ -197,35 +225,47 @@ const HealthCheckCampaign = () => {
           </div>
         </header>
         <div className={campaignStyle.header}>
-          <input
-            type="text"
-            placeholder="Tìm kiếm chiến dịch..."
-            className={campaignStyle.searchBar}
-            value={searchText}
-            onChange={(e) => {
-              setSearchText(e.target.value);
-              setCurrentPage(1);
-            }}
-            style={{
-              border: "2px solid #23b7b7",
-              borderRadius: 12,
-              padding: "10px 16px",
-              fontSize: 16,
-              outline: "none",
-              boxShadow: "0 2px 12px #23b7b71a",
-              background: "#f9fefe",
-              transition: "border-color 0.2s",
-              marginRight: 16,
-              width: 320,
-              maxWidth: "100%",
-            }}
-            onFocus={(e) => (e.target.style.borderColor = "#1890ff")}
-            onBlur={(e) => (e.target.style.borderColor = "#23b7b7")}
-          />
-          <button className={campaignStyle.addBtn} onClick={() => openModal()}>
-            <Plus size={16} style={{ marginRight: 6, marginBottom: -2 }} /> Thêm
-            chiến dịch
-          </button>
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 16 }}>
+            <input
+              type="text"
+              placeholder="Tìm kiếm chiến dịch..."
+              className={campaignStyle.searchBar}
+              value={searchText}
+              onChange={e => { setSearchText(e.target.value); setQuickFilter('custom'); setCurrentPage(1); }}
+              style={{
+                border: '2px solid #23b7b7',
+                borderRadius: 12,
+                padding: '10px 16px',
+                fontSize: 16,
+                outline: 'none',
+                boxShadow: '0 2px 12px #23b7b71a',
+                background: '#f9fefe',
+                transition: 'border-color 0.2s',
+                marginRight: 8,
+                width: 220,
+                maxWidth: '100%',
+              }}
+              onFocus={e => e.target.style.borderColor = '#1890ff'}
+              onBlur={e => e.target.style.borderColor = '#23b7b7'}
+            />
+            <select value={yearFilter} onChange={e => { setYearFilter(Number(e.target.value)); setQuickFilter('custom'); setCurrentPage(1); }} style={{ border: '2px solid #23b7b7', borderRadius: 12, padding: '8px 12px', fontSize: 16, background: '#f9fefe', marginRight: 8 }}>
+              <option value={0}>Năm hiện tại</option>
+              <option value={1}>1 năm gần nhất</option>
+              <option value={2}>2 năm gần nhất</option>
+              <option value={3}>3 năm gần nhất</option>
+            </select>
+            <select value={statusFilter} onChange={e => { setStatusFilter(Number(e.target.value)); setQuickFilter('custom'); setCurrentPage(1); }} style={{ border: '2px solid #23b7b7', borderRadius: 12, padding: '8px 12px', fontSize: 16, background: '#f9fefe', marginRight: 8 }}>
+              <option value={0}>Tất cả trạng thái</option>
+              {statusOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+            <button className={campaignStyle.addBtn} onClick={() => openModal()}>
+              <Plus size={16} style={{ marginRight: 6, marginBottom: -2 }} /> Thêm chiến dịch
+            </button>
+            <button className={campaignStyle.addBtn} style={{ background: quickFilter === 'all' ? '#23b7b7' : '#eee', color: quickFilter === 'all' ? '#fff' : '#333', border: 'none', borderRadius: 8, padding: '8px 16px', fontWeight: 500, cursor: 'pointer' }} onClick={() => { setQuickFilter('all'); setCurrentPage(1); }}>Hiển thị tất cả</button>
+            <button className={campaignStyle.addBtn} style={{ background: quickFilter === 'latest' ? '#23b7b7' : '#eee', color: quickFilter === 'latest' ? '#fff' : '#333', border: 'none', borderRadius: 8, padding: '8px 16px', fontWeight: 500, cursor: 'pointer' }} onClick={() => { setQuickFilter('latest'); setCurrentPage(1); }}>Chiến dịch vừa tạo</button>
+          </div>
         </div>
         <div className={campaignStyle.table}>
           <table className={campaignStyle.studentTable}>
