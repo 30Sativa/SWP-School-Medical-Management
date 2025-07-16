@@ -231,10 +231,60 @@
 }
 
 .status.reject {
-  background: linear-gradient(90deg, #fecaca 0%, #f87171 100%);
-  color: #b91c1c;
-  box-shadow: 0 0 8px #fca5a580;
-  border: 1.5px solid #ef4444;
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+.cancelBtn {
+  margin-left: 10px;
+  padding: 4px 10px;
+  border: 1px solid #f87171;
+  border-radius: 6px;
+  background-color: #fef2f2;
+  color: #ef4444;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelBtn:hover {
+  background-color: #fee2e2;
+  border-color: #ef4444;
+}
+
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btnSecondary {
+  background-color: #e5e7eb;
+  color: #4b5563;
+}
+
+.btnSecondary:hover {
+  background-color: #d1d5db;
+}
+
+.btnDanger {
+  background-color: #ef4444;
+  color: white;
+}
+
+.btnDanger:hover {
+  background-color: #dc2626;
 }
 
 .status.reject::before {
