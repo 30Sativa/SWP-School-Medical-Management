@@ -76,7 +76,9 @@ const VaccinCampaign = () => {
       return matchSearch && c.status !== "Đã huỷ";
     });
   } else if (quickFilter === 'latest') {
-    const latest = campaigns.reduce((max, c) => new Date(c.date) > new Date(max.date) ? c : max, campaigns[0]);
+    const latest = campaigns.length > 0 
+      ? campaigns.reduce((max, c) => new Date(c.date) > new Date(max.date) ? c : max, campaigns[0]) 
+      : null;
     filteredCampaigns = latest ? [latest] : [];
   } else {
     filteredCampaigns = campaigns.filter((c) => {
