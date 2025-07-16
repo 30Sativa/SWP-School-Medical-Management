@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/sidebar/Sidebar";
 import style from "../../assets/css/studentDetail.module.css";
@@ -7,246 +7,389 @@ import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
 import LoadingOverlay from "../../components/LoadingOverlay";
 
-const StudentDetail = () => {
-  // Thông tin sức khỏe
-  const [healthProfile, setHealthProfile] = useState(null);
-  const [healthLoading, setHealthLoading] = useState(true);
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [student, setStudent] = useState(null);
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: "",
-    dateOfBirth: "",
-    gender: "",
-    parent: "",
-    class: "",
-  });
-  const [loading, setLoading] = useState(true);
-  const [modalLoading, setModalLoading] = useState(false); // loading khi submit modal
+const API_BASE = "https://swp-school-medical-management.onrender.com/api";
 
-  useEffect(() => {
-    setLoading(true);
-    axios
-      .get(
-        `https://swp-school-medical-management.onrender.com/api/Student/${id}`
-      )
-      .then((res) => setStudent(res.data.data))
-      .catch((err) => console.error("Lỗi khi tải dữ liệu:", err))
-      .finally(() => setLoading(false));
-  }, [id]);
+// --- Child Component for Basic Info ---
+const StudentInfoSection = ({ student, onSave }) => {
+    if (!student) return null;
 
-  // Lấy thông tin sức khỏe
-  useEffect(() => {
-    if (!id) return;
-    setHealthLoading(true);
-    axios
-      .get(`https://swp-school-medical-management.onrender.com/api/health-profiles/${id}`)
-      .then((res) => setHealthProfile(res.data.data))
-      .catch((err) => {
-        setHealthProfile(null);
-        console.error("Lỗi khi tải hồ sơ sức khỏe:", err);
-      })
-      .finally(() => setHealthLoading(false));
-  }, [id]);
+    const [isEditing, setIsEditing] = useState(false);
+    const [formData, setFormData] = useState({});
+    const [submitting, setSubmitting] = useState(false);
 
-  const handleBack = () => {
-    navigate("/students");
-  };
+    useEffect(() => {
+        setFormData({
+            fullName: student.fullName || "",
+            dateOfBirth: student.dateOfBirth ? new Date(student.dateOfBirth).toISOString().split('T')[0] : "",
+            class: student.class || "",
+            genderName: student.genderName || "",
+        });
+    }, [student]);
 
-  const handleDelete = () => {
-    const confirmDelete = window.confirm("Bạn có chắc muốn xoá học sinh này?");
-    if (!confirmDelete) return;
-
-    axios
-      .delete(
-        `https://swp-school-medical-management.onrender.com/api/Student/${student.studentId}`
-      )
-      .then(() => {
-        notifySuccess("Đã xoá học sinh.");
-        navigate("/students");
-      })
-      .catch((err) => {
-        console.error("Lỗi xoá học sinh:", err);
-        notifyError("Xoá thất bại!");
-      });
-  };
-
-  const handleEdit = () => {
-    setFormData({
-      fullName: student.fullName,
-      dateOfBirth: student.dateOfBirth,
-      gender: student.genderName, // genderName for consistency
-      parent: student.parentName, // parentName for consistency
-      class: student.class,
-    });
-    setShowForm(true);
-  };
-
-  const handleUpdate = () => {
-    setModalLoading(true);
-    const updatedData = {
-      studentId: student.studentId,
-      fullName: formData.fullName,
-      dateOfBirth: formData.dateOfBirth,
-      genderName: formData.gender, // genderName instead of gender
-      parentName: formData.parent, // parentName instead of parent
-      class: formData.class,
+    const handleFormChange = (e) => {
+        setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
-    axios
-      .put(
-        "https://swp-school-medical-management.onrender.com/api/Student",
-        updatedData
-      )
-      .then(() => {
-        notifySuccess("Cập nhật thành công!");
-        setStudent({ ...student, ...formData });
-        setShowForm(false);
-      })
-      .catch((err) => {
-        console.error("Lỗi cập nhật:", err);
-        const errorMessage =
-          err.response?.data?.message || "Cập nhật thất bại. Vui lòng thử lại!";
-        notifyError(errorMessage); // Show detailed error message
-      })
-      .finally(() => setModalLoading(false));
+    const handleCancel = () => {
+        setIsEditing(false);
+        // Reset form data on cancel
+        setFormData({
+            fullName: student.fullName || "",
+            dateOfBirth: student.dateOfBirth ? new Date(student.dateOfBirth).toISOString().split('T')[0] : "",
+            class: student.class || "",
+            genderName: student.genderName || "",
+        });
+    };
+
+    const handleSave = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+        let genderId = null;
+        if (formData.genderName === 'Nam') genderId = 1;
+        else if (formData.genderName === 'Nữ') genderId = 2;
+
+        const payload = {
+            fullName: formData.fullName,
+            dateOfBirth: formData.dateOfBirth,
+            className: formData.class,
+            genderId: genderId,
+            parentId: student.parentId,
+        };
+
+        try {
+            await onSave(payload);
+            setIsEditing(false);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    return (
+        <div className={style.section}>
+            <div className={style.sectionHeader}>
+                <h4 className={style.sectionTitle}>Thông tin cá nhân</h4>
+            </div>
+            <form onSubmit={handleSave}>
+                <div className={style.infoGrid}>
+                    {/* Form Fields */}
+                    <div>
+                        <span className={style.label}>Họ và tên:</span>
+                        {isEditing ? <input type="text" name="fullName" value={formData.fullName} onChange={handleFormChange} className={style.inputField} /> : ` ${student.fullName}`}
+                    </div>
+                    <div>
+                        <span className={style.label}>Phụ huynh:</span> {student.parentName}
+                    </div>
+                    <div>
+                        <span className={style.label}>Giới tính:</span>
+                        {isEditing ? (
+                            <select name="genderName" value={formData.genderName} onChange={handleFormChange} className={style.inputField}>
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                            </select>
+                        ) : ` ${student.genderName}`}
+                    </div>
+                    <div>
+                        <span className={style.label}>Ngày sinh:</span>
+                        {isEditing ? <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleFormChange} className={style.inputField} /> : ` ${new Date(student.dateOfBirth).toLocaleDateString('vi-VN')}`}
+                    </div>
+                    <div>
+                        <span className={style.label}>Lớp:</span>
+                        {isEditing ? <input type="text" name="class" value={formData.class} onChange={handleFormChange} className={style.inputField} /> : ` ${student.class}`}
+                    </div>
+                </div>
+                {isEditing && (
+                    <div className={style.actionRow}>
+                        <button type="submit" className={style.saveBtn} disabled={submitting}>Lưu</button>
+                        <button type="button" className={style.cancelBtn} onClick={handleCancel}>Hủy</button>
+                    </div>
+                )}
+            </form>
+             {!isEditing && (
+                <div className={style.actionRow}>
+                    <button type="button" className={style.editBtn} onClick={() => setIsEditing(true)}>Chỉnh sửa</button>
+                </div>
+            )}
+        </div>
+    );
+};
+
+// --- Child Component for Health Profile ---
+const HealthProfileSection = ({ healthProfile, studentId, onSave }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [formData, setFormData] = useState({});
+    const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        setFormData({
+            height: healthProfile?.height || "",
+            weight: healthProfile?.weight || "",
+            chronicDiseases: healthProfile?.chronicDiseases || "",
+            allergies: healthProfile?.allergies || "",
+            generalNote: healthProfile?.generalNote || "",
+        });
+    }, [healthProfile]);
+
+    const handleFormChange = (e) => {
+        setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    };
+
+    const handleCancel = () => {
+        setIsEditing(false);
+        setFormData({
+             height: healthProfile?.height || "",
+            weight: healthProfile?.weight || "",
+            chronicDiseases: healthProfile?.chronicDiseases || "",
+            allergies: healthProfile?.allergies || "",
+            generalNote: healthProfile?.generalNote || "",
+        });
+    };
+    
+    const handleSave = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+        const payload = {
+            studentId: studentId,
+            height: formData.height ? Number(formData.height) : null,
+            weight: formData.weight ? Number(formData.weight) : null,
+            chronicDiseases: formData.chronicDiseases,
+            allergies: formData.allergies,
+            generalNote: formData.generalNote,
+            isActive: true,
+        };
+        try {
+            await onSave(payload);
+            setIsEditing(false);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    return (
+        <div className={style.section}>
+            <div className={style.sectionHeader}>
+                <h4 className={style.sectionTitle}>Thông tin sức khỏe</h4>
+            </div>
+            {healthProfile ? (
+                <form onSubmit={handleSave}>
+                    <div className={style.infoGrid}>
+                        {/* Form Fields */}
+                        <div>
+                            <span className={style.label}>Chiều cao:</span>
+                            {isEditing ? <><input type="number" name="height" value={formData.height} onChange={handleFormChange} className={style.inputField} /> cm</> : ` ${healthProfile.height || 'N/A'} cm`}
+                        </div>
+                        <div>
+                            <span className={style.label}>Cân nặng:</span>
+                            {isEditing ? <><input type="number" name="weight" value={formData.weight} onChange={handleFormChange} className={style.inputField} /> kg</> : ` ${healthProfile.weight || 'N/A'} kg`}
+                        </div>
+                        <div className={style.fullWidth}>
+                            <span className={style.label}>Bệnh mãn tính:</span>
+                            {isEditing ? <input type="text" name="chronicDiseases" value={formData.chronicDiseases} onChange={handleFormChange} className={style.inputFieldFull} /> : ` ${healthProfile.chronicDiseases || 'Không có'}`}
+                        </div>
+                        <div className={style.fullWidth}>
+                            <span className={style.label}>Dị ứng:</span>
+                            {isEditing ? <input type="text" name="allergies" value={formData.allergies} onChange={handleFormChange} className={style.inputFieldFull} /> : ` ${healthProfile.allergies || 'Không có'}`}
+                        </div>
+                        <div className={style.fullWidth}>
+                            <span className={style.label}>Ghi chú y tế chung:</span>
+                            {isEditing ? <textarea name="generalNote" value={formData.generalNote} onChange={handleFormChange} className={style.textareaField} /> : ` ${healthProfile.generalNote || 'Không có'}`}
+                        </div>
+                    </div>
+                    {isEditing && (
+                        <div className={style.actionRow}>
+                            <button type="submit" className={style.saveBtn} disabled={submitting}>Lưu thay đổi</button>
+                            <button type="button" className={style.cancelBtn} onClick={handleCancel}>Hủy</button>
+                        </div>
+                    )}
+                </form>
+            ) : (
+                <p className={style.notice}>Chưa có hồ sơ sức khỏe. Phụ huynh cần tạo hồ sơ cho học sinh.</p>
+            )}
+             {!isEditing && healthProfile && (
+                <div className={style.actionRow}>
+                    <button type="button" className={style.editBtn} onClick={() => setIsEditing(true)}>Chỉnh sửa</button>
+                </div>
+            )}
+        </div>
+    );
+};
+
+
+// --- Main Parent Component ---
+const StudentDetail = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [student, setStudent] = useState(null);
+  const [healthProfile, setHealthProfile] = useState(null);
+  const [medicalHistory, setMedicalHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    // We only set loading to true on the first fetch
+    if (!student) setLoading(true);
+
+    try {
+      const token = localStorage.getItem("authToken"); // Retrieve token from local storage
+      const headers = { Authorization: `Bearer ${token}` }; // Set Authorization header
+      const studentPromise = axios.get(`${API_BASE}/Student/${id}`, { headers });
+      const healthProfilePromise = axios.get(`${API_BASE}/health-profiles/student/${id}`, { headers });
+      const medicalHistoryPromise = axios.get(`${API_BASE}/MedicalHistory/student/${id}`, { headers });
+
+      const [studentRes, healthProfileRes, medicalHistoryRes] = await Promise.allSettled([
+        studentPromise,
+        healthProfilePromise,
+        medicalHistoryPromise,
+      ]);
+
+      if (studentRes.status === "fulfilled") {
+        setStudent(studentRes.value.data.data);
+      } else {
+        console.error("Lỗi tải thông tin học sinh:", studentRes.reason);
+        notifyError("Không thể tải thông tin học sinh.");
+        navigate("/students");
+        return;
+      }
+      
+      if (healthProfileRes.status === "fulfilled" && healthProfileRes.value.data.data) {
+        setHealthProfile(healthProfileRes.value.data.data);
+      } else {
+        setHealthProfile(null);
+      }
+
+      if (medicalHistoryRes.status === "fulfilled" && medicalHistoryRes.value.data.data) {
+        setMedicalHistory(Array.isArray(medicalHistoryRes.value.data.data) ? medicalHistoryRes.value.data.data : []);
+      } else {
+        setMedicalHistory([]);
+      }
+
+    } catch (err) {
+      console.error("Lỗi khi tải dữ liệu:", err);
+      notifyError("Đã xảy ra lỗi khi tải dữ liệu chi tiết.");
+    } finally {
+      setLoading(false);
+    }
+  }, [id, navigate]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleSaveBasic = async (payload) => {
+    setSubmitting(true);
+    try {
+        await axios.put(`${API_BASE}/Student/${student.studentId}`, payload);
+        notifySuccess("Cập nhật thông tin học sinh thành công!");
+        await fetchData(); // Refetch all data
+    } catch (error) {
+        console.error("Lỗi cập nhật thông tin học sinh:", error);
+        notifyError("Cập nhật thông tin thất bại: " + (error.response?.data?.message || ""));
+        throw error; // Propagate error to child to stop submitting state
+    } finally {
+        setSubmitting(false);
+    }
   };
 
-  if (loading || modalLoading)
+  const handleSaveHealth = async (payload) => {
+    setSubmitting(true);
+    try {
+        await axios.put(`${API_BASE}/health-profiles/student/${student.studentId}`, payload);
+        notifySuccess("Cập nhật hồ sơ sức khỏe thành công!");
+        await fetchData(); // Refetch all data
+    } catch (error) {
+        console.error("Lỗi cập nhật hồ sơ sức khỏe:", error);
+        notifyError("Cập nhật hồ sơ thất bại: " + (error.response?.data?.message || ""));
+        throw error; // Propagate error to child
+    } finally {
+        setSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return <LoadingOverlay text="Đang tải dữ liệu học sinh..." />;
+  }
+
+  if (!student) {
     return (
-      <div className={style.loadingOverlay}>
-        <div className={style.spinner}></div>
+      <div className={style.layoutContainer}>
+        <Sidebar />
+        <main className={style.mainContent}>
+          <p>Không tìm thấy thông tin học sinh.</p>
+          <button className={style.backBtn} onClick={() => navigate("/students")}>
+            ← Quay lại danh sách
+          </button>
+        </main>
       </div>
     );
+  }
 
   return (
     <div className={style.layoutContainer}>
       <Sidebar />
-
       <main className={style.mainContent}>
-        <div className={style.titleGroup}>
-          <h1>
-            <span className={style.textBlack}>Thông tin</span>
-            <span className={style.textAccent}> học sinh</span>
-          </h1>
-        </div>
+        {(submitting) && <LoadingOverlay text="Đang cập nhật..." />}
+        <Notification />
 
-        <div className={style.contentWrapper}>
-          <div className={style.leftPanel}>
-            <img
-              src="https://i.pravatar.cc/150?img=15"
-              alt="avatar"
-              className={style.avatar}
-            />
-            <h2>{student.fullName}</h2>
-            <p className={style.label}>Mã học sinh: {student.studentId}</p>
+        <header className={style.dashboardHeaderBar}>
+          <div className={style.titleGroup}>
+            <h1>
+              <span className={style.textBlack}>Chi tiết</span>
+              <span className={style.textAccent}> học sinh</span>
+            </h1>
           </div>
+        </header>
 
-          <div className={style.rightPanel}>
-            <div className={style.notebookBox}>
-              <div className={style.line}>
-                <span>Phụ huynh:</span> {student.parentName}
-              </div>
-              <div className={style.line}>
-                <span>Giới tính:</span> {student.genderName}
-              </div>
-              <div className={style.line}>
-                <span>Ngày sinh:</span> {student.dateOfBirth}
-              </div>
-              <div className={style.line}>
-                <span>Lớp:</span> {student.class}
-              </div>
-              <div className={style.actionRow}>
-                <button className={style.editBtn} onClick={handleEdit}>
-                  Chỉnh sửa
-                </button>
-                <button className={style.deleteBtn} onClick={handleDelete}>
-                  Xoá
-                </button>
-              </div>
-            </div>
-            {/* Thông tin sức khỏe đặt dưới form phụ huynh */}
-            <div style={{ marginTop: "2rem" }}>
-              <h3 style={{ marginBottom: "1rem" }}>Thông tin sức khỏe</h3>
-              {healthLoading ? (
-                <div>Đang tải thông tin sức khỏe...</div>
-              ) : healthProfile ? (
+        <div className={style.cardBox}>
+            <div className={style.studentHeader}>
                 <div>
-                  <div>Chiều cao: {healthProfile.height} cm</div>
-                  <div>Cân nặng: {healthProfile.weight} kg</div>
-                  <div>Bệnh mãn tính: {healthProfile.chronicDiseases}</div>
-                  <div>Dị ứng: {healthProfile.allergies}</div>
-                  <div>Nhận xét: {healthProfile.generalNote}</div>
-                  <div>Trạng thái: {healthProfile.isActive ? "Đang hoạt động" : "Ngừng hoạt động"}</div>
+                    <h2 className={style.name}>{student.fullName}</h2>
+                    <p className={style.subInfo}>
+                      Lớp: {student.class || 'N/A'} | Phụ huynh: {student.parentName || 'N/A'}
+                    </p>
                 </div>
-              ) : (
-                <div>Không có thông tin sức khỏe.</div>
-              )}
             </div>
-          </div>
+
+            <StudentInfoSection student={student} onSave={handleSaveBasic} />
+            
+            <HealthProfileSection 
+              healthProfile={healthProfile}
+              studentId={student.studentId}
+              onSave={handleSaveHealth}
+            />
+            
+            <div className={style.section}>
+                <h4 className={style.sectionTitle}>Tiền sử bệnh</h4>
+                {medicalHistory.length > 0 ? (
+                    <table className={style.historyTable}>
+                        <thead>
+                            <tr>
+                                <th>Tên bệnh</th>
+                                <th>Ghi chú</th>
+                                <th>Ngày chẩn đoán</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {medicalHistory.map((mh, idx) => (
+                                <tr key={mh.historyId || idx}>
+                                    <td>{mh.diseaseName || 'Không có'}</td>
+                                    <td>{mh.note || 'Không có'}</td>
+                                    <td>{mh.diagnosedDate ? new Date(mh.diagnosedDate).toLocaleDateString('vi-VN') : 'N/A'}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                ) : (
+                    <p className={style.notice}>Không có tiền sử bệnh nào được ghi nhận.</p>
+                )}
+            </div>
+
         </div>
 
         <div className={style.backContainer}>
-          <button className={style.backBtn} onClick={handleBack}>
+          <button className={style.backBtn} onClick={() => navigate("/students")}>
             ← Quay lại danh sách
           </button>
         </div>
-
-        {/* Modal form cập nhật */}
-        {showForm && (
-          <div className={style.modalOverlay}>
-            <div className={style.modal}>
-              <h3>Cập nhật học sinh</h3>
-              <input
-                type="text"
-                placeholder="Họ tên"
-                value={formData.fullName}
-                onChange={(e) =>
-                  setFormData({ ...formData, fullName: e.target.value })
-                }
-              />
-              <input
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={(e) =>
-                  setFormData({ ...formData, dateOfBirth: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Giới tính"
-                value={formData.gender}
-                onChange={(e) =>
-                  setFormData({ ...formData, gender: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Lớp"
-                value={formData.class}
-                onChange={(e) =>
-                  setFormData({ ...formData, class: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Phụ huynh"
-                value={formData.parent}
-                onChange={(e) =>
-                  setFormData({ ...formData, parent: e.target.value })
-                }
-              />
-
-              <div className={style.modalActions}>
-                <button onClick={() => setShowForm(false)}>Huỷ</button>
-                <button onClick={handleUpdate}>Lưu</button>
-              </div>
-            </div>
-          </div>
-        )}
-        <Notification />
-        {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
       </main>
     </div>
   );

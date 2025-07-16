@@ -1,22 +1,22 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Sidebar from "../../components/sb-Parent/Sidebar";
 import styles from "../../assets/css/NotificationAndReport.module.css";
-import Notification from "../../components/Notification";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { FiBell, FiCheckCircle, FiClipboard, FiAlertTriangle, FiInbox, FiArchive } from 'react-icons/fi';
+
 
 // Constants
-const API_BASE_URL = "https://swp-school-medical-management.onrender.com/api";
+const API_BASE_URL = "/api"; 
 
 // Error messages
 const ERROR_MESSAGES = {
   FETCH_STUDENTS_FAILED: "Lỗi khi lấy danh sách học sinh",
-  FETCH_NOTIFICATIONS_FAILED: "Không thể tải thông báo",
-  FETCH_CONSENT_FORMS_FAILED: "Không thể tải phiếu đồng ý vaccine",
+  FETCH_DATA_FAILED: "Không thể tải dữ liệu thông báo và phiếu điền.",
   SEND_RESPONSE_FAILED: "Không thể gửi phản hồi!",
   DECLINE_REASON_REQUIRED: "Vui lòng nhập lý do từ chối",
-  NO_STUDENTS_LINKED: "Tài khoản của bạn chưa được liên kết với học sinh nào. Vui lòng liên hệ nhà trường để được hỗ trợ liên kết với con em mình."
+  NO_STUDENTS_LINKED: "Tài khoản của bạn chưa được liên kết với học sinh nào. Vui lòng liên hệ nhà trường để được hỗ trợ."
 };
 
 // Success messages
@@ -27,7 +27,7 @@ const SUCCESS_MESSAGES = {
 // API endpoints
 const API_ENDPOINTS = {
   STUDENTS_BY_PARENT: (parentId) => `${API_BASE_URL}/Student/by-parent/${parentId}`,
-  NOTIFICATIONS: `${API_BASE_URL}/Notification`,
+  NOTIFICATIONS: `${API_BASE_URL}/Notification`, // Reverted to old endpoint
   CONSENT_REQUESTS: (studentId) => `${API_BASE_URL}/VaccinationCampaign/consent-requests/student/${studentId}`,
   UPDATE_CONSENT: (requestId) => `${API_BASE_URL}/VaccinationCampaign/consent-requests/${requestId}`
 };
@@ -36,6 +36,7 @@ const API_ENDPOINTS = {
 const TABS = {
   ALL: "all",
   VACCINE: "vaccine",
+  OTHER: "other",
   RESULT_HEALTH: "result-health",
   RESULT_VACCINE: "result-vaccine",
   REPLIED: "replied"
@@ -49,11 +50,14 @@ const NotificationAndReport = () => {
   const [consentForms, setConsentForms] = useState([]);
   const [activeTab, setActiveTab] = useState(TABS.ALL);
   const [declineReason, setDeclineReason] = useState("");
-  const [showReasonBoxId, setShowReasonBoxId] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [showDeclineModal, setShowDeclineModal] = useState(false);
+  const [currentConsentItem, setCurrentConsentItem] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submittingId, setSubmittingId] = useState(null);
 
   // Get auth data from localStorage
   const parentId = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
 
   // Utility functions
   const getSelectedStudentName = useCallback(() => {
@@ -67,139 +71,113 @@ const NotificationAndReport = () => {
 
   // API calls
   const fetchStudents = useCallback(async () => {
-    if (!parentId) {
-      console.error("No parentId found");
-      return;
-    }
-
+    if (!parentId) return;
     try {
-      console.log(`Fetching students for parent ID: ${parentId}`);
-      const response = await axios.get(API_ENDPOINTS.STUDENTS_BY_PARENT(parentId));
+      const response = await axios.get(API_ENDPOINTS.STUDENTS_BY_PARENT(parentId), {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       const studentList = response.data?.data || [];
-      
       setStudents(studentList);
-      
       if (studentList.length > 0) {
         setSelectedStudentId(studentList[0].studentId);
-        console.log(`Selected default student: ${studentList[0].fullName}`);
-      } else {
-        console.warn("No students found for this parent");
       }
     } catch (error) {
       console.error(ERROR_MESSAGES.FETCH_STUDENTS_FAILED, error);
       toast.error(ERROR_MESSAGES.FETCH_STUDENTS_FAILED);
     }
-  }, [parentId]);
+  }, [parentId, token]);
 
-  const fetchNotifications = useCallback(async () => {
-    if (!selectedStudentId || students.length === 0) {
-      return;
-    }
-
+  const fetchDataForStudent = useCallback(async (studentId) => {
+    if (!studentId) return;
+    setLoading(true);
     try {
-      console.log(`Fetching notifications for student ID: ${selectedStudentId}`);
-      const response = await axios.get(API_ENDPOINTS.NOTIFICATIONS);
-      const allNotifications = response.data?.data || [];
-      
+      // Reverted to fetch all notifications and filter on client-side
+      const [notificationsRes, consentRes] = await Promise.all([
+        axios.get(API_ENDPOINTS.NOTIFICATIONS, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(API_ENDPOINTS.CONSENT_REQUESTS(studentId), { headers: { Authorization: `Bearer ${token}` } })
+      ]);
+
+      const allNotifications = notificationsRes.data?.data || [];
       const studentName = getSelectedStudentName();
+      
       const studentNotifications = allNotifications.filter(
         notification =>
           notification.receiverId === parentId && 
           notification.message?.includes(studentName)
       );
-      
+
       setNotifications(studentNotifications);
-      console.log(`Found ${studentNotifications.length} notifications for ${studentName}`);
-    } catch (error) {
-      console.error(ERROR_MESSAGES.FETCH_NOTIFICATIONS_FAILED, error);
-      toast.error(ERROR_MESSAGES.FETCH_NOTIFICATIONS_FAILED);
-    }
-  }, [selectedStudentId, students, parentId, getSelectedStudentName]);
+      setConsentForms(consentRes.data?.data || []);
 
-  const fetchConsentForms = useCallback(async () => {
-    if (!selectedStudentId) {
-      return;
-    }
-
-    try {
-      console.log(`Fetching consent forms for student ID: ${selectedStudentId}`);
-      const response = await axios.get(API_ENDPOINTS.CONSENT_REQUESTS(selectedStudentId));
-      const consentData = response.data?.data || [];
-      
-      setConsentForms(consentData);
-      console.log(`Found ${consentData.length} consent forms`);
     } catch (error) {
-      console.error(ERROR_MESSAGES.FETCH_CONSENT_FORMS_FAILED, error);
-      toast.error(ERROR_MESSAGES.FETCH_CONSENT_FORMS_FAILED);
+      console.error(ERROR_MESSAGES.FETCH_DATA_FAILED, error);
+      toast.error(ERROR_MESSAGES.FETCH_DATA_FAILED);
+    } finally {
+      setLoading(false);
     }
-  }, [selectedStudentId]);
+  }, [token, parentId, getSelectedStudentName]);
 
   // Event handlers
-  const handleStudentChange = useCallback((e) => {
-    const newStudentId = Number(e.target.value);
-    setSelectedStudentId(newStudentId);
-    console.log(`Student changed to ID: ${newStudentId}`);
-  }, []);
+  const handleStudentChange = (e) => setSelectedStudentId(Number(e.target.value));
+  const handleTabChange = (tab) => setActiveTab(tab);
 
-  const handleTabChange = useCallback((tab) => {
-    setActiveTab(tab);
-    console.log(`Tab changed to: ${tab}`);
-  }, []);
+  const openDeclineModal = (item) => {
+    setCurrentConsentItem(item);
+    setDeclineReason("");
+    setShowDeclineModal(true);
+  };
 
-  const handleConsent = useCallback(async (requestId, agree) => {
-    if (!agree && declineReason.trim() === "") {
+  const closeDeclineModal = () => {
+    setCurrentConsentItem(null);
+    setShowDeclineModal(false);
+  };
+
+  const handleConsent = useCallback(async (agree, item) => {
+    const requestId = item.requestId;
+    if (!agree && !declineReason.trim()) {
       toast.warning(ERROR_MESSAGES.DECLINE_REASON_REQUIRED);
       return;
     }
-
+    
+    setSubmittingId(requestId);
     try {
-      setLoading(true);
       const payload = {
         consentStatusId: agree ? 2 : 3,
         consentReason: agree ? null : declineReason,
       };
-
-      console.log(`Sending consent response: ${agree ? 'agree' : 'decline'} for request ${requestId}`);
       
-      await axios.put(API_ENDPOINTS.UPDATE_CONSENT(requestId), payload);
+      await axios.put(API_ENDPOINTS.UPDATE_CONSENT(requestId), payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       
       toast.success(SUCCESS_MESSAGES.CONSENT_SENT(agree));
+      closeDeclineModal();
       
-      // Reset form state
-      setShowReasonBoxId(null);
-      setDeclineReason("");
-      
-      // Refresh consent forms
-      await fetchConsentForms();
+      // Refresh consent forms optimistically
+      setConsentForms(prev => prev.map(form => 
+        form.requestId === requestId 
+          ? { ...form, consentStatusName: agree ? 'Đồng ý' : 'Từ chối' }
+          : form
+      ));
       
     } catch (error) {
       console.error(ERROR_MESSAGES.SEND_RESPONSE_FAILED, error);
       toast.error(ERROR_MESSAGES.SEND_RESPONSE_FAILED);
     } finally {
-      setLoading(false);
+      setSubmittingId(null);
     }
-  }, [declineReason, fetchConsentForms]);
-
-  const handleNotificationRead = useCallback((notificationId) => {
-    setNotifications(prev =>
-      prev.map(notification =>
-        notification.notificationId === notificationId
-          ? { ...notification, isRead: true }
-          : notification
-      )
-    );
-  }, []);
+  }, [declineReason, token]);
 
   // Data filtering
   const getFilteredItems = useCallback(() => {
     const combined = [
-      ...notifications.map(n => ({ ...n, itemType: "notification" })),
-      ...consentForms.map(f => ({ ...f, itemType: "consent" })),
+      ...notifications.map(n => ({ ...n, itemType: "notification", date: n.sentDate })),
+      ...consentForms.map(f => ({ ...f, itemType: "consent", date: f.requestDate })),
     ];
-
-    const filtered = combined.filter(item => {
+    
+    // Primary filtering based on the active tab
+    const filteredByTab = combined.filter(item => {
       if (!item) return false;
-      
       switch (activeTab) {
         case TABS.ALL:
           return (
@@ -210,31 +188,30 @@ const NotificationAndReport = () => {
           return (
             item.itemType === "consent" && !isConsentResponded(item.consentStatusName)
           );
+        case TABS.OTHER:
+            const isHealthResultForOther = item.itemType === "notification" && item.title?.includes("Kết quả khám sức khỏe");
+            const isVaccineResultForOther = item.itemType === "notification" && item.title?.includes("Kết quả tiêm chủng");
+            return item.itemType === "notification" && !isHealthResultForOther && !isVaccineResultForOther;
         case TABS.RESULT_HEALTH:
-          return (
-            item.itemType === "notification" &&
-            item.title?.includes("Kết quả khám sức khỏe")
-          );
+          return item.itemType === "notification" && item.title?.includes("Kết quả khám sức khỏe");
         case TABS.RESULT_VACCINE:
-          return (
-            item.itemType === "notification" &&
-            item.title?.includes("Kết quả tiêm chủng")
-          );
+          return item.itemType === "notification" && item.title?.includes("Kết quả tiêm chủng");
         case TABS.REPLIED:
-          return (
-            item.itemType === "consent" && isConsentResponded(item.consentStatusName)
-          );
-        default:
-          return true;
+          return item.itemType === "consent" && isConsentResponded(item.consentStatusName);
+        default: return true;
       }
     });
 
-    // Sort by date (newest first)
-    return filtered.sort((a, b) => {
-      const dateA = new Date(a.requestDate || a.sentDate);
-      const dateB = new Date(b.requestDate || b.sentDate);
-      return dateB - dateA;
-    });
+    // Secondary sorting: prioritize items that require action
+    const needsAction = filteredByTab
+      .filter(item => item.itemType === "consent" && !isConsentResponded(item.consentStatusName))
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    const others = filteredByTab
+      .filter(item => !(item.itemType === "consent" && !isConsentResponded(item.consentStatusName)))
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    return [...needsAction, ...others];
   }, [notifications, consentForms, activeTab, isConsentResponded]);
 
   // Effects
@@ -244,326 +221,106 @@ const NotificationAndReport = () => {
 
   useEffect(() => {
     if (selectedStudentId) {
-      fetchNotifications();
-      fetchConsentForms();
+      fetchDataForStudent(selectedStudentId);
     }
-  }, [selectedStudentId, fetchNotifications, fetchConsentForms]);
+  }, [selectedStudentId, fetchDataForStudent, getSelectedStudentName]); // Added getSelectedStudentName dependency
 
   // Render functions
-  const renderTabButtons = () => (
-    <div style={{ display: "flex", gap: "20px", margin: "20px 0" }}>
-      <button 
-        className={`${styles.tabButton} ${activeTab === TABS.ALL ? styles.active : ""}`} 
-        onClick={() => handleTabChange(TABS.ALL)}
-      >
-        Tất cả
-      </button>
-      <button 
-        className={`${styles.tabButton} ${activeTab === TABS.VACCINE ? styles.active : ""}`} 
-        onClick={() => handleTabChange(TABS.VACCINE)}
-      >
-        Vaccine
-      </button>
-      <button 
-        className={`${styles.tabButton} ${activeTab === TABS.RESULT_HEALTH ? styles.active : ""}`} 
-        onClick={() => handleTabChange(TABS.RESULT_HEALTH)}
-      >
-        Kết quả khám sức khỏe
-      </button>
-      <button 
-        className={`${styles.tabButton} ${activeTab === TABS.RESULT_VACCINE ? styles.active : ""}`} 
-        onClick={() => handleTabChange(TABS.RESULT_VACCINE)}
-      >
-        Kết quả tiêm chủng
-      </button>
-      <button 
-        className={`${styles.tabButton} ${activeTab === TABS.REPLIED ? styles.active : ""}`} 
-        onClick={() => handleTabChange(TABS.REPLIED)}
-      >
-        Lịch sử phản hồi
-      </button>
-    </div>
-  );
+  const renderItemCard = (item) => {
+    const isConsent = item.itemType === 'consent';
+    const responded = isConsent && isConsentResponded(item.consentStatusName);
+    const isSubmitting = submittingId === item.requestId;
 
-  const renderStudentSelector = () => (
-    <>
-      <label>Chọn học sinh:</label>
-      <select
-        value={selectedStudentId || ""}
-        onChange={handleStudentChange}
-      >
-        {students.map(student => (
-          <option key={student.studentId} value={student.studentId}>
-            {student.fullName} - {student.className}
-          </option>
-        ))}
-      </select>
-    </>
-  );
-
-  const renderConsentActions = (item) => {
-    const isResponded = isConsentResponded(item.consentStatusName);
-    
-    if (isResponded) {
-      return (
-        <span
-          className={`${styles.tag} ${
-            item.consentStatusName === "Từ chối" ? styles.rejectTag : styles.approveTag
-          }`}
-        >
-          {item.consentStatusName === "Từ chối" ? "❌ Từ chối" : "✅ Đồng ý"}
-        </span>
-      );
+    let icon, tag, tagStyle, iconStyle;
+    if (isConsent) {
+      icon = <FiClipboard />;
+      tag = 'Phiếu đồng ý';
+      tagStyle = styles.tagConsent;
+      iconStyle = styles.iconVaccine;
+    } else if (item.title?.includes("Kết quả")) {
+      icon = <FiCheckCircle />;
+      tag = 'Kết quả';
+      tagStyle = styles.tagResult;
+      iconStyle = styles.iconHealth;
+    } else {
+      icon = <FiBell />;
+      tag = 'Thông báo chung';
+      tagStyle = styles.tagGeneral;
+      iconStyle = styles.iconGeneral;
     }
 
+    const requiresAction = isConsent && !responded;
+
     return (
-      <>
-        <div className={styles.responseActions}>
-          <button 
-            className={styles.approve} 
-            onClick={() => handleConsent(item.requestId, true)}
-            disabled={loading}
-          >
-            ✅ Đồng ý
-          </button>
-          <button 
-            className={styles.decline} 
-            onClick={() => setShowReasonBoxId(item.requestId)}
-            disabled={loading}
-          >
-            ❌ Từ chối
-          </button>
-        </div>
-        
-        {showReasonBoxId === item.requestId && (
-          <div className={styles.reasonBox}>
-            <textarea
-              placeholder="Nhập lý do từ chối..."
-              value={declineReason}
-              onChange={(e) => setDeclineReason(e.target.value)}
-            />
-            <button 
-              className={styles.confirmDecline} 
-              onClick={() => handleConsent(item.requestId, false)}
-              disabled={loading || !declineReason.trim()}
-            >
-              {loading ? "Đang gửi..." : "Gửi lý do"}
-            </button>
+      <div 
+        className={`${styles.notificationCard} ${requiresAction ? styles.cardRequiresAction : ''}`} 
+        key={isConsent ? item.requestId : item.notificationId}
+      >
+        <div className={`${styles.cardIcon} ${iconStyle}`}>{icon}</div>
+        <div className={styles.cardContent}>
+          <div className={styles.cardHeader}>
+            <h3>{item.campaignName || item.title}</h3>
+            <span className={`${styles.cardTag} ${tagStyle}`}>{tag}</span>
           </div>
-        )}
-      </>
+          <div className={styles.cardBody}>
+            <p><strong>Học sinh:</strong> {item.studentName || getSelectedStudentName()}</p>
+            <p>{item.message || "Phụ huynh vui lòng xác nhận để nhà trường tiến hành tiêm chủng."}</p>
+          </div>
+          <div className={styles.cardFooter}>
+            <span className={styles.cardDate}>
+              {new Date(item.date).toLocaleString("vi-VN", { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            </span>
+            <div className={styles.cardActions}>
+              {isConsent && !responded && (
+                <>
+                  <button className={`${styles.actionButton} ${styles.approveButton}`} onClick={() => handleConsent(true, item)} disabled={isSubmitting}>
+                    {isSubmitting ? 'Đang gửi...' : '✅ Đồng ý'}
+                  </button>
+                  <button className={`${styles.actionButton} ${styles.declineButton}`} onClick={() => openDeclineModal(item)} disabled={isSubmitting}>
+                    ❌ Từ chối
+                  </button>
+                </>
+              )}
+              {responded && (
+                <span className={`${styles.respondedTag} ${item.consentStatusName === 'Đồng ý' ? styles.tagApproved : styles.tagDeclined}`}>
+                  {item.consentStatusName === 'Đồng ý' ? '✅ Đã đồng ý' : `❌ Đã từ chối`}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
     );
-  };
-
-  const renderConsentItem = (item) => (
-    <div className={`${styles.card} ${styles.notifyCard}`} key={item.requestId}>
-      <div className={styles.actionRow}>
-        <span className={styles.tag}>Chiến dịch tiêm chủng</span>
-        {isConsentResponded(item.consentStatusName) && (
-          <span
-            className={`${styles.tag} ${
-              item.consentStatusName === "Từ chối" ? styles.rejectTag : styles.approveTag
-            }`}
-          >
-            {item.consentStatusName === "Từ chối" ? "❌ Từ chối" : "✅ Đồng ý"}
-          </span>
-        )}
-      </div>
-      <h3>{item.campaignName}</h3>
-      <p><strong>Chi tiết:</strong> Phụ huynh vui lòng xác nhận đồng ý để nhà trường tiến hành tiêm chủng.</p>
-      <p><strong>Học sinh:</strong> {item.studentName}</p>
-      <p><strong>Ngày gửi:</strong> {new Date(item.requestDate).toLocaleDateString("vi-VN")}</p>
-      
-      {renderConsentActions(item)}
-    </div>
-  );
-
-  const renderNotificationItem = (item) => (
-    <div
-      className={`${styles.card} ${styles.notifyCard}`}
-      key={item.notificationId}
-      onClick={() => handleNotificationRead(item.notificationId)}
-    >
-      <div className={styles.actionRow}>
-        <span className={styles.tag}>
-          {item.title?.includes("Kết quả tiêm chủng")
-            ? "Kết quả tiêm chủng"
-            : item.typeName}
-        </span>
-      </div>
-      <h3>{item.title}</h3>
-      <p><strong>Nội dung:</strong> {item.message}</p>
-      <p><strong>Ngày gửi:</strong> {new Date(item.sentDate).toLocaleString("vi-VN")}</p>
-    </div>
-  );
-
-  const renderItem = (item) => {
-    return item.itemType === "consent" 
-      ? renderConsentItem(item) 
-      : renderNotificationItem(item);
   };
 
   const renderEmptyState = () => (
     <div className={styles.container}>
       <Sidebar />
       <div className={styles.content}>
-        <h2 className={styles.title}>Thông Báo & Phản Hồi</h2>
-        <div style={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          minHeight: '60vh',
-          textAlign: 'center',
-          padding: '40px 20px'
-        }}>
-          {/* Icon */}
-          <div style={{
-            width: '120px',
-            height: '120px',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #e0f7fa 0%, #f0f4ff 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: '24px',
-            boxShadow: '0 8px 32px rgba(32, 178, 170, 0.15)'
-          }}>
-            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#20b2aa" strokeWidth="1.5">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-          </div>
-
-          {/* Heading */}
-          <h2 style={{ 
-            color: '#0284c7', 
-            fontSize: '28px', 
-            fontWeight: '700', 
-            marginBottom: '16px',
-            lineHeight: '1.3'
-          }}>
-            Chưa có liên kết học sinh
-          </h2>
-
-          {/* Description */}
-          <p style={{ 
-            color: '#64748b', 
-            fontSize: '16px', 
-            lineHeight: '1.6',
-            maxWidth: '500px',
-            marginBottom: '32px'
-          }}>
-            {ERROR_MESSAGES.NO_STUDENTS_LINKED}
-          </p>
-
-          {/* Steps */}
-          <div style={{
-            background: '#f8fafc',
-            borderRadius: '16px',
-            padding: '24px',
-            maxWidth: '600px',
-            width: '100%',
-            border: '1px solid #e2e8f0'
-          }}>
-            <h3 style={{ 
-              color: '#334155', 
-              fontSize: '18px', 
-              fontWeight: '600', 
-              marginBottom: '16px',
-              textAlign: 'center'
-            }}>
-              Các bước để nhận thông báo và phản hồi:
-            </h3>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                  background: '#20b2aa',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  flexShrink: 0
-                }}>1</div>
-                <span style={{ color: '#475569', fontSize: '15px' }}>
-                  Liên hệ với nhà trường qua số điện thoại hoặc email
-                </span>
-              </div>
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                  background: '#20b2aa',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  flexShrink: 0
-                }}>2</div>
-                <span style={{ color: '#475569', fontSize: '15px' }}>
-                  Cung cấp thông tin cá nhân và thông tin con em
-                </span>
-              </div>
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                  background: '#20b2aa',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  flexShrink: 0
-                }}>3</div>
-                <span style={{ color: '#475569', fontSize: '15px' }}>
-                  Đợi nhà trường xác nhận và liên kết tài khoản
-                </span>
-              </div>
+        <div className={styles.pageWrapper}>
+          <div className={styles.emptyStateContainer}>
+            <div className={styles.emptyStateIcon}>
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#20b2aa" strokeWidth="1.5">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
             </div>
-          </div>
-
-          {/* Contact info */}
-          <div style={{
-            marginTop: '24px',
-            padding: '16px 24px',
-            background: 'linear-gradient(135deg, #e0f7fa 0%, #f0f4ff 100%)',
-            borderRadius: '12px',
-            border: '1px solid #20b2aa'
-          }}>
-            <p style={{ 
-              color: '#0284c7', 
-              fontSize: '14px', 
-              fontWeight: '500',
-              margin: 0
-            }}>
-              💡 Sau khi liên kết thành công, bạn sẽ nhận được thông báo và có thể phản hồi tại đây.
-            </p>
+            <h2 className={styles.emptyStateHeading}>Chưa có liên kết học sinh</h2>
+            <p className={styles.emptyStateText}>{ERROR_MESSAGES.NO_STUDENTS_LINKED}</p>
+            <div className={styles.emptyStateGuide}>
+              <h3>Các bước để nhận thông báo:</h3>
+              <div className={styles.emptyStateStep}><span className={styles.stepNumber}>1</span><span className={styles.stepText}>Liên hệ với nhà trường qua số điện thoại hoặc email</span></div>
+              <div className={styles.emptyStateStep}><span className={styles.stepNumber}>2</span><span className={styles.stepText}>Cung cấp thông tin cá nhân và thông tin con em</span></div>
+              <div className={styles.emptyStateStep}><span className={styles.stepNumber}>3</span><span className={styles.stepText}>Đợi nhà trường xác nhận và liên kết tài khoản</span></div>
+            </div>
+            <div className={styles.emptyStateFooter}><p>💡 Sau khi liên kết, bạn sẽ nhận được thông báo và có thể phản hồi tại đây.</p></div>
           </div>
         </div>
       </div>
     </div>
   );
-
+  
   // Main render logic
-  if (students.length === 0) {
-    return renderEmptyState();
-  }
+  if (students.length === 0 && !loading) return renderEmptyState();
 
   const filteredItems = getFilteredItems();
 
@@ -571,22 +328,93 @@ const NotificationAndReport = () => {
     <div className={styles.container}>
       <Sidebar />
       <div className={styles.content}>
-        <h2 className={styles.title}>Thông Báo & Phản Hồi</h2>
-        <p className={styles.subtitle}>
-          Xin chào, bạn đang đăng nhập với tư cách phụ huynh em{" "}
-          <strong>{getSelectedStudentName()}</strong>
-        </p>
+        <div className={styles.pageWrapper}>
+          <div className={styles.header}>
+            <h2 className={styles.title}>Thông Báo & Phản Hồi</h2>
+            <p className={styles.subtitle}>
+              Quản lý tất cả thông báo, kết quả và phiếu đồng ý từ nhà trường.
+            </p>
+          </div>
 
-        {renderStudentSelector()}
-        {renderTabButtons()}
+          <div className={styles.layoutGrid}>
+            <div className={styles.mainContent}>
+              {loading ? <p>Đang tải dữ liệu...</p> : (
+                filteredItems.length === 0 ? (
+                  <div className={styles.emptyStateMessage}>
+                    <FiInbox size={48} style={{ marginBottom: '16px', color: '#94a3b8' }}/>
+                    <h4>Không có gì ở đây cả!</h4>
+                    <p>Hiện không có thông báo hay phiếu điền nào trong mục này.</p>
+                  </div>
+                ) : (
+                  filteredItems.map(renderItemCard)
+                )
+              )}
+            </div>
 
-        <div className={styles.listWrapper}>
-          {filteredItems.length === 0 ? (
-            <p>Không có dữ liệu để hiển thị.</p>
-          ) : (
-            filteredItems.map(renderItem)
-          )}
+            <div className={styles.rightSidebar}>
+              <div className={styles.filterCard}>
+                <h3>Chọn học sinh</h3>
+                <div className={styles.studentSelector}>
+                  <select value={selectedStudentId || ""} onChange={handleStudentChange} disabled={students.length <= 1}>
+                    {students.map(student => (
+                      <option key={student.studentId} value={student.studentId}>
+                        {student.fullName} - {student.className}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className={styles.filterCard}>
+                <h3>Lọc theo loại</h3>
+                <div className={styles.tabList}>
+                  <button className={`${styles.tabButton} ${activeTab === TABS.ALL ? styles.active : ""}`} onClick={() => handleTabChange(TABS.ALL)}>
+                    <FiAlertTriangle /> Tất cả thông báo
+                  </button>
+                  <button className={`${styles.tabButton} ${activeTab === TABS.VACCINE ? styles.active : ""}`} onClick={() => handleTabChange(TABS.VACCINE)}>
+                    <FiClipboard /> Phiếu đồng ý Vaccine
+                  </button>
+                  <button className={`${styles.tabButton} ${activeTab === TABS.OTHER ? styles.active : ""}`} onClick={() => handleTabChange(TABS.OTHER)}>
+                    <FiBell /> Thông báo khác
+                  </button>
+                  <button className={`${styles.tabButton} ${activeTab === TABS.RESULT_HEALTH ? styles.active : ""}`} onClick={() => handleTabChange(TABS.RESULT_HEALTH)}>
+                    <FiCheckCircle/> Kết quả khám sức khỏe
+                  </button>
+                   <button className={`${styles.tabButton} ${activeTab === TABS.RESULT_VACCINE ? styles.active : ""}`} onClick={() => handleTabChange(TABS.RESULT_VACCINE)}>
+                    <FiCheckCircle /> Kết quả tiêm chủng
+                  </button>
+                  <button className={`${styles.tabButton} ${activeTab === TABS.REPLIED ? styles.active : ""}`} onClick={() => handleTabChange(TABS.REPLIED)}>
+                    <FiArchive /> Lịch sử phản hồi
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        {showDeclineModal && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modalContent}>
+              <h3>Lý do từ chối</h3>
+              <p>Vui lòng cung cấp lý do từ chối cho phiếu đồng ý của <strong>{currentConsentItem?.campaignName}</strong>.</p>
+              <textarea
+                placeholder="Ví dụ: Cháu vừa bị ốm, gia đình sẽ cho cháu tiêm sau..."
+                value={declineReason}
+                onChange={(e) => setDeclineReason(e.target.value)}
+              />
+              <div className={styles.modalActions}>
+                <button className={`${styles.actionButton}`} onClick={closeDeclineModal} style={{background: '#f1f5f9', color: '#475569'}}>Hủy</button>
+                <button
+                  className={`${styles.actionButton} ${styles.declineButton}`}
+                  onClick={() => handleConsent(false, currentConsentItem)}
+                  disabled={!declineReason.trim() || submittingId === currentConsentItem.requestId}
+                >
+                  {submittingId === currentConsentItem.requestId ? "Đang gửi..." : "Xác nhận từ chối"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

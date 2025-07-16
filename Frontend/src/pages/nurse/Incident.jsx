@@ -29,6 +29,7 @@ import LoadingOverlay from "../../components/LoadingOverlay";
 
 // API URL constants
 const MEDICAL_EVENT_API = "https://swp-school-medical-management.onrender.com/api/MedicalEvent";
+const MEDICAL_EVENT_TYPE_API = "https://swp-school-medical-management.onrender.com/api/MedicalEventType";
 const STUDENT_API = "https://swp-school-medical-management.onrender.com/api/Student";
 const USER_API = "https://swp-school-medical-management.onrender.com/api/User";
 const MEDICAL_SUPPLIES_API = "https://swp-school-medical-management.onrender.com/api/MedicalSupplies";
@@ -90,20 +91,46 @@ const Incident = () => {
   const [bulkSuppliesUsed, setBulkSuppliesUsed] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true); // loading fetch list
+  const [modalLoading, setModalLoading] = useState(false);
   const [showSendOption, setShowSendOption] = useState(false);
+  const [eventTypes, setEventTypes] = useState([]);
+  const [showCreateEventTypeModal, setShowCreateEventTypeModal] = useState(false);
+  const [newEventTypeName, setNewEventTypeName] = useState("");
 
-  const eventTypes = [
-    { id: "1", name: "Sốt" },
-    { id: "2", name: "Té ngã" },
-    { id: "3", name: "Dị ứng" },
-    { id: "4", name: "Đau bụng" },
-    { id: "5", name: "Tai nạn nhỏ" },
-  ];
   const severityLevels = [
     { id: "1", level: "Nhẹ" },
     { id: "2", level: "Trung bình" },
     { id: "3", level: "Nặng" },
   ];
+
+  const fetchEventTypes = () => {
+    axios
+      .get(MEDICAL_EVENT_TYPE_API, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      })
+      .then((res) => {
+        const data = res.data;
+        const types = Array.isArray(data)
+          ? data
+          : data && Array.isArray(data.data)
+          ? data.data
+          : [];
+
+        if (Array.isArray(types)) {
+          const mappedTypes = types.map((t) => ({
+            id: t.eventTypeId || t.id,
+            name: t.eventTypeName || t.name,
+            ...t,
+          }));
+          setEventTypes(mappedTypes);
+        }
+      })
+      .catch((err) => {
+        console.error("❌ Lỗi lấy loại sự cố:", err);
+        setEventTypes([]); // Ensure it's an empty array on error
+        notifyError("Không thể tải danh sách loại sự cố. Vui lòng thử lại.");
+      });
+  };
 
   const fetchEvents = () => {
     setLoading(true);
@@ -182,12 +209,59 @@ const Incident = () => {
     }
   };
 
+  const handleCreateEventType = () => {
+    if (!newEventTypeName.trim()) {
+      notifyError("Tên loại sự cố không được để trống!");
+      return;
+    }
+    setModalLoading(true);
+    const token = localStorage.getItem("token");
+    axios
+      .post(
+        MEDICAL_EVENT_TYPE_API,
+        { eventTypeName: newEventTypeName },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      .then((res) => {
+        notifySuccess("Tạo loại sự cố mới thành công!");
+        setShowCreateEventTypeModal(false);
+        setNewEventTypeName("");
+
+        const newType = res.data?.data || res.data;
+        // Fetch again to get the full updated list
+        fetchEventTypes();
+
+        if (newType && (newType.eventTypeId || newType.id)) {
+          const newId = (newType.eventTypeId || newType.id).toString();
+          if (showCreateForm) {
+            setNewEvent((prev) => ({ ...prev, eventTypeId: newId }));
+          }
+          if (showBulkCreateForm) {
+            setBulkEvent((prev) => ({ ...prev, eventTypeId: newId }));
+          }
+        }
+      })
+      .catch((err) => {
+        console.error("❌ Lỗi tạo loại sự cố:", err);
+        notifyError(
+          "Lỗi khi tạo loại sự cố mới: " +
+            (err.response?.data?.message || err.message)
+        );
+      })
+      .finally(() => {
+        setModalLoading(false);
+      });
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("token");
-    console.log("🔑 Token:", token);
+    console.log("🔑 Token: [Sanitized] " + (token ? token.substring(0, 4) + "..." : "No token found"));
     console.log("👤 UserId:", localStorage.getItem("userId"));
 
     fetchEvents();
+    fetchEventTypes();
 
     axios
       .get(STUDENT_API, {
@@ -516,7 +590,7 @@ const Incident = () => {
             onClick={() => {
               toast.dismiss();
               axios
-                .delete(`https://swp-school-medical-management.onrender.com/api/MedicalEvent/${id}`)
+                .delete(`${MEDICAL_EVENT_API}/${id}`)
                 .then(() => {
                   setEvents((prev) => prev.filter((e) => e.eventId !== id));
                   setSelectedEvent(null);
@@ -708,7 +782,7 @@ const Incident = () => {
       <Sidebar />
       <div className={style.contentArea}>
         {/* LOADING OVERLAY */}
-        {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
+        {(loading || modalLoading) && <LoadingOverlay text="Đang tải dữ liệu..." />}
         <div className={style.header}>
           <h2>Báo cáo sự cố y tế học đường</h2>
           <div className={style.headerButtons}>
@@ -732,12 +806,12 @@ const Incident = () => {
             value={eventTypeFilter}
             onChange={(e) => setEventTypeFilter(e.target.value)}
           >
-            <option>Tất cả</option>
-            <option>Sốt</option>
-            <option>Đau bụng</option>
-            <option>Dị ứng</option>
-            <option>Té ngã</option>
-            <option>Tai nạn nhỏ</option>
+            <option value="Tất cả">Tất cả</option>
+            {eventTypes.map((type) => (
+              <option key={type.id} value={type.name}>
+                {type.name}
+              </option>
+            ))}
           </select>
           <input
             type="date"
@@ -1189,9 +1263,13 @@ const Incident = () => {
 
             <select
               value={newEvent.eventTypeId}
-              onChange={(e) =>
-                setNewEvent({ ...newEvent, eventTypeId: e.target.value })
-              }
+              onChange={(e) => {
+                if (e.target.value === "add_new_type") {
+                  setShowCreateEventTypeModal(true);
+                } else {
+                  setNewEvent({ ...newEvent, eventTypeId: e.target.value });
+                }
+              }}
             >
               <option value="">-- Loại sự cố --</option>
               {eventTypes.map((et) => (
@@ -1199,6 +1277,12 @@ const Incident = () => {
                   {et.name}
                 </option>
               ))}
+              <option
+                value="add_new_type"
+                style={{ color: "#007bff", fontWeight: "bold" }}
+              >
+                + Tạo loại mới...
+              </option>
             </select>
 
             <select
@@ -1638,9 +1722,13 @@ const Incident = () => {
 
             <select
               value={bulkEvent.eventTypeId}
-              onChange={(e) =>
-                setBulkEvent({ ...bulkEvent, eventTypeId: e.target.value })
-              }
+              onChange={(e) => {
+                if (e.target.value === "add_new_type") {
+                  setShowCreateEventTypeModal(true);
+                } else {
+                  setBulkEvent({ ...bulkEvent, eventTypeId: e.target.value });
+                }
+              }}
             >
               <option value="">-- Loại sự cố --</option>
               {eventTypes.map((et) => (
@@ -1648,6 +1736,12 @@ const Incident = () => {
                   {et.name}
                 </option>
               ))}
+              <option
+                value="add_new_type"
+                style={{ color: "#007bff", fontWeight: "bold" }}
+              >
+                + Tạo loại mới...
+              </option>
             </select>
 
             <select
@@ -1802,6 +1896,36 @@ const Incident = () => {
                   setShowAllStudents(false);
                   setSearchStudent("");
                 }}
+              >
+                Huỷ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showCreateEventTypeModal && (
+        <div className={style.modalOverlay}>
+          <div className={style.modalContent} style={{ maxWidth: "400px" }}>
+            <h3>Tạo loại sự cố mới</h3>
+            <input
+              type="text"
+              placeholder="Nhập tên loại sự cố..."
+              value={newEventTypeName}
+              onChange={(e) => setNewEventTypeName(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px",
+                boxSizing: "border-box",
+                marginBottom: "12px",
+              }}
+            />
+            <div className={style.modalActions}>
+              <button className={style.tagBlue} onClick={handleCreateEventType}>
+                Tạo
+              </button>
+              <button
+                className={style.closeBtn}
+                onClick={() => setShowCreateEventTypeModal(false)}
               >
                 Huỷ
               </button>
