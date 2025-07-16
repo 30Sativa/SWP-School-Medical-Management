@@ -230,9 +230,11 @@ const StudentDetail = () => {
     if (!student) setLoading(true);
 
     try {
-      const studentPromise = axios.get(`${API_BASE}/Student/${id}`);
-      const healthProfilePromise = axios.get(`${API_BASE}/health-profiles/student/${id}`);
-      const medicalHistoryPromise = axios.get(`${API_BASE}/MedicalHistory/student/${id}`);
+      const token = localStorage.getItem("authToken"); // Retrieve token from local storage
+      const headers = { Authorization: `Bearer ${token}` }; // Set Authorization header
+      const studentPromise = axios.get(`${API_BASE}/Student/${id}`, { headers });
+      const healthProfilePromise = axios.get(`${API_BASE}/health-profiles/student/${id}`, { headers });
+      const medicalHistoryPromise = axios.get(`${API_BASE}/MedicalHistory/student/${id}`, { headers });
 
       const [studentRes, healthProfileRes, medicalHistoryRes] = await Promise.allSettled([
         studentPromise,
