@@ -47,6 +47,17 @@ const HealthProfile = () => {
   const [medicalHistoryMap, setMedicalHistoryMap] = useState({}); // { studentId: [medicalHistory, ...] }
   const [isInitialized, setIsInitialized] = useState(false); // Prevent multiple calls
 
+  // State for editing health profile
+  const [editingProfileId, setEditingProfileId] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    height: "",
+    weight: "",
+    chronicDiseases: "",
+    allergies: "",
+    generalNote: "",
+  });
+
+
   // Get auth data from localStorage
   const token = localStorage.getItem("token");
   const parentId = localStorage.getItem("userId"); // Unified with SendMedicine.jsx
@@ -312,6 +323,77 @@ const HealthProfile = () => {
     }
   }, [modalStudent, formData, medicalHistories, token, fetchProfiles, navigate]);
 
+  // Handlers for updating profile
+  const handleUpdateClick = useCallback((profile) => {
+    setEditingProfileId(profile.profileId);
+    setEditFormData({
+      height: profile.height || "",
+      weight: profile.weight || "",
+      chronicDiseases: profile.chronicDiseases || "",
+      allergies: profile.allergies || "",
+      generalNote: profile.generalNote || "",
+    });
+  }, []);
+
+  const handleCancelUpdate = useCallback(() => {
+    setEditingProfileId(null);
+    setEditFormData({ height: "", weight: "", chronicDiseases: "", allergies: "", generalNote: "" });
+  }, []);
+
+  const handleEditFormChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({ ...prev, [name]: value }));
+  }, []);
+
+  const handleSaveUpdate = useCallback(async (e, studentId, healthProfileId) => {
+    e.preventDefault();
+    if (!healthProfileId) {
+      toast.error("Không tìm thấy ID hồ sơ sức khỏe.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await axios.put(
+        `${API_BASE}/health-profiles/${healthProfileId}`,
+        {
+          studentId: studentId,
+          height: Number(editFormData.height),
+          weight: Number(editFormData.weight),
+          chronicDiseases: editFormData.chronicDiseases,
+          allergies: editFormData.allergies,
+          generalNote: editFormData.generalNote,
+          isActive: true,
+        },
+        { 
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          timeout: 10000 
+        }
+      );
+      toast.success("Cập nhật hồ sơ sức khỏe thành công!");
+      setEditingProfileId(null);
+      await fetchProfiles();
+    } catch (error) {
+      console.error("Error updating health profile:", error);
+      if (error.response?.status === 401) {
+        toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+        setTimeout(() => {
+          localStorage.clear();
+          navigate("/login");
+        }, 2000);
+      } else if (error.code === 'ECONNABORTED') {
+        toast.error("Request timeout. Vui lòng thử lại sau!");
+      } else if (!error.response) {
+        toast.error(ERROR_MESSAGES.NETWORK_ERROR);
+      } else {
+        toast.error("Cập nhật hồ sơ thất bại! " + (error.response?.data?.message || ""));
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }, [editFormData, token, fetchProfiles, navigate]);
+
+
   // Effects
   useEffect(() => {
     if (!isInitialized) {
@@ -496,6 +578,7 @@ const HealthProfile = () => {
   // Render functions - Memoized to prevent unnecessary re-renders
   const renderPersonalInfo = useCallback((studentInfo, profile) => {
     const studentMedicalHistory = medicalHistoryMap[studentInfo.studentId] || [];
+    const isEditing = editingProfileId === profile.profileId;
     
     return (
       <>
@@ -505,51 +588,102 @@ const HealthProfile = () => {
         </div>
         <h4 className={styles.sectionTitle}>Thông tin hồ sơ sức khỏe</h4>
         <div className={styles.infoBox}>
-          <div className={styles.infoGrid}>
-            <div>
-              <span className={styles.label}>Họ và tên:</span> {studentInfo.fullName}
+          {isEditing ? (
+            <form onSubmit={(e) => handleSaveUpdate(e, studentInfo.studentId, profile.profileId)}>
+              <div className={styles.infoGrid}>
+                <div><span className={styles.label}>Họ và tên:</span> {studentInfo.fullName}</div>
+                <div><span className={styles.label}>Lớp:</span> {studentInfo.className}</div>
+                <div><span className={styles.label}>Giới tính:</span> {studentInfo.gender}</div>
+                <div><span className={styles.label}>Tuổi:</span> {calculateAge(studentInfo.dateOfBirth)}</div>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <label htmlFor="height" className={styles.label}>Chiều cao:</label>
+                  <input type="number" id="height" name="height" value={editFormData.height} onChange={handleEditFormChange} style={{ width: '80px', padding: '4px 8px', borderRadius: '4px', border: '1px solid #ccc' }} /> cm
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <label htmlFor="weight" className={styles.label}>Cân nặng:</label>
+                  <input type="number" id="weight" name="weight" value={editFormData.weight} onChange={handleEditFormChange} style={{ width: '80px', padding: '4px 8px', borderRadius: '4px', border: '1px solid #ccc' }} /> kg
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label htmlFor="chronicDiseases" className={styles.label}>Bệnh mãn tính:</label>
+                  <input type="text" id="chronicDiseases" name="chronicDiseases" value={editFormData.chronicDiseases} onChange={handleEditFormChange} style={{ width: '100%', padding: '4px 8px', borderRadius: '4px', border: '1px solid #ccc' }}/>
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label htmlFor="allergies" className={styles.label}>Dị ứng:</label>
+                  <input type="text" id="allergies" name="allergies" value={editFormData.allergies} onChange={handleEditFormChange} style={{ width: '100%', padding: '4px 8px', borderRadius: '4px', border: '1px solid #ccc' }}/>
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label htmlFor="generalNote" className={styles.label}>Ghi chú y tế:</label>
+                  <input type="text" id="generalNote" name="generalNote" value={editFormData.generalNote} onChange={handleEditFormChange} style={{ width: '100%', padding: '4px 8px', borderRadius: '4px', border: '1px solid #ccc' }}/>
+                </div>
+                <div><span className={styles.label}>Trạng thái hồ sơ:</span> Đang hoạt động</div>
+              </div>
+              <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                <button type="submit" disabled={submitting} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#20b2aa', color: 'white', cursor: 'pointer', fontWeight: '600' }}>
+                  {submitting ? "Đang lưu..." : "Lưu thay đổi"}
+                </button>
+                <button type="button" onClick={handleCancelUpdate} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #ccc', background: '#f8f8f8', cursor: 'pointer', fontWeight: '600' }}>
+                  Hủy
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className={styles.infoGrid}>
+              <div>
+                <span className={styles.label}>Họ và tên:</span> {studentInfo.fullName}
+              </div>
+              <div>
+                <span className={styles.label}>Lớp:</span> {studentInfo.className}
+              </div>
+              <div>
+                <span className={styles.label}>Giới tính:</span> {studentInfo.gender}
+              </div>
+              <div>
+                <span className={styles.label}>Tuổi:</span> {calculateAge(studentInfo.dateOfBirth)}
+              </div>
+              <div>
+                <span className={styles.label}>Chiều cao:</span> {
+                  profile.height > 0 ? `${profile.height} cm` : "Chưa có thông tin"
+                }
+              </div>
+              <div>
+                <span className={styles.label}>Cân nặng:</span> {
+                  profile.weight > 0 ? `${profile.weight} kg` : "Chưa có thông tin"
+                }
+              </div>
+              <div>
+                <span className={styles.label}>Bệnh mãn tính:</span> {
+                  safeDisplayValue(profile.chronicDiseases)
+                }
+              </div>
+              <div>
+                <span className={styles.label}>Dị ứng:</span> {
+                  safeDisplayValue(profile.allergies)
+                }
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <span className={styles.label}>Ghi chú y tế:</span> {
+                  safeDisplayValue(profile.generalNote)
+                }
+              </div>
+              <div>
+                <span className={styles.label}>Trạng thái hồ sơ:</span> {
+                  profile.isActive ? "Đang hoạt động" : "Ngừng hoạt động"
+                }
+              </div>
             </div>
-            <div>
-              <span className={styles.label}>Lớp:</span> {studentInfo.className}
-            </div>
-            <div>
-              <span className={styles.label}>Giới tính:</span> {studentInfo.gender}
-            </div>
-            <div>
-              <span className={styles.label}>Tuổi:</span> {calculateAge(studentInfo.dateOfBirth)}
-            </div>
-            <div>
-              <span className={styles.label}>Chiều cao:</span> {
-                profile.height > 0 ? `${profile.height} cm` : "Chưa có thông tin"
-              }
-            </div>
-            <div>
-              <span className={styles.label}>Cân nặng:</span> {
-                profile.weight > 0 ? `${profile.weight} kg` : "Chưa có thông tin"
-              }
-            </div>
-            <div>
-              <span className={styles.label}>Bệnh mãn tính:</span> {
-                safeDisplayValue(profile.chronicDiseases)
-              }
-            </div>
-            <div>
-              <span className={styles.label}>Dị ứng:</span> {
-                safeDisplayValue(profile.allergies)
-              }
-            </div>
-            <div>
-              <span className={styles.label}>Ghi chú y tế:</span> {
-                safeDisplayValue(profile.generalNote)
-              }
-            </div>
-            <div>
-              <span className={styles.label}>Trạng thái hồ sơ:</span> {
-                profile.isActive ? "Đang hoạt động" : "Ngừng hoạt động"
-              }
-            </div>
-          </div>
+          )}
         </div>
+
+        {/* Action Buttons */}
+        {!isEditing && (
+          <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+            <button onClick={() => handleUpdateClick(profile)} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#0ea5e9', color: 'white', cursor: 'pointer', fontWeight: '600' }}>
+              Cập nhật
+            </button>
+          </div>
+        )}
+
         {/* Medical History Table */}
         <div style={{ marginTop: 24 }}>
           <h4 style={{ color: '#20b2aa', marginBottom: 12, fontSize: 18, fontWeight: 600 }}>Tiền sử bệnh</h4>
@@ -632,7 +766,7 @@ const HealthProfile = () => {
         </div>
       </>
     );
-  }, [medicalHistoryMap, calculateAge, safeDisplayValue]);
+  }, [medicalHistoryMap, calculateAge, safeDisplayValue, editingProfileId, editFormData, handleEditFormChange, handleSaveUpdate, handleCancelUpdate, handleUpdateClick, submitting]);
 
   const renderStudentCard = useCallback(({ studentInfo, profile }) => (
     <div
