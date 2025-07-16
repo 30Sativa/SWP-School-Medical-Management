@@ -438,7 +438,7 @@ const Incident = () => {
         fetchEvents();
         notifySuccess("Tạo sự cố thành công!");
         // Gửi thông báo tự động
-        sendNotificationToParent(res.data);
+        sendNotificationToParent(added);
       })
       .catch((err) => {
         const errorDetail =
