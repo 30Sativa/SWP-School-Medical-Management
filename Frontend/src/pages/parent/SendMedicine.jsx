@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import Sidebar from "../../components/sb-Parent/Sidebar";
 import styles from "../../assets/css/SendMedicine.module.css";
 import Notification from "../../components/Notification";
+import Modal from "../../components/Modal";
 import { FiInfo, FiEdit, FiClipboard } from "react-icons/fi";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -21,6 +22,8 @@ const SendMedicine = () => {
   // Removed unused showAll state and its setter _setShowAll
   const [searchTerm, setSearchTerm] = useState("");
   const [showPopup, setShowPopup] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [cancelingRequestId, setCancelingRequestId] = useState(null);
 
   const parentId = localStorage.getItem("userId"); // bị lỗi chỗ này nè trc đó ai để là parent id nhưng bên đăng nhập lưu lại là userId
   const historyEndRef = useRef(null);
@@ -168,6 +171,53 @@ const SendMedicine = () => {
     }
   };
 
+  const handleCancel = async (requestId) => {
+    if (!requestId) return;
+
+    try {
+      setLoading(true);
+      await axios.put(
+        `https://swp-school-medical-management.onrender.com/api/MedicationRequest/${requestId}/status`,
+        { statusId: 5 } // 5 là trạng thái "Đã hủy"
+      );
+      toast.success("Đã hủy đơn thuốc thành công!", {
+        position: "top-center",
+        autoClose: 2500,
+        theme: "colored",
+      });
+      // Cập nhật trạng thái trong state để UI thay đổi ngay lập tức, không fetch lại từ server
+      setHistory(prevHistory =>
+        prevHistory.map(item =>
+          item.requestID === requestId
+            ? { ...item, status: "Đã huỷ" }
+            : item
+        )
+      );
+    } catch (err) {
+      console.error("Lỗi khi hủy đơn thuốc:", err);
+      toast.error("Hủy đơn thuốc thất bại! Vui lòng thử lại.", {
+        position: "top-center",
+        autoClose: 2500,
+        theme: "colored",
+      });
+    } finally {
+      setLoading(false);
+      setShowConfirmModal(false);
+      setCancelingRequestId(null);
+    }
+  };
+
+
+  const openConfirmModal = (requestId) => {
+    setCancelingRequestId(requestId);
+    setShowConfirmModal(true);
+  };
+
+  const closeConfirmModal = () => {
+    setCancelingRequestId(null);
+    setShowConfirmModal(false);
+  };
+
   const fetchStudentList = useCallback(async () => {
     if (!parentId || parentId === 'null') {
       console.error("ParentId không hợp lệ:", parentId);
@@ -282,6 +332,23 @@ const SendMedicine = () => {
   useEffect(() => {
     hasShownNoStudentToastRef.current = false;
   }, []);
+
+  const getStatusInfo = (status) => {
+    switch (status) {
+      case "Đã duyệt":
+        return { text: "Đã duyệt", className: styles.done };
+      case "Chờ duyệt":
+        return { text: "Chờ duyệt", className: styles.pending };
+      case "Đã huỷ":
+        return { text: "Đã huỷ", className: styles.reject };
+      case "Bị từ chối":
+        return { text: "Bị từ chối", className: styles.reject };
+      case "Đã hoàn thành":
+        return { text: "Đã lên lịch", className: styles.done }; // "Đã hoàn thành" hiển thị là "Đã lên lịch"
+      default:
+        return { text: status, className: styles.reject }; // Mặc định cho các trạng thái khác
+    }
+  };
 
   const filteredHistory = history.filter((item) =>
     `${item.medicationName} ${item.instructions}`
@@ -581,28 +648,39 @@ const SendMedicine = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className={styles.searchBox}
                 />
-                {filteredHistory.slice(0, 3).map((item, index) => (
-                  <div
-                    key={index}
-                    className={`${styles.historyItem} ${styles.fadeIn}`}
-                    ref={index === 0 ? historyTopRef : null}
-                  >
-                    <h4>{item.medicationName}</h4>
-                    <p>📅 {new Date(item.requestDate).toLocaleDateString("vi-VN")}</p>
-                    <p>💊 {item.dosage}</p>
-                    <p>📝 {item.instructions}</p>
-                    {item.imagePath && (
-                      <p>
-                        📄 File: <a href={`https://swp-school-medical-management.onrender.com${item.imagePath}`} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600, color: "#2563eb", textDecoration: "underline" }}>Xem file</a>
-                      </p>
-                    )}
-                    <div className={styles.statusRow}>
-                      <span className={`${styles.status} ${item.status === "Đã duyệt" ? styles.done : item.status === "Chờ duyệt" ? styles.pending : styles.reject}`}>
-                        {item.status === "Đã duyệt" ? "Đã duyệt" : item.status === "Chờ duyệt" ? "Chờ duyệt" : item.status === "Đã hoàn thành" ? "Đã lên lịch" : "Bị từ chối"}
-                      </span>
+                {filteredHistory.slice(0, 3).map((item, index) => {
+                  const statusInfo = getStatusInfo(item.status);
+                  return (
+                    <div
+                      key={item.requestID}
+                      className={`${styles.historyItem} ${styles.fadeIn}`}
+                      ref={index === 0 ? historyTopRef : null}
+                    >
+                      <h4>{item.medicationName}</h4>
+                      <p>📅 {new Date(item.requestDate).toLocaleDateString("vi-VN")}</p>
+                      <p>💊 {item.dosage}</p>
+                      <p>📝 {item.instructions}</p>
+                      {item.imagePath && (
+                        <p>
+                          📄 File: <a href={`https://swp-school-medical-management.onrender.com${item.imagePath}`} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600, color: "#2563eb", textDecoration: "underline" }}>Xem file</a>
+                        </p>
+                      )}
+                      <div className={styles.statusRow}>
+                        <span className={`${styles.status} ${statusInfo.className}`}>
+                          {statusInfo.text}
+                        </span>
+                        {item.status === "Chờ duyệt" && (
+                          <button
+                            onClick={() => openConfirmModal(item.requestID)}
+                            className={styles.cancelBtn}
+                          >
+                            Hủy
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 <div ref={historyEndRef} />
               </div>
             </div>
@@ -623,24 +701,35 @@ const SendMedicine = () => {
                     style={{ marginBottom: 18 }}
                   />
                   <div className={styles.popupBody}>
-                    {filteredHistory.map((item, index) => (
-                      <div key={index} className={styles.historyItem}>
-                        <h4>{item.medicationName}</h4>
-                        <p>📅 {new Date(item.requestDate).toLocaleDateString("vi-VN")}</p>
-                        <p>💊 {item.dosage}</p>
-                        <p>📝 {item.instructions}</p>
-                        {item.imagePath && (
-                          <p>
-                            📄 File: <a href={`https://swp-school-medical-management.onrender.com${item.imagePath}`} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600, color: "#2563eb", textDecoration: "underline" }}>Xem file</a>
-                          </p>
-                        )}
-                        <div className={styles.statusRow}>
-                          <span className={`${styles.status} ${item.status === "Đã duyệt" ? styles.done : item.status === "Chờ duyệt" ? styles.pending : styles.reject}`}>
-                            {item.status === "Đã duyệt" ? "Đã duyệt" : item.status === "Chờ duyệt" ? "Chờ duyệt" : item.status === "Đã hoàn thành" ? "Đã lên lịch" : "Bị từ chối"}
-                          </span>
+                    {filteredHistory.map((item, index) => {
+                      const statusInfo = getStatusInfo(item.status);
+                      return (
+                        <div key={item.requestID} className={styles.historyItem}>
+                          <h4>{item.medicationName}</h4>
+                          <p>📅 {new Date(item.requestDate).toLocaleDateString("vi-VN")}</p>
+                          <p>💊 {item.dosage}</p>
+                          <p>📝 {item.instructions}</p>
+                          {item.imagePath && (
+                            <p>
+                              📄 File: <a href={`https://swp-school-medical-management.onrender.com${item.imagePath}`} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600, color: "#2563eb", textDecoration: "underline" }}>Xem file</a>
+                            </p>
+                          )}
+                          <div className={styles.statusRow}>
+                            <span className={`${styles.status} ${statusInfo.className}`}>
+                              {statusInfo.text}
+                            </span>
+                            {item.status === "Chờ duyệt" && (
+                              <button
+                                onClick={() => openConfirmModal(item.requestID)}
+                                className={styles.cancelBtn}
+                              >
+                                Hủy
+                              </button>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -648,6 +737,14 @@ const SendMedicine = () => {
           </>
         )}
       </div>
+
+      <Modal isOpen={showConfirmModal} onClose={closeConfirmModal} title="Xác nhận hủy">
+        <p>Bạn có chắc chắn muốn hủy đơn thuốc này không?</p>
+        <div className={styles.confirmActions}>
+          <button onClick={closeConfirmModal} className={`${styles.btn} ${styles.btnSecondary}`}>Không</button>
+          <button onClick={() => handleCancel(cancelingRequestId)} className={`${styles.btn} ${styles.btnDanger}`}>Có, hủy</button>
+        </div>
+      </Modal>
     </div>
   );
 };
