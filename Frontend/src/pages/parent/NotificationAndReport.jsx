@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Sidebar from "../../components/sb-Parent/Sidebar";
 import styles from "../../assets/css/NotificationAndReport.module.css";
+import Notification from "../../components/Notification";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";

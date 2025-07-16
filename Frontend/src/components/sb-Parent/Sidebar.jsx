@@ -54,7 +54,7 @@ const Sidebar = () => {
         </NavLink>
         <NavLink to="/dashboard" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ""}`}>
           <Home size={20} />
-          <span>Dashboard</span>
+          <span>Bảng điều khiển</span>
         </NavLink>
         <NavLink to="/healthprofile" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ""}`}> 
           <Users size={20} />
