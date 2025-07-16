@@ -641,7 +641,7 @@ const Incident = () => {
         fetchEvents();
         notifySuccess(`Đã tạo thành công ${responses.length} sự cố y tế!`);
         // Gửi thông báo tự động cho từng event
-        responses.forEach((res) => sendNotificationToParent(res.data));
+        addedEvents.forEach((event) => sendNotificationToParent(event));
       })
       .catch((err) => {
         const errorDetail =
