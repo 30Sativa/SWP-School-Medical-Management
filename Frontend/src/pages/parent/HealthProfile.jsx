@@ -358,8 +358,8 @@ const HealthProfile = () => {
         `${API_BASE}/health-profiles/${healthProfileId}`,
         {
           studentId: studentId,
-          height: Number(editFormData.height),
-          weight: Number(editFormData.weight),
+          height: editFormData.height && !isNaN(parseFloat(editFormData.height)) ? parseFloat(editFormData.height) : null,
+          weight: editFormData.weight && !isNaN(parseFloat(editFormData.weight)) ? parseFloat(editFormData.weight) : null,
           chronicDiseases: editFormData.chronicDiseases,
           allergies: editFormData.allergies,
           generalNote: editFormData.generalNote,
