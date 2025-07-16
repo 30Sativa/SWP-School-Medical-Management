@@ -451,3 +451,50 @@
   font-weight: 500;
   margin: 0;
 }
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+/* New styles for Health Check Cards */
+.healthDetailsContainer {
+  width: 100%;
+}
+
+.healthSection {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.healthSection:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 12px;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px 16px;
+}
+
+.metricsGrid span {
+  font-size: 0.9rem;
+}
+
+.specialistGrid p {
+  font-size: 0.9rem;
+  margin: 0 0 8px 0;
+}
+
+.specialistGrid p:last-child {
+  margin-bottom: 0;
+}
