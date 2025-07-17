@@ -159,7 +159,7 @@ const NotificationAndReport = () => {
     // Filter by selected student first
     const studentItems = allItems.filter(item => {
       // Show items for the selected student, plus items that are not student-specific (studentId is null/undefined)
-      return item.studentId === selectedStudentId || item.studentId == null;
+      return item.studentId === selectedStudentId || item.studentId === null || item.studentId === undefined;
     });
 
     // Primary filtering based on the active tab
