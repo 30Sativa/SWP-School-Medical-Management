@@ -141,7 +141,7 @@ const NotificationAndReport = () => {
       
       // Refresh consent forms optimistically
       setAllItems(prev => prev.map(item =>
-        item.id === `consent-${requestId}`
+        item.requestId === requestId
           ? { ...item, status: agree ? 'Đồng ý' : 'Từ chối' }
           : item
       ));
