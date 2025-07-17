@@ -43,6 +43,11 @@ const TABS = {
   REPLIED: "replied"
 };
 
+const NOTIFICATION_TYPES = {
+  HEALTH_RESULT: "health_result",
+  VACCINE_RESULT: "vaccine_result",
+};
+
 const NotificationAndReport = () => {
   // State management
   const [students, setStudents] = useState([]);
@@ -171,13 +176,13 @@ const NotificationAndReport = () => {
         case TABS.VACCINE:
           return item.itemType === "consent" && !isConsentResponded(item.status);
         case TABS.OTHER:
-            const isHealthResultForOther = item.notificationType === "health_result";
-            const isVaccineResultForOther = item.notificationType === "vaccine_result";
+            const isHealthResultForOther = item.notificationType === NOTIFICATION_TYPES.HEALTH_RESULT;
+            const isVaccineResultForOther = item.notificationType === NOTIFICATION_TYPES.VACCINE_RESULT;
             return item.itemType === "notification" && !isHealthResultForOther && !isVaccineResultForOther;
         case TABS.RESULT_HEALTH:
-          return item.itemType === "notification" && item.notificationType === "health_result";
+          return item.itemType === "notification" && item.notificationType === NOTIFICATION_TYPES.HEALTH_RESULT;
         case TABS.RESULT_VACCINE:
-          return item.itemType === "notification" && item.notificationType === "vaccine_result";
+          return item.itemType === "notification" && item.notificationType === NOTIFICATION_TYPES.VACCINE_RESULT;
         case TABS.REPLIED:
           return item.itemType === "consent" && isConsentResponded(item.status);
         default: return true;
@@ -220,7 +225,7 @@ const NotificationAndReport = () => {
       tag = 'Phiếu đồng ý';
       tagStyle = styles.tagConsent;
       iconStyle = styles.iconVaccine;
-    } else if (item.notificationType === NOTIFICATION_TYPES.RESULT) {
+    } else if (item.notificationType === NOTIFICATION_TYPES.HEALTH_RESULT || item.notificationType === NOTIFICATION_TYPES.VACCINE_RESULT) {
       icon = <FiCheckCircle />;
       tag = 'Kết quả';
       tagStyle = styles.tagResult;
