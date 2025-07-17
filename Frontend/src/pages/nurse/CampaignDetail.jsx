@@ -20,6 +20,9 @@ const CampaignDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  // New state for send consent options modal (move here to fix hook order)
+  const [showSendOptions, setShowSendOptions] = useState(false);
+
   const [campaign, setCampaign] = useState(null);
   const [consents, setConsents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,11 +37,10 @@ const CampaignDetail = () => {
   const isDangDienRa = (status) => status === "Đang diễn ra";
   const isDaHoanThanh = (status) => status === "Đã hoàn thành";
   const isDaHuy = (status) => status === "Đã huỷ";
-  const [selectedDate, setSelectedDate] = useState(null);
 
   // State cho phạm vi gửi và dữ liệu học sinh/lớp
   const [sendScope, setSendScope] = useState("all"); // "all" hoặc "class"
-  const [selectedClass, setSelectedClass] = useState("");
+  const [selectedClasses, setSelectedClasses] = useState([]);
   const [classList, setClassList] = useState([]); // Danh sách lớp
   const [studentList, setStudentList] = useState([]); // Danh sách học sinh hiển thị
   const [allStudents, setAllStudents] = useState([]); // Toàn bộ học sinh
@@ -88,12 +90,12 @@ const CampaignDetail = () => {
   useEffect(() => {
     if (sendScope === "all") {
       setStudentList(allStudents);
-    } else if (sendScope === "class" && selectedClass) {
-      setStudentList(allStudents.filter(s => s.className === selectedClass));
+    } else if (sendScope === "class" && selectedClasses.length > 0) {
+      setStudentList(allStudents.filter(s => selectedClasses.includes(s.className)));
     } else {
       setStudentList([]);
     }
-  }, [sendScope, selectedClass, allStudents]);
+  }, [sendScope, selectedClasses, allStudents]);
 
   // Thêm hàm gửi email qua userId
   const sendEmailToParent = async (userId, subject, body) => {
@@ -288,107 +290,185 @@ const CampaignDetail = () => {
   return (
     <div className={style.container}>
       <h2>Chi tiết chiến dịch tiêm chủng</h2>
-      <p>
-        <strong>Tên:</strong> {campaign.vaccineName}
-      </p>
-      <p>
-        <strong>Thời gian:</strong> {campaign.date}
-      </p>
-      <p>
-        <strong>Mô tả:</strong> {campaign.description}
-      </p>
-      <p>
-        <strong>Trạng thái:</strong> {campaign.statusName}
-      </p>
-      <p>
-        <strong>Thống kê:</strong> {totalAgreed} đồng ý / {totalRejected} từ
-        chối
-      </p>
+      {/* Info cards section */}
+      <div className={style.infoRow}>
+        <div className={style.infoCard}>
+          <div className={style.infoTitle}>Tên</div>
+          <div className={style.infoValue}>{campaign.vaccineName}</div>
+        </div>
+        <div className={style.infoCard}>
+          <div className={style.infoTitle}>Mô tả</div>
+          <div className={style.infoValue}>{campaign.description}</div>
+        </div>
+        <div className={style.infoCard}>
+          <div className={style.infoTitle}>Thời gian</div>
+          <div className={style.infoValue}>{campaign.date}</div>
+        </div>
+        <div className={style.infoCard}>
+          <div className={style.infoTitle}>Trạng thái</div>
+          <div className={style.infoValue}>{campaign.statusName}</div>
+        </div>
+        {/* Thống kê card */}
+        <div className={style.statsCard}>
+          <div className={style.infoTitle}>Thống kê</div>
+          <div className={style.statsRow}>
+            <div className={style.statBox}>
+              <span className={`${style.statNum} ${style.agree}`}>{totalAgreed}</span>
+              <span className={style.statLabel}>đồng ý</span>
+            </div>
+            <div className={style.statBox}>
+              <span className={`${style.statNum} ${style.reject}`}>{totalRejected}</span>
+              <span className={style.statLabel}>từ chối</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <div style={{ marginBottom: 16 }}>
-        <label>
-          <input
-            type="radio"
-            value="all"
-            checked={sendScope === "all"}
-            onChange={() => setSendScope("all")}
-          />
-          Gửi cho toàn trường
-        </label>
-        <label style={{ marginLeft: 16 }}>
-          <input
-            type="radio"
-            value="class"
-            checked={sendScope === "class"}
-            onChange={() => setSendScope("class")}
-          />
-          Gửi theo lớp
-        </label>
-        <div style={{ marginTop: 8 }}>
-          <label>
-            Số ngày tự động từ chối nếu không xác nhận: {" "}
+      {/* Send consent options modal */}
+      {showSendOptions && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: '#0006', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#fff', borderRadius: 12, padding: 32, minWidth: 320, boxShadow: '0 2px 16px #0002', textAlign: 'center' }}>
+            <h3>Chọn phạm vi gửi phiếu xác nhận</h3>
+            <button
+              style={{ margin: '16px 0', padding: '10px 24px', borderRadius: 6, background: '#2563eb', color: '#fff', border: 'none', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}
+              onClick={async () => {
+                setShowSendOptions(false);
+                await handleSendConsentToAll();
+              }}
+            >
+              Gửi cho toàn trường
+            </button>
+            <br />
+            <button
+              style={{ margin: '8px 0', padding: '10px 24px', borderRadius: 6, background: '#10b981', color: '#fff', border: 'none', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}
+              onClick={() => {
+                setShowSendOptions(false);
+                setSendScope('class');
+              }}
+            >
+              Gửi theo lớp
+            </button>
+            <br />
+            <button
+              style={{ marginTop: 16, background: 'none', color: '#ef4444', border: 'none', fontWeight: 600, cursor: 'pointer' }}
+              onClick={() => setShowSendOptions(false)}
+            >
+              Huỷ
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Class selection and student list only if sendScope is 'class' and campaign chưa bắt đầu */}
+      {sendScope === 'class' && isChuaBatDau(campaign.statusName) && (
+        <div className={style.sendClassCard}>
+          <div className={style.sendClassTitle}>Gửi phiếu xác nhận theo lớp</div>
+          <div className={style.sendClassRow} style={{ flexWrap: 'wrap', alignItems: 'flex-start' }}>
+            {/* Danh sách checkbox lớp dạng lưới 4 cột */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 0', width: '100%' }}>
+              {classList.map(cls => (
+                <label
+                  key={cls}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    fontWeight: 500,
+                    width: '24%',
+                    minWidth: 120,
+                    marginBottom: 8,
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedClasses.includes(cls)}
+                    onChange={e => {
+                      if (e.target.checked) {
+                        setSelectedClasses(prev => [...prev, cls]);
+                      } else {
+                        setSelectedClasses(prev => prev.filter(c => c !== cls));
+                      }
+                    }}
+                  />
+                  {cls}
+                </label>
+              ))}
+            </div>
+          </div>
+          {/* Input số ngày quy định nằm dưới, căn giữa */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '12px 0 0 0' }}>
+            <span className={style.sendClassInputLabel}>
+              Số ngày cho phép:
+            </span>
             <input
               type="number"
               min={1}
               value={autoDeclineAfterDays}
               onChange={e => setAutoDeclineAfterDays(Number(e.target.value))}
-              style={{ width: 60, marginLeft: 4 }}
-            /> ngày
-          </label>
-        </div>
-        {sendScope === "class" && (
-          <>
-            <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)} style={{ marginLeft: 8 }}>
-              <option value="">-- Chọn lớp --</option>
-              {classList.map(cls => (
-                <option key={cls} value={cls}>{cls}</option>
-              ))}
-            </select>
-            <div style={{ marginTop: 12 }}>
-              <b>Danh sách học sinh:</b>
-              <ul>
-                {studentList.map(stu => (
-                  <li key={stu.studentId}>{stu.fullName} ({stu.className})</li>
-                ))}
-              </ul>
+              className={style.sendClassInput}
+            />
+            <span>ngày</span>
+          </div>
+          <div className={style.sendClassList}>
+            <div className={style.sendClassListTitle}>
+              Danh sách học sinh ({studentList.length}):
             </div>
-          </>
-        )}
-      </div>
-
-      <div className={style.actions}>
-        {isChuaBatDau(campaign.statusName) && (
+            <ul style={{ margin: 0, paddingLeft: 18 }}>
+              {studentList.map(stu => (
+                <li key={stu.studentId}>{stu.fullName} ({stu.className})</li>
+              ))}
+            </ul>
+          </div>
           <button
-            className={style.btnNotify}
+            className={style.sendClassBtn}
+            disabled={selectedClasses.length === 0}
             onClick={async () => {
-              if (sendScope === "all") {
-                await handleSendConsentToAll();
-              } else if (sendScope === "class" && selectedClass) {
+              if (selectedClasses.length > 0) {
                 try {
-                  await axios.post(
-                    `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/send-consent-by-class`,
-                    { className: selectedClass, autoDeclineAfterDays }
-                  );
-                  notifySuccess("Đã gửi phiếu xác nhận cho lớp " + selectedClass);
+                  for (const cls of selectedClasses) {
+                    await axios.post(
+                      `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/send-consent-by-class`,
+                      { className: cls, autoDeclineAfterDays }
+                    );
+                  }
+                  notifySuccess("Đã gửi phiếu xác nhận cho các lớp đã chọn.");
                   // Load lại consents nếu cần
                   const consentsRes = await axios.get(
                     `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/consent-requests`
                   );
                   setConsents(consentsRes.data.data);
-                  // Gửi email cho từng phụ huynh trong lớp
+                  // Gửi email cho từng phụ huynh trong các lớp đã chọn
                   const subject = "Xác nhận tiêm chủng cho con em quý phụ huynh";
                   const body = "Kính gửi quý phụ huynh, vui lòng xác nhận phiếu tiêm chủng cho con em mình trên hệ thống.";
                   const parentIds = [...new Set(studentList.map(stu => stu.parentId).filter(Boolean))];
                   for (const parentId of parentIds) {
                     await sendEmailToParent(parentId, subject, body);
                   }
+                  setSendScope('all'); // Ẩn form sau khi gửi thành công
                 } catch {
                   notifyError("Gửi phiếu xác nhận thất bại!");
                 }
-              } else {
-                notifyError("Vui lòng chọn lớp!");
               }
             }}
+          >
+            Xác nhận gửi cho lớp này
+          </button>
+          <button
+            style={{
+              background: '#f3f4f6', color: '#ef4444', border: 'none', borderRadius: 6, padding: '10px 0', fontSize: '1.05rem', fontWeight: 600, marginTop: 8, cursor: 'pointer', transition: 'background 0.2s',
+            }}
+            onClick={() => setSendScope('all')}
+          >
+            Huỷ
+          </button>
+        </div>
+      )}
+
+      <div className={style.actions}>
+        {isChuaBatDau(campaign.statusName) && (
+          <button
+            className={style.btnNotify}
+            onClick={() => setShowSendOptions(true)}
           >
             Gửi phiếu xác nhận
           </button>
@@ -493,75 +573,7 @@ const CampaignDetail = () => {
         ))}
       </div>
 
-      <div className={style.chartAndCalendar}>
-        {/* Biểu đồ tỉ lệ phản hồi */}
-        <div className={style.chartBox}>
-          <h3 style={{ textAlign: "center", marginBottom: "12px" }}>
-            Tỉ lệ phản hồi
-          </h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={[
-                  { name: "Đồng ý", value: totalAgreed },
-                  { name: "Từ chối", value: totalRejected },
-                  {
-                    name: "Chờ xác nhận",
-                    value: consents.length - totalAgreed - totalRejected,
-                  },
-                ]}
-                cx="50%"
-                cy="50%"
-                label
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                <Cell fill="#10b981" />
-                <Cell fill="#ef4444" />
-                <Cell fill="#facc15" />
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Lịch phản hồi */}
-        <div className={style.calendarBox}>
-          <h3 style={{ textAlign: "center", marginBottom: "12px" }}>
-            Lịch phản hồi theo ngày
-          </h3>
-          <Calendar
-            onChange={(date) => setSelectedDate(date)}
-            tileContent={({ date }) => {
-              const count = consentByDate[date.toDateString()];
-              return count ? (
-                <div
-                  style={{
-                    fontSize: "10px",
-                    marginTop: "2px",
-                    background: "#bae6fd",
-                    borderRadius: "4px",
-                    textAlign: "center",
-                  }}
-                >
-                  {count} phản hồi
-                </div>
-              ) : null;
-            }}
-          />
-          {selectedDate && (
-            <p
-              style={{
-                textAlign: "center",
-                marginTop: "8px",
-                fontStyle: "italic",
-              }}
-            >
-              Ngày được chọn: {selectedDate.toLocaleDateString()}
-            </p>
-          )}
-        </div>
-      </div>
+      {/* Removed chart and calendar section as requested */}
 
       <button onClick={() => navigate(-1)} className={style.btnBack}>
         ← Quay lại
