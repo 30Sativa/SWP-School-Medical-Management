@@ -28,7 +28,7 @@ const SUCCESS_MESSAGES = {
 const API_ENDPOINTS = {
   STUDENTS_BY_PARENT: (parentId) => `${API_BASE_URL}/Student/by-parent/${parentId}`,
   // NEW: Unified endpoint for all items for a parent
-  PARENT_ITEMS: (parentId) => `/api/Notification/parent/${parentId}/notifications`,
+  PARENT_ITEMS: (parentId) => `${API_BASE_URL}/Notification/parent/${parentId}/notifications`,
   // OLD endpoints - kept UPDATE_CONSENT for now
   UPDATE_CONSENT: (requestId) => `${API_BASE_URL}/VaccinationCampaign/consent-requests/${requestId}`
 };
