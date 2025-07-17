@@ -91,7 +91,11 @@ const NotificationAndReport = () => {
     if (!studentId) return;
     setLoading(true);
     try {
-      // Reverted to fetch all notifications and filter on client-side
+      // TODO: Technical Debt - The current notification API is inefficient.
+      // It fetches all notifications and filters on the client-side, which is slow and unreliable.
+      // The filter condition `notification.message?.includes(studentName)` is brittle.
+      // A dedicated backend endpoint `GET /api/Notification/student/{studentId}` is needed
+      // to fetch notifications for a specific student directly.
       const [notificationsRes, consentRes] = await Promise.all([
         axios.get(API_ENDPOINTS.NOTIFICATIONS, { headers: { Authorization: `Bearer ${token}` } }),
         axios.get(API_ENDPOINTS.CONSENT_REQUESTS(studentId), { headers: { Authorization: `Bearer ${token}` } })
@@ -115,7 +119,7 @@ const NotificationAndReport = () => {
     } finally {
       setLoading(false);
     }
-  }, [token, parentId, getSelectedStudentName]);
+  }, [token, parentId, getSelectedStudentName]); // Added getSelectedStudentName dependency
 
   // Event handlers
   const handleStudentChange = (e) => setSelectedStudentId(Number(e.target.value));
@@ -180,10 +184,7 @@ const NotificationAndReport = () => {
       if (!item) return false;
       switch (activeTab) {
         case TABS.ALL:
-          return (
-            item.itemType === "notification" ||
-            (item.itemType === "consent" && !isConsentResponded(item.consentStatusName))
-          );
+          return true; // Show all items for the selected student
         case TABS.VACCINE:
           return (
             item.itemType === "consent" && !isConsentResponded(item.consentStatusName)
@@ -216,14 +217,31 @@ const NotificationAndReport = () => {
 
   // Effects
   useEffect(() => {
-    fetchStudents();
-  }, [fetchStudents]);
+    const loadStudents = async () => {
+      if (!parentId) return;
+      try {
+        const response = await axios.get(API_ENDPOINTS.STUDENTS_BY_PARENT(parentId), {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const studentList = response.data?.data || [];
+        setStudents(studentList);
+        if (studentList.length > 0 && !selectedStudentId) {
+          setSelectedStudentId(studentList[0].studentId);
+        }
+      } catch (error) {
+        console.error(ERROR_MESSAGES.FETCH_STUDENTS_FAILED, error);
+        toast.error(ERROR_MESSAGES.FETCH_STUDENTS_FAILED);
+      }
+    };
+
+    loadStudents();
+  }, [parentId, token, selectedStudentId]); // Only re-run if parentId or token changes
 
   useEffect(() => {
     if (selectedStudentId) {
       fetchDataForStudent(selectedStudentId);
     }
-  }, [selectedStudentId, fetchDataForStudent, getSelectedStudentName]); // Added getSelectedStudentName dependency
+  }, [selectedStudentId, fetchDataForStudent]);
 
   // Render functions
   const renderItemCard = (item) => {
@@ -320,10 +338,21 @@ const NotificationAndReport = () => {
   );
   
   // Main render logic
-  if (students.length === 0 && !loading) return renderEmptyState();
-
   const filteredItems = getFilteredItems();
 
+  if (loading && students.length === 0) {
+    return (
+      <div className={styles.container}>
+        <Sidebar />
+        <div className={styles.content}><p>Đang tải dữ liệu...</p></div>
+      </div>
+    );
+  }
+
+  if (students.length === 0) {
+    return renderEmptyState();
+  }
+  
   return (
     <div className={styles.container}>
       <Sidebar />
@@ -338,7 +367,7 @@ const NotificationAndReport = () => {
 
           <div className={styles.layoutGrid}>
             <div className={styles.mainContent}>
-              {loading ? <p>Đang tải dữ liệu...</p> : (
+              {loading ? <p>Đang tải dữ liệu cho {getSelectedStudentName()}...</p> : (
                 filteredItems.length === 0 ? (
                   <div className={styles.emptyStateMessage}>
                     <FiInbox size={48} style={{ marginBottom: '16px', color: '#94a3b8' }}/>
