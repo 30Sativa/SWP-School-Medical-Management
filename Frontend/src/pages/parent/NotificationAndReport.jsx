@@ -220,7 +220,7 @@ const NotificationAndReport = () => {
       tag = 'Phiếu đồng ý';
       tagStyle = styles.tagConsent;
       iconStyle = styles.iconVaccine;
-    } else if (item.notificationType?.includes("result")) {
+    } else if (item.notificationType === NOTIFICATION_TYPES.RESULT) {
       icon = <FiCheckCircle />;
       tag = 'Kết quả';
       tagStyle = styles.tagResult;
