@@ -12,7 +12,7 @@ const VaccineResult = () => {
   const [records, setRecords] = useState([]);
   const [campaignStatus, setCampaignStatus] = useState("");
   const [loading, setLoading] = useState(true);
-  const [modalLoading, setModalLoading] = useState(false); // loading khi gửi thông báo
+  // Removed unused modalLoading state
   const [editingIndex, setEditingIndex] = useState(null);
   const [viewingIndex, setViewingIndex] = useState(null);
   const navigate = useNavigate();
@@ -102,7 +102,6 @@ const VaccineResult = () => {
 
   const handleSendNotificationAndEmail = async (student) => {
     try {
-      setModalLoading(true);
       // Gửi notification
       const note = student.followUpNote ? `Ghi chú: ${student.followUpNote}` : "Không có ghi chú.";
       await axios.post(
@@ -130,8 +129,6 @@ const VaccineResult = () => {
     } catch (error) {
       console.error("Lỗi khi gửi thông báo/email:", error);
       notifyError("Không thể gửi thông báo/email: " + error.response?.data?.message);
-    } finally {
-      setModalLoading(false);
     }
   };
 

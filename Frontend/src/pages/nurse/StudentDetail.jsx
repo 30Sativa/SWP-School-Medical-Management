@@ -11,20 +11,22 @@ const API_BASE = "https://swp-school-medical-management.onrender.com/api";
 
 // --- Child Component for Basic Info ---
 const StudentInfoSection = ({ student, onSave }) => {
-    if (!student) return null;
-
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({});
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
-        setFormData({
-            fullName: student.fullName || "",
-            dateOfBirth: student.dateOfBirth ? new Date(student.dateOfBirth).toISOString().split('T')[0] : "",
-            class: student.class || "",
-            genderName: student.genderName || "",
-        });
+        if (student) {
+            setFormData({
+                fullName: student.fullName || "",
+                dateOfBirth: student.dateOfBirth ? new Date(student.dateOfBirth).toISOString().split('T')[0] : "",
+                class: student.class || "",
+                genderName: student.genderName || "",
+            });
+        }
     }, [student]);
+
+    if (!student) return null;
 
     const handleFormChange = (e) => {
         setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -216,9 +218,9 @@ const HealthProfileSection = ({ healthProfile, studentId, onSave }) => {
 
 // --- Main Parent Component ---
 const StudentDetail = () => {
+  // Tất cả hook phải ở đầu function component
   const { id } = useParams();
   const navigate = useNavigate();
-
   const [student, setStudent] = useState(null);
   const [healthProfile, setHealthProfile] = useState(null);
   const [medicalHistory, setMedicalHistory] = useState([]);
@@ -226,22 +228,18 @@ const StudentDetail = () => {
   const [submitting, setSubmitting] = useState(false);
 
   const fetchData = useCallback(async () => {
-    // We only set loading to true on the first fetch
-    if (!student) setLoading(true);
-
+    setLoading(true); // luôn set loading true khi fetch
     try {
-      const token = localStorage.getItem("authToken"); // Retrieve token from local storage
-      const headers = { Authorization: `Bearer ${token}` }; // Set Authorization header
+      const token = localStorage.getItem("token"); // đồng bộ key token
+      const headers = { Authorization: `Bearer ${token}` };
       const studentPromise = axios.get(`${API_BASE}/Student/${id}`, { headers });
       const healthProfilePromise = axios.get(`${API_BASE}/health-profiles/student/${id}`, { headers });
       const medicalHistoryPromise = axios.get(`${API_BASE}/MedicalHistory/student/${id}`, { headers });
-
       const [studentRes, healthProfileRes, medicalHistoryRes] = await Promise.allSettled([
         studentPromise,
         healthProfilePromise,
         medicalHistoryPromise,
       ]);
-
       if (studentRes.status === "fulfilled") {
         setStudent(studentRes.value.data.data);
       } else {
@@ -250,19 +248,16 @@ const StudentDetail = () => {
         navigate("/students");
         return;
       }
-      
       if (healthProfileRes.status === "fulfilled" && healthProfileRes.value.data.data) {
         setHealthProfile(healthProfileRes.value.data.data);
       } else {
         setHealthProfile(null);
       }
-
       if (medicalHistoryRes.status === "fulfilled" && medicalHistoryRes.value.data.data) {
         setMedicalHistory(Array.isArray(medicalHistoryRes.value.data.data) ? medicalHistoryRes.value.data.data : []);
       } else {
         setMedicalHistory([]);
       }
-
     } catch (err) {
       console.error("Lỗi khi tải dữ liệu:", err);
       notifyError("Đã xảy ra lỗi khi tải dữ liệu chi tiết.");
