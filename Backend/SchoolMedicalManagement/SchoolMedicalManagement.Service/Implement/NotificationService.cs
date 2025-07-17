@@ -16,15 +16,18 @@ namespace SchoolMedicalManagement.Service.Implement
         private readonly NotificationRepository _notificationRepository;
         private readonly UserRepository _userRepository;
         private readonly NotificationTypeRepository _notificationTypeRepository;
+        private readonly IStudentService _studentService;
 
         public NotificationService(
             NotificationRepository notificationRepository,
             UserRepository userRepository,
-            NotificationTypeRepository notificationTypeRepository)
+            NotificationTypeRepository notificationTypeRepository,
+            IStudentService studentService)
         {
             _notificationRepository = notificationRepository;
             _userRepository = userRepository;
             _notificationTypeRepository = notificationTypeRepository;
+            _studentService = studentService;
         }
 
         public async Task<BaseResponse> GetAllNotificationsAsync()
@@ -176,5 +179,84 @@ namespace SchoolMedicalManagement.Service.Implement
             }
             return new BaseResponse { Status = StatusCodes.Status200OK.ToString(), Message = "Xóa thông báo thành công.", Data = null };
         }
+
+        public async Task<BaseResponse> GetParentNotificationsAsync(Guid parentId)
+        {
+            // Bước 1: Kiểm tra parentId có tồn tại và có quyền Parent không
+            var parentUser = await _userRepository.GetUserById(parentId);
+            if (parentUser == null)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status404NotFound.ToString(),
+                    Message = $"Không tìm thấy phụ huynh với ID {parentId}.",
+                    Data = null
+                };
+            }
+
+            if (parentUser.RoleId != 3)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status403Forbidden.ToString(),
+                    Message = "Người dùng không phải là phụ huynh.",
+                    Data = null
+                };
+            }
+
+            // Bước 2: Lấy danh sách học sinh của phụ huynh
+            var studentsResponse = await _studentService.GetStudentsOfParent(parentId);
+            var students = studentsResponse.Data as List<ListStudentResponse> ?? new List<ListStudentResponse>();
+            var studentIds = students.Select(s => s.StudentId).ToList();
+            
+            var notifications = new List<ParentNotificationResponse>();
+
+            // Bước 3: Lấy phiếu đồng ý tiêm chủng
+            if (studentIds.Any())
+            {
+                var consentRequests = await _userRepository.GetConsentRequestsByStudentIds(studentIds);
+                foreach (var consent in consentRequests)
+                {
+                    notifications.Add(new ParentNotificationResponse
+                    {
+                        Id = $"consent-{consent.RequestId}",
+                        ItemType = "consent",
+                        Title = consent.Campaign?.VaccineName ?? "Chiến dịch không xác định",
+                        Message = "Phụ huynh vui lòng xác nhận để nhà trường tiến hành tiêm chủng cho học sinh.",
+                        Date = consent.RequestDate.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                        Status = consent.ConsentStatus?.ConsentStatusName ?? "Chờ phản hồi",
+                        NotificationType = "vaccination"
+                    });
+                }
+            }
+
+            // Bước 4: Lấy thông báo gửi trực tiếp cho phụ huynh
+            var directNotifications = await _notificationRepository.GetNotificationsByUserId(parentId);
+            foreach (var notif in directNotifications)
+            {
+                notifications.Add(new ParentNotificationResponse
+                {
+                    Id = $"notification-{notif.NotificationId}",
+                    ItemType = "notification",
+                    Title = notif.Title ?? "Không có tiêu đề",
+                    Message = notif.Message,
+                    Date = notif.SentDate?.ToString("yyyy-MM-ddTHH:mm:ssZ") ?? DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    Status = "active",
+                    NotificationType = notif.Type?.TypeName ?? "general"
+                });
+            }
+
+            // Bước 5: Sắp xếp theo thời gian (mới nhất trước)
+            var sortedNotifications = notifications
+                .OrderByDescending(x => DateTime.Parse(x.Date))
+                .ToList();
+
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Lấy danh sách thông báo phụ huynh thành công.",
+                Data = sortedNotifications
+            };
+        }
     }
-} 
+}

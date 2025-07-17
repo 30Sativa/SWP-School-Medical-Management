@@ -49,4 +49,4 @@ namespace SchoolMedicalManagement.Repository.Repository
             return await RemoveAsync(isExist);
         }
     }
-} 
+}

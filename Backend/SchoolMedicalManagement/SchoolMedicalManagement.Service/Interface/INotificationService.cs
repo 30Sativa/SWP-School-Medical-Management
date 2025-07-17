@@ -13,5 +13,8 @@ namespace SchoolMedicalManagement.Service.Interface
         Task<BaseResponse?> GetNotificationByIdAsync(int id);
         Task<BaseResponse?> CreateNotificationAsync(CreateNotificationRequest request);
         Task<BaseResponse> DeleteNotificationAsync(int id);
+
+        // Lấy danh sách tổng hợp thông báo cho phụ huynh
+        Task<BaseResponse> GetParentNotificationsAsync(Guid parentId);
     }
-} 
+}
