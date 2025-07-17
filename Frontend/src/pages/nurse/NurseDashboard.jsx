@@ -43,13 +43,17 @@ const NurseDashBoard = () => {
   if (!dashboardData)
     return <div className={style.loadingText}>Không có dữ liệu dashboard</div>;
 
-  const userData = [
-    { name: "Admin", value: dashboardData.totalUsers.admin },
-    { name: "Y tá", value: dashboardData.totalUsers.nurse },
-    { name: "Phụ huynh", value: dashboardData.totalUsers.parent },
-  ];
+  // Tạo dữ liệu biểu đồ thống kê sự cố theo loại
+  const incidentTypeCount = {};
+  dashboardData.recentMedicalEvents.forEach((event) => {
+    const type = event.eventType || "Không xác định";
+    incidentTypeCount[type] = (incidentTypeCount[type] || 0) + 1;
+  });
+  const incidentChartData = Object.entries(incidentTypeCount).map(([name, value]) => ({ name, value }));
 
-  const COLORS = ["#8884d8", "#82ca9d", "#ffc658"];
+  const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f7f", "#4D96FF", "#F4C430", "#FF6B6B", "#9AE6B4", "#FFA500"];
+
+  const renderIncidentLabel = ({ name }) => name;
 
   return (
     <div className={style.container}>
@@ -137,19 +141,19 @@ const NurseDashBoard = () => {
 
           <div className={style.rightPanel}>
             <section className={style.card}>
-              <h3>Biểu đồ người dùng</h3>
+              <h3>Biểu đồ thống kê sự cố theo loại</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={userData}
+                    data={incidentChartData}
                     dataKey="value"
                     nameKey="name"
                     cx="50%"
                     cy="50%"
                     outerRadius={100}
-                    label
+                    label={renderIncidentLabel}
                   >
-                    {userData.map((entry, index) => (
+                    {incidentChartData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={COLORS[index % COLORS.length]}

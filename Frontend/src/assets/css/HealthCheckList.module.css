@@ -255,3 +255,116 @@
   color: #FF6347; /* Đỏ */
 }
 
+/* Card grid layout */
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+  margin-top: 32px;
+}
+
+.campaignCard {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  padding: 24px 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 200px;
+  transition: box-shadow 0.2s;
+}
+.campaignCard:hover {
+  box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+}
+
+.cardHeader {
+  margin-bottom: 12px;
+}
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a3c40;
+  margin-bottom: 4px;
+}
+.cardBody {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 16px;
+}
+.cardBody b {
+  color: #23b7b7;
+}
+.cardFooter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.statusBadgeWaiting {
+  background: #f3f3f3;
+  color: #888;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.statusBadgeActive {
+  background: #e0f7f5;
+  color: #23b7b7;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.statusBadgeDone {
+  background: #fff3e0;
+  color: #ff9800;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.statusBadgeCancel {
+  background: #ffeaea;
+  color: #e53935;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.btnDetail {
+  background: #23b7b7;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s;
+  margin-left: 0;
+}
+.btnDetail:hover {
+  background: #189a9a;
+}
+
+@media (max-width: 600px) {
+  .cardGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .campaignCard {
+    padding: 16px 10px 14px 10px;
+  }
+  .cardTitle {
+    font-size: 1.1rem;
+  }
+  .btnDetail {
+    font-size: 0.95rem;
+    padding: 7px 12px;
+  }
+}
+
