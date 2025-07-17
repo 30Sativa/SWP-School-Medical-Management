@@ -27,8 +27,9 @@ const SUCCESS_MESSAGES = {
 // API endpoints
 const API_ENDPOINTS = {
   STUDENTS_BY_PARENT: (parentId) => `${API_BASE_URL}/Student/by-parent/${parentId}`,
-  NOTIFICATIONS: `${API_BASE_URL}/Notification`, // Reverted to old endpoint
-  CONSENT_REQUESTS: (studentId) => `${API_BASE_URL}/VaccinationCampaign/consent-requests/student/${studentId}`,
+  // NEW: Unified endpoint for all items for a parent
+  PARENT_ITEMS: (parentId) => `${API_BASE_URL}/Notification/parent/${parentId}/notifications`,
+  // OLD endpoints - kept UPDATE_CONSENT for now
   UPDATE_CONSENT: (requestId) => `${API_BASE_URL}/VaccinationCampaign/consent-requests/${requestId}`
 };
 
@@ -46,8 +47,7 @@ const NotificationAndReport = () => {
   // State management
   const [students, setStudents] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
-  const [notifications, setNotifications] = useState([]);
-  const [consentForms, setConsentForms] = useState([]);
+  const [allItems, setAllItems] = useState([]); // New state for combined items
   const [activeTab, setActiveTab] = useState(TABS.ALL);
   const [declineReason, setDeclineReason] = useState("");
   const [showDeclineModal, setShowDeclineModal] = useState(false);
@@ -87,35 +87,21 @@ const NotificationAndReport = () => {
     }
   }, [parentId, token]);
 
-  const fetchDataForStudent = useCallback(async (studentId) => {
-    if (!studentId) return;
+  const fetchDataForParent = useCallback(async () => {
+    if (!parentId) return;
     setLoading(true);
     try {
-      // Reverted to fetch all notifications and filter on client-side
-      const [notificationsRes, consentRes] = await Promise.all([
-        axios.get(API_ENDPOINTS.NOTIFICATIONS, { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get(API_ENDPOINTS.CONSENT_REQUESTS(studentId), { headers: { Authorization: `Bearer ${token}` } })
-      ]);
-
-      const allNotifications = notificationsRes.data?.data || [];
-      const studentName = getSelectedStudentName();
-      
-      const studentNotifications = allNotifications.filter(
-        notification =>
-          notification.receiverId === parentId && 
-          notification.message?.includes(studentName)
-      );
-
-      setNotifications(studentNotifications);
-      setConsentForms(consentRes.data?.data || []);
-
+      const response = await axios.get(API_ENDPOINTS.PARENT_ITEMS(parentId), {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAllItems(response.data?.data || []);
     } catch (error) {
       console.error(ERROR_MESSAGES.FETCH_DATA_FAILED, error);
       toast.error(ERROR_MESSAGES.FETCH_DATA_FAILED);
     } finally {
       setLoading(false);
     }
-  }, [token, parentId, getSelectedStudentName]);
+  }, [parentId, token]);
 
   // Event handlers
   const handleStudentChange = (e) => setSelectedStudentId(Number(e.target.value));
@@ -154,10 +140,10 @@ const NotificationAndReport = () => {
       closeDeclineModal();
       
       // Refresh consent forms optimistically
-      setConsentForms(prev => prev.map(form => 
-        form.requestId === requestId 
-          ? { ...form, consentStatusName: agree ? 'Đồng ý' : 'Từ chối' }
-          : form
+      setAllItems(prev => prev.map(item =>
+        item.requestId === requestId
+          ? { ...item, status: agree ? 'Đồng ý' : 'Từ chối' }
+          : item
       ));
       
     } catch (error) {
@@ -170,49 +156,45 @@ const NotificationAndReport = () => {
 
   // Data filtering
   const getFilteredItems = useCallback(() => {
-    const combined = [
-      ...notifications.map(n => ({ ...n, itemType: "notification", date: n.sentDate })),
-      ...consentForms.map(f => ({ ...f, itemType: "consent", date: f.requestDate })),
-    ];
-    
+    // Filter by selected student first
+    const studentItems = allItems.filter(item => {
+      // Show items for the selected student, plus items that are not student-specific (studentId is null/undefined)
+      return item.studentId === selectedStudentId || item.studentId === null || item.studentId === undefined;
+    });
+
     // Primary filtering based on the active tab
-    const filteredByTab = combined.filter(item => {
+    const filteredByTab = studentItems.filter(item => {
       if (!item) return false;
       switch (activeTab) {
         case TABS.ALL:
-          return (
-            item.itemType === "notification" ||
-            (item.itemType === "consent" && !isConsentResponded(item.consentStatusName))
-          );
+          return true; // Already filtered by student, so show all
         case TABS.VACCINE:
-          return (
-            item.itemType === "consent" && !isConsentResponded(item.consentStatusName)
-          );
+          return item.itemType === "consent" && !isConsentResponded(item.status);
         case TABS.OTHER:
-            const isHealthResultForOther = item.itemType === "notification" && item.title?.includes("Kết quả khám sức khỏe");
-            const isVaccineResultForOther = item.itemType === "notification" && item.title?.includes("Kết quả tiêm chủng");
+            const isHealthResultForOther = item.notificationType === "health_result";
+            const isVaccineResultForOther = item.notificationType === "vaccine_result";
             return item.itemType === "notification" && !isHealthResultForOther && !isVaccineResultForOther;
         case TABS.RESULT_HEALTH:
-          return item.itemType === "notification" && item.title?.includes("Kết quả khám sức khỏe");
+          return item.itemType === "notification" && item.notificationType === "health_result";
         case TABS.RESULT_VACCINE:
-          return item.itemType === "notification" && item.title?.includes("Kết quả tiêm chủng");
+          return item.itemType === "notification" && item.notificationType === "vaccine_result";
         case TABS.REPLIED:
-          return item.itemType === "consent" && isConsentResponded(item.consentStatusName);
+          return item.itemType === "consent" && isConsentResponded(item.status);
         default: return true;
       }
     });
 
     // Secondary sorting: prioritize items that require action
     const needsAction = filteredByTab
-      .filter(item => item.itemType === "consent" && !isConsentResponded(item.consentStatusName))
+      .filter(item => item.itemType === "consent" && !isConsentResponded(item.status))
       .sort((a, b) => new Date(b.date) - new Date(a.date));
 
     const others = filteredByTab
-      .filter(item => !(item.itemType === "consent" && !isConsentResponded(item.consentStatusName)))
+      .filter(item => !(item.itemType === "consent" && !isConsentResponded(item.status)))
       .sort((a, b) => new Date(b.date) - new Date(a.date));
 
     return [...needsAction, ...others];
-  }, [notifications, consentForms, activeTab, isConsentResponded]);
+  }, [allItems, activeTab, isConsentResponded, selectedStudentId]);
 
   // Effects
   useEffect(() => {
@@ -220,15 +202,16 @@ const NotificationAndReport = () => {
   }, [fetchStudents]);
 
   useEffect(() => {
-    if (selectedStudentId) {
-      fetchDataForStudent(selectedStudentId);
+    // Fetch all parent data once, after the parentId is available.
+    if (parentId) {
+      fetchDataForParent();
     }
-  }, [selectedStudentId, fetchDataForStudent, getSelectedStudentName]); // Added getSelectedStudentName dependency
+  }, [parentId, fetchDataForParent]);
 
   // Render functions
   const renderItemCard = (item) => {
     const isConsent = item.itemType === 'consent';
-    const responded = isConsent && isConsentResponded(item.consentStatusName);
+    const responded = isConsent && isConsentResponded(item.status);
     const isSubmitting = submittingId === item.requestId;
 
     let icon, tag, tagStyle, iconStyle;
@@ -237,7 +220,7 @@ const NotificationAndReport = () => {
       tag = 'Phiếu đồng ý';
       tagStyle = styles.tagConsent;
       iconStyle = styles.iconVaccine;
-    } else if (item.title?.includes("Kết quả")) {
+    } else if (item.notificationType === NOTIFICATION_TYPES.RESULT) {
       icon = <FiCheckCircle />;
       tag = 'Kết quả';
       tagStyle = styles.tagResult;
@@ -254,17 +237,17 @@ const NotificationAndReport = () => {
     return (
       <div 
         className={`${styles.notificationCard} ${requiresAction ? styles.cardRequiresAction : ''}`} 
-        key={isConsent ? item.requestId : item.notificationId}
+        key={item.id} // Use the new unified ID
       >
         <div className={`${styles.cardIcon} ${iconStyle}`}>{icon}</div>
         <div className={styles.cardContent}>
           <div className={styles.cardHeader}>
-            <h3>{item.campaignName || item.title}</h3>
+            <h3>{item.title}</h3>
             <span className={`${styles.cardTag} ${tagStyle}`}>{tag}</span>
           </div>
           <div className={styles.cardBody}>
-            <p><strong>Học sinh:</strong> {item.studentName || getSelectedStudentName()}</p>
-            <p>{item.message || "Phụ huynh vui lòng xác nhận để nhà trường tiến hành tiêm chủng."}</p>
+            {item.studentName && <p><strong>Học sinh:</strong> {item.studentName}</p>}
+            <p>{item.message}</p>
           </div>
           <div className={styles.cardFooter}>
             <span className={styles.cardDate}>
@@ -282,8 +265,8 @@ const NotificationAndReport = () => {
                 </>
               )}
               {responded && (
-                <span className={`${styles.respondedTag} ${item.consentStatusName === 'Đồng ý' ? styles.tagApproved : styles.tagDeclined}`}>
-                  {item.consentStatusName === 'Đồng ý' ? '✅ Đã đồng ý' : `❌ Đã từ chối`}
+                <span className={`${styles.respondedTag} ${item.status === 'Đồng ý' ? styles.tagApproved : styles.tagDeclined}`}>
+                  {item.status === 'Đồng ý' ? '✅ Đã đồng ý' : `❌ Đã từ chối`}
                 </span>
               )}
             </div>
@@ -320,10 +303,21 @@ const NotificationAndReport = () => {
   );
   
   // Main render logic
-  if (students.length === 0 && !loading) return renderEmptyState();
-
   const filteredItems = getFilteredItems();
 
+  if (loading && students.length === 0) {
+    return (
+      <div className={styles.container}>
+        <Sidebar />
+        <div className={styles.content}><p>Đang tải dữ liệu...</p></div>
+      </div>
+    );
+  }
+
+  if (students.length === 0) {
+    return renderEmptyState();
+  }
+  
   return (
     <div className={styles.container}>
       <Sidebar />
@@ -338,7 +332,7 @@ const NotificationAndReport = () => {
 
           <div className={styles.layoutGrid}>
             <div className={styles.mainContent}>
-              {loading ? <p>Đang tải dữ liệu...</p> : (
+              {loading ? <p>Đang tải dữ liệu cho {getSelectedStudentName()}...</p> : (
                 filteredItems.length === 0 ? (
                   <div className={styles.emptyStateMessage}>
                     <FiInbox size={48} style={{ marginBottom: '16px', color: '#94a3b8' }}/>
@@ -396,7 +390,7 @@ const NotificationAndReport = () => {
           <div className={styles.modalOverlay}>
             <div className={styles.modalContent}>
               <h3>Lý do từ chối</h3>
-              <p>Vui lòng cung cấp lý do từ chối cho phiếu đồng ý của <strong>{currentConsentItem?.campaignName}</strong>.</p>
+              <p>Vui lòng cung cấp lý do từ chối cho phiếu đồng ý của <strong>{currentConsentItem?.title}</strong>.</p>
               <textarea
                 placeholder="Ví dụ: Cháu vừa bị ốm, gia đình sẽ cho cháu tiêm sau..."
                 value={declineReason}
