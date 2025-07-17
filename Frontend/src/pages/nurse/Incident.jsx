@@ -23,7 +23,7 @@ import isoWeek from "dayjs/plugin/isoWeek";
 dayjs.extend(isoWeek);
 import Select from "react-select";
 import Notification from "../../components/Notification";
-import { notifySuccess, notifyError, notifyInfo, notifyWarn } from "../../utils/notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
 import { toast } from "react-toastify";
 import LoadingOverlay from "../../components/LoadingOverlay";
 

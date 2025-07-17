@@ -177,7 +177,7 @@ const HealthCheckDetail = () => {
               "Thông báo kiểm tra sức khỏe học sinh",
               `Học sinh ${student.fullName} sẽ tham gia chiến dịch kiểm tra sức khỏe: ${campaign.title}.\nMô tả: ${campaign.description}.\nNgày kiểm tra: ${campaign.date}`
             );
-          } catch (err) {
+          } catch {
             hasError = true;
           }
         })

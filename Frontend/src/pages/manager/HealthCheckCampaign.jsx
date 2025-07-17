@@ -35,6 +35,12 @@ const HealthCheckCampaign = () => {
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      // Chuyển hướng về trang đăng nhập nếu không có token
+      window.location.href = "/login";
+      return;
+    }
     fetchCampaigns();
   }, []);
 
@@ -77,7 +83,15 @@ const HealthCheckCampaign = () => {
         setCampaigns([]);
       }
     } catch (error) {
-      console.error("Failed to fetch campaigns:", error);
+      if (error.response && error.response.status === 401) {
+        notifyError("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+        localStorage.removeItem("token");
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 1500);
+      } else {
+        notifyError("Không thể tải dữ liệu chiến dịch!");
+      }
       setCampaigns([]);
     }
     setLoading(false);
