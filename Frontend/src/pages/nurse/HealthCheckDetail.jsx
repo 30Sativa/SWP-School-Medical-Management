@@ -302,6 +302,87 @@ const HealthCheckDetail = () => {
               Gửi thông báo
             </button>
           )}
+          {campaign.statusName === "Đang diễn ra" && (
+            <button
+              className={styles.saveButton}
+              style={{ marginLeft: 12 }}
+              onClick={async () => {
+                try {
+                  await axios.put(
+                    `https://swp-school-medical-management.onrender.com/api/HealthCheckCampaign/${campaignId}`,
+                    { statusId: 3 }
+                  );
+                  notifySuccess("Đã chuyển sang trạng thái Đã hoàn thành!");
+                  fetchData();
+                } catch {
+                  notifyError("Lỗi khi cập nhật trạng thái!");
+                }
+              }}
+            >
+              Hoàn thành
+            </button>
+          )}
+          {campaign.statusName === "Đã hoàn thành" && (
+            <button
+              className={styles.saveButton}
+              style={{ marginLeft: 12 }}
+              onClick={async () => {
+                let hasError = false;
+                try {
+                  // Lọc các học sinh có healthCheckSummaries trong chiến dịch này
+                  const summaries = healthCheckSummaries.filter(s => Number(s.campaignId) === Number(campaignId));
+                  await Promise.all(
+                    summaries.map(async (summary) => {
+                      const student = students.find(stu => Number(stu.studentId) === Number(summary.studentId));
+                      if (!student || !student.parentId) return;
+                      // Soạn nội dung kết quả
+                      const result = `Kết quả khám sức khỏe của học sinh ${student.fullName} trong chiến dịch "${campaign.title}":\n- Huyết áp: ${summary.bloodPressure}\n- Nhịp tim: ${summary.heartRate}\n- Chiều cao: ${summary.height} cm\n- Cân nặng: ${summary.weight} kg\n- BMI: ${summary.bmi}\n- Mắt: ${summary.visionSummary}\n- Tai-Mũi-Họng: ${summary.ent} (${summary.entNotes || ''})\n- Miệng: ${summary.mouth}\n- Họng: ${summary.throat}\n- Sâu răng: ${summary.toothDecay} (${summary.toothNotes || ''})\n- Sức khỏe chung: ${summary.generalNote}\n- Khuyến nghị: ${summary.followUpNote || 'Không có'}\nNgày khám: ${campaign.date}`;
+                      // Gửi notification
+                      await axios.post(
+                        "https://swp-school-medical-management.onrender.com/api/Notification/send",
+                        {
+                          receiverId: student.parentId,
+                          title: `Kết quả khám sức khỏe học sinh ${student.fullName}`,
+                          message: result,
+                          typeId: 2,
+                          isRead: false,
+                        },
+                        {
+                          headers: { "Content-Type": "application/json" },
+                        }
+                      );
+                      // Gửi email
+                      try {
+                        await axios.post(
+                          "https://swp-school-medical-management.onrender.com/api/Email/send-by-userid",
+                          {
+                            userId: student.parentId,
+                            subject: `Kết quả khám sức khỏe học sinh ${student.fullName}`,
+                            body: result,
+                          },
+                          {
+                            headers: { "Content-Type": "application/json" },
+                          }
+                        );
+                      } catch {
+                        hasError = true;
+                      }
+                    })
+                  );
+                  if (hasError) {
+                    notifyError("Một số email gửi thất bại. Vui lòng kiểm tra lại!");
+                  } else {
+                    notifySuccess("Đã gửi kết quả sức khỏe cho tất cả phụ huynh!");
+                  }
+                // eslint-disable-next-line no-unused-vars
+                } catch (err) {
+                  notifyError("Lỗi khi gửi kết quả hàng loạt!");
+                }
+              }}
+            >
+              Gửi kết quả 
+            </button>
+          )}
         </div>
       )}
 

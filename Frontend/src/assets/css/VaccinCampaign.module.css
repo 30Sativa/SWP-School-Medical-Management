@@ -129,15 +129,36 @@
   color: white;
 }
 
+.statusBadgeWaiting {
+  background-color: transparent;
+  color: #ff9800;
+}
+
+.statusBadgeActive {
+  background-color: transparent;
+  color: #20b2aa;
+}
+
+.statusBadgeDone {
+  background-color: transparent;
+  color: #8bc34a;
+}
+
+.statusBadgeCancel {
+  background-color: transparent;
+  color: #f44336;
+}
+
 /* === Button === */
 .btnDetail {
   background-color: #20b2aa;
   color: white;
-  padding: 8px 16px;
+  padding: 6px 12px !important;
   border-radius: 8px;
   font-size: 1rem;
   border: none;
   cursor: pointer;
+  margin-left: 15px !important;
   transition: background-color 0.3s ease;
 }
 
@@ -260,5 +281,97 @@
 .inputSearch:focus {
   box-shadow: 0 0 0 2px #20b2aa33;
   border: 1px solid #20b2aa;
+}
+
+/* === Card Campaign (đẹp, hiện đại, responsive) === */
+.campaignCardList {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px 32px;
+  justify-content: center;
+  width: 100%;
+  margin-top: 24px;
+}
+@media (max-width: 1000px) {
+  .campaignCardList {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px 0;
+  }
+}
+@media (max-width: 700px) {
+  .campaignCardList {
+    grid-template-columns: 1fr;
+    gap: 16px 0;
+  }
+}
+.campaignCard {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(32,178,170,0.10);
+  padding: 32px 36px 28px 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 600px;
+  min-width: 0;
+  transition: box-shadow 0.2s;
+}
+.campaignCard:hover {
+  box-shadow: 0 8px 32px rgba(32,178,170,0.16);
+}
+.campaignCardInfo {
+  width: 100%;
+  margin-bottom: 18px;
+}
+.campaignCardTitle {
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin-bottom: 6px;
+  color: #222;
+}
+.campaignCardDate {
+  color: #666;
+  font-size: 1.05rem;
+  margin-bottom: 2px;
+}
+.campaignCardDesc {
+  color: #444;
+  font-size: 1.05rem;
+  margin-bottom: 0;
+}
+.campaignCardActions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+}
+.statusBadge {
+  display: inline-block;
+  padding: 10px 26px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 1.08rem;
+  margin-bottom: 0;
+  margin-right: 8px;
+  min-width: 140px;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(32,178,170,0.07);
+}
+
+
+@media (max-width: 700px) {
+  .campaignCard {
+    padding: 20px 10px 18px 10px;
+    max-width: 98vw;
+  }
+  .campaignCardTitle, .campaignCardDate, .campaignCardDesc {
+    font-size: 1rem;
+  }
+  .btnDetail, .statusBadge {
+    font-size: 0.98rem;
+    padding: 8px 16px;
+  }
 }
 
