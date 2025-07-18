@@ -191,7 +191,7 @@ const VaccineResult = () => {
           message: `Học sinh ${
             student.studentName
           } đã ${student.result.toLowerCase()} trong đợt tiêm chủng.\n${note}`,
-          typeId: 8,
+          typeId: 2, // <-- SỬA LẠI TỪ 8 THÀNH 2
           isRead: false,
         };
         const emailPayload = {
