@@ -109,7 +109,9 @@ const NotificationAndReport = () => {
   }, [parentId, token]);
 
   // Event handlers
-  const handleStudentChange = (e) => setSelectedStudentId(Number(e.target.value));
+  const handleStudentChange = (e) => {
+    setSelectedStudentId(e.target.value);
+  };
   const handleTabChange = (tab) => setActiveTab(tab);
 
   const openDeclineModal = (item) => {
@@ -124,7 +126,7 @@ const NotificationAndReport = () => {
   };
 
   const handleConsent = useCallback(async (agree, item) => {
-    const requestId = item.requestId;
+    const requestId = item.id;
     if (!agree && !declineReason.trim()) {
       toast.warning(ERROR_MESSAGES.DECLINE_REASON_REQUIRED);
       return;
@@ -137,7 +139,8 @@ const NotificationAndReport = () => {
         consentReason: agree ? null : declineReason,
       };
       
-      await axios.put(API_ENDPOINTS.UPDATE_CONSENT(requestId), payload, {
+      const idForApi = requestId.split('-')[1] || requestId;
+      await axios.put(API_ENDPOINTS.UPDATE_CONSENT(idForApi), payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -145,10 +148,10 @@ const NotificationAndReport = () => {
       closeDeclineModal();
       
       // Refresh consent forms optimistically
-      setAllItems(prev => prev.map(item =>
-        item.requestId === requestId
-          ? { ...item, status: agree ? 'Đồng ý' : 'Từ chối' }
-          : item
+      setAllItems(prev => prev.map(prevItem =>
+        prevItem.id === requestId
+          ? { ...prevItem, status: agree ? 'Đồng ý' : 'Từ chối' }
+          : prevItem
       ));
       
     } catch (error) {
@@ -159,47 +162,7 @@ const NotificationAndReport = () => {
     }
   }, [declineReason, token]);
 
-  // Data filtering
-  const getFilteredItems = useCallback(() => {
-    // Filter by selected student first
-    const studentItems = allItems.filter(item => {
-      // Show items for the selected student, plus items that are not student-specific (studentId is null/undefined)
-      return item.studentId === selectedStudentId || item.studentId === null || item.studentId === undefined;
-    });
-
-    // Primary filtering based on the active tab
-    const filteredByTab = studentItems.filter(item => {
-      if (!item) return false;
-      switch (activeTab) {
-        case TABS.ALL:
-          return true; // Already filtered by student, so show all
-        case TABS.VACCINE:
-          return item.itemType === "consent" && !isConsentResponded(item.status);
-        case TABS.OTHER:
-            const isHealthResultForOther = item.notificationType === NOTIFICATION_TYPES.HEALTH_RESULT;
-            const isVaccineResultForOther = item.notificationType === NOTIFICATION_TYPES.VACCINE_RESULT;
-            return item.itemType === "notification" && !isHealthResultForOther && !isVaccineResultForOther;
-        case TABS.RESULT_HEALTH:
-          return item.itemType === "notification" && item.notificationType === NOTIFICATION_TYPES.HEALTH_RESULT;
-        case TABS.RESULT_VACCINE:
-          return item.itemType === "notification" && item.notificationType === NOTIFICATION_TYPES.VACCINE_RESULT;
-        case TABS.REPLIED:
-          return item.itemType === "consent" && isConsentResponded(item.status);
-        default: return true;
-      }
-    });
-
-    // Secondary sorting: prioritize items that require action
-    const needsAction = filteredByTab
-      .filter(item => item.itemType === "consent" && !isConsentResponded(item.status))
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    const others = filteredByTab
-      .filter(item => !(item.itemType === "consent" && !isConsentResponded(item.status)))
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    return [...needsAction, ...others];
-  }, [allItems, activeTab, isConsentResponded, selectedStudentId]);
+  // Data filtering - logic will be moved directly into the render body
 
   // Effects
   useEffect(() => {
@@ -217,7 +180,7 @@ const NotificationAndReport = () => {
   const renderItemCard = (item) => {
     const isConsent = item.itemType === 'consent';
     const responded = isConsent && isConsentResponded(item.status);
-    const isSubmitting = submittingId === item.requestId;
+    const isSubmitting = submittingId === item.id;
 
     let icon, tag, tagStyle, iconStyle;
     if (isConsent) {
@@ -308,7 +271,85 @@ const NotificationAndReport = () => {
   );
   
   // Main render logic
-  const filteredItems = getFilteredItems();
+  const selectedStudent = students.find(s => s.studentId == selectedStudentId);
+  const selectedStudentName = selectedStudent?.fullName;
+
+  const studentItems = allItems.filter(item => {
+    const content = `${item.title} ${item.message}`;
+
+    // 1. If no student is selected, don't show any specific items.
+    // This case shouldn't happen if a student is selected by default.
+    if (!selectedStudentName) {
+      // Check if it's a general item (doesn't contain any student's name)
+      const allStudentNames = students.map(s => s.fullName);
+      const isForAnyStudent = allStudentNames.some(name => content.includes(name));
+      return !isForAnyStudent;
+    }
+
+    // 2. Check if the item belongs to the currently selected student.
+    const isForSelectedStudent = content.includes(selectedStudentName);
+    if (isForSelectedStudent) {
+      return true;
+    }
+
+    // 3. Check if the item is a general notification (doesn't belong to ANY student).
+    const allStudentNames = students.map(s => s.fullName);
+    const isForAnyStudent = allStudentNames.some(name => content.includes(name));
+    if (!isForAnyStudent) {
+      return true;
+    }
+
+    // 4. Otherwise, it's for a different student, so don't show it.
+    return false;
+  });
+
+  // Primary filtering based on the active tab
+  const filteredByTab = studentItems.filter(item => {
+    if (!item) return false;
+
+    // Normalize both the item title and keywords for robust matching.
+    const title = String(item.title || '').normalize('NFC').toLowerCase();
+    const healthCheckKeyword = 'kết quả khám sức khỏe'.normalize('NFC');
+    const vaccineKeyword = 'kết quả tiêm chủng'.normalize('NFC');
+
+    const isHealthResult = title.includes(healthCheckKeyword);
+    const isVaccineResult = title.includes(vaccineKeyword);
+
+    switch (activeTab) {
+      case TABS.ALL:
+        return true;
+
+      case TABS.VACCINE:
+        return item.itemType === "consent" && !isConsentResponded(item.status);
+
+      case TABS.OTHER:
+        // An "other" notification is a notification item that is NOT a health or vaccine result.
+        return item.itemType === "notification" && !isHealthResult && !isVaccineResult;
+
+      case TABS.RESULT_HEALTH:
+        return item.itemType === "notification" && isHealthResult;
+
+      case TABS.RESULT_VACCINE:
+        return item.itemType === "notification" && isVaccineResult;
+
+      case TABS.REPLIED:
+        return item.itemType === "consent" && isConsentResponded(item.status);
+
+      default:
+        return true;
+    }
+  });
+
+  // Secondary sorting: prioritize items that require action
+  const needsAction = filteredByTab
+    .filter(item => item.itemType === "consent" && !isConsentResponded(item.status))
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  const others = filteredByTab
+    .filter(item => !(item.itemType === "consent" && !isConsentResponded(item.status)))
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  const filteredItems = [...needsAction, ...others];
 
   if (loading && students.length === 0) {
     return (
@@ -406,9 +447,9 @@ const NotificationAndReport = () => {
                 <button
                   className={`${styles.actionButton} ${styles.declineButton}`}
                   onClick={() => handleConsent(false, currentConsentItem)}
-                  disabled={!declineReason.trim() || submittingId === currentConsentItem.requestId}
+                  disabled={!declineReason.trim() || submittingId === currentConsentItem.id}
                 >
-                  {submittingId === currentConsentItem.requestId ? "Đang gửi..." : "Xác nhận từ chối"}
+                  {submittingId === currentConsentItem.id ? "Đang gửi..." : "Xác nhận từ chối"}
                 </button>
               </div>
             </div>
