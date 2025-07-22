@@ -43,6 +43,7 @@ const VaccinCampaign = () => {
             confirmed: item.totalVaccinationRecords,
             total: item.totalConsentRequests,
             status: item.statusName,
+            createdByName: item.createdByName, // Thêm dòng này để lấy tên người tạo
           }));
           // Sắp xếp theo ngày giảm dần (mới nhất lên đầu)
           transformed.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -81,8 +82,9 @@ const VaccinCampaign = () => {
       return matchSearch && c.status !== "Đã huỷ";
     });
   } else if (quickFilter === "latest") {
+    // Find the campaign with the highest id (assume id is numeric)
     const latest = campaigns.reduce(
-      (max, c) => (new Date(c.date) > new Date(max.date) ? c : max),
+      (max, c) => (Number(c.id) > Number(max.id) ? c : max),
       campaigns[0]
     );
     filteredCampaigns = latest ? [latest] : [];
@@ -229,6 +231,9 @@ const VaccinCampaign = () => {
                     </div>
                     <div>
                       <b>Mô tả:</b> {c.description}
+                    </div>
+                    <div>
+                      <b>Người tạo:</b> {c.createdByName}
                     </div>
                   </div>
                   <div className={style.cardFooter}>

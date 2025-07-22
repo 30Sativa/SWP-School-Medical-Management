@@ -291,6 +291,7 @@ const HealthCheckList = () => {
                   <div className={style.cardBody}>
                     <div><b>Ngày:</b> {new Date(c.date).toLocaleDateString()}</div>
                     <div><b>Mô tả:</b> {c.description}</div>
+                    <div><b>Người tạo:</b> {c.createdByName}</div>
                   </div>
                   <div className={style.cardFooter}>
                     {c.statusName === "Chưa bắt đầu" ? (

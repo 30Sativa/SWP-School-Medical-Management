@@ -16,6 +16,8 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
+  BarChart,
+  Bar,
 } from "recharts";
 import { Search, Plus, Users } from "lucide-react";
 import dayjs from "dayjs";
@@ -44,7 +46,6 @@ const Incident = () => {
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [eventTypeFilter, setEventTypeFilter] = useState("Tất cả");
   const [dateFilter, setDateFilter] = useState("");
-  const [chartData, setChartData] = useState([]);
   const [summary, setSummary] = useState({
     total: 0,
     sent: 0,
@@ -413,9 +414,6 @@ const Incident = () => {
       dateMap[groupKey] = (dateMap[groupKey] || 0) + 1;
     });
 
-    setChartData(
-      Object.entries(typeMap).map(([name, value]) => ({ name, value }))
-    );
     setDistributionData(
       Object.entries(dateMap)
         .map(([key, value]) => ({ date: key, value }))
@@ -557,9 +555,25 @@ const Incident = () => {
         });
         setSuppliesUsed([]);
         fetchEvents();
-        notifySuccess("Tạo sự cố thành công!");
-        // Gửi thông báo tự động
-        sendNotificationToParent(added.studentId, added);
+        // Map lại các trường cho notification
+        const eventTypeObj = eventTypes.find(et => et.id == payload.eventTypeId);
+        const severityObj = severityLevels.find(sl => sl.id == payload.severityId);
+        const notificationEvent = {
+          ...added,
+          eventType: eventTypeObj ? eventTypeObj.name : "Không rõ",
+          severityLevelName: severityObj ? severityObj.level : "Không rõ",
+          description: payload.description || "Không có",
+          eventDate: payload.eventDate || "",
+          studentName: payload.studentName,
+          parentId: payload.parentId,
+        };
+        sendNotificationToParent(notificationEvent.studentId, notificationEvent).then((ok) => {
+          if (ok) {
+            notifySuccess("Tạo sự cố và gửi thông báo thành công!");
+          } else {
+            notifyError("Tạo sự cố thành công nhưng gửi thông báo/email thất bại!");
+          }
+        });
       })
       .catch((err) => {
         const errorDetail =
@@ -842,6 +856,21 @@ const Incident = () => {
     );
   };
 
+  // Hàm lấy dữ liệu cho BarChart: top 10 loại sự cố
+  const getBarChartData = (data) => {
+    if (!Array.isArray(data) || data.length === 0) return [];
+    const typeMap = {};
+    data.forEach((event) => {
+      if (event.eventType) {
+        typeMap[event.eventType] = (typeMap[event.eventType] || 0) + 1;
+      }
+    });
+    const sorted = Object.entries(typeMap)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+    return sorted.slice(0, 10);
+  };
+
   // Skeleton loading rows
   const skeletonRows = Array.from({ length: itemsPerPage }, (_, i) => (
     <tr key={i} className={style.skeletonRow}>
@@ -984,27 +1013,22 @@ const Incident = () => {
         <div className={style.summarySection}>
           <div className={style.chartCard}>
             <h4>Thống kê theo loại</h4>
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={40}
-                  outerRadius={70}
-                  fill="#8884d8"
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart
+                data={getBarChartData(filteredEvents)}
+                layout="vertical"
+                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+              >
+                <XAxis type="number" allowDecimals={false} tick={{ fontSize: 13 }} />
+                <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 13 }} />
+                <Tooltip formatter={(value) => [`${value} sự cố`]} />
                 <Legend />
-              </PieChart>
+                <Bar dataKey="value" fill="#4D96FF">
+                  {getBarChartData(filteredEvents).map((entry, index) => (
+                    <Cell key={`cell-bar-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           </div>
 
@@ -1218,7 +1242,7 @@ const Incident = () => {
                   );
                   const parentId = res.data?.data?.parentId;
                   if (!parentId) {
-                    alert("Không tìm thấy phụ huynh của học sinh này!");
+                    notifyError("Không tìm thấy phụ huynh của học sinh này!");
                     return;
                   }
                   const message = `Học sinh: ${selectedEvent.studentName}\nLoại sự cố: ${selectedEvent.eventType}\nThời gian: ${selectedEvent.eventDate ? new Date(selectedEvent.eventDate).toLocaleString() : "Không rõ"}\nMức độ: ${selectedEvent.severityLevelName || "Không rõ"}\nMô tả: ${selectedEvent.description || "Không có"}`;
@@ -1246,10 +1270,10 @@ const Incident = () => {
                       { headers: { Authorization: `Bearer ${token}` } }
                     ),
                   ]);
-                  alert("Đã gửi thông báo và email cho phụ huynh!");
+                  notifySuccess("Đã gửi thông báo và email cho phụ huynh!");
                   setShowSendOption(false);
                 } catch {
-                  alert("Gửi thông báo hoặc email thất bại!");
+                  notifyError("Gửi thông báo hoặc email thất bại!");
                 }
               }}
             >

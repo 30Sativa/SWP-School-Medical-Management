@@ -97,9 +97,9 @@ const VaccinationCampaign = () => {
       return matchSearch;
     });
   } else if (quickFilter === "latest") {
-    // Chiến dịch vừa tạo: lấy campaign có ngày lớn nhất
+    // Chiến dịch vừa tạo: lấy campaign có id lớn nhất
     const latest = activeCampaigns.reduce(
-      (max, c) => (dayjs(c.date).isAfter(dayjs(max.date)) ? c : max),
+      (max, c) => (Number(c.campaignId) > Number(max.campaignId) ? c : max),
       activeCampaigns[0]
     );
     filteredCampaigns = latest ? [latest] : [];
