@@ -187,12 +187,14 @@ app.MapMethods("/api/health", new[] { "HEAD" }, () => Results.Ok());
 app.UseStaticFiles();
 app.UseSwagger();
 app.UseSwaggerUI();
-
+app.UseRouting();
 app.UseCors("MyCorsPolicy");
 
 app.UseHttpsRedirection();
 
 
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
