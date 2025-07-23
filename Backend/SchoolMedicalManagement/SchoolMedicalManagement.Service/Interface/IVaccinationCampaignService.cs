@@ -76,5 +76,20 @@ namespace SchoolMedicalManagement.Service.Interface
 
         // Lấy tất cả phiếu đồng ý tiêm chủng của một học sinh
         Task<BaseResponse> GetConsentRequestsByStudentIdAsync(int studentId);
+
+        // Cập nhật bản ghi tiêm chủng
+        Task<BaseResponse> UpdateVaccinationRecordAsync(UpdateVaccinationRecordRequest request);
+
+        // Lấy danh sách bản ghi tiêm chủng theo chiến dịch
+        Task<BaseResponse> GetVaccinationRecordsByCampaignAsync(int campaignId);
+
+        // Gửi lại phiếu đồng ý
+        Task<BaseResponse> ResendConsentRequestAsync(int requestId, int? autoDeclineAfterDays = null);
+
+        // Lấy tóm tắt thống kê chiến dịch
+        Task<BaseResponse> GetCampaignSummaryAsync(int campaignId);
+
+        // Lấy danh sách phiếu đồng ý đang chờ
+        Task<BaseResponse> GetPendingConsentRequestsAsync(int campaignId);
     }
 }

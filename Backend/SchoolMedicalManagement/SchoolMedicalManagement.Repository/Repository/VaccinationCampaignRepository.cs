@@ -365,5 +365,70 @@ namespace SchoolMedicalManagement.Repository.Repository
             return await _context.VaccinationRecords
                 .CountAsync(vr => vr.CampaignId == campaignId && vr.IsActive == true);
         }
+
+        // Cập nhật bản ghi tiêm chủng
+        public async Task<VaccinationRecord?> UpdateVaccinationRecord(VaccinationRecord record)
+        {
+            _context.VaccinationRecords.Update(record);
+            var affected = await _context.SaveChangesAsync();
+            return affected > 0 ? await _context.VaccinationRecords
+                .Include(v => v.Campaign)
+                .Include(v => v.ConsentStatus)
+                .Include(v => v.Student)
+                .FirstOrDefaultAsync(v => v.RecordId == record.RecordId) : null;
+        }
+
+        // Lấy danh sách bản ghi tiêm chủng theo chiến dịch
+        public async Task<List<VaccinationRecord>> GetVaccinationRecordsByCampaign(int campaignId)
+        {
+            return await _context.VaccinationRecords
+                .Include(v => v.Student)
+                .Include(v => v.Campaign)
+                .Include(v => v.ConsentStatus)
+                .Where(v => v.CampaignId == campaignId && v.IsActive == true)
+                .ToListAsync();
+        }
+
+        // Lấy danh sách phiếu đồng ý đang chờ theo chiến dịch
+        public async Task<List<VaccinationConsentRequest>> GetPendingConsentRequests(int campaignId)
+        {
+            return await _context.VaccinationConsentRequests
+                .Include(c => c.Student)
+                .Include(c => c.Parent)
+                .Include(c => c.ConsentStatus)
+                .Where(c => c.CampaignId == campaignId && c.ConsentStatusId == 1)
+                .ToListAsync();
+        }
+
+        // Đếm số phiếu đồng ý đang chờ cho chiến dịch
+        public async Task<int> GetPendingConsentCount(int campaignId)
+        {
+            return await _context.VaccinationConsentRequests
+                .CountAsync(cr => cr.CampaignId == campaignId && cr.ConsentStatusId == 1);
+        }
+
+        // Đếm số tiêm chủng thành công cho chiến dịch (giả sử Result == "Success")
+        public async Task<int> GetSuccessfulVaccinationCount(int campaignId)
+        {
+            return await _context.VaccinationRecords
+                .CountAsync(vr => vr.CampaignId == campaignId && vr.IsActive == true && vr.Result == "Success");
+        }
+
+        // Lấy bản ghi tiêm chủng theo ID
+        public async Task<VaccinationRecord?> GetVaccinationRecordById(int recordId)
+        {
+            return await _context.VaccinationRecords
+                .Include(v => v.Campaign)
+                .Include(v => v.ConsentStatus)
+                .Include(v => v.Student)
+                .FirstOrDefaultAsync(v => v.RecordId == recordId);
+        }
+
+        // Đếm số phiếu từ chối cho chiến dịch
+        public async Task<int> GetDeclinedConsentCount(int campaignId)
+        {
+            return await _context.VaccinationConsentRequests
+                .CountAsync(cr => cr.CampaignId == campaignId && cr.ConsentStatusId == 3);
+        }
     }
 }

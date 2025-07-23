@@ -1346,5 +1346,99 @@ namespace SchoolMedicalManagement.Service.Implement
                 await _campaignRepository.UpdateConsentRequest(consentRequest);
             }
         }
+
+        // Cập nhật bản ghi tiêm chủng
+        public async Task<BaseResponse> UpdateVaccinationRecordAsync(UpdateVaccinationRecordRequest request)
+        {
+            var record = await _campaignRepository.GetVaccinationRecordById(request.RecordId);
+            if (record == null)
+            {
+                return new BaseResponse { Status = StatusCodes.Status404NotFound.ToString(), Message = $"Không tìm thấy bản ghi với ID {request.RecordId}", Data = null };
+            }
+            if (record.IsActive != true)
+            {
+                return new BaseResponse { Status = StatusCodes.Status400BadRequest.ToString(), Message = "Không thể cập nhật bản ghi không hoạt động", Data = null };
+            }
+            var campaign = await _campaignRepository.GetCampaignById(record.CampaignId.Value);
+            if (campaign.StatusId != 2)
+            {
+                return new BaseResponse { Status = StatusCodes.Status400BadRequest.ToString(), Message = "Chỉ cập nhật trong chiến dịch đang diễn ra", Data = null };
+            }
+            if (request.VaccinationDate.HasValue) record.VaccinationDate = request.VaccinationDate;
+            if (!string.IsNullOrEmpty(request.Result)) record.Result = request.Result;
+            if (!string.IsNullOrEmpty(request.FollowUpNote)) record.FollowUpNote = request.FollowUpNote;
+            if (request.IsActive.HasValue) record.IsActive = request.IsActive;
+            var updated = await _campaignRepository.UpdateVaccinationRecord(record);
+            if (updated == null)
+            {
+                return new BaseResponse { Status = StatusCodes.Status400BadRequest.ToString(), Message = "Cập nhật thất bại", Data = null };
+            }
+            return new BaseResponse { Status = StatusCodes.Status200OK.ToString(), Message = "Cập nhật thành công", Data = new VaccinationRecordResponse { /* map fields */ } };
+        }
+
+        // Lấy danh sách bản ghi tiêm chủng theo chiến dịch
+        public async Task<BaseResponse> GetVaccinationRecordsByCampaignAsync(int campaignId)
+        {
+            var records = await _campaignRepository.GetVaccinationRecordsByCampaign(campaignId);
+            var response = records.Select(r => new VaccinationRecordResponse { /* map fields */ }).ToList();
+            return new BaseResponse { Status = StatusCodes.Status200OK.ToString(), Message = "Lấy danh sách thành công", Data = response };
+        }
+
+        // Gửi lại phiếu đồng ý
+        public async Task<BaseResponse> ResendConsentRequestAsync(int requestId, int? autoDeclineAfterDays = null)
+        {
+            var consent = await _campaignRepository.GetConsentRequestById(requestId);
+            if (consent == null) return new BaseResponse { Status = "404", Message = "Không tìm thấy phiếu", Data = null };
+            if (consent.ConsentStatusId == 2) return new BaseResponse { Status = "400", Message = "Phiếu đã đồng ý, không cần gửi lại", Data = null };
+            consent.ConsentStatusId = 1;
+            consent.RequestDate = DateTime.UtcNow;
+            consent.ConsentDate = null;
+            var updated = await _campaignRepository.UpdateConsentRequest(consent);
+            if (updated == null) return new BaseResponse { Status = "400", Message = "Gửi lại thất bại", Data = null };
+            int days = autoDeclineAfterDays ?? 3;
+            BackgroundJob.Schedule<VaccinationCampaignService>(x => x.AutoDeclineConsentRequest(requestId), TimeSpan.FromDays(days));
+            return new BaseResponse { Status = "200", Message = "Gửi lại thành công", Data = new ConsentRequestResponse { /* map */ } };
+        }
+
+        // Lấy tóm tắt thống kê chiến dịch
+        public async Task<BaseResponse> GetCampaignSummaryAsync(int campaignId)
+        {
+            var campaign = await _campaignRepository.GetCampaignById(campaignId);
+            if (campaign == null) return new BaseResponse { Status = "404", Message = "Không tìm thấy chiến dịch", Data = null };
+            var summary = new CampaignSummaryResponse
+            {
+                CampaignId = campaignId,
+                VaccineName = campaign.VaccineName,
+                Date = campaign.Date,
+                TotalConsentRequests = await _campaignRepository.GetConsentRequestsCountByCampaignId(campaignId),
+                ApprovedConsents = await _campaignRepository.GetApprovedConsentCount(campaignId),
+                DeclinedConsents = await _campaignRepository.GetDeclinedConsentCount(campaignId),
+                PendingConsents = await _campaignRepository.GetPendingConsentCount(campaignId),
+                TotalVaccinationRecords = await _campaignRepository.GetVaccinationRecordCount(campaignId),
+                SuccessfulVaccinations = await _campaignRepository.GetSuccessfulVaccinationCount(campaignId)
+            };
+            return new BaseResponse { Status = "200", Message = "Lấy tóm tắt thành công", Data = summary };
+        }
+
+        // Lấy danh sách phiếu đồng ý đang chờ
+        public async Task<BaseResponse> GetPendingConsentRequestsAsync(int campaignId)
+        {
+            var consents = await _campaignRepository.GetPendingConsentRequests(campaignId);
+            var response = consents.Select(c => new ConsentRequestResponse
+            {
+                RequestId = c.RequestId,
+                StudentId = c.StudentId,
+                StudentName = c.Student?.FullName,
+                CampaignId = c.CampaignId,
+                CampaignName = c.Campaign?.VaccineName,
+                ParentId = c.ParentId,
+                ParentName = c.Parent?.FullName,
+                RequestDate = c.RequestDate,
+                ConsentStatusId = c.ConsentStatusId,
+                ConsentStatusName = c.ConsentStatus?.ConsentStatusName,
+                ConsentDate = c.ConsentDate
+            }).ToList();
+            return new BaseResponse { Status = StatusCodes.Status200OK.ToString(), Message = "Lấy danh sách phiếu chờ thành công", Data = response };
+        }
     }
 }
