@@ -84,90 +84,6 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Lấy danh sách yêu cầu đồng ý của một chiến dịch
-        [HttpGet("campaigns/{id}/consent-requests")]
-        public async Task<IActionResult> GetCampaignConsentRequests([FromRoute] int id)
-        {
-            var response = await _vaccinationCampaignService.GetCampaignConsentRequestsAsync(id);
-            return StatusCode(int.Parse(response.Status ?? "200"), response);
-        }
-
-        // Lấy danh sách yêu cầu đã đồng ý
-        [HttpGet("campaigns/{id}/approved-consents")]
-        public async Task<IActionResult> GetApprovedConsentRequests([FromRoute] int id)
-        {
-            var response = await _vaccinationCampaignService.GetApprovedConsentRequestsAsync(id);
-            return StatusCode(int.Parse(response.Status ?? "200"), response);
-        }
-
-        // Lấy danh sách yêu cầu từ chối
-        [HttpGet("campaigns/{id}/declined-consents")]
-        public async Task<IActionResult> GetDeclinedConsentRequests([FromRoute] int id)
-        {
-            var response = await _vaccinationCampaignService.GetDeclinedConsentRequestsAsync(id);
-            return StatusCode(int.Parse(response.Status ?? "200"), response);
-        }
-
-        // Gửi phiếu đồng ý tiêm chủng cho phụ huynh
-        [HttpPost("campaigns/{campaignId}/send-consent/{studentId}")]
-        public async Task<IActionResult> SendConsentRequest(
-            [FromRoute] int campaignId,
-            [FromRoute] int studentId,
-            [FromQuery] Guid parentId,
-            [FromQuery] int? autoDeclineAfterDays = null)
-        {
-            var response = await _vaccinationCampaignService.SendConsentRequestAsync(campaignId, studentId, parentId, autoDeclineAfterDays);
-            return StatusCode(int.Parse(response.Status ?? "200"), response);
-        }
-
-        // Gửi phiếu đồng ý theo lớp học
-        [HttpPost("campaigns/{campaignId}/send-consent-by-class")]
-        public async Task<IActionResult> SendConsentRequestsByClass([FromRoute] int campaignId, [FromBody] SendConsentByClassRequest request)
-        {
-            var response = await _vaccinationCampaignService.SendConsentRequestsByClassAsync(campaignId, request);
-            return StatusCode(int.Parse(response.Status ?? "200"), response);
-        }
-
-        // Gửi phiếu đồng ý cho tất cả phụ huynh
-        [HttpPost("campaigns/{campaignId}/send-consent-to-all-parents")]
-        public async Task<IActionResult> SendConsentRequestsToAllParents([FromRoute] int campaignId, [FromQuery] int? autoDeclineAfterDays = null)
-        {
-            var response = await _vaccinationCampaignService.SendConsentRequestsToAllParentsAsync(campaignId, autoDeclineAfterDays);
-            return StatusCode(int.Parse(response.Status ?? "200"), response);
-        }
-
-        // Gửi phiếu đồng ý theo danh sách học sinh
-        [HttpPost("campaigns/{campaignId}/send-consent-bulk")]
-        public async Task<IActionResult> SendConsentRequestsBulk([FromRoute] int campaignId, [FromBody] SendConsentBulkRequest request)
-        {
-            var response = await _vaccinationCampaignService.SendConsentRequestsBulkAsync(campaignId, request);
-            return StatusCode(int.Parse(response.Status ?? "200"), response);
-        }
-
-        // Cập nhật trạng thái đồng ý của phụ huynh
-        [HttpPut("consent-requests/{id}")]
-        public async Task<IActionResult> UpdateConsentRequest([FromRoute] int id, [FromBody] UpdateConsentRequestRequest request)
-        {
-            var response = await _vaccinationCampaignService.UpdateConsentRequestAsync(id, request);
-            return StatusCode(int.Parse(response.Status ?? "200"), response);
-        }
-
-        // Lấy lịch sử tiêm chủng của một học sinh
-        [HttpGet("records/student/{studentId}")]
-        public async Task<IActionResult> GetStudentVaccinationRecords([FromRoute] int studentId)
-        {
-            var response = await _vaccinationCampaignService.GetStudentVaccinationRecordsAsync(studentId);
-            return StatusCode(int.Parse(response.Status ?? "200"), response);
-        }
-
-        // Ghi nhận kết quả tiêm chủng cho học sinh
-        [HttpPost("records")]
-        public async Task<IActionResult> CreateVaccinationRecord([FromBody] CreateVaccinationRecordRequest request)
-        {
-            var response = await _vaccinationCampaignService.CreateVaccinationRecordAsync(request);
-            return StatusCode(int.Parse(response.Status ?? "200"), response);
-        }
-
         // Lấy danh sách chiến dịch theo người tạo
         [HttpGet("campaigns/creator/{creatorId}")]
         public async Task<IActionResult> GetCampaignsByCreator([FromRoute] Guid creatorId)
@@ -184,21 +100,12 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Lấy phiếu đồng ý tiêm chủng theo requestId
-        [HttpGet("consent-requests/{requestId}")]
-        public async Task<IActionResult> GetConsentRequestById([FromRoute] int requestId)
+        // Lấy tóm tắt thống kê chiến dịch
+        [HttpGet("campaigns/{id}/summary")]
+        public async Task<IActionResult> GetCampaignSummary([FromRoute] int id)
         {
-            var response = await _vaccinationCampaignService.GetConsentRequestByIdAsync(requestId);
+            var response = await _vaccinationCampaignService.GetCampaignSummaryAsync(id);
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
-
-        // Lấy tất cả phiếu đồng ý tiêm chủng của một học sinh
-        [HttpGet("consent-requests/student/{studentId}")]
-        public async Task<IActionResult> GetConsentRequestsByStudentId([FromRoute] int studentId)
-        {
-            var response = await _vaccinationCampaignService.GetConsentRequestsByStudentIdAsync(studentId);
-            return StatusCode(int.Parse(response.Status ?? "200"), response);
-        }
-
     }
 }
