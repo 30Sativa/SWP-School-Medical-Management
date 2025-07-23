@@ -27,9 +27,11 @@ const SUCCESS_MESSAGES = {
 // API endpoints
 const API_ENDPOINTS = {
   STUDENTS_BY_PARENT: (parentId) => `${API_BASE_URL}/Student/by-parent/${parentId}`,
-  // NEW: Unified endpoint for all items for a parent
-  PARENT_ITEMS: (parentId) => `${API_BASE_URL}/Notification/parent/${parentId}/notifications`,
-  // OLD endpoints - kept UPDATE_CONSENT for now
+  // API for general notifications and health/vaccine results
+  PARENT_NOTIFICATIONS: (parentId) => `${API_BASE_URL}/Notification/parent/${parentId}/notifications`,
+  // API for ALL consent requests (pending and historical) for a specific student
+  STUDENT_CONSENTS: (studentId) => `${API_BASE_URL}/VaccinationCampaign/consent-requests/student/${studentId}`,
+  // API to update a consent request
   UPDATE_CONSENT: (requestId) => `${API_BASE_URL}/VaccinationCampaign/consent-requests/${requestId}`
 };
 
@@ -52,7 +54,11 @@ const NotificationAndReport = () => {
   // State management
   const [students, setStudents] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
-  const [allItems, setAllItems] = useState([]); // New state for combined items
+  
+  // Reworked state: Separate data sources for clarity and reliability
+  const [notifications, setNotifications] = useState([]); // For general announcements and results
+  const [consentRequests, setConsentRequests] = useState([]); // For all consents (pending & historical)
+
   const [activeTab, setActiveTab] = useState(TABS.ALL);
   const [declineReason, setDeclineReason] = useState("");
   const [showDeclineModal, setShowDeclineModal] = useState(false);
@@ -92,21 +98,55 @@ const NotificationAndReport = () => {
     }
   }, [parentId, token]);
 
-  const fetchDataForParent = useCallback(async () => {
+  // Fetches general notifications and results for the parent
+  const fetchNotifications = useCallback(async () => {
     if (!parentId) return;
     setLoading(true);
     try {
-      const response = await axios.get(API_ENDPOINTS.PARENT_ITEMS(parentId), {
+      const response = await axios.get(API_ENDPOINTS.PARENT_NOTIFICATIONS(parentId), {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setAllItems(response.data?.data || []);
+      // We only store non-consent items here
+      const nonConsentItems = (response.data?.data || []).filter(item => item.itemType !== 'consent');
+      setNotifications(nonConsentItems);
     } catch (error) {
-      console.error(ERROR_MESSAGES.FETCH_DATA_FAILED, error);
-      toast.error(ERROR_MESSAGES.FETCH_DATA_FAILED);
+      console.error("Lỗi khi lấy thông báo chung:", error);
+      toast.error("Không thể tải các thông báo chung.");
     } finally {
       setLoading(false);
     }
   }, [parentId, token]);
+
+  // Fetches ALL consent requests for a specific student
+  const fetchConsentRequests = useCallback(async (studentId) => {
+    if (!studentId) return;
+    setLoading(true);
+    try {
+      const response = await axios.get(API_ENDPOINTS.STUDENT_CONSENTS(studentId), {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const consents = response.data?.data || [];
+      // Transform data to match the unified structure for rendering
+      const transformedData = consents.map(item => ({
+        id: item.requestId, // Use original requestId
+        itemType: 'consent',
+        status: item.consentStatusName,
+        title: item.campaignName,
+        message: `Chiến dịch tiêm chủng vắc-xin ${item.campaignName}. Vui lòng xác nhận.`,
+        date: item.requestDate,
+        studentId: item.studentId,
+        studentName: item.studentName,
+      }));
+      setConsentRequests(transformedData);
+    } catch (error) {
+      console.error("Lỗi khi lấy phiếu đồng ý:", error);
+      toast.error("Không thể tải các phiếu đồng ý.");
+      setConsentRequests([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
 
   // Event handlers
   const handleStudentChange = (e) => {
@@ -139,20 +179,18 @@ const NotificationAndReport = () => {
         consentReason: agree ? null : declineReason,
       };
       
-      const idForApi = requestId.split('-')[1] || requestId;
-      await axios.put(API_ENDPOINTS.UPDATE_CONSENT(idForApi), payload, {
+      // The item.id is now the pure requestId
+      await axios.put(API_ENDPOINTS.UPDATE_CONSENT(requestId), payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
       toast.success(SUCCESS_MESSAGES.CONSENT_SENT(agree));
       closeDeclineModal();
       
-      // Refresh consent forms optimistically
-      setAllItems(prev => prev.map(prevItem =>
-        prevItem.id === requestId
-          ? { ...prevItem, status: agree ? 'Đồng ý' : 'Từ chối' }
-          : prevItem
-      ));
+      // Re-fetch the consent list for the student to get the latest data
+      if (selectedStudentId) {
+        fetchConsentRequests(selectedStudentId);
+      }
       
     } catch (error) {
       console.error(ERROR_MESSAGES.SEND_RESPONSE_FAILED, error);
@@ -160,7 +198,7 @@ const NotificationAndReport = () => {
     } finally {
       setSubmittingId(null);
     }
-  }, [declineReason, token]);
+  }, [declineReason, token, selectedStudentId, fetchConsentRequests]);
 
   // Data filtering - logic will be moved directly into the render body
 
@@ -170,11 +208,18 @@ const NotificationAndReport = () => {
   }, [fetchStudents]);
 
   useEffect(() => {
-    // Fetch all parent data once, after the parentId is available.
+    // Fetch general notifications once when parentId is available
     if (parentId) {
-      fetchDataForParent();
+      fetchNotifications();
     }
-  }, [parentId, fetchDataForParent]);
+  }, [parentId, fetchNotifications]);
+
+  useEffect(() => {
+    // Fetch consents whenever the selected student changes
+    if (selectedStudentId) {
+      fetchConsentRequests(selectedStudentId);
+    }
+  }, [selectedStudentId, fetchConsentRequests]);
 
   // Render functions
   const renderItemCard = (item) => {
@@ -202,6 +247,15 @@ const NotificationAndReport = () => {
 
     const requiresAction = isConsent && !responded;
 
+    // Determine student name for display. Prioritize explicit name, then lookup by ID.
+    let studentNameToDisplay = item.studentName;
+    if (!studentNameToDisplay && item.studentId) {
+      const student = students.find(s => String(s.studentId) === String(item.studentId));
+      if (student) {
+        studentNameToDisplay = student.fullName;
+      }
+    }
+
     return (
       <div 
         className={`${styles.notificationCard} ${requiresAction ? styles.cardRequiresAction : ''}`} 
@@ -214,7 +268,7 @@ const NotificationAndReport = () => {
             <span className={`${styles.cardTag} ${tagStyle}`}>{tag}</span>
           </div>
           <div className={styles.cardBody}>
-            {item.studentName && <p><strong>Học sinh:</strong> {item.studentName}</p>}
+            {studentNameToDisplay && <p><strong>Học sinh:</strong> {studentNameToDisplay}</p>}
             <p>{item.message}</p>
           </div>
           <div className={styles.cardFooter}>
@@ -274,82 +328,70 @@ const NotificationAndReport = () => {
   const selectedStudent = students.find(s => s.studentId == selectedStudentId);
   const selectedStudentName = selectedStudent?.fullName;
 
-  const studentItems = allItems.filter(item => {
-    const content = `${item.title} ${item.message}`;
-
-    // 1. If no student is selected, don't show any specific items.
-    // This case shouldn't happen if a student is selected by default.
-    if (!selectedStudentName) {
-      // Check if it's a general item (doesn't contain any student's name)
-      const allStudentNames = students.map(s => s.fullName);
-      const isForAnyStudent = allStudentNames.some(name => content.includes(name));
-      return !isForAnyStudent;
+  // 1. Get notifications relevant to the selected student (or general ones)
+  const studentNotifications = notifications.filter(item => {
+    // There must be a student selected to show any items.
+    if (!selectedStudentId) {
+      return false;
     }
-
-    // 2. Check if the item belongs to the currently selected student.
-    const isForSelectedStudent = content.includes(selectedStudentName);
-    if (isForSelectedStudent) {
-      return true;
+    // This logic now only applies to non-consent items, making it simpler.
+    const owner = students.find(s => s.fullName && `${item.title} ${item.message}`.includes(s.fullName));
+    if (owner) {
+      // If we found a matching name, check if it's the selected student.
+      return String(owner.studentId) === String(selectedStudentId);
     }
-
-    // 3. Check if the item is a general notification (doesn't belong to ANY student).
-    const allStudentNames = students.map(s => s.fullName);
-    const isForAnyStudent = allStudentNames.some(name => content.includes(name));
-    if (!isForAnyStudent) {
-      return true;
-    }
-
-    // 4. Otherwise, it's for a different student, so don't show it.
-    return false;
+    // If it's not tied to any specific student, it's a general announcement.
+    return true;
   });
 
-  // Primary filtering based on the active tab
-  const filteredByTab = studentItems.filter(item => {
-    if (!item) return false;
+  // 2. Determine which items to display based on the active tab
+  let itemsToDisplay = [];
+  const pendingConsents = consentRequests.filter(item => !isConsentResponded(item.status));
+  const repliedConsents = consentRequests.filter(item => isConsentResponded(item.status));
 
-    // Normalize both the item title and keywords for robust matching.
-    const title = String(item.title || '').normalize('NFC').toLowerCase();
-    const healthCheckKeyword = 'kết quả khám sức khỏe'.normalize('NFC');
-    const vaccineKeyword = 'kết quả tiêm chủng'.normalize('NFC');
+  switch (activeTab) {
+    case TABS.VACCINE:
+      itemsToDisplay = pendingConsents;
+      break;
+    
+    case TABS.REPLIED:
+      itemsToDisplay = repliedConsents;
+      break;
 
-    const isHealthResult = title.includes(healthCheckKeyword);
-    const isVaccineResult = title.includes(vaccineKeyword);
-
-    switch (activeTab) {
-      case TABS.ALL:
-        return true;
-
-      case TABS.VACCINE:
-        return item.itemType === "consent" && !isConsentResponded(item.status);
-
-      case TABS.OTHER:
-        // An "other" notification is a notification item that is NOT a health or vaccine result.
+    case TABS.OTHER:
+      itemsToDisplay = studentNotifications.filter(item => {
+        const title = String(item.title || '').normalize('NFC').toLowerCase();
+        const healthCheckKeyword = 'kết quả khám sức khỏe'.normalize('NFC');
+        const vaccineKeyword = 'kết quả tiêm chủng'.normalize('NFC');
+        const isHealthResult = title.includes(healthCheckKeyword);
+        const isVaccineResult = title.includes(vaccineKeyword);
         return item.itemType === "notification" && !isHealthResult && !isVaccineResult;
+      });
+      break;
 
-      case TABS.RESULT_HEALTH:
-        return item.itemType === "notification" && isHealthResult;
+    case TABS.RESULT_HEALTH:
+      itemsToDisplay = studentNotifications.filter(item => {
+        const title = String(item.title || '').normalize('NFC').toLowerCase();
+        return item.itemType === "notification" && title.includes('kết quả khám sức khỏe'.normalize('NFC'));
+      });
+      break;
 
-      case TABS.RESULT_VACCINE:
-        return item.itemType === "notification" && isVaccineResult;
-
-      case TABS.REPLIED:
-        return item.itemType === "consent" && isConsentResponded(item.status);
-
-      default:
-        return true;
-    }
-  });
-
-  // Secondary sorting: prioritize items that require action
-  const needsAction = filteredByTab
-    .filter(item => item.itemType === "consent" && !isConsentResponded(item.status))
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-  const others = filteredByTab
-    .filter(item => !(item.itemType === "consent" && !isConsentResponded(item.status)))
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
+    case TABS.RESULT_VACCINE:
+      itemsToDisplay = studentNotifications.filter(item => {
+        const title = String(item.title || '').normalize('NFC').toLowerCase();
+        return item.itemType === "notification" && title.includes('kết quả tiêm chủng'.normalize('NFC'));
+      });
+      break;
+      
+    case TABS.ALL:
+    default:
+      // Show pending consents first, then all other notifications
+      itemsToDisplay = [...pendingConsents, ...studentNotifications];
+      break;
+  }
   
-  const filteredItems = [...needsAction, ...others];
+  // 3. Final sort: by date descending.
+  const filteredItems = itemsToDisplay.sort((a, b) => new Date(b.date) - new Date(a.date));
 
   if (loading && students.length === 0) {
     return (
