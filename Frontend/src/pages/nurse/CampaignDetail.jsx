@@ -558,18 +558,20 @@ const CampaignDetail = () => {
                       `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/consent-requests`
                     );
                     setConsents(consentsRes.data.data);
-                    // Gửi email cho từng phụ huynh trong các lớp đã chọn
-                    const subject =
-                      "Xác nhận tiêm chủng cho con em quý phụ huynh";
-                    const body =
-                      "Kính gửi quý phụ huynh, vui lòng xác nhận phiếu tiêm chủng cho con em mình trên hệ thống.";
-                    const parentIds = [
-                      ...new Set(
-                        studentList.map((stu) => stu.parentId).filter(Boolean)
-                      ),
-                    ];
-                    for (const parentId of parentIds) {
-                      await sendEmailToParent(parentId, subject, body);
+                    // Gửi email cho từng phụ huynh với thông tin học sinh cụ thể
+                    for (const stu of studentList) {
+                      // Kiểm tra học sinh đã nhận phiếu hoặc đã xác nhận chưa
+                      const consent = consents.find(
+                        (c) => String(c.studentId) === String(stu.studentId)
+                      );
+                      if (
+                        stu.parentId &&
+                        (!consent || consent.consentStatusName === "Chờ xác nhận")
+                      ) {
+                        const subject = "Xác nhận tiêm chủng cho con em quý phụ huynh";
+                        const body = `Kính gửi quý phụ huynh, vui lòng xác nhận phiếu tiêm chủng cho học sinh: ${stu.fullName} (${stu.className}) trên hệ thống.`;
+                        await sendEmailToParent(stu.parentId, subject, body);
+                      }
                     }
                     setSendScope("all"); // Ẩn form sau khi gửi thành công
                   } catch {

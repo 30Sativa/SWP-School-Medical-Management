@@ -8,30 +8,37 @@ const VaccinCampaignTour = () => {
     {
       target: "#search-campaign",
       content: "Tìm kiếm chiến dịch bằng tên vắc xin tại đây.",
+      placement: "auto"
     },
     {
       target: "#filter-year",
       content: "Lọc chiến dịch theo năm diễn ra.",
+      placement: "auto"
     },
     {
       target: "#filter-status",
       content: "Lọc chiến dịch theo trạng thái hoạt động.",
+      placement: "auto"
     },
     {
       target: "#show-all",
       content: "Hiển thị tất cả các chiến dịch hiện có.",
+      placement: "auto"
     },
     {
       target: "#latest-campaign",
       content: "Chỉ xem chiến dịch vừa được tạo gần nhất.",
+      placement: "auto"
     },
     {
       target: ".campaignCard",
       content: "Mỗi thẻ hiển thị thông tin tổng quan về một chiến dịch.",
+      placement: "auto"
     },
     {
       target: ".btn-detail-tour",
       content: "Nhấn để xem chi tiết chiến dịch này.",
+      placement: "auto"
     },
    
   ];
@@ -44,6 +51,20 @@ const VaccinCampaignTour = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (run) {
+      document.body.style.overflowX = "hidden";
+      document.body.style.paddingRight = "16px"; // Thêm dòng này
+    } else {
+      document.body.style.overflowX = "";
+      document.body.style.paddingRight = "";
+    }
+    return () => {
+      document.body.style.overflowX = "";
+      document.body.style.paddingRight = "";
+    };
+  }, [run]);
+
   const handleStartTour = () => setRun(true);
 
   return (
@@ -55,6 +76,7 @@ const VaccinCampaignTour = () => {
         scrollToFirstStep
         showProgress
         showSkipButton
+        disableScrolling
         styles={{
           options: {
             zIndex: 9999,
@@ -65,12 +87,17 @@ const VaccinCampaignTour = () => {
           tooltipContainer: {
             textAlign: "left",
             maxWidth: 320,
+            width: "100%",
+            boxSizing: "border-box",
           },
           tooltip: {
             padding: "16px",
             fontSize: "14px",
             borderRadius: "12px",
             boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+            maxWidth: "90vw", // Thêm dòng này
+            minWidth: "200px",
+            wordBreak: "break-word",
           },
           buttonNext: {
             backgroundColor: "#d91b5c",
