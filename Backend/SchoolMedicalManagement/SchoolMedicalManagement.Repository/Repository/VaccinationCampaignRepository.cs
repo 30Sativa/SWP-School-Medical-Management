@@ -411,7 +411,7 @@ namespace SchoolMedicalManagement.Repository.Repository
         public async Task<int> GetSuccessfulVaccinationCount(int campaignId)
         {
             return await _context.VaccinationRecords
-                .CountAsync(vr => vr.CampaignId == campaignId && vr.IsActive == true && vr.Result == "Success");
+                .CountAsync(vr => vr.CampaignId == campaignId && vr.IsActive == true && vr.Result == "Thành công");
         }
 
         // Lấy bản ghi tiêm chủng theo ID

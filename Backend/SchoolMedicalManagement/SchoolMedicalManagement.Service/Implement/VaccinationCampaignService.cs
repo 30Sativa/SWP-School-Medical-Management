@@ -1373,14 +1373,47 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 return new BaseResponse { Status = StatusCodes.Status400BadRequest.ToString(), Message = "Cập nhật thất bại", Data = null };
             }
-            return new BaseResponse { Status = StatusCodes.Status200OK.ToString(), Message = "Cập nhật thành công", Data = new VaccinationRecordResponse { /* map fields */ } };
+            return new BaseResponse
+            {
+                Status = StatusCodes.Status200OK.ToString(),
+                Message = "Cập nhật thành công",
+                Data = new VaccinationRecordResponse
+                {
+                    RecordId = updated.RecordId,
+                    StudentId = updated.StudentId,
+                    StudentName = updated.Student?.FullName,
+                    CampaignId = updated.CampaignId,
+                    CampaignName = updated.Campaign?.VaccineName,
+                    ConsentStatusId = updated.ConsentStatusId,
+                    ConsentStatusName = updated.ConsentStatus?.ConsentStatusName,
+                    ConsentDate = updated.ConsentDate,
+                    VaccinationDate = updated.VaccinationDate,
+                    Result = updated.Result,
+                    FollowUpNote = updated.FollowUpNote,
+                    IsActive = updated.IsActive
+                }
+            };
         }
 
         // Lấy danh sách bản ghi tiêm chủng theo chiến dịch
         public async Task<BaseResponse> GetVaccinationRecordsByCampaignAsync(int campaignId)
         {
             var records = await _campaignRepository.GetVaccinationRecordsByCampaign(campaignId);
-            var response = records.Select(r => new VaccinationRecordResponse { /* map fields */ }).ToList();
+            var response = records.Select(r => new VaccinationRecordResponse
+            {
+                RecordId = r.RecordId,
+                StudentId = r.StudentId,
+                StudentName = r.Student?.FullName,
+                CampaignId = r.CampaignId,
+                CampaignName = r.Campaign?.VaccineName,
+                ConsentStatusId = r.ConsentStatusId,
+                ConsentStatusName = r.ConsentStatus?.ConsentStatusName,
+                ConsentDate = r.ConsentDate,
+                VaccinationDate = r.VaccinationDate,
+                Result = r.Result,
+                FollowUpNote = r.FollowUpNote,
+                IsActive = r.IsActive
+            }).ToList();
             return new BaseResponse { Status = StatusCodes.Status200OK.ToString(), Message = "Lấy danh sách thành công", Data = response };
         }
 
@@ -1397,7 +1430,25 @@ namespace SchoolMedicalManagement.Service.Implement
             if (updated == null) return new BaseResponse { Status = "400", Message = "Gửi lại thất bại", Data = null };
             int days = autoDeclineAfterDays ?? 3;
             BackgroundJob.Schedule<VaccinationCampaignService>(x => x.AutoDeclineConsentRequest(requestId), TimeSpan.FromDays(days));
-            return new BaseResponse { Status = "200", Message = "Gửi lại thành công", Data = new ConsentRequestResponse { /* map */ } };
+            return new BaseResponse
+            {
+                Status = "200",
+                Message = "Gửi lại thành công",
+                Data = new ConsentRequestResponse
+                {
+                    RequestId = updated.RequestId,
+                    StudentId = updated.StudentId,
+                    StudentName = updated.Student?.FullName,
+                    CampaignId = updated.CampaignId,
+                    CampaignName = updated.Campaign?.VaccineName,
+                    ParentId = updated.ParentId,
+                    ParentName = updated.Parent?.FullName,
+                    RequestDate = updated.RequestDate,
+                    ConsentStatusId = updated.ConsentStatusId,
+                    ConsentStatusName = updated.ConsentStatus?.ConsentStatusName,
+                    ConsentDate = updated.ConsentDate
+                }
+            };
         }
 
         // Lấy tóm tắt thống kê chiến dịch
@@ -1417,7 +1468,12 @@ namespace SchoolMedicalManagement.Service.Implement
                 TotalVaccinationRecords = await _campaignRepository.GetVaccinationRecordCount(campaignId),
                 SuccessfulVaccinations = await _campaignRepository.GetSuccessfulVaccinationCount(campaignId)
             };
-            return new BaseResponse { Status = "200", Message = "Lấy tóm tắt thành công", Data = summary };
+            return new BaseResponse 
+            { 
+                Status = "200", 
+                Message = "Lấy tóm tắt thành công", 
+                Data = summary 
+            };
         }
 
         // Lấy danh sách phiếu đồng ý đang chờ
@@ -1438,7 +1494,13 @@ namespace SchoolMedicalManagement.Service.Implement
                 ConsentStatusName = c.ConsentStatus?.ConsentStatusName,
                 ConsentDate = c.ConsentDate
             }).ToList();
-            return new BaseResponse { Status = StatusCodes.Status200OK.ToString(), Message = "Lấy danh sách phiếu chờ thành công", Data = response };
+
+            return new BaseResponse 
+            { 
+                Status = StatusCodes.Status200OK.ToString(), 
+                Message = "Lấy danh sách phiếu chờ thành công", 
+                Data = response 
+            };
         }
     }
 }
