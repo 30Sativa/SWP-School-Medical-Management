@@ -459,7 +459,7 @@ const Incident = () => {
       isNaN(Number(newEvent.studentId)) ||
       Number(newEvent.studentId) === 0
     ) {
-      alert("Vui lòng chọn học sinh!");
+      notifyError("Vui lòng chọn học sinh!");
       return;
     }
     if (
@@ -467,7 +467,7 @@ const Incident = () => {
       isNaN(Number(newEvent.eventTypeId)) ||
       Number(newEvent.eventTypeId) === 0
     ) {
-      alert("Vui lòng chọn loại sự cố!");
+      notifyError("Vui lòng chọn loại sự cố!");
       return;
     }
     if (
@@ -475,19 +475,19 @@ const Incident = () => {
       isNaN(Number(newEvent.severityId)) ||
       Number(newEvent.severityId) === 0
     ) {
-      alert("Vui lòng chọn mức độ!");
+      notifyError("Vui lòng chọn mức độ!");
       return;
     }
     if (!newEvent.eventDate) {
-      alert("Vui lòng chọn thời gian!");
+      notifyError("Vui lòng chọn thời gian!");
       return;
     }
     if (!newEvent.description) {
-      alert("Vui lòng nhập mô tả!");
+      notifyError("Vui lòng nhập mô tả!");
       return;
     }
     if (!currentUserId) {
-      alert("Vui lòng đăng nhập lại!");
+      notifyError("Vui lòng đăng nhập lại!");
       return;
     }
 
@@ -684,7 +684,7 @@ const Incident = () => {
       !bulkEvent.selectedStudents ||
       bulkEvent.selectedStudents.length === 0
     ) {
-      alert("Vui lòng chọn ít nhất một học sinh!");
+      notifyError("Vui lòng chọn ít nhất một học sinh!");
       return;
     }
     if (
@@ -692,7 +692,7 @@ const Incident = () => {
       isNaN(Number(bulkEvent.eventTypeId)) ||
       Number(bulkEvent.eventTypeId) === 0
     ) {
-      alert("Vui lòng chọn loại sự cố!");
+      notifyError("Vui lòng chọn loại sự cố!");
       return;
     }
     if (
@@ -700,19 +700,19 @@ const Incident = () => {
       isNaN(Number(bulkEvent.severityId)) ||
       Number(bulkEvent.severityId) === 0
     ) {
-      alert("Vui lòng chọn mức độ!");
+      notifyError("Vui lòng chọn mức độ!");
       return;
     }
     if (!bulkEvent.eventDate) {
-      alert("Vui lòng chọn thời gian!");
+      notifyError("Vui lòng chọn thời gian!");
       return;
     }
     if (!bulkEvent.description) {
-      alert("Vui lòng nhập mô tả!");
+      notifyError("Vui lòng nhập mô tả!");
       return;
     }
     if (!currentUserId) {
-      alert("Vui lòng đăng nhập lại!");
+      notifyError("Vui lòng đăng nhập lại!");
       return;
     }
 
