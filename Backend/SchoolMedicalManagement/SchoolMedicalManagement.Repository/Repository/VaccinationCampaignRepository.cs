@@ -351,5 +351,12 @@ namespace SchoolMedicalManagement.Repository.Repository
                 .Include(c => c.ConsentStatus)
                 .Where(c => c.StudentId == studentId)
                 .ToListAsync();
+
+        // Đếm số phiếu đồng ý đã phê duyệt cho chiến dịch
+        public async Task<int> GetApprovedConsentCount(int campaignId)
+        {
+            return await _context.VaccinationConsentRequests
+                .CountAsync(cr => cr.CampaignId == campaignId && cr.ConsentStatusId == 2);
+        }
     }
 }

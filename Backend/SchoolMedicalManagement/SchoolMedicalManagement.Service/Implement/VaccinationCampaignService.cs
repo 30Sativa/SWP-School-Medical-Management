@@ -613,6 +613,20 @@ namespace SchoolMedicalManagement.Service.Implement
                     Data = null
                 };
             }
+            // Kiểm tra nếu chuyển sang trạng thái đang diễn ra thì phải có phiếu đồng ý
+            if (request.StatusId == 2 && campaign.StatusId != 2)
+            {
+                var approvedCount = await _campaignRepository.GetApprovedConsentCount(request.CampaignId);
+                if (approvedCount == 0)
+                {
+                    return new BaseResponse
+                    {
+                        Status = StatusCodes.Status400BadRequest.ToString(),
+                        Message = "Không thể chuyển trạng thái sang 'Đang diễn ra' vì chưa có phiếu đồng ý nào được phê duyệt",
+                        Data = null
+                    };
+                }
+            }
 
             campaign.VaccineName = request.VaccineName;
             campaign.Date = request.Date;
@@ -721,6 +735,17 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     Status = StatusCodes.Status400BadRequest.ToString(),
                     Message = "Chỉ chiến dịch với trạng thái 'Đã hoàn thành' có thể được kích hoạt",
+                    Data = null
+                };
+            }
+            // Kiểm tra có ít nhất một phiếu đồng ý đã phê duyệt
+            var approvedCount = await _campaignRepository.GetApprovedConsentCount(campaignId);
+            if (approvedCount == 0)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Không thể kích hoạt chiến dịch vì chưa có phiếu đồng ý nào được phê duyệt",
                     Data = null
                 };
             }
