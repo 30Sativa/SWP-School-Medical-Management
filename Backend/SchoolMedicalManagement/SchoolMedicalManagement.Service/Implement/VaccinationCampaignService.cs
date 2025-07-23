@@ -282,6 +282,16 @@ namespace SchoolMedicalManagement.Service.Implement
                     Data = null
                 };
             }
+            // Kiểm tra trạng thái chiến dịch để gửi phiếu đồng ý
+            if (campaign.StatusId == 3 || campaign.StatusId == 4)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Không thể gửi phiếu đồng ý cho chiến dịch đã hoàn thành hoặc huỷ",
+                    Data = null
+                };
+            }
 
             var student = await _studentRepository.GetStudentById(studentId);
             if (student == null)
@@ -362,9 +372,28 @@ namespace SchoolMedicalManagement.Service.Implement
                     Data = null
                 };
             }
-
+            // Chỉ cho phép cập nhật nếu đang chờ xác nhận
+            if (consentRequest.ConsentStatusId != 1)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Không thể cập nhật phiếu đồng ý đã xác nhận",
+                    Data = null
+                };
+            }
+            // Kiểm tra ngày xác nhận hợp lệ
             consentRequest.ConsentStatusId = request.ConsentStatusId;
             consentRequest.ConsentDate = DateTime.UtcNow;
+            if (consentRequest.ConsentDate < consentRequest.RequestDate)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Ngày xác nhận phải sau ngày yêu cầu",
+                    Data = null
+                };
+            }
 
             var updated = await _campaignRepository.UpdateConsentRequest(consentRequest);
             if (updated == null)
@@ -471,6 +500,27 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
                     Message = "Không tìm thấy yêu cầu đồng ý cho học sinh và chiến dịch này",
+                    Data = null
+                };
+            }
+            // Kiểm tra sự đồng ý từ phụ huynh
+            if (consentRequest.ConsentStatusId != 2)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Chưa có sự đồng ý từ phụ huynh để tạo hồ sơ tiêm chủng",
+                    Data = null
+                };
+            }
+            // Kiểm tra ngày tiêm hợp lệ
+            var campaignDate = campaign.Date ?? DateOnly.FromDateTime(DateTime.UtcNow);
+            if (request.VaccinationDate < consentRequest.ConsentDate || request.VaccinationDate < campaignDate.ToDateTime(TimeOnly.MinValue))
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Ngày tiêm không hợp lệ: phải sau ngày đồng ý và ngày chiến dịch",
                     Data = null
                 };
             }
@@ -685,6 +735,17 @@ namespace SchoolMedicalManagement.Service.Implement
                     Data = null
                 };
             }
+            // Kiểm tra có ít nhất một bản ghi tiêm chủng trước khi hoàn thành
+            var recordCount = await _campaignRepository.GetVaccinationRecordCount(campaignId);
+            if (recordCount == 0)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Không thể hoàn thành chiến dịch vì chưa có bản ghi tiêm chủng nào",
+                    Data = null
+                };
+            }
 
             var deactivated = await _campaignRepository.DeactivateCampaign(campaignId);
             if (deactivated == null)
@@ -864,6 +925,16 @@ namespace SchoolMedicalManagement.Service.Implement
                     Data = null
                 };
             }
+            // Kiểm tra trạng thái chiến dịch để gửi phiếu đồng ý
+            if (campaign.StatusId == 3 || campaign.StatusId == 4)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Không thể gửi phiếu đồng ý cho chiến dịch đã hoàn thành hoặc huỷ",
+                    Data = null
+                };
+            }
 
             var students = await _campaignRepository.GetStudentsByClass(request.ClassName);
             if (!students.Any())
@@ -969,6 +1040,16 @@ namespace SchoolMedicalManagement.Service.Implement
                     Data = null
                 };
             }
+            // Kiểm tra trạng thái chiến dịch để gửi phiếu đồng ý
+            if (campaign.StatusId == 3 || campaign.StatusId == 4)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Không thể gửi phiếu đồng ý cho chiến dịch đã hoàn thành hoặc huỷ",
+                    Data = null
+                };
+            }
 
             var students = await _campaignRepository.GetStudentsWithParents();
             if (!students.Any())
@@ -1064,6 +1145,16 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     Status = StatusCodes.Status404NotFound.ToString(),
                     Message = $"Không tìm thấy chiến dịch tiêm chủng với ID {campaignId}",
+                    Data = null
+                };
+            }
+            // Kiểm tra trạng thái chiến dịch để gửi phiếu đồng ý
+            if (campaign.StatusId == 3 || campaign.StatusId == 4)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status400BadRequest.ToString(),
+                    Message = "Không thể gửi phiếu đồng ý cho chiến dịch đã hoàn thành hoặc huỷ",
                     Data = null
                 };
             }

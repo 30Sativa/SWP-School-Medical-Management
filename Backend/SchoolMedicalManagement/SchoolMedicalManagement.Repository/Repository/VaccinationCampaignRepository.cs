@@ -358,5 +358,12 @@ namespace SchoolMedicalManagement.Repository.Repository
             return await _context.VaccinationConsentRequests
                 .CountAsync(cr => cr.CampaignId == campaignId && cr.ConsentStatusId == 2);
         }
+
+        // Đếm số bản ghi tiêm chủng cho chiến dịch
+        public async Task<int> GetVaccinationRecordCount(int campaignId)
+        {
+            return await _context.VaccinationRecords
+                .CountAsync(vr => vr.CampaignId == campaignId && vr.IsActive == true);
+        }
     }
 }
