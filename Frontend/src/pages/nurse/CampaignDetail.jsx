@@ -15,7 +15,7 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
-
+import Guideline from "../../utils/CampaignDetailTour";
 const CampaignDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -70,7 +70,9 @@ const CampaignDetail = () => {
         const students = Array.isArray(res.data.data) ? res.data.data : [];
         setAllStudents(students);
         // Lấy danh sách lớp duy nhất
-        const uniqueClasses = Array.from(new Set(students.map(s => s.className).filter(Boolean)));
+        const uniqueClasses = Array.from(
+          new Set(students.map((s) => s.className).filter(Boolean))
+        );
         setClassList(uniqueClasses);
         // Nếu mặc định là toàn trường thì hiển thị toàn bộ học sinh
         setStudentList(students);
@@ -81,9 +83,11 @@ const CampaignDetail = () => {
       }
     };
 
-    Promise.all([fetchCampaignDetail(), fetchConsents(), fetchStudents()]).finally(() =>
-      setLoading(false)
-    );
+    Promise.all([
+      fetchCampaignDetail(),
+      fetchConsents(),
+      fetchStudents(),
+    ]).finally(() => setLoading(false));
   }, [id]);
 
   // Khi chọn phạm vi gửi hoặc lớp thì cập nhật danh sách học sinh hiển thị
@@ -91,7 +95,9 @@ const CampaignDetail = () => {
     if (sendScope === "all") {
       setStudentList(allStudents);
     } else if (sendScope === "class" && selectedClasses.length > 0) {
-      setStudentList(allStudents.filter(s => selectedClasses.includes(s.className)));
+      setStudentList(
+        allStudents.filter((s) => selectedClasses.includes(s.className))
+      );
     } else {
       setStudentList([]);
     }
@@ -110,11 +116,22 @@ const CampaignDetail = () => {
     }
   };
 
+  // --- VALIDATION HELPER ---
+  const isCompletedOrCancelled = (status) =>
+    status === "Đã hoàn thành" || status === "Đã huỷ";
+
   const handleSendConsentToAll = async () => {
+    // Validation: Không gửi nếu đã hoàn thành/hủy
+    if (isCompletedOrCancelled(campaign.statusName)) {
+      notifyError(
+        "Không thể gửi phiếu đồng ý cho chiến dịch đã hoàn thành hoặc huỷ."
+      );
+      return;
+    }
     try {
       setModalLoading(true);
       if (!campaign || !campaign.campaignId) {
-        alert("Không tìm thấy thông tin chiến dịch.");
+        notifyError("Không tìm thấy thông tin chiến dịch.");
         return;
       }
       const res = await axios.post(
@@ -131,8 +148,11 @@ const CampaignDetail = () => {
       setConsents(consentsRes.data.data);
       // Gửi email cho từng phụ huynh
       const subject = "Xác nhận tiêm chủng cho con em quý phụ huynh";
-      const body = "Kính gửi quý phụ huynh, vui lòng xác nhận phiếu tiêm chủng cho con em mình trên hệ thống.";
-      const parentIds = [...new Set(allStudents.map(stu => stu.parentId).filter(Boolean))];
+      const body =
+        "Kính gửi quý phụ huynh, vui lòng xác nhận phiếu tiêm chủng cho con em mình trên hệ thống.";
+      const parentIds = [
+        ...new Set(allStudents.map((stu) => stu.parentId).filter(Boolean)),
+      ];
       for (const parentId of parentIds) {
         await sendEmailToParent(parentId, subject, body);
       }
@@ -148,17 +168,19 @@ const CampaignDetail = () => {
   };
 
   const handleStartCampaign = async () => {
+    // Validation: Không có sự đồng ý từ phụ huynh
+    const agreedStudents = consents
+      .filter((c) => c.consentStatusName === "Đồng ý")
+      .map((c) => parseInt(c.studentId));
+    if (agreedStudents.length === 0) {
+      notifyError("Chưa có sự đồng ý từ phụ huynh để tạo hồ sơ tiêm chủng.");
+      return;
+    }
     try {
       if (!isChuaBatDau(campaign.statusName)) {
-        notifyError("Chỉ chiến dịch ở trạng thái 'Chưa bắt đầu' mới có thể khởi động.");
-        return;
-      }
-      const agreedStudents = consents
-        .filter((c) => c.consentStatusName === "Đồng ý")
-        .map((c) => parseInt(c.studentId));
-
-      if (agreedStudents.length === 0) {
-        notifyError("Không có học sinh nào đồng ý để khởi động.");
+        notifyError(
+          "Chỉ chiến dịch ở trạng thái 'Chưa bắt đầu' mới có thể khởi động."
+        );
         return;
       }
 
@@ -191,6 +213,16 @@ const CampaignDetail = () => {
   };
 
   const handleMarkAsCompleted = async () => {
+    // Validation: Không có bản ghi tiêm chủng nào
+    if (
+      !campaign.totalVaccinationRecords ||
+      campaign.totalVaccinationRecords === 0
+    ) {
+      notifyError(
+        "Không thể hoàn thành chiến dịch vì chưa có bản ghi tiêm chủng nào."
+      );
+      return;
+    }
     try {
       await axios.put(
         `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${id}/deactivate`
@@ -289,9 +321,11 @@ const CampaignDetail = () => {
 
   return (
     <div className={style.container}>
-      <h2>Chi tiết chiến dịch tiêm chủng</h2>
+      <h2 id="campaign-title">Chi tiết chiến dịch tiêm chủng</h2>
+      <Guideline />
+
       {/* Info cards section */}
-      <div className={style.infoRow}>
+      <div id="info-row" className={style.infoRow}>
         <div className={style.infoCard}>
           <div className={style.infoTitle}>Tên</div>
           <div className={style.infoValue}>{campaign.vaccineName}</div>
@@ -313,11 +347,15 @@ const CampaignDetail = () => {
           <div className={style.infoTitle}>Thống kê</div>
           <div className={style.statsRow}>
             <div className={style.statBox}>
-              <span className={`${style.statNum} ${style.agree}`}>{totalAgreed}</span>
+              <span className={`${style.statNum} ${style.agree}`}>
+                {totalAgreed}
+              </span>
               <span className={style.statLabel}>đồng ý</span>
             </div>
             <div className={style.statBox}>
-              <span className={`${style.statNum} ${style.reject}`}>{totalRejected}</span>
+              <span className={`${style.statNum} ${style.reject}`}>
+                {totalRejected}
+              </span>
               <span className={style.statLabel}>từ chối</span>
             </div>
           </div>
@@ -326,11 +364,43 @@ const CampaignDetail = () => {
 
       {/* Send consent options modal */}
       {showSendOptions && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: '#0006', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: '#fff', borderRadius: 12, padding: 32, minWidth: 320, boxShadow: '0 2px 16px #0002', textAlign: 'center' }}>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "#0006",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: 12,
+              padding: 32,
+              minWidth: 320,
+              boxShadow: "0 2px 16px #0002",
+              textAlign: "center",
+            }}
+          >
             <h3>Chọn phạm vi gửi phiếu xác nhận</h3>
             <button
-              style={{ margin: '16px 0', padding: '10px 24px', borderRadius: 6, background: '#2563eb', color: '#fff', border: 'none', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}
+              style={{
+                margin: "16px 0",
+                padding: "10px 24px",
+                borderRadius: 6,
+                background: "#2563eb",
+                color: "#fff",
+                border: "none",
+                fontWeight: 600,
+                fontSize: 16,
+                cursor: "pointer",
+              }}
               onClick={async () => {
                 setShowSendOptions(false);
                 await handleSendConsentToAll();
@@ -340,17 +410,34 @@ const CampaignDetail = () => {
             </button>
             <br />
             <button
-              style={{ margin: '8px 0', padding: '10px 24px', borderRadius: 6, background: '#10b981', color: '#fff', border: 'none', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}
+              style={{
+                margin: "8px 0",
+                padding: "10px 24px",
+                borderRadius: 6,
+                background: "#10b981",
+                color: "#fff",
+                border: "none",
+                fontWeight: 600,
+                fontSize: 16,
+                cursor: "pointer",
+              }}
               onClick={() => {
                 setShowSendOptions(false);
-                setSendScope('class');
+                setSendScope("class");
               }}
             >
               Gửi theo lớp
             </button>
             <br />
             <button
-              style={{ marginTop: 16, background: 'none', color: '#ef4444', border: 'none', fontWeight: 600, cursor: 'pointer' }}
+              style={{
+                marginTop: 16,
+                background: "none",
+                color: "#ef4444",
+                border: "none",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
               onClick={() => setShowSendOptions(false)}
             >
               Huỷ
@@ -360,113 +447,164 @@ const CampaignDetail = () => {
       )}
 
       {/* Class selection and student list only if sendScope is 'class' and campaign chưa bắt đầu */}
-      {sendScope === 'class' && isChuaBatDau(campaign.statusName) && (
-        <div className={style.sendClassCard}>
-          <div className={style.sendClassTitle}>Gửi phiếu xác nhận theo lớp</div>
-          <div className={style.sendClassRow} style={{ flexWrap: 'wrap', alignItems: 'flex-start' }}>
-            {/* Danh sách checkbox lớp dạng lưới 4 cột */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 0', width: '100%' }}>
-              {classList.map(cls => (
-                <label
-                  key={cls}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    fontWeight: 500,
-                    width: '24%',
-                    minWidth: 120,
-                    marginBottom: 8,
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedClasses.includes(cls)}
-                    onChange={e => {
-                      if (e.target.checked) {
-                        setSelectedClasses(prev => [...prev, cls]);
-                      } else {
-                        setSelectedClasses(prev => prev.filter(c => c !== cls));
-                      }
+      {sendScope === "class" &&
+        (isChuaBatDau(campaign.statusName) ||
+          isDangDienRa(campaign.statusName)) && (
+          <div className={style.sendClassCard}>
+            <div className={style.sendClassTitle}>
+              Gửi phiếu xác nhận theo lớp
+            </div>
+            <div
+              className={style.sendClassRow}
+              style={{ flexWrap: "wrap", alignItems: "flex-start" }}
+            >
+              {/* Danh sách checkbox lớp dạng lưới 4 cột */}
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "8px 0",
+                  width: "100%",
+                }}
+              >
+                {classList.map((cls) => (
+                  <label
+                    key={cls}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      fontWeight: 500,
+                      width: "24%",
+                      minWidth: 120,
+                      marginBottom: 8,
                     }}
-                  />
-                  {cls}
-                </label>
-              ))}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedClasses.includes(cls)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedClasses((prev) => [...prev, cls]);
+                        } else {
+                          setSelectedClasses((prev) =>
+                            prev.filter((c) => c !== cls)
+                          );
+                        }
+                      }}
+                    />
+                    {cls}
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
-          {/* Input số ngày quy định nằm dưới, căn giữa */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '12px 0 0 0' }}>
-            <span className={style.sendClassInputLabel}>
-              Số ngày cho phép:
-            </span>
-            <input
-              type="number"
-              min={1}
-              value={autoDeclineAfterDays}
-              onChange={e => setAutoDeclineAfterDays(Number(e.target.value))}
-              className={style.sendClassInput}
-            />
-            <span>ngày</span>
-          </div>
-          <div className={style.sendClassList}>
-            <div className={style.sendClassListTitle}>
-              Danh sách học sinh ({studentList.length}):
-            </div>
-            <ul style={{ margin: 0, paddingLeft: 18 }}>
-              {studentList.map(stu => (
-                <li key={stu.studentId}>{stu.fullName} ({stu.className})</li>
-              ))}
-            </ul>
-          </div>
-          <button
-            className={style.sendClassBtn}
-            disabled={selectedClasses.length === 0}
-            onClick={async () => {
-              if (selectedClasses.length > 0) {
-                try {
-                  for (const cls of selectedClasses) {
-                    await axios.post(
-                      `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/send-consent-by-class`,
-                      { className: cls, autoDeclineAfterDays }
-                    );
-                  }
-                  notifySuccess("Đã gửi phiếu xác nhận cho các lớp đã chọn.");
-                  // Load lại consents nếu cần
-                  const consentsRes = await axios.get(
-                    `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/consent-requests`
-                  );
-                  setConsents(consentsRes.data.data);
-                  // Gửi email cho từng phụ huynh trong các lớp đã chọn
-                  const subject = "Xác nhận tiêm chủng cho con em quý phụ huynh";
-                  const body = "Kính gửi quý phụ huynh, vui lòng xác nhận phiếu tiêm chủng cho con em mình trên hệ thống.";
-                  const parentIds = [...new Set(studentList.map(stu => stu.parentId).filter(Boolean))];
-                  for (const parentId of parentIds) {
-                    await sendEmailToParent(parentId, subject, body);
-                  }
-                  setSendScope('all'); // Ẩn form sau khi gửi thành công
-                } catch {
-                  notifyError("Gửi phiếu xác nhận thất bại!");
+            {/* Input số ngày quy định nằm dưới, căn giữa */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "12px 0 0 0",
+              }}
+            >
+              <span className={style.sendClassInputLabel}>
+                Số ngày cho phép:
+              </span>
+              <input
+                type="number"
+                min={1}
+                value={autoDeclineAfterDays}
+                onChange={(e) =>
+                  setAutoDeclineAfterDays(Number(e.target.value))
                 }
-              }
-            }}
-          >
-            Xác nhận gửi cho lớp này
-          </button>
-          <button
-            style={{
-              background: '#f3f4f6', color: '#ef4444', border: 'none', borderRadius: 6, padding: '10px 0', fontSize: '1.05rem', fontWeight: 600, marginTop: 8, cursor: 'pointer', transition: 'background 0.2s',
-            }}
-            onClick={() => setSendScope('all')}
-          >
-            Huỷ
-          </button>
-        </div>
-      )}
+                className={style.sendClassInput}
+              />
+              <span>ngày</span>
+            </div>
+            <div className={style.sendClassList}>
+              <div className={style.sendClassListTitle}>
+                Danh sách học sinh ({studentList.length}):
+              </div>
+              <ul style={{ margin: 0, paddingLeft: 18 }}>
+                {studentList.map((stu) => (
+                  <li key={stu.studentId}>
+                    {stu.fullName} ({stu.className})
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <button
+              className={style.sendClassBtn}
+              disabled={selectedClasses.length === 0}
+              onClick={async () => {
+                // Validation: Không gửi nếu đã hoàn thành/hủy
+                if (isCompletedOrCancelled(campaign.statusName)) {
+                  notifyError(
+                    "Không thể gửi phiếu đồng ý cho chiến dịch đã hoàn thành hoặc huỷ."
+                  );
+                  return;
+                }
+                if (selectedClasses.length > 0) {
+                  try {
+                    for (const cls of selectedClasses) {
+                      await axios.post(
+                        `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/send-consent-by-class`,
+                        { className: cls, autoDeclineAfterDays }
+                      );
+                    }
+                    notifySuccess("Đã gửi phiếu xác nhận cho các lớp đã chọn.");
+                    // Load lại consents nếu cần
+                    const consentsRes = await axios.get(
+                      `https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/campaigns/${campaign.campaignId}/consent-requests`
+                    );
+                    setConsents(consentsRes.data.data);
+                    // Gửi email cho từng phụ huynh trong các lớp đã chọn
+                    const subject =
+                      "Xác nhận tiêm chủng cho con em quý phụ huynh";
+                    const body =
+                      "Kính gửi quý phụ huynh, vui lòng xác nhận phiếu tiêm chủng cho con em mình trên hệ thống.";
+                    const parentIds = [
+                      ...new Set(
+                        studentList.map((stu) => stu.parentId).filter(Boolean)
+                      ),
+                    ];
+                    for (const parentId of parentIds) {
+                      await sendEmailToParent(parentId, subject, body);
+                    }
+                    setSendScope("all"); // Ẩn form sau khi gửi thành công
+                  } catch {
+                    notifyError("Gửi phiếu xác nhận thất bại!");
+                  }
+                }
+              }}
+            >
+              Xác nhận gửi cho lớp này
+            </button>
+            <button
+              style={{
+                background: "#f3f4f6",
+                color: "#ef4444",
+                border: "none",
+                borderRadius: 6,
+                padding: "10px 0",
+                fontSize: "1.05rem",
+                fontWeight: 600,
+                marginTop: 8,
+                cursor: "pointer",
+                transition: "background 0.2s",
+              }}
+              onClick={() => setSendScope("all")}
+            >
+              Huỷ
+            </button>
+          </div>
+        )}
 
       <div className={style.actions}>
-        {isChuaBatDau(campaign.statusName) && (
+        {(isChuaBatDau(campaign.statusName) ||
+          isDangDienRa(campaign.statusName)) && (
           <button
+          id="btn-send"
             className={style.btnNotify}
             onClick={() => setShowSendOptions(true)}
           >
@@ -474,31 +612,31 @@ const CampaignDetail = () => {
           </button>
         )}
         {isChuaBatDau(campaign.statusName) && totalAgreed > 0 && (
-          <button className={style.btnStart} onClick={handleStartCampaign}>
+          <button  id="btn-start" className={style.btnStart} onClick={handleStartCampaign}>
             Khởi động chiến dịch
           </button>
         )}
         {isDaHoanThanh(campaign.statusName) && (
           <>
-            <button className={style.btnExport} onClick={exportToExcel}>
+            <button id="btn-export"   className={style.btnExport} onClick={exportToExcel}>
               Xuất Excel
             </button>
           </>
         )}
         {isDangDienRa(campaign.statusName) && (
-          <button className={style.btnComplete} onClick={handleMarkAsCompleted}>
+          <button id="btn-complete" className={style.btnComplete} onClick={handleMarkAsCompleted}>
             Đánh dấu hoàn thành
           </button>
         )}
         {isDaHuy(campaign.statusName) && (
           <span className={style.cancelledTag}> Đã huỷ</span>
         )}
-        <button onClick={() => navigate(`/vaccines/${id}/result`)}>
+        <button id="btn-result" onClick={() => navigate(`/vaccines/${id}/result`)}>
           Xem kết quả tiêm chủng
         </button>
       </div>
 
-      <div className={style.tabRow}>
+      <div id="tab-row" className={style.tabRow}>
         <button
           className={activeTab === "all" ? style.activeTab : ""}
           onClick={() => {
@@ -528,7 +666,7 @@ const CampaignDetail = () => {
         </button>
       </div>
 
-      <table className={style.table}>
+      <table  id="consent-table" className={style.table}>
         <thead>
           <tr>
             <th>Học sinh</th>
@@ -575,7 +713,7 @@ const CampaignDetail = () => {
 
       {/* Removed chart and calendar section as requested */}
 
-      <button onClick={() => navigate(-1)} className={style.btnBack}>
+      <button onClick={() => navigate(-1)} id="btn-back" className={style.btnBack}>
         ← Quay lại
       </button>
 

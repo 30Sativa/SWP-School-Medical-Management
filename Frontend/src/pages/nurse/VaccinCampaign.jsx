@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import Notification from "../../components/Notification";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import Guidline from "../../utils/VaccinCampaignTour";
 
 const VaccinCampaign = () => {
   // Bộ lọc thời gian và trạng thái
@@ -116,6 +117,8 @@ const VaccinCampaign = () => {
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       <Sidebar />
+      <Guidline />
+
       <main style={{ flex: 1 }}>
         <div className={style.campaignPage}>
           {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
@@ -132,6 +135,7 @@ const VaccinCampaign = () => {
             <div className={style.searchBox}>
               <Search size={16} />
               <input
+                id="search-campaign"
                 placeholder="Tìm kiếm chiến dịch..."
                 value={searchKeyword}
                 onChange={(e) => {
@@ -143,6 +147,7 @@ const VaccinCampaign = () => {
               />
             </div>
             <select
+              id="filter-year"
               className={style.filterDropdown}
               value={yearFilter}
               onChange={(e) => {
@@ -158,6 +163,7 @@ const VaccinCampaign = () => {
               <option value={3}>3 năm gần nhất</option>
             </select>
             <select
+              id="filter-status"
               className={style.filterDropdown}
               value={filterStatus}
               onChange={(e) => {
@@ -174,6 +180,7 @@ const VaccinCampaign = () => {
               <option>Đã huỷ</option>
             </select>
             <button
+              id="show-all"
               style={{
                 background: quickFilter === "all" ? "#23b7b7" : "#eee",
                 color: quickFilter === "all" ? "#fff" : "#333",
@@ -192,6 +199,7 @@ const VaccinCampaign = () => {
               Hiển thị tất cả
             </button>
             <button
+              id="latest-campaign"
               style={{
                 background: quickFilter === "latest" ? "#23b7b7" : "#eee",
                 color: quickFilter === "latest" ? "#fff" : "#333",
@@ -221,7 +229,10 @@ const VaccinCampaign = () => {
               </div>
             ) : (
               currentCampaigns.map((c) => (
-                <div key={c.id} className={style.campaignCard}>
+                <div
+                  key={c.id}
+                  className={`${style.campaignCard} campaignCard`}
+                >
                   <div className={style.cardHeader}>
                     <div className={style.cardTitle}>{c.vaccineName}</div>
                   </div>
@@ -257,7 +268,9 @@ const VaccinCampaign = () => {
                       c.status === "Đã hoàn thành" ||
                       c.status === "Chưa bắt đầu") && (
                       <Link to={`/vaccines/${c.id}`}>
-                        <button className={style.btnDetail}>
+                        <button
+                          className={`${style.btnDetail} btn-detail-tour`}
+                        >
                           Xem chi tiết
                         </button>
                       </Link>
