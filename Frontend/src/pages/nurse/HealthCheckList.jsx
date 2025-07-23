@@ -15,7 +15,7 @@ import {
 import Notification from "../../components/Notification";
 import { notifySuccess, notifyError } from "../../utils/notification";
 import LoadingOverlay from "../../components/LoadingOverlay";
-
+import HealthCheckTour from "../../utils/HealthCheckTour";
 // API URL constants
 const HEALTH_CHECK_CAMPAIGN_API = "https://swp-school-medical-management.onrender.com/api/HealthCheckCampaign";
 
@@ -224,6 +224,7 @@ const HealthCheckList = () => {
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       <Sidebar />
+      <HealthCheckTour/>
       <main style={{ flex: 1 }}>
         <div className={style.campaignPage}>
           {/* LOADING OVERLAY */}
@@ -243,6 +244,8 @@ const HealthCheckList = () => {
             <div className={style.searchBox}>
               <Search size={16} />
               <input
+                id="search-campaign"
+
                 placeholder="Tìm kiếm chiến dịch..."
                 value={searchKeyword}
                 onChange={e => { setSearchKeyword(e.target.value); setQuickFilter('custom'); setCurrentPage(1); }}
@@ -250,6 +253,7 @@ const HealthCheckList = () => {
               />
             </div>
             <select
+            id="filter-year"
               className={style.filterDropdown}
               value={yearFilter}
               onChange={e => { setYearFilter(Number(e.target.value)); setQuickFilter('custom'); setCurrentPage(1); }}
@@ -261,6 +265,7 @@ const HealthCheckList = () => {
               <option value={3}>3 năm gần nhất</option>
             </select>
             <select
+            id="filter-status"
               className={style.filterDropdown}
               value={filterStatus}
               onChange={e => { setFilterStatus(e.target.value); setQuickFilter('custom'); setCurrentPage(1); }}
@@ -272,8 +277,8 @@ const HealthCheckList = () => {
               <option>Đã hoàn thành</option>
               <option>Đã huỷ</option>
             </select>
-            <button style={{ background: quickFilter === 'all' ? '#23b7b7' : '#eee', color: quickFilter === 'all' ? '#fff' : '#333', border: 'none', borderRadius: 8, padding: '8px 16px', fontWeight: 500, cursor: 'pointer', marginRight: 8 }} onClick={() => { setQuickFilter('all'); setCurrentPage(1); }}>Hiển thị tất cả</button>
-            <button style={{ background: quickFilter === 'latest' ? '#23b7b7' : '#eee', color: quickFilter === 'latest' ? '#fff' : '#333', border: 'none', borderRadius: 8, padding: '8px 16px', fontWeight: 500, cursor: 'pointer' }} onClick={() => { setQuickFilter('latest'); setCurrentPage(1); }}>Chiến dịch vừa tạo</button>
+            <button id="btn-show-all" style={{ background: quickFilter === 'all' ? '#23b7b7' : '#eee', color: quickFilter === 'all' ? '#fff' : '#333', border: 'none', borderRadius: 8, padding: '8px 16px', fontWeight: 500, cursor: 'pointer', marginRight: 8 }} onClick={() => { setQuickFilter('all'); setCurrentPage(1); }}>Hiển thị tất cả</button>
+            <button id="btn-latest" style={{ background: quickFilter === 'latest' ? '#23b7b7' : '#eee', color: quickFilter === 'latest' ? '#fff' : '#333', border: 'none', borderRadius: 8, padding: '8px 16px', fontWeight: 500, cursor: 'pointer' }} onClick={() => { setQuickFilter('latest'); setCurrentPage(1); }}>Chiến dịch vừa tạo</button>
           </div>
 
           {/* TABLE */}
@@ -284,7 +289,7 @@ const HealthCheckList = () => {
               <div style={{ padding: 32, textAlign: 'center', width: '100%' }}>Không có dữ liệu chiến dịch.</div>
             ) : (
               currentCampaigns.map((c) => (
-                <div key={c.id} className={style.campaignCard}>
+                <div key={c.id} id="card-0" className={style.campaignCard}>
                   <div className={style.cardHeader}>
                     <div className={style.cardTitle}>{c.title}</div>
                   </div>
@@ -304,11 +309,11 @@ const HealthCheckList = () => {
                       <span className={style.statusBadgeCancel}>Đã huỷ</span>
                     )}
                     {c.statusName === "Chưa bắt đầu" && (
-                      <button className={style.btnDetail} onClick={() => handleStatusChange(c.id, "Đang diễn ra")}>Kích hoạt</button>
+                      <button id="btn-starts" className={style.btnDetail} onClick={() => handleStatusChange(c.id, "Đang diễn ra")}>Kích hoạt</button>
                     )}
                     {(c.statusName === "Đang diễn ra" || c.statusName === "Đã hoàn thành") && (
                       <Link to={`/healthcheck/${c.id}`}>
-                        <button className={style.btnDetail}>Xem chi tiết</button>
+                        <button id="btn-detail-0" className={style.btnDetail}>Xem chi tiết</button>
                       </Link>
                     )}
                   </div>
