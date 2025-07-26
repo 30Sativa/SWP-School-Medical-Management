@@ -12,7 +12,7 @@ import LoadingOverlay from "../../components/LoadingOverlay";
 const { Option } = Select;
 const { Title } = Typography;
 
-const apiUrl = "https://swp-school-medical-management.onrender.com/api/User";
+const apiUrl = "/api/User";
 
 const UsersList = () => {
   const [users, setUsers] = useState([]);
@@ -222,15 +222,35 @@ const handleModalSubmit = async (values) => {
         parentId: selectedParent.userID,
       };
       delete payload.className;
+      
+      // Sử dụng URL tương đối nếu cùng domain, hoặc URL tuyệt đối nếu khác domain
+      const apiUrl = "/api/Student";
+      
       await axios.post(
-        "https://swp-school-medical-management.onrender.com/api/Student",
+        apiUrl,
         payload,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { 
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+            "Accept": "*/*"
+          }
+        }
       );
       message.success("Thêm học sinh thành công!");
       setStudentModalVisible(false);
-    } catch {
-      message.error("Thêm học sinh thất bại!");
+    } catch (error) {
+      console.error("Lỗi khi thêm học sinh:", error);
+      if (error.response) {
+        console.log("Response status:", error.response.status);
+        console.log("Response data:", error.response.data);
+        message.error(`Thêm học sinh thất bại! ${error.response.data?.message || error.response.statusText || ""}`);
+      } else if (error.request) {
+        console.log("Request error:", error.request);
+        message.error("Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng.");
+      } else {
+        message.error("Lỗi: " + error.message);
+      }
     }
   };
 
