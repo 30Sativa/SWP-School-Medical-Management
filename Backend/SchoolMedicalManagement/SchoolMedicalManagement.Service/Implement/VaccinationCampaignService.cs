@@ -384,8 +384,7 @@ namespace SchoolMedicalManagement.Service.Implement
             }
             // Kiểm tra ngày xác nhận hợp lệ
             consentRequest.ConsentStatusId = request.ConsentStatusId;
-            consentRequest.ConsentDate = DateTime.UtcNow;
-            if (consentRequest.ConsentDate < consentRequest.RequestDate)
+            if (request.ConsentDate < consentRequest.RequestDate)
             {
                 return new BaseResponse
                 {
