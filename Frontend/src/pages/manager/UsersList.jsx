@@ -215,28 +215,36 @@ const handleModalSubmit = async (values) => {
   const handleStudentSubmit = async (values) => {
     try {
       const token = localStorage.getItem("token");
-      const payload = {
-        ...values,
-        class: values.className,
-        dateOfBirth: values.dateOfBirth.format("YYYY-MM-DD"),
-        parentId: selectedParent.userID,
-      };
-      delete payload.className;
       
-      // Sử dụng URL tương đối nếu cùng domain, hoặc URL tuyệt đối nếu khác domain
+      // Đảm bảo genderId là số
+      const genderId = typeof values.genderId === 'string' 
+        ? parseInt(values.genderId, 10) 
+        : values.genderId;
+      
+      const payload = {
+        fullName: values.fullName,
+        dateOfBirth: values.dateOfBirth.format("YYYY-MM-DD"),
+        class: values.className,
+        genderId: genderId,
+        parentId: selectedParent.userID || selectedParent.userId
+      };
+      
+      console.log("Sending payload:", payload);
+      
       const apiUrl = "/api/Student";
       
-      await axios.post(
+      const response = await axios.post(
         apiUrl,
         payload,
         { 
           headers: { 
             "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-            "Accept": "*/*"
+            "Content-Type": "application/json"
           }
         }
       );
+      
+      console.log("Response:", response.data);
       message.success("Thêm học sinh thành công!");
       setStudentModalVisible(false);
     } catch (error) {
@@ -244,7 +252,11 @@ const handleModalSubmit = async (values) => {
       if (error.response) {
         console.log("Response status:", error.response.status);
         console.log("Response data:", error.response.data);
-        message.error(`Thêm học sinh thất bại! ${error.response.data?.message || error.response.statusText || ""}`);
+        const errorMsg = error.response.data?.message || 
+                         error.response.data?.title || 
+                         error.response.statusText || 
+                         "Lỗi không xác định";
+        message.error(`Thêm học sinh thất bại! ${errorMsg}`);
       } else if (error.request) {
         console.log("Request error:", error.request);
         message.error("Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng.");
