@@ -450,6 +450,3 @@ namespace SchoolMedicalManagement.Service.Implement
         }
     }
 }
-
-
-
