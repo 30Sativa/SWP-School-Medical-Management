@@ -1420,18 +1420,18 @@ namespace SchoolMedicalManagement.Service.Implement
         public async Task<BaseResponse> ResendConsentRequestAsync(int requestId, int? autoDeclineAfterDays = null)
         {
             var consent = await _campaignRepository.GetConsentRequestById(requestId);
-            if (consent == null) return new BaseResponse { Status = "404", Message = "Không tìm thấy phiếu", Data = null };
-            if (consent.ConsentStatusId == 2) return new BaseResponse { Status = "400", Message = "Phiếu đã đồng ý, không cần gửi lại", Data = null };
+            if (consent == null) return new BaseResponse { Status = StatusCodes.Status404NotFound.ToString(), Message = "Không tìm thấy phiếu", Data = null };
+            if (consent.ConsentStatusId == 2) return new BaseResponse { Status = StatusCodes.Status400BadRequest.ToString(), Message = "Phiếu đã đồng ý, không cần gửi lại", Data = null };
             consent.ConsentStatusId = 1;
             consent.RequestDate = DateTime.UtcNow;
             consent.ConsentDate = null;
             var updated = await _campaignRepository.UpdateConsentRequest(consent);
-            if (updated == null) return new BaseResponse { Status = "400", Message = "Gửi lại thất bại", Data = null };
+            if (updated == null) return new BaseResponse { Status = StatusCodes.Status400BadRequest.ToString(), Message = "Gửi lại thất bại", Data = null };
             int days = autoDeclineAfterDays ?? 3;
             BackgroundJob.Schedule<VaccinationCampaignService>(x => x.AutoDeclineConsentRequest(requestId), TimeSpan.FromDays(days));
             return new BaseResponse
             {
-                Status = "200",
+                Status = StatusCodes.Status200OK.ToString(),
                 Message = "Gửi lại thành công",
                 Data = new ConsentRequestResponse
                 {
