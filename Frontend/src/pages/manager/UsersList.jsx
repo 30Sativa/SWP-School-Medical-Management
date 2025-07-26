@@ -216,22 +216,36 @@ const handleModalSubmit = async (values) => {
     try {
       const token = localStorage.getItem("token");
       
+      if (!token) {
+        message.error("Không tìm thấy token xác thực. Vui lòng đăng nhập lại!");
+        return;
+      }
+      
+      // Kiểm tra parentId
+      const parentId = selectedParent?.userID || selectedParent?.userId;
+      if (!parentId) {
+        message.error("Không tìm thấy ID của phụ huynh!");
+        return;
+      }
+      
       // Đảm bảo genderId là số
       const genderId = typeof values.genderId === 'string' 
         ? parseInt(values.genderId, 10) 
         : values.genderId;
       
+      // Định dạng payload theo đúng yêu cầu của API
       const payload = {
-        fullName: values.fullName,
+        fullName: values.fullName.trim(),
         dateOfBirth: values.dateOfBirth.format("YYYY-MM-DD"),
-        class: values.className,
         genderId: genderId,
-        parentId: selectedParent.userID || selectedParent.userId
+        class: values.className.trim(),
+        parentId: parentId
       };
       
-      console.log("Sending payload:", payload);
+      console.log("Sending payload:", JSON.stringify(payload));
       
-      const apiUrl = "/api/Student";
+      // Sử dụng URL tuyệt đối vì đang trên production
+      const apiUrl = "https://swp-school-medical-management.onrender.com/api/Student";
       
       const response = await axios.post(
         apiUrl,
@@ -249,9 +263,21 @@ const handleModalSubmit = async (values) => {
       setStudentModalVisible(false);
     } catch (error) {
       console.error("Lỗi khi thêm học sinh:", error);
+      
+      // Kiểm tra lỗi xác thực
+      if (error.response && error.response.status === 401) {
+        message.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+        setTimeout(() => {
+          localStorage.clear();
+          window.location.href = "/login";
+        }, 2000);
+        return;
+      }
+      
       if (error.response) {
         console.log("Response status:", error.response.status);
-        console.log("Response data:", error.response.data);
+        console.log("Response data:", JSON.stringify(error.response.data));
+        
         const errorMsg = error.response.data?.message || 
                          error.response.data?.title || 
                          error.response.statusText || 
