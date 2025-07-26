@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Http;
 using SchoolMedicalManagement.Models.Response;
+using SchoolMedicalManagement.Models.Entity;
 using SchoolMedicalManagement.Repository.Repository;
 using SchoolMedicalManagement.Service.Interface;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,6 +18,7 @@ namespace SchoolMedicalManagement.Service.Implement
         private readonly MedicationRequestRepository _medicationRequestRepository;
         private readonly VaccinationCampaignRepository _vaccinationCampaignRepository;
         private readonly HealthCheckCampaignRepository _healthCheckCampaignRepository;
+        private readonly NotificationRepository _notificationRepository;
 
         public DashboardService(
             StudentRepository studentRepository,
@@ -23,7 +26,8 @@ namespace SchoolMedicalManagement.Service.Implement
             MedicalEventRepository medicalEventRepository,
             MedicationRequestRepository medicationRequestRepository,
             VaccinationCampaignRepository vaccinationCampaignRepository,
-            HealthCheckCampaignRepository healthCheckCampaignRepository)
+            HealthCheckCampaignRepository healthCheckCampaignRepository,
+            NotificationRepository notificationRepository)
         {
             _studentRepository = studentRepository;
             _userRepository = userRepository;
@@ -31,6 +35,7 @@ namespace SchoolMedicalManagement.Service.Implement
             _medicationRequestRepository = medicationRequestRepository;
             _vaccinationCampaignRepository = vaccinationCampaignRepository;
             _healthCheckCampaignRepository = healthCheckCampaignRepository;
+            _notificationRepository = notificationRepository;
         }
 
         public async Task<BaseResponse?> GetDashboardOverviewAsync()
@@ -154,7 +159,7 @@ namespace SchoolMedicalManagement.Service.Implement
                     CompletedCampaigns = await _vaccinationCampaignRepository.GetCompletedVaccinationCampaignsCount(),
                     CancelledCampaigns = await _vaccinationCampaignRepository.GetCancelledVaccinationCampaignsCount()
                 };
-                
+
                 return new BaseResponse
                 {
                     Status = StatusCodes.Status200OK.ToString(),
@@ -296,5 +301,152 @@ namespace SchoolMedicalManagement.Service.Implement
                 };
             }
         }
+
+        // Dashboard cho phụ huynh - Code dễ hiểu với logic thực tế
+        public async Task<BaseResponse?> GetParentDashboardOverviewAsync(Guid parentId)
+        {
+            try
+            {
+                // BƯỚC 1: Kiểm tra phụ huynh có tồn tại không
+                var parent = await _userRepository.GetUserById(parentId);
+                if (parent == null || parent.RoleId != 3)
+                {
+                    return new BaseResponse
+                    {
+                        Status = StatusCodes.Status404NotFound.ToString(),
+                        Message = "Không tìm thấy phụ huynh.",
+                        Data = null
+                    };
+                }
+
+                // BƯỚC 2: Lấy danh sách con của phụ huynh
+                var children = await _studentRepository.GetStudentsByParentId(parentId);
+                var childrenIds = children.Select(s => s.StudentId).ToList();
+
+                // BƯỚC 3: Lấy dữ liệu y tế của các con
+                var childrenMedicalEvents = await GetChildrenMedicalEvents(childrenIds);
+                var childrenMedicationRequests = await GetChildrenMedicationRequests(childrenIds);
+
+                // BƯỚC 4: Tạo thông tin tổng quan cơ bản từng con
+                var childrenOverview = CreateBasicChildrenOverview(children);
+
+                // BƯỚC 5: Lấy sự kiện y tế gần đây (5 sự kiện mới nhất)
+                var recentMedicalEvents = GetRecentMedicalEvents(childrenMedicalEvents, 5);
+
+                // BƯỚC 6: Lấy yêu cầu thuốc gần đây (5 yêu cầu mới nhất)
+                var recentMedicationRequests = GetRecentMedicationRequests(childrenMedicationRequests, 5);
+
+                // BƯỚC 7: Lấy thông báo gần đây
+                var recentNotifications = await GetRecentNotifications(parentId, 3);
+
+                // BƯỚC 8: Tạo response cuối cùng
+                var parentDashboard = new ParentDashboardOverviewResponse
+                {
+                    TotalChildren = children.Count,
+                    Children = childrenOverview,
+                    RecentMedicalEvents = recentMedicalEvents,
+                    RecentMedicationRequests = recentMedicationRequests,
+                    RecentNotifications = recentNotifications
+                };
+
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status200OK.ToString(),
+                    Message = "Lấy dữ liệu tổng quan cho phụ huynh thành công.",
+                    Data = parentDashboard
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse
+                {
+                    Status = StatusCodes.Status500InternalServerError.ToString(),
+                    Message = $"Đã xảy ra lỗi khi lấy dữ liệu tổng quan cho phụ huynh: {ex.Message}",
+                    Data = null
+                };
+            }
+        }
+
+        // ========== CÁC METHOD HỖ TRỢ - DỄ HIỂU ==========
+
+        // Lấy tất cả sự kiện y tế của các con
+        private async Task<List<MedicalEvent>> GetChildrenMedicalEvents(List<int> childrenIds)
+        {
+            var allMedicalEvents = await _medicalEventRepository.GetAllMedicalEvents();
+            return allMedicalEvents
+                .Where(e => e.StudentId.HasValue && childrenIds.Contains(e.StudentId.Value))
+                .ToList();
+        }
+
+        // Lấy tất cả yêu cầu thuốc của các con
+        private async Task<List<MedicationRequest>> GetChildrenMedicationRequests(List<int> childrenIds)
+        {
+            var allMedicationRequests = await _medicationRequestRepository.GetAllRequestsAsync();
+            return allMedicationRequests
+                .Where(r => childrenIds.Contains(r.StudentId))
+                .ToList();
+        }
+
+        // Tạo thông tin tổng quan cơ bản từng con
+        private List<ChildOverviewResponse> CreateBasicChildrenOverview(List<Student> children)
+        {
+            return children.Select(child => new ChildOverviewResponse
+            {
+                StudentId = child.StudentId,
+                StudentName = child.FullName ?? "",
+                Class = child.Class ?? "",
+                DateOfBirth = child.DateOfBirth,
+                Gender = child.Gender?.GenderName ?? ""
+            }).ToList();
+        }
+
+        // Lấy các sự kiện y tế gần đây
+        private List<RecentMedicalEventResponse> GetRecentMedicalEvents(List<MedicalEvent> medicalEvents, int count)
+        {
+            return medicalEvents
+                .OrderByDescending(e => e.EventDate)
+                .Take(count)
+                .Select(e => new RecentMedicalEventResponse
+                {
+                    EventId = e.EventId.ToString(),
+                    StudentName = e.Student?.FullName ?? "",
+                    EventType = e.EventType?.EventTypeName ?? "",
+                    EventDate = e.EventDate,
+                    Severity = e.Severity?.SeverityName ?? ""
+                }).ToList();
+        }
+
+        // Lấy các yêu cầu thuốc gần đây
+        private List<RecentMedicationRequestResponse> GetRecentMedicationRequests(List<MedicationRequest> medicationRequests, int count)
+        {
+            return medicationRequests
+                .OrderByDescending(r => r.RequestDate)
+                .Take(count)
+                .Select(r => new RecentMedicationRequestResponse
+                {
+                    RequestId = r.RequestId.ToString(),
+                    StudentName = r.Student?.FullName ?? "",
+                    MedicationName = r.MedicationName ?? "",
+                    RequestDate = r.RequestDate,
+                    Status = r.Status?.StatusName ?? ""
+                }).ToList();
+        }
+
+        // Lấy thông báo gần đây của phụ huynh
+        private async Task<List<RecentNotificationResponse>> GetRecentNotifications(Guid parentId, int count)
+        {
+            var notifications = await _notificationRepository.GetNotificationsByUserId(parentId);
+            return notifications
+                .OrderByDescending(n => n.SentDate)
+                .Take(count)
+                .Select(n => new RecentNotificationResponse
+                {
+                    NotificationId = n.NotificationId,
+                    Title = n.Title,
+                    Message = n.Message,
+                    CreatedDate = n.SentDate ?? DateTime.MinValue,
+                    IsRead = n.IsRead ?? false
+                }).ToList();
+        }
     }
-} 
+}

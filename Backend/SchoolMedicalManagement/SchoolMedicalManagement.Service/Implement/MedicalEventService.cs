@@ -4,6 +4,7 @@ using SchoolMedicalManagement.Models.Request;
 using SchoolMedicalManagement.Models.Response;
 using SchoolMedicalManagement.Repository.Repository;
 using SchoolMedicalManagement.Service.Interface;
+using System.Text;
 
 public class MedicalEventService : IMedicalEventService
 {
@@ -37,6 +38,124 @@ public class MedicalEventService : IMedicalEventService
                     };
                 }
             }
+        }
+
+        // B1.5: Kiểm tra tiền sử bệnh (dị ứng) của học sinh với vật tư y tế được chọn
+        if (request.StudentId != 0 && request.SuppliesUsed != null && request.SuppliesUsed.Any())
+        {
+            // Lấy danh sách tiền sử bệnh của học sinh
+            var medicalHistories = await _medicalHistoryRepository.GetAllByStudentIdMedicalHistory(request.StudentId);
+            
+            // Chỉ kiểm tra nếu học sinh có tiền sử bệnh
+            if (medicalHistories != null && medicalHistories.Any())
+            {
+                // Lấy thông tin chi tiết của các vật tư y tế được chọn
+                var selectedSupplies = new List<MedicalSupply>();
+                foreach (var item in request.SuppliesUsed)
+                {
+                    var supply = await _medicalEventRepository.GetSupplyById(item.SupplyId);
+                    if (supply != null)
+                    {
+                        selectedSupplies.Add(supply);
+                    }
+                }
+
+                // Kiểm tra xem có dị ứng với vật tư nào không
+                var allergies = new List<string>();
+                
+                // Tìm các tiền sử dị ứng
+                var allergyHistories = medicalHistories.Where(h => 
+                    (!string.IsNullOrEmpty(h.DiseaseName) && h.DiseaseName.ToLower().Contains("dị ứng")) || 
+                    (!string.IsNullOrEmpty(h.Note) && h.Note.ToLower().Contains("dị ứng"))
+                ).ToList();
+                
+                if (allergyHistories.Any())
+                {
+                    // Trích xuất tên thuốc/vật tư gây dị ứng từ tiền sử
+                    foreach (var history in allergyHistories)
+                    {
+                        // Trích xuất tên thuốc gây dị ứng từ DiseaseName hoặc Note
+                        string allergyName = "";
+                        
+                        if (!string.IsNullOrEmpty(history.DiseaseName) && history.DiseaseName.ToLower().Contains("dị ứng"))
+                        {
+                            // Lấy phần sau "Dị ứng" nếu có
+                            int index = history.DiseaseName.ToLower().IndexOf("dị ứng");
+                            if (index >= 0 && index + 7 < history.DiseaseName.Length)
+                            {
+                                allergyName = history.DiseaseName.Substring(index + 7).Trim();
+                            }
+                        }
+                        
+                        // Nếu không tìm thấy trong DiseaseName, tìm trong Note
+                        if (string.IsNullOrEmpty(allergyName) && !string.IsNullOrEmpty(history.Note))
+                        {
+                            // Tìm từ khóa trong Note
+                            string[] keywords = { "dị ứng với", "dị ứng", "không dùng", "không được sử dụng" };
+                            foreach (var keyword in keywords)
+                            {
+                                int index = history.Note.ToLower().IndexOf(keyword);
+                                if (index >= 0 && index + keyword.Length < history.Note.Length)
+                                {
+                                    allergyName = history.Note.Substring(index + keyword.Length).Trim().Split(',')[0].Trim();
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        // Nếu tìm được tên thuốc gây dị ứng, kiểm tra với các vật tư được chọn
+                        if (!string.IsNullOrEmpty(allergyName))
+                        {
+                            foreach (var supply in selectedSupplies)
+                            {
+                                if (!string.IsNullOrEmpty(supply.Name) && 
+                                    supply.Name.ToLower().Contains(allergyName.ToLower()))
+                                {
+                                    allergies.Add($"{supply.Name} (ID: {supply.SupplyId})");
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Nếu không thể trích xuất tên thuốc, kiểm tra trực tiếp với các vật tư phổ biến
+                            string[] commonAllergens = { "paracetamol", "aspirin", "ibuprofen", "penicillin", "amoxicillin" };
+                            foreach (var supply in selectedSupplies)
+                            {
+                                if (!string.IsNullOrEmpty(supply.Name))
+                                {
+                                    foreach (var allergen in commonAllergens)
+                                    {
+                                        if (supply.Name.ToLower().Contains(allergen))
+                                        {
+                                            // Kiểm tra xem allergen này có được đề cập trong tiền sử không
+                                            if ((history.DiseaseName != null && history.DiseaseName.ToLower().Contains(allergen)) ||
+                                                (history.Note != null && history.Note.ToLower().Contains(allergen)))
+                                            {
+                                                allergies.Add($"{supply.Name} (ID: {supply.SupplyId})");
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Nếu có dị ứng với bất kỳ vật tư nào, trả về lỗi
+                if (allergies.Any())
+                {
+                    var allergyList = string.Join(", ", allergies);
+                    return new BaseResponse
+                    {
+                        Status = StatusCodes.Status400BadRequest.ToString(),
+                        Message = $"Học sinh có tiền sử dị ứng với các vật tư y tế sau: {allergyList}",
+                        Data = null
+                    };
+                }
+            }
+            // Nếu không có tiền sử bệnh, bỏ qua việc kiểm tra
         }
 
         // B2: Tạo entity mới cho sự kiện y tế
@@ -228,6 +347,125 @@ public class MedicalEventService : IMedicalEventService
                 Message = "Không tìm thấy sự kiện y tế.",
                 Data = null
             };
+        }
+
+        // Kiểm tra tiền sử bệnh (dị ứng) của học sinh với vật tư y tế được chọn
+        int studentId = request.StudentId == 0 ? existingEvent.StudentId.GetValueOrDefault() : request.StudentId;
+        if (studentId != 0 && request.SuppliesUsed != null && request.SuppliesUsed.Any())
+        {
+            // Lấy danh sách tiền sử bệnh của học sinh
+            var medicalHistories = await _medicalHistoryRepository.GetAllByStudentIdMedicalHistory(studentId);
+            
+            // Chỉ kiểm tra nếu học sinh có tiền sử bệnh
+            if (medicalHistories != null && medicalHistories.Any())
+            {
+                // Lấy thông tin chi tiết của các vật tư y tế được chọn
+                var selectedSupplies = new List<MedicalSupply>();
+                foreach (var item in request.SuppliesUsed)
+                {
+                    var supply = await _medicalEventRepository.GetSupplyById(item.SupplyId);
+                    if (supply != null)
+                    {
+                        selectedSupplies.Add(supply);
+                    }
+                }
+
+                // Kiểm tra xem có dị ứng với vật tư nào không
+                var allergies = new List<string>();
+                
+                // Tìm các tiền sử dị ứng
+                var allergyHistories = medicalHistories.Where(h => 
+                    (!string.IsNullOrEmpty(h.DiseaseName) && h.DiseaseName.ToLower().Contains("dị ứng")) || 
+                    (!string.IsNullOrEmpty(h.Note) && h.Note.ToLower().Contains("dị ứng"))
+                ).ToList();
+                
+                if (allergyHistories.Any())
+                {
+                    // Trích xuất tên thuốc/vật tư gây dị ứng từ tiền sử
+                    foreach (var history in allergyHistories)
+                    {
+                        // Trích xuất tên thuốc gây dị ứng từ DiseaseName hoặc Note
+                        string allergyName = "";
+                        
+                        if (!string.IsNullOrEmpty(history.DiseaseName) && history.DiseaseName.ToLower().Contains("dị ứng"))
+                        {
+                            // Lấy phần sau "Dị ứng" nếu có
+                            int index = history.DiseaseName.ToLower().IndexOf("dị ứng");
+                            if (index >= 0 && index + 7 < history.DiseaseName.Length)
+                            {
+                                allergyName = history.DiseaseName.Substring(index + 7).Trim();
+                            }
+                        }
+                        
+                        // Nếu không tìm thấy trong DiseaseName, tìm trong Note
+                        if (string.IsNullOrEmpty(allergyName) && !string.IsNullOrEmpty(history.Note))
+                        {
+                            // Tìm từ khóa trong Note
+                            string[] keywords = { "dị ứng với", "dị ứng", "không dùng", "không được sử dụng" };
+                            foreach (var keyword in keywords)
+                            {
+                                int index = history.Note.ToLower().IndexOf(keyword);
+                                if (index >= 0 && index + keyword.Length < history.Note.Length)
+                                {
+                                    allergyName = history.Note.Substring(index + keyword.Length).Trim().Split(',')[0].Trim();
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        // Nếu tìm được tên thuốc gây dị ứng, kiểm tra với các vật tư được chọn
+                        if (!string.IsNullOrEmpty(allergyName))
+                        {
+                            foreach (var supply in selectedSupplies)
+                            {
+                                if (!string.IsNullOrEmpty(supply.Name) && 
+                                    supply.Name.ToLower().Contains(allergyName.ToLower()))
+                                {
+                                    allergies.Add($"{supply.Name} (ID: {supply.SupplyId})");
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Nếu không thể trích xuất tên thuốc, kiểm tra trực tiếp với các vật tư phổ biến
+                            string[] commonAllergens = { "paracetamol", "aspirin", "ibuprofen", "penicillin", "amoxicillin" };
+                            foreach (var supply in selectedSupplies)
+                            {
+                                if (!string.IsNullOrEmpty(supply.Name))
+                                {
+                                    foreach (var allergen in commonAllergens)
+                                    {
+                                        if (supply.Name.ToLower().Contains(allergen))
+                                        {
+                                            // Kiểm tra xem allergen này có được đề cập trong tiền sử không
+                                            if ((history.DiseaseName != null && history.DiseaseName.ToLower().Contains(allergen)) ||
+                                                (history.Note != null && history.Note.ToLower().Contains(allergen)))
+                                            {
+                                                allergies.Add($"{supply.Name} (ID: {supply.SupplyId})");
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Nếu có dị ứng với bất kỳ vật tư nào, trả về lỗi
+                if (allergies.Any())
+                {
+                    var allergyList = string.Join(", ", allergies);
+                    return new BaseResponse
+                    {
+                        Status = StatusCodes.Status400BadRequest.ToString(),
+                        Message = $"Học sinh có tiền sử dị ứng với các vật tư y tế sau: {allergyList}",
+                        Data = null
+                    };
+                }
+            }
+            // Nếu không có tiền sử bệnh, bỏ qua việc kiểm tra
         }
 
         // Cập nhật dữ liệu cơ bản (nếu request gửi lên không null)

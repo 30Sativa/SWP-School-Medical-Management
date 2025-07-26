@@ -63,6 +63,12 @@ public class MedicalEventRepository : GenericRepository<MedicalEvent>
         return supply != null && supply.Quantity >= quantityRequired;
     }
 
+    // Lấy thông tin chi tiết của vật tư y tế theo ID
+    public async Task<MedicalSupply?> GetSupplyById(int supplyId)
+    {
+        return await _context.MedicalSupplies.FindAsync(supplyId);
+    }
+
     // Cập nhật số lượng tồn kho sau khi dùng vật tư
     public async Task<bool> UpdateSupplyQuantity(int supplyId, int quantityUsed)
     {

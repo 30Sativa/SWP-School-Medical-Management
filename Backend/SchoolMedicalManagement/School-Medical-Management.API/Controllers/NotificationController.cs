@@ -56,5 +56,13 @@ namespace School_Medical_Management.API.Controllers
             var response = await _notificationService.DeleteNotificationAsync(id);
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
+
+        // Lấy danh sách tổng hợp thông báo cho phụ huynh
+        [HttpGet("parent/{parentId}/notifications")]
+        public async Task<IActionResult> GetParentNotifications([FromRoute] Guid parentId)
+        {
+            var response = await _notificationService.GetParentNotificationsAsync(parentId);
+            return StatusCode(int.Parse(response.Status ?? "200"), response);
+        }
     }
-} 
+}

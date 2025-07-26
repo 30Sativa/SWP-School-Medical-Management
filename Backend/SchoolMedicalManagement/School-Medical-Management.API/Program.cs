@@ -22,16 +22,6 @@ builder.Configuration.AddEnvironmentVariables();
 
 
 
-// ✅ Thêm cấu hình CORS (Cho phép React ở localhost:3000 gọi API)
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowReactApp",
-        policy => policy.WithOrigins("http://localhost:3000") // React chạy ở port 3000
-                        .AllowAnyHeader()
-                        .AllowAnyMethod());
-});
-
-
 builder.Services.AddEndpointsApiExplorer();
 
 //DI for Repo
@@ -75,16 +65,22 @@ builder.Services.AddScoped<IMedicalEventTypeService, MedicalEventTypeService>();
 builder.Services.AddScoped<IBlogPostService, BlogPostService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IParentFeedbackService, ParentFeedbackService>();
+
 // CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins",
-        builder =>
-        {
-            builder.AllowAnyOrigin()
-                   .AllowAnyMethod()
-                   .AllowAnyHeader();
-        });
+    options.AddPolicy("MyCorsPolicy", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:3000", // Local development
+                "http://localhost:5173",
+                "http://localhost:5174",
+                "https://schoolmedicalmanagement.id.vn" // Production
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); // Nếu dùng cookies/token
+    });
 });
 
 //Database
@@ -193,10 +189,14 @@ app.MapMethods("/api/health", new[] { "HEAD" }, () => Results.Ok());
 app.UseStaticFiles();
 app.UseSwagger();
 app.UseSwaggerUI();
-app.UseCors("AllowAllOrigins");
+app.UseRouting();
+app.UseCors("MyCorsPolicy");
+
 app.UseHttpsRedirection();
-// ✅ Kích hoạt CORS (phải đặt trước Authorization!)
-app.UseCors("AllowReactApp");
+
+
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

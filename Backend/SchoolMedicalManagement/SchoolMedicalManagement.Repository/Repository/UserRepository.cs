@@ -102,5 +102,16 @@ namespace SchoolMedicalManagement.Repository.Repository
                 .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
+
+        // Lấy danh sách VaccinationConsentRequest theo danh sách StudentId
+        public async Task<List<VaccinationConsentRequest>> GetConsentRequestsByStudentIds(List<int> studentIds)
+        {
+            return await _context.VaccinationConsentRequests
+                .Include(v => v.Campaign)
+                .Include(v => v.ConsentStatus)
+                .Include(v => v.Student)
+                .Where(v => studentIds.Contains(v.StudentId))
+                .ToListAsync();
+        }
     }
 }
