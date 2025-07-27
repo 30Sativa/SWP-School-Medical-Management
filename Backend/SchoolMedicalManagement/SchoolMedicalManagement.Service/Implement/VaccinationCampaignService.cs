@@ -349,11 +349,11 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     RequestId = created.RequestId,
                     StudentId = created.StudentId,
-                    StudentName = student.FullName,
+                    StudentName = student.FullName ?? string.Empty,
                     CampaignId = created.CampaignId,
-                    CampaignName = campaign.VaccineName,
+                    CampaignName = campaign.VaccineName ?? string.Empty,
                     ParentId = created.ParentId,
-                    ParentName = parent.FullName,
+                    ParentName = parent.FullName ?? string.Empty,
                     RequestDate = created.RequestDate
                 }
             };
@@ -514,7 +514,8 @@ namespace SchoolMedicalManagement.Service.Implement
             }
             // Kiểm tra ngày tiêm hợp lệ
             var campaignDate = campaign.Date ?? DateOnly.FromDateTime(DateTime.UtcNow);
-            if (request.VaccinationDate < consentRequest.ConsentDate || request.VaccinationDate < campaignDate.ToDateTime(TimeOnly.MinValue))
+            if (request.VaccinationDate < consentRequest.ConsentDate || 
+                request.VaccinationDate < campaignDate.ToDateTime(TimeOnly.MinValue))
             {
                 return new BaseResponse
                 {
@@ -998,14 +999,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     RequestId = cr.RequestId,
                     StudentId = cr.StudentId,
-                    StudentName = cr.Student?.FullName,
+                    StudentName = cr.Student?.FullName ?? string.Empty,
                     CampaignId = cr.CampaignId,
-                    CampaignName = cr.Campaign?.VaccineName,
+                    CampaignName = cr.Campaign?.VaccineName ?? string.Empty,
                     ParentId = cr.ParentId,
-                    ParentName = cr.Parent?.FullName,
+                    ParentName = cr.Parent?.FullName ?? string.Empty,
                     RequestDate = cr.RequestDate,
                     ConsentStatusId = cr.ConsentStatusId,
-                    ConsentStatusName = cr.ConsentStatus?.ConsentStatusName
+                    ConsentStatusName = cr.ConsentStatus?.ConsentStatusName ?? string.Empty
                 }).ToList();
 
                 int days = request.AutoDeclineAfterDays ?? 3;
@@ -1106,14 +1107,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     RequestId = cr.RequestId,
                     StudentId = cr.StudentId,
-                    StudentName = cr.Student?.FullName,
+                    StudentName = cr.Student?.FullName ?? string.Empty,
                     CampaignId = cr.CampaignId,
-                    CampaignName = cr.Campaign?.VaccineName,
+                    CampaignName = cr.Campaign?.VaccineName ?? string.Empty,
                     ParentId = cr.ParentId,
-                    ParentName = cr.Parent?.FullName,
+                    ParentName = cr.Parent?.FullName ?? string.Empty,
                     RequestDate = cr.RequestDate,
                     ConsentStatusId = cr.ConsentStatusId,
-                    ConsentStatusName = cr.ConsentStatus?.ConsentStatusName
+                    ConsentStatusName = cr.ConsentStatus?.ConsentStatusName ?? string.Empty
                 }).ToList();
 
                 int days = autoDeclineAfterDays ?? 3;
@@ -1231,14 +1232,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     RequestId = cr.RequestId,
                     StudentId = cr.StudentId,
-                    StudentName = cr.Student?.FullName,
+                    StudentName = cr.Student?.FullName ?? string.Empty,
                     CampaignId = cr.CampaignId,
-                    CampaignName = cr.Campaign?.VaccineName,
+                    CampaignName = cr.Campaign?.VaccineName ?? string.Empty,
                     ParentId = cr.ParentId,
-                    ParentName = cr.Parent?.FullName,
+                    ParentName = cr.Parent?.FullName ?? string.Empty,
                     RequestDate = cr.RequestDate,
                     ConsentStatusId = cr.ConsentStatusId,
-                    ConsentStatusName = cr.ConsentStatus?.ConsentStatusName
+                    ConsentStatusName = cr.ConsentStatus?.ConsentStatusName ?? string.Empty
                 }).ToList();
 
                 int days = request.AutoDeclineAfterDays ?? 3;
@@ -1277,14 +1278,14 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 RequestId = consentRequest.RequestId,
                 StudentId = consentRequest.StudentId,
-                StudentName = consentRequest.Student?.FullName,
+                StudentName = consentRequest.Student?.FullName ?? string.Empty,
                 CampaignId = consentRequest.CampaignId,
-                CampaignName = consentRequest.Campaign?.VaccineName,
+                CampaignName = consentRequest.Campaign?.VaccineName ?? string.Empty,
                 ParentId = consentRequest.ParentId,
-                ParentName = consentRequest.Parent?.FullName,
+                ParentName = consentRequest.Parent?.FullName ?? string.Empty,
                 RequestDate = consentRequest.RequestDate,
                 ConsentStatusId = consentRequest.ConsentStatusId,
-                ConsentStatusName = consentRequest.ConsentStatus?.ConsentStatusName,
+                ConsentStatusName = consentRequest.ConsentStatus?.ConsentStatusName ?? string.Empty,
                 ConsentDate = consentRequest.ConsentDate
             };
 
@@ -1315,14 +1316,14 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 RequestId = cr.RequestId,
                 StudentId = cr.StudentId,
-                StudentName = cr.Student?.FullName,
+                StudentName = cr.Student?.FullName ?? string.Empty,
                 CampaignId = cr.CampaignId,
-                CampaignName = cr.Campaign?.VaccineName,
+                CampaignName = cr.Campaign?.VaccineName ?? string.Empty,
                 ParentId = cr.ParentId,
-                ParentName = cr.Parent?.FullName,
+                ParentName = cr.Parent?.FullName ?? string.Empty,
                 RequestDate = cr.RequestDate,
                 ConsentStatusId = cr.ConsentStatusId,
-                ConsentStatusName = cr.ConsentStatus?.ConsentStatusName,
+                ConsentStatusName = cr.ConsentStatus?.ConsentStatusName ?? string.Empty,
                 ConsentDate = cr.ConsentDate
             }).ToList();
 
@@ -1437,14 +1438,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     RequestId = updated.RequestId,
                     StudentId = updated.StudentId,
-                    StudentName = updated.Student?.FullName,
+                    StudentName = updated.Student?.FullName ?? string.Empty,
                     CampaignId = updated.CampaignId,
-                    CampaignName = updated.Campaign?.VaccineName,
+                    CampaignName = updated.Campaign?.VaccineName ?? string.Empty,
                     ParentId = updated.ParentId,
-                    ParentName = updated.Parent?.FullName,
+                    ParentName = updated.Parent?.FullName ?? string.Empty,
                     RequestDate = updated.RequestDate,
                     ConsentStatusId = updated.ConsentStatusId,
-                    ConsentStatusName = updated.ConsentStatus?.ConsentStatusName,
+                    ConsentStatusName = updated.ConsentStatus?.ConsentStatusName ?? string.Empty,
                     ConsentDate = updated.ConsentDate
                 }
             };

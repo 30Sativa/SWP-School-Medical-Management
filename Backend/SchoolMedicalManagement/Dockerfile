@@ -15,7 +15,7 @@ RUN dotnet restore
 COPY . .
 
 WORKDIR /app/School-Medical-Management.API
-RUN dotnet publish -c Release -o out
+RUN dotnet publish -c Release -o out /p:TreatWarningsAsErrors=false
 
 # ========== RUNTIME STAGE ==========
 FROM mcr.microsoft.com/dotnet/aspnet:8.0

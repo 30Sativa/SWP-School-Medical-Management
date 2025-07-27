@@ -542,7 +542,7 @@ public class MedicalEventService : IMedicalEventService
             Message = "Đã cập nhật sự kiện y tế thành công.",
             Data = new CreateMedicalEventResponse
             {
-                StudentId = updatedEvent.Student.StudentId,
+                StudentId = updatedEvent.Student?.StudentId ?? 0,
                 StudentName = updatedEvent.Student?.FullName ?? string.Empty,
                 ParentName = updatedEvent.Student?.Parent?.FullName ?? string.Empty,
                 EventType = updatedEvent.EventType?.EventTypeName ?? string.Empty,
