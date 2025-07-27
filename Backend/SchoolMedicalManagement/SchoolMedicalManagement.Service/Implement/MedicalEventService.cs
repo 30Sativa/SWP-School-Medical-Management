@@ -210,24 +210,24 @@ public class MedicalEventService : IMedicalEventService
             Data = new CreateMedicalEventResponse
             {
                 EventId = createdEvent.EventId, 
-                StudentId = createdEvent.Student.StudentId,
-                StudentName = createdEvent.Student?.FullName,
-                ParentName = createdEvent.Student?.Parent?.FullName,
-                EventType = createdEvent.EventType?.EventTypeName,
+                StudentId = createdEvent.Student?.StudentId ?? 0,
+                StudentName = createdEvent.Student?.FullName ?? string.Empty,
+                ParentName = createdEvent.Student?.Parent?.FullName ?? string.Empty,
+                EventType = createdEvent.EventType?.EventTypeName ?? string.Empty,
                 EventDate = createdEvent.EventDate,
-                Description = createdEvent.Description,
+                Description = createdEvent.Description ?? string.Empty,
                 HandledById = createdEvent.HandledBy,
-                HandledByName = createdEvent.HandledByNavigation?.FullName,
-                SeverityLevelName = createdEvent.Severity?.SeverityName,
-                Location = createdEvent.Location,
-                Notes = createdEvent.Notes,
-                SuppliesUsed = request.SuppliesUsed.Select(s => new SupplyUserResponse
+                HandledByName = createdEvent.HandledByNavigation?.FullName ?? string.Empty,
+                SeverityLevelName = createdEvent.Severity?.SeverityName ?? string.Empty,
+                Location = createdEvent.Location ?? string.Empty,
+                Notes = createdEvent.Notes ?? string.Empty,
+                SuppliesUsed = request.SuppliesUsed?.Select(s => new SupplyUserResponse
                 {
                     SupplyId = s.SupplyId,
                     SupplyName = "", // frontend tự join nếu cần
                     QuantityUsed = s.QuantityUsed,
                     Note = s.Note
-                }).ToList()
+                }).ToList() ?? new List<SupplyUserResponse>()
             }
         };
     }
