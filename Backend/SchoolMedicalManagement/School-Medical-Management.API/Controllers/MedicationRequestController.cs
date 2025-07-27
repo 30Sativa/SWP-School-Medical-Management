@@ -1,4 +1,5 @@
 ﻿using Azure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolMedicalManagement.Models.Request;
@@ -9,6 +10,7 @@ namespace School_Medical_Management.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize] // Default authorization for all endpoints
     public class MedicationRequestController : ControllerBase
     {
         private readonly IMedicationRequestService _medicationRequestService;
@@ -18,7 +20,8 @@ namespace School_Medical_Management.API.Controllers
             _medicationRequestService = medicationRequestService;
         }
 
-        // ✅ 1. Lấy danh sách đơn thuốc đang chờ duyệt
+        // ✅ 1. Lấy danh sách đơn thuốc đang chờ duyệt - Chỉ y tá và quản lý mới có quyền xem
+        [Authorize(Roles = "Nurse,Manager")]
         [HttpGet("pending")]
         public async Task<IActionResult> GetPendingRequests()
         {
@@ -26,7 +29,8 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // ✅ 2. Xử lý đơn thuốc (duyệt hoặc từ chối)
+        // ✅ 2. Xử lý đơn thuốc (duyệt hoặc từ chối) - Chỉ y tá và quản lý mới có quyền xử lý
+        [Authorize(Roles = "Nurse,Manager")]
         [HttpPost("handle")]
         public async Task<IActionResult> HandleMedicationRequest([FromBody] UpdateMedicationRequestStatus request)
         {
@@ -38,7 +42,8 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(result.Status ?? "200"), result);
         }
 
-        // ✅ 3. Tạo đơn thuốc mới (cho phép upload ảnh đơn thuốc)
+        // ✅ 3. Tạo đơn thuốc mới (cho phép upload ảnh đơn thuốc) - Phụ huynh có thể tạo đơn thuốc
+        [Authorize(Roles = "Parent,Nurse,Manager")]
         [HttpPost("create")]
         public async Task<IActionResult> CreateMedicationRequest([FromForm] CreateMedicationRequest request, [FromQuery] Guid parentId)
         {
@@ -81,6 +86,8 @@ namespace School_Medical_Management.API.Controllers
             }
         }
 
+        // Lấy tất cả đơn thuốc - Chỉ y tá và quản lý mới có quyền xem tất cả
+        [Authorize(Roles = "Nurse,Manager")]
         [HttpGet("all")]
         public async Task<IActionResult> GetAllMedicalRequests()
         {
@@ -88,6 +95,8 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
+        // Lấy đơn thuốc theo học sinh - Phụ huynh, y tá và quản lý có thể xem
+        [Authorize(Roles = "Parent,Nurse,Manager")]
         [HttpGet("student/{studentId}")]
         public async Task<IActionResult> GetMedicalRequestByStudent(string studentId)
         {
@@ -102,7 +111,8 @@ namespace School_Medical_Management.API.Controllers
             }
         }
 
-        // Get medication requests by parent ID
+        // Lấy đơn thuốc theo phụ huynh - Phụ huynh có thể xem đơn thuốc của mình
+        [Authorize(Roles = "Parent,Nurse,Manager")]
         [HttpGet("parent/{parentId}")]
         public async Task<IActionResult> GetRequestsByParent(Guid parentId)
         {
@@ -110,7 +120,8 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Get medication request by ID
+        // Lấy đơn thuốc theo ID - Phụ huynh, y tá và quản lý có thể xem
+        [Authorize(Roles = "Parent,Nurse,Manager")]
         [HttpGet("{requestId}")]
         public async Task<IActionResult> GetRequestById(int requestId)
         {
@@ -125,7 +136,8 @@ namespace School_Medical_Management.API.Controllers
             }
         }
 
-        // API cập nhật trạng thái tổng quát cho đơn thuốc
+        // Cập nhật trạng thái đơn thuốc - Chỉ y tá và quản lý mới có quyền cập nhật
+        [Authorize(Roles = "Nurse,Manager")]
         [HttpPut("{requestId}/status")]
         public async Task<IActionResult> UpdateMedicationRequestStatus(int requestId, [FromBody] UpdateMedicationStatusDto dto)
         {
@@ -136,7 +148,8 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // ✅ Lấy danh sách đơn thuốc theo Id trạng thái
+        // ✅ Lấy danh sách đơn thuốc theo Id trạng thái - Chỉ y tá và quản lý mới có quyền xem
+        [Authorize(Roles = "Nurse,Manager")]
         [HttpGet("status/{statusId}")]
         public async Task<IActionResult> GetRequestsByStatusId(int statusId)
         {

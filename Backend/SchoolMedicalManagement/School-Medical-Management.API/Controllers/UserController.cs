@@ -7,6 +7,7 @@ namespace School_Medical_Management.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize] // Default authorization for all endpoints
     public class UserController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -18,7 +19,8 @@ namespace School_Medical_Management.API.Controllers
             _userService = userService;
         }
 
-        // Đăng nhập
+        // Đăng nhập - Public endpoint
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginUserRequest loginRequest)
         {
@@ -36,7 +38,7 @@ namespace School_Medical_Management.API.Controllers
         }
 
         // Lấy thông tin 1 user theo ID
-        [Authorize(Roles = "Manager")]
+        [Authorize(Roles = "Manager,Nurse")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById([FromRoute] Guid id)
         {
@@ -72,6 +74,7 @@ namespace School_Medical_Management.API.Controllers
         }
 
         // Đổi mật khẩu sau lần đăng nhập đầu tiên
+        [AllowAnonymous] // Allow first login password change without authorization
         [HttpPost("change-password-firstlogin/{id}")]
         public async Task<IActionResult> ChangePasswordAfterFirstLogin([FromRoute] Guid id, [FromBody] ChangePasswordUserRequest request)
         {
@@ -80,6 +83,7 @@ namespace School_Medical_Management.API.Controllers
         }
 
         // Gửi OTP quên mật khẩu đến email
+        [AllowAnonymous] // Allow password reset without authorization
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
@@ -88,6 +92,7 @@ namespace School_Medical_Management.API.Controllers
         }
 
         // Gộp xác thực OTP và đặt lại mật khẩu
+        [AllowAnonymous] // Allow password reset without authorization
         [HttpPost("verify-otp-reset-password")]
         public async Task<IActionResult> VerifyOtpAndResetPassword([FromBody] VerifyOtpAndResetPasswordRequest request)
         {

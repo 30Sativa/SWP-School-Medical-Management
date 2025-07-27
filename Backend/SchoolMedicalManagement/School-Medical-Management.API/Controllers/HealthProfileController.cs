@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolMedicalManagement.Models.Request;
 using SchoolMedicalManagement.Service.Interface;
@@ -8,6 +9,7 @@ namespace School_Medical_Management.API.Controllers
 {
     [Route("api/health-profiles")]
     [ApiController]
+    [Authorize] // Default authorization for all endpoints
     public class HealthProfileController : ControllerBase
     {
         private readonly IHealthProfileService _healthProfileService;
@@ -17,7 +19,8 @@ namespace School_Medical_Management.API.Controllers
             _healthProfileService = healthProfileService;
         }
 
-        // ✅ Lấy danh sách hồ sơ sức khỏe (chỉ IsActive = true)
+        // ✅ Lấy danh sách hồ sơ sức khỏe (chỉ IsActive = true) - Y tá và quản lý có quyền xem
+        [Authorize(Roles = "Nurse,Manager")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -25,7 +28,8 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // ✅ Lấy danh sách tất cả hồ sơ sức khỏe (bao gồm cả IsActive = false)
+        // ✅ Lấy danh sách tất cả hồ sơ sức khỏe (bao gồm cả IsActive = false) - Chỉ quản lý mới có quyền xem
+        [Authorize(Roles = "Manager")]
         [HttpGet("include-inactive")]
         public async Task<IActionResult> GetAllIncludeInactive()
         {
@@ -33,7 +37,8 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // ✅ Lấy chi tiết theo ID
+        // ✅ Lấy chi tiết theo ID - Y tá, quản lý và phụ huynh có quyền xem
+        [Authorize(Roles = "Nurse,Manager,Parent")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
@@ -44,7 +49,8 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // ✅ Tạo mới hồ sơ
+        // ✅ Tạo mới hồ sơ - Chỉ y tá và quản lý mới có quyền tạo
+        [Authorize(Roles = "Nurse,Manager")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateHealthProfileRequest request)
         {
@@ -52,7 +58,8 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response?.Status ?? "200"), response);
         }
 
-        // ✅ Cập nhật hồ sơ
+        // ✅ Cập nhật hồ sơ - Chỉ y tá và quản lý mới có quyền cập nhật
+        [Authorize(Roles = "Nurse,Manager")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateHealthProfileRequest request)
         {
@@ -63,7 +70,8 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // ✅ Cập nhật trạng thái IsActive của hồ sơ sức khỏe
+        // ✅ Cập nhật trạng thái IsActive của hồ sơ sức khỏe - Chỉ quản lý mới có quyền cập nhật trạng thái
+        [Authorize(Roles = "Manager")]
         [HttpPut("{id}/status")]
         public async Task<IActionResult> UpdateStatus([FromRoute] int id, [FromBody] UpdateHealthProfileStatusRequest request)
         {
@@ -84,7 +92,8 @@ namespace School_Medical_Management.API.Controllers
         //        : NotFound($"Health profile with ID {id} not found or could not be deleted.");
         //}
 
-        // ✅ Lấy hồ sơ sức khỏe của học sinh
+        // ✅ Lấy hồ sơ sức khỏe của học sinh - Y tá, quản lý và phụ huynh có quyền xem
+        [Authorize(Roles = "Nurse,Manager,Parent")]
         [HttpGet("student/{studentId}")]
         public async Task<IActionResult> GetHealthProfileByStudentId([FromRoute] int studentId)
         {
@@ -95,7 +104,8 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // ✅ Cập nhật hồ sơ sức khỏe của học sinh
+        // ✅ Cập nhật hồ sơ sức khỏe của học sinh - Chỉ y tá và quản lý mới có quyền cập nhật
+        [Authorize(Roles = "Nurse,Manager")]
         [HttpPut("student/{studentId}")]
         public async Task<IActionResult> UpdateHealthProfileByStudentId([FromRoute] int studentId, [FromBody] UpdateHealthProfileRequest request)
         {
