@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolMedicalManagement.Models.Request;
@@ -9,7 +8,6 @@ namespace School_Medical_Management.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Default authorization for all endpoints
     public class BlogPostController : ControllerBase
     {
         private readonly IBlogPostService _blogPostService;
@@ -19,7 +17,6 @@ namespace School_Medical_Management.API.Controllers
             _blogPostService = blogPostService;
         }
 
-        // Xem danh sách bài viết - Tất cả người dùng đã đăng nhập đều có thể xem
         [HttpGet]
         public async Task<IActionResult> GetBlogPostList()
         {
@@ -27,7 +24,6 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Xem chi tiết bài viết - Tất cả người dùng đã đăng nhập đều có thể xem
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBlogPostById([FromRoute] int id)
         {
@@ -39,8 +35,6 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Tạo bài viết mới - Chỉ quản lý và y tá mới có quyền tạo
-        [Authorize(Roles = "Manager,Nurse")]
         [HttpPost]
         public async Task<IActionResult> CreateBlogPost([FromBody] CreateBlogPostRequest request)
         {
@@ -48,8 +42,6 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response?.Status ?? "200"), response);
         }
 
-        // Cập nhật bài viết - Chỉ quản lý và y tá mới có quyền cập nhật
-        [Authorize(Roles = "Manager,Nurse")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBlogPost([FromRoute] int id, [FromBody] UpdateBlogPostRequest request)
         {
@@ -61,8 +53,6 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Xóa bài viết - Chỉ quản lý mới có quyền xóa
-        [Authorize(Roles = "Manager")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBlogPost([FromRoute] int id)
         {

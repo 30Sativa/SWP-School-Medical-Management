@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolMedicalManagement.Models.Request;
 using SchoolMedicalManagement.Models.Response;
@@ -12,7 +11,6 @@ namespace School_Medical_Management.API.Controllers
     // Controller xử lý các request API liên quan đến chiến dịch tiêm chủng
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Default authorization for all endpoints
     public class VaccinationCampaignController : ControllerBase
     {
         private readonly IVaccinationCampaignService _vaccinationCampaignService;
@@ -22,7 +20,7 @@ namespace School_Medical_Management.API.Controllers
             _vaccinationCampaignService = vaccinationCampaignService;
         }
 
-        // Lấy danh sách tất cả chiến dịch tiêm chủng - Tất cả người dùng đã đăng nhập đều có thể xem
+        // Lấy danh sách tất cả chiến dịch tiêm chủng
         [HttpGet("campaigns")]
         public async Task<IActionResult> GetVaccinationCampaigns()
         {
@@ -30,7 +28,7 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Lấy danh sách chiến dịch tiêm chủng đang hoạt động - Tất cả người dùng đã đăng nhập đều có thể xem
+        // Lấy danh sách chiến dịch tiêm chủng đang hoạt động
         [HttpGet("campaigns/active")]
         public async Task<IActionResult> GetActiveVaccinationCampaigns()
         {
@@ -38,8 +36,7 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Lấy danh sách chiến dịch tiêm chủng theo trạng thái - Chỉ quản lý và y tá mới có quyền xem
-        [Authorize(Roles = "Manager,Nurse")]
+        // Lấy danh sách chiến dịch tiêm chủng theo trạng thái
         [HttpGet("campaigns/status/{statusId}")]
         public async Task<IActionResult> GetVaccinationCampaignsByStatus([FromRoute] int statusId)
         {
@@ -47,7 +44,7 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Lấy thông tin chi tiết một chiến dịch tiêm chủng - Tất cả người dùng đã đăng nhập đều có thể xem
+        // Lấy thông tin chi tiết một chiến dịch tiêm chủng
         [HttpGet("campaigns/{id}")]
         public async Task<IActionResult> GetVaccinationCampaign([FromRoute] int id)
         {
@@ -55,8 +52,7 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Tạo mới một chiến dịch tiêm chủng - Chỉ quản lý và y tá mới có quyền tạo
-        [Authorize(Roles = "Manager,Nurse")]
+        // Tạo mới một chiến dịch tiêm chủng
         [HttpPost("campaigns")]
         public async Task<IActionResult> CreateVaccinationCampaign([FromBody] CreateVaccinationCampaignRequest request)
         {
@@ -64,8 +60,7 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Cập nhật một chiến dịch tiêm chủng - Chỉ quản lý và y tá mới có quyền cập nhật
-        [Authorize(Roles = "Manager,Nurse")]
+        // Cập nhật một chiến dịch tiêm chủng
         [HttpPut("campaigns")]
         public async Task<IActionResult> UpdateVaccinationCampaign([FromBody] UpdateVaccinationCampaignRequest request)
         {
@@ -73,8 +68,7 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Vô hiệu hóa một chiến dịch tiêm chủng - Chỉ quản lý mới có quyền vô hiệu hóa
-        [Authorize(Roles = "Manager")]
+        // Vô hiệu hóa một chiến dịch tiêm chủng
         [HttpPut("campaigns/{id}/deactivate")]
         public async Task<IActionResult> DeactivateVaccinationCampaign([FromRoute] int id)
         {
@@ -82,8 +76,7 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Kích hoạt lại một chiến dịch tiêm chủng - Chỉ quản lý mới có quyền kích hoạt lại
-        [Authorize(Roles = "Manager")]
+        // Kích hoạt lại một chiến dịch tiêm chủng
         [HttpPut("campaigns/{id}/activate")]
         public async Task<IActionResult> ActivateVaccinationCampaign([FromRoute] int id)
         {
@@ -91,8 +84,7 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Lấy danh sách chiến dịch theo người tạo - Chỉ quản lý và y tá mới có quyền xem
-        [Authorize(Roles = "Manager,Nurse")]
+        // Lấy danh sách chiến dịch theo người tạo
         [HttpGet("campaigns/creator/{creatorId}")]
         public async Task<IActionResult> GetCampaignsByCreator([FromRoute] Guid creatorId)
         {
@@ -100,7 +92,7 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Kiểm tra trạng thái chiến dịch - Tất cả người dùng đã đăng nhập đều có thể xem
+        // Kiểm tra trạng thái chiến dịch
         [HttpGet("campaigns/{id}/status")]
         public async Task<IActionResult> CheckCampaignStatus([FromRoute] int id)
         {
@@ -108,8 +100,7 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Lấy tóm tắt thống kê chiến dịch - Chỉ quản lý và y tá mới có quyền xem
-        [Authorize(Roles = "Manager,Nurse")]
+        // Lấy tóm tắt thống kê chiến dịch
         [HttpGet("campaigns/{id}/summary")]
         public async Task<IActionResult> GetCampaignSummary([FromRoute] int id)
         {
