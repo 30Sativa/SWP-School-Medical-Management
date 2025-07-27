@@ -523,9 +523,10 @@ const HealthCheckDetail = () => {
           className={styles.modalForm}
         >
           <div className={styles.formGroup}>
-            <label htmlFor="bloodPressure">Huyết áp:</label>
+            <label htmlFor="bloodPressure">Huyết áp (mmHg):</label>
             <input
               type="number"
+              step="any"
               id="bloodPressure"
               name="bloodPressure"
               defaultValue={
@@ -537,7 +538,7 @@ const HealthCheckDetail = () => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="heartRate">Nhịp tim:</label>
+            <label htmlFor="heartRate">Nhịp tim (bpm):</label>
             <input
               type="number"
               id="heartRate"
@@ -554,6 +555,7 @@ const HealthCheckDetail = () => {
             <label htmlFor="height">Chiều cao (cm):</label>
             <input
               type="number"
+              step="any"
               id="height"
               name="height"
               defaultValue={modalType === "edit" ? selectedRecord?.height : ""}
@@ -566,6 +568,7 @@ const HealthCheckDetail = () => {
             <label htmlFor="weight">Cân nặng (kg):</label>
             <input
               type="number"
+              step="any"
               id="weight"
               name="weight"
               defaultValue={modalType === "edit" ? selectedRecord?.weight : ""}
@@ -578,6 +581,7 @@ const HealthCheckDetail = () => {
             <label htmlFor="bmi">BMI:</label>
             <input
               type="number"
+              step="any"
               id="bmi"
               name="bmi"
               defaultValue={modalType === "edit" ? selectedRecord?.bmi : ""}
