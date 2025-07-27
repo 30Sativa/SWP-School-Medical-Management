@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SchoolMedicalManagement.Models.Request;
 using SchoolMedicalManagement.Service.Interface;
@@ -7,6 +8,7 @@ namespace School_Medical_Management.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize] // Default authorization for all endpoints
     public class ParentFeedbackController : ControllerBase
     {
         private readonly IParentFeedbackService _feedbackService;
@@ -16,7 +18,8 @@ namespace School_Medical_Management.API.Controllers
             _feedbackService = feedbackService;
         }
 
-        // GET: api/parentfeedback
+        // Lấy danh sách tất cả phản hồi của phụ huynh - Chỉ quản lý và y tá mới có quyền xem
+        [Authorize(Roles = "Manager,Nurse")]
         [HttpGet]
         public async Task<IActionResult> GetAllFeedback()
         {
@@ -24,7 +27,8 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // GET: api/parentfeedback/{id}
+        // Lấy chi tiết phản hồi theo ID - Chỉ quản lý và y tá mới có quyền xem
+        [Authorize(Roles = "Manager,Nurse")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetFeedbackById(int id)
         {
@@ -32,7 +36,8 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // POST: api/parentfeedback
+        // Tạo phản hồi mới - Chỉ phụ huynh mới có quyền tạo
+        [Authorize(Roles = "Parent")]
         [HttpPost]
         public async Task<IActionResult> CreateFeedback([FromBody] CreateParentFeedbackRequest request)
         {

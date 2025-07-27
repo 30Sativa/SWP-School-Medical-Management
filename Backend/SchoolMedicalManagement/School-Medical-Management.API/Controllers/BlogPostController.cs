@@ -19,7 +19,7 @@ namespace School_Medical_Management.API.Controllers
             _blogPostService = blogPostService;
         }
 
-        // Xem danh sách bài viết - Tất cả người dùng đã đăng nhập đều có thể xem
+        // Lấy danh sách bài viết - Tất cả người dùng đã đăng nhập đều có quyền xem
         [HttpGet]
         public async Task<IActionResult> GetBlogPostList()
         {
@@ -27,7 +27,7 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Xem chi tiết bài viết - Tất cả người dùng đã đăng nhập đều có thể xem
+        // Lấy chi tiết bài viết theo ID - Tất cả người dùng đã đăng nhập đều có quyền xem
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBlogPostById([FromRoute] int id)
         {

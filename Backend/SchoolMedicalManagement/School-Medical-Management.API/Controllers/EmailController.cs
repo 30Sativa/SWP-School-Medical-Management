@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SchoolMedicalManagement.Models.Request;
 using SchoolMedicalManagement.Service.Interface;
@@ -8,6 +9,7 @@ namespace School_Medical_Management.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize] // Default authorization for all endpoints
     public class EmailController : ControllerBase
     {
         private readonly IEmailService _emailService;
@@ -17,6 +19,8 @@ namespace School_Medical_Management.API.Controllers
             _emailService = emailService;
         }
 
+        // Gửi email bằng UserId - Chỉ quản lý và y tá mới có quyền gửi
+        [Authorize(Roles = "Manager,Nurse")]
         [HttpPost("send-by-userid")]
         public async Task<IActionResult> SendEmailByUserId([FromBody] SendEmailByUserIdRequest request)
         {
@@ -28,6 +32,8 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
+        // Gửi email bằng địa chỉ email - Chỉ quản lý và y tá mới có quyền gửi
+        [Authorize(Roles = "Manager,Nurse")]
         [HttpPost("send-by-email")]
         public async Task<IActionResult> SendEmailByEmail([FromBody] SendEmailByEmailRequest request)
         {
