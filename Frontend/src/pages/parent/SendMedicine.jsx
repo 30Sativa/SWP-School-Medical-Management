@@ -178,7 +178,7 @@ const SendMedicine = () => {
       setLoading(true);
       await axios.put(
         `https://swp-school-medical-management.onrender.com/api/MedicationRequest/${requestId}/status`,
-        { statusId: 5 } // 5 là trạng thái "Đã hủy"
+        { statusId: 6 } // 6 là trạng thái "Đã hủy"
       );
       toast.success("Đã hủy đơn thuốc thành công!", {
         position: "top-center",
