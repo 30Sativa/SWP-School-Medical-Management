@@ -77,7 +77,7 @@ namespace School_Medical_Management.API.Controllers
         [HttpPatch("{id}/status")]
         public async Task<IActionResult> UpdateStatus([FromRoute] int id, [FromBody] UpdateHealthProfileStatusRequest request)
         {
-            var response = await _healthProfileService.UpdateHealthProfileStatusAsync(id, request);
+            var response = await _healthProfileService.UpdateHealthProfileStatusAsync(id, request.IsActive);
             if (response == null)
             {
                 return NotFound($"Không tìm thấy hồ sơ sức khỏe với ID {id} hoặc không thể cập nhật trạng thái.");
