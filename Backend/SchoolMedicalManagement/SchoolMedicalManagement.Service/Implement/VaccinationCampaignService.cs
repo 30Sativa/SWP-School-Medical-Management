@@ -384,12 +384,7 @@ namespace SchoolMedicalManagement.Service.Implement
             }
             // Kiểm tra ngày xác nhận hợp lệ
             consentRequest.ConsentStatusId = request.ConsentStatusId;
-            
-            // Cập nhật ConsentDate là thời gian hiện tại
-            consentRequest.ConsentDate = DateTime.UtcNow;
-            
-            // Kiểm tra ngày xác nhận hợp lệ
-            if (consentRequest.ConsentDate < consentRequest.RequestDate)
+            if (request.ConsentDate < consentRequest.RequestDate)
             {
                 return new BaseResponse
                 {
@@ -450,15 +445,15 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 RecordId = r.RecordId,
                 StudentId = r.StudentId,
-                StudentName = r.Student?.FullName ?? string.Empty,
+                StudentName = r.Student?.FullName,
                 CampaignId = r.CampaignId,
-                CampaignName = r.Campaign?.VaccineName ?? string.Empty,
+                CampaignName = r.Campaign?.VaccineName,
                 ConsentStatusId = r.ConsentStatusId,
-                ConsentStatusName = r.ConsentStatus?.ConsentStatusName ?? string.Empty,
+                ConsentStatusName = r.ConsentStatus?.ConsentStatusName,
                 ConsentDate = r.ConsentDate,
                 VaccinationDate = r.VaccinationDate,
-                Result = r.Result ?? string.Empty,
-                FollowUpNote = r.FollowUpNote ?? string.Empty,
+                Result = r.Result,
+                FollowUpNote = r.FollowUpNote,
                 IsActive = r.IsActive
             }).ToList();
 
@@ -1387,15 +1382,15 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     RecordId = updated.RecordId,
                     StudentId = updated.StudentId,
-                    StudentName = updated.Student?.FullName ?? string.Empty,
+                    StudentName = updated.Student?.FullName,
                     CampaignId = updated.CampaignId,
-                    CampaignName = updated.Campaign?.VaccineName ?? string.Empty,
+                    CampaignName = updated.Campaign?.VaccineName,
                     ConsentStatusId = updated.ConsentStatusId,
-                    ConsentStatusName = updated.ConsentStatus?.ConsentStatusName ?? string.Empty,
+                    ConsentStatusName = updated.ConsentStatus?.ConsentStatusName,
                     ConsentDate = updated.ConsentDate,
                     VaccinationDate = updated.VaccinationDate,
-                    Result = updated.Result ?? string.Empty,
-                    FollowUpNote = updated.FollowUpNote ?? string.Empty,
+                    Result = updated.Result,
+                    FollowUpNote = updated.FollowUpNote,
                     IsActive = updated.IsActive
                 }
             };
@@ -1409,15 +1404,15 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 RecordId = r.RecordId,
                 StudentId = r.StudentId,
-                StudentName = r.Student?.FullName ?? string.Empty,
+                StudentName = r.Student?.FullName,
                 CampaignId = r.CampaignId,
-                CampaignName = r.Campaign?.VaccineName ?? string.Empty,
+                CampaignName = r.Campaign?.VaccineName,
                 ConsentStatusId = r.ConsentStatusId,
-                ConsentStatusName = r.ConsentStatus?.ConsentStatusName ?? string.Empty,
+                ConsentStatusName = r.ConsentStatus?.ConsentStatusName,
                 ConsentDate = r.ConsentDate,
                 VaccinationDate = r.VaccinationDate,
-                Result = r.Result ?? string.Empty,
-                FollowUpNote = r.FollowUpNote ?? string.Empty,
+                Result = r.Result,
+                FollowUpNote = r.FollowUpNote,
                 IsActive = r.IsActive
             }).ToList();
             return new BaseResponse { Status = StatusCodes.Status200OK.ToString(), Message = "Lấy danh sách thành công", Data = response };
@@ -1500,14 +1495,14 @@ namespace SchoolMedicalManagement.Service.Implement
             {
                 RequestId = c.RequestId,
                 StudentId = c.StudentId,
-                StudentName = c.Student?.FullName ?? string.Empty,
+                StudentName = c.Student?.FullName,
                 CampaignId = c.CampaignId,
-                CampaignName = c.Campaign?.VaccineName ?? string.Empty,
+                CampaignName = c.Campaign?.VaccineName,
                 ParentId = c.ParentId,
-                ParentName = c.Parent?.FullName ?? string.Empty,
+                ParentName = c.Parent?.FullName,
                 RequestDate = c.RequestDate,
                 ConsentStatusId = c.ConsentStatusId,
-                ConsentStatusName = c.ConsentStatus?.ConsentStatusName ?? string.Empty,
+                ConsentStatusName = c.ConsentStatus?.ConsentStatusName,
                 ConsentDate = c.ConsentDate
             }).ToList();
 
