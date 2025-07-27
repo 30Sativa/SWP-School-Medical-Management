@@ -190,7 +190,18 @@ const Login = () => {
                 {loading ? "Đang đăng nhập..." : "Đăng nhập"}
               </button>
               <div className="register-link">
-                <span>Chưa có tài khoản?</span>
+                <span
+                  style={{ cursor: "pointer", color: "#007bff" }}
+                  onClick={() =>
+                    toast.info("Quý Phụ huynh vui lòng liên hệ Nhà trường để nhận tài khoản truy cập. Trân trọng!", {
+                      position: "top-center",
+                      autoClose: 2500,
+                      theme: "colored",
+                    })
+                  }
+                >
+                  Chưa có tài khoản?
+                </span>
               </div>
             </form>
           </div>
