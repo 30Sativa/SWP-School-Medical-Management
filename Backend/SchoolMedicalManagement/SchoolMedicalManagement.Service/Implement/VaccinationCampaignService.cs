@@ -413,14 +413,14 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     RequestId = updated.RequestId,
                     StudentId = updated.StudentId,
-                    StudentName = updated.Student?.FullName,
+                    StudentName = updated.Student?.FullName ?? string.Empty,
                     CampaignId = updated.CampaignId,
-                    CampaignName = updated.Campaign?.VaccineName,
+                    CampaignName = updated.Campaign?.VaccineName ?? string.Empty,
                     ParentId = updated.ParentId,
-                    ParentName = updated.Parent?.FullName,
+                    ParentName = updated.Parent?.FullName ?? string.Empty,
                     RequestDate = updated.RequestDate,
                     ConsentStatusId = updated.ConsentStatusId,
-                    ConsentStatusName = updated.ConsentStatus?.ConsentStatusName,
+                    ConsentStatusName = updated.ConsentStatus?.ConsentStatusName ?? string.Empty,
                     ConsentDate = updated.ConsentDate
                 }
             };
@@ -514,7 +514,8 @@ namespace SchoolMedicalManagement.Service.Implement
             }
             // Kiểm tra ngày tiêm hợp lệ
             var campaignDate = campaign.Date ?? DateOnly.FromDateTime(DateTime.UtcNow);
-            if (request.VaccinationDate < consentRequest.ConsentDate || 
+            // Kiểm tra consentRequest.ConsentDate có null không trước khi so sánh
+            if ((consentRequest.ConsentDate.HasValue && request.VaccinationDate < consentRequest.ConsentDate) || 
                 request.VaccinationDate < campaignDate.ToDateTime(TimeOnly.MinValue))
             {
                 return new BaseResponse
@@ -556,15 +557,15 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     RecordId = created.RecordId,
                     StudentId = created.StudentId,
-                    StudentName = student.FullName,
+                    StudentName = student.FullName ?? string.Empty,
                     CampaignId = created.CampaignId,
-                    CampaignName = campaign.VaccineName,
+                    CampaignName = campaign.VaccineName ?? string.Empty,
                     ConsentStatusId = created.ConsentStatusId,
-                    ConsentStatusName = created.ConsentStatus?.ConsentStatusName,
+                    ConsentStatusName = created.ConsentStatus?.ConsentStatusName ?? string.Empty,
                     ConsentDate = created.ConsentDate,
                     VaccinationDate = created.VaccinationDate,
-                    Result = created.Result,
-                    FollowUpNote = created.FollowUpNote,
+                    Result = created.Result ?? string.Empty,
+                    FollowUpNote = created.FollowUpNote ?? string.Empty,
                     IsActive = created.IsActive
                 }
             };
@@ -1456,18 +1457,28 @@ namespace SchoolMedicalManagement.Service.Implement
         {
             var campaign = await _campaignRepository.GetCampaignById(campaignId);
             if (campaign == null) return new BaseResponse { Status = "404", Message = "Không tìm thấy chiến dịch", Data = null };
+            
+            // Lấy các thông tin thống kê
+            int totalConsentRequests = await _campaignRepository.GetConsentRequestsCountByCampaignId(campaignId);
+            int approvedConsents = await _campaignRepository.GetApprovedConsentCount(campaignId);
+            int declinedConsents = await _campaignRepository.GetDeclinedConsentCount(campaignId);
+            int pendingConsents = await _campaignRepository.GetPendingConsentCount(campaignId);
+            int totalVaccinationRecords = await _campaignRepository.GetVaccinationRecordCount(campaignId);
+            int successfulVaccinations = await _campaignRepository.GetSuccessfulVaccinationCount(campaignId);
+            
             var summary = new CampaignSummaryResponse
             {
                 CampaignId = campaignId,
-                VaccineName = campaign.VaccineName,
+                VaccineName = campaign.VaccineName ?? string.Empty,
                 Date = campaign.Date,
-                TotalConsentRequests = await _campaignRepository.GetConsentRequestsCountByCampaignId(campaignId),
-                ApprovedConsents = await _campaignRepository.GetApprovedConsentCount(campaignId),
-                DeclinedConsents = await _campaignRepository.GetDeclinedConsentCount(campaignId),
-                PendingConsents = await _campaignRepository.GetPendingConsentCount(campaignId),
-                TotalVaccinationRecords = await _campaignRepository.GetVaccinationRecordCount(campaignId),
-                SuccessfulVaccinations = await _campaignRepository.GetSuccessfulVaccinationCount(campaignId)
+                TotalConsentRequests = totalConsentRequests,
+                ApprovedConsents = approvedConsents,
+                DeclinedConsents = declinedConsents,
+                PendingConsents = pendingConsents,
+                TotalVaccinationRecords = totalVaccinationRecords,
+                SuccessfulVaccinations = successfulVaccinations
             };
+            
             return new BaseResponse 
             { 
                 Status = "200", 
