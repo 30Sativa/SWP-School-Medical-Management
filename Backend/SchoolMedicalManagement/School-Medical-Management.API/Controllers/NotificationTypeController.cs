@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolMedicalManagement.Models.Request;
@@ -9,7 +8,6 @@ namespace School_Medical_Management.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Default authorization for all endpoints
     public class NotificationTypeController : ControllerBase
     {
         private readonly INotificationTypeService _notificationTypeService;
@@ -19,7 +17,6 @@ namespace School_Medical_Management.API.Controllers
             _notificationTypeService = notificationTypeService;
         }
 
-        // Lấy danh sách loại thông báo - Tất cả người dùng đã đăng nhập đều có quyền xem
         [HttpGet]
         public async Task<IActionResult> GetNotificationTypeList()
         {
@@ -27,7 +24,6 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Lấy chi tiết loại thông báo theo ID - Tất cả người dùng đã đăng nhập đều có quyền xem
         [HttpGet("{id}")]
         public async Task<IActionResult> GetNotificationTypeById([FromRoute] int id)
         {
@@ -39,8 +35,6 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Tạo loại thông báo mới - Chỉ quản lý mới có quyền tạo
-        [Authorize(Roles = "Manager")]
         [HttpPost]
         public async Task<IActionResult> CreateNotificationType([FromBody] CreateNotificationTypeRequest request)
         {
@@ -48,8 +42,6 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response?.Status ?? "200"), response);
         }
 
-        // Cập nhật loại thông báo - Chỉ quản lý mới có quyền cập nhật
-        [Authorize(Roles = "Manager")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateNotificationType([FromRoute] int id, [FromBody] UpdateNotificationTypeRequest request)
         {
@@ -61,8 +53,6 @@ namespace School_Medical_Management.API.Controllers
             return StatusCode(int.Parse(response.Status ?? "200"), response);
         }
 
-        // Xóa loại thông báo - Chỉ quản lý mới có quyền xóa
-        [Authorize(Roles = "Manager")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteNotificationType([FromRoute] int id)
         {
