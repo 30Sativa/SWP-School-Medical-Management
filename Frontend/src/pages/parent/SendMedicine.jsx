@@ -178,7 +178,7 @@ const SendMedicine = () => {
       setLoading(true);
       await axios.put(
         `https://swp-school-medical-management.onrender.com/api/MedicationRequest/${requestId}/status`,
-        { statusId: 6 } // 6 là trạng thái "Đã hủy"
+        { statusId: 3 } // 6 là trạng thái "Đã hủy"
       );
       toast.success("Đã hủy đơn thuốc thành công!", {
         position: "top-center",
@@ -672,7 +672,7 @@ const SendMedicine = () => {
                         <span className={`${styles.statusBadge} ${statusInfo.className}`}>
                           {statusInfo.text}
                         </span>
-                        {item.status === "Chờ duyệt" && (
+                        {(item.status === "Chờ duyệt" || item.status === "Đã duyệt") && (
                           <button
                             onClick={() => openConfirmModal(item.requestID)}
                             className={styles.cancelBtn}
@@ -704,7 +704,7 @@ const SendMedicine = () => {
                     style={{ marginBottom: 18 }}
                   />
                   <div className={styles.popupBody}>
-                    {filteredHistory.map((item, index) => {
+                    {filteredHistory.map((item) => {
                       const statusInfo = getStatusInfo(item.status);
                       return (
                         <div key={item.requestID} className={styles.historyItem}>
@@ -728,7 +728,7 @@ const SendMedicine = () => {
                             <span className={`${styles.statusBadge} ${statusInfo.className}`}>
                               {statusInfo.text}
                             </span>
-                            {item.status === "Chờ duyệt" && (
+                            {(item.status === "Chờ duyệt" || item.status === "Đã duyệt") && (
                               <button
                                 onClick={() => openConfirmModal(item.requestID)}
                                 className={styles.cancelBtn}
