@@ -442,12 +442,9 @@ const VaccinationCampaign = () => {
               label="Ngày tổ chức"
               rules={[{ required: true, message: "Chọn ngày" }]}
             >
-              <DatePicker
+            <DatePicker
                 style={{ width: "100%" }}
                 format="YYYY-MM-DD"
-                disabledDate={(current) =>
-                  current && current < dayjs().startOf("day")
-                }
                 className={campaignStyle.input}
               />
             </Form.Item>
