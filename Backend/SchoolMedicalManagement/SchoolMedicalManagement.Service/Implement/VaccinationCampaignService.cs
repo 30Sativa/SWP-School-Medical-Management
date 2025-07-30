@@ -383,7 +383,6 @@ namespace SchoolMedicalManagement.Service.Implement
                 };
             }
             // Kiểm tra ngày xác nhận hợp lệ
-            consentRequest.ConsentStatusId = request.ConsentStatusId;
             if (request.ConsentDate < consentRequest.RequestDate)
             {
                 return new BaseResponse
@@ -393,6 +392,9 @@ namespace SchoolMedicalManagement.Service.Implement
                     Data = null
                 };
             }
+
+            consentRequest.ConsentStatusId = request.ConsentStatusId;
+            consentRequest.ConsentDate = request.ConsentDate; // Đảm bảo luôn gán ConsentDate
 
             var updated = await _campaignRepository.UpdateConsentRequest(consentRequest);
             if (updated == null)
@@ -413,15 +415,15 @@ namespace SchoolMedicalManagement.Service.Implement
                 {
                     RequestId = updated.RequestId,
                     StudentId = updated.StudentId,
-                    StudentName = updated.Student?.FullName,
+                    StudentName = updated.Student?.FullName ?? string.Empty,
                     CampaignId = updated.CampaignId,
-                    CampaignName = updated.Campaign?.VaccineName,
+                    CampaignName = updated.Campaign?.VaccineName ?? string.Empty,
                     ParentId = updated.ParentId,
-                    ParentName = updated.Parent?.FullName,
+                    ParentName = updated.Parent?.FullName ?? string.Empty,
                     RequestDate = updated.RequestDate,
                     ConsentStatusId = updated.ConsentStatusId,
-                    ConsentStatusName = updated.ConsentStatus?.ConsentStatusName,
-                    ConsentDate = updated.ConsentDate
+                    ConsentStatusName = updated.ConsentStatus?.ConsentStatusName ?? string.Empty,
+                    ConsentDate = updated.ConsentDate ?? request.ConsentDate // Đảm bảo không null
                 }
             };
         }
