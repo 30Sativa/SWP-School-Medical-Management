@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SchoolMedicalManagement.Models.Exceptions;
 
 namespace SchoolMedicalManagement.Service.Implement
 {
@@ -27,12 +28,7 @@ namespace SchoolMedicalManagement.Service.Implement
             var existingUser = await _userRepository.GetUserByUsername(user.Username);
             if (existingUser != null)
             {
-                return new BaseResponse
-                {
-                    Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Tên đăng nhập đã tồn tại.",
-                    Data = null
-                };
+               throw new BusinessException("Tên đăng nhập đã tồn tại.", StatusCodes.Status400BadRequest);
             }
 
             var newUser = new User
@@ -51,12 +47,7 @@ namespace SchoolMedicalManagement.Service.Implement
             var createdUser = await _userRepository.CreateUser(newUser);
             if (createdUser == null)
             {
-                return new BaseResponse
-                {
-                    Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Tạo người dùng thất bại.",
-                    Data = null
-                };
+                throw new BusinessException("Tạo người dùng thất bại.", StatusCodes.Status400BadRequest);
             }
 
             return new BaseResponse
@@ -83,12 +74,7 @@ namespace SchoolMedicalManagement.Service.Implement
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
             {
-                return new BaseResponse
-                {
-                    Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Không tìm thấy người dùng với ID {id}.",
-                    Data = null
-                };
+                throw new BusinessException($"Không tìm thấy người dùng với ID {id}.", StatusCodes.Status404NotFound);
             }
 
             var result = await _userRepository.SoftDeleteUser(id);
@@ -128,12 +114,7 @@ namespace SchoolMedicalManagement.Service.Implement
             var user = await _userRepository.GetUserById(id);
             if (user == null)
             {
-                return new BaseResponse
-                {
-                    Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Không tìm thấy người dùng với ID {id}.",
-                    Data = null
-                };
+                throw new BusinessException($"Không tìm thấy người dùng với ID {id}.", StatusCodes.Status404NotFound);
             }
 
             return new BaseResponse
@@ -159,12 +140,7 @@ namespace SchoolMedicalManagement.Service.Implement
             var userToUpdate = await _userRepository.GetByIdAsync(id);
             if (userToUpdate == null)
             {
-                return new BaseResponse
-                {
-                    Status = StatusCodes.Status404NotFound.ToString(),
-                    Message = $"Không tìm thấy người dùng với ID {id}.",
-                    Data = null
-                };
+                throw new BusinessException($"Không tìm thấy người dùng với ID {id}.", StatusCodes.Status404NotFound);
             }
 
             userToUpdate.FullName = string.IsNullOrEmpty(request.FullName) ? userToUpdate.FullName : request.FullName;
@@ -179,12 +155,7 @@ namespace SchoolMedicalManagement.Service.Implement
             var updatedUser = await _userRepository.UpdateUser(userToUpdate);
             if (updatedUser == null)
             {
-                return new BaseResponse
-                {
-                    Status = StatusCodes.Status400BadRequest.ToString(),
-                    Message = "Cập nhật thất bại.",
-                    Data = null
-                };
+                throw new BusinessException("Cập nhật người dùng thất bại.", StatusCodes.Status400BadRequest);
             }
 
             return new BaseResponse
