@@ -1,521 +1,452 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap');
+
+:root {
+  --background-color: #f8f9fe;
+  --card-background: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+  --shadow-color: rgba(149, 157, 165, 0.1);
+  --font-family: 'Be Vietnam Pro', sans-serif;
+
+  --blue-bg: #eef5ff;
+  --blue-text: #3b82f6;
+  --blue-icon-bg: #dbeafe;
+
+  --green-bg: #f0fdf4;
+  --green-text: #22c55e;
+  --green-icon-bg: #dcfce7;
+
+  --purple-bg: #faf5ff;
+  --purple-text: #a855f7;
+  --purple-icon-bg: #f3e8ff;
+  
+  --orange-bg: #fff7ed;
+  --orange-text: #f97316;
+  --orange-icon-bg: #ffedd5;
+
+  --red-bg: #fef2f2;
+  --red-text: #ef4444;
+  --red-icon-bg: #fee2e2;
+}
+
 .container {
   display: flex;
+  background-color: var(--background-color);
+  font-family: var(--font-family);
+  color: var(--text-primary);
   min-height: 100vh;
-  background: linear-gradient(120deg, #e0e7ff 0%, #eef2ff 100%);
-  font-family: "Segoe UI", sans-serif;
 }
 
-
-/* Sidebar chiếm 280px */
-.sidebar {
-  width: 280px;
-}
-
-/* Nội dung chính */
 .content {
-  flex: 1;
-  padding: 24px;
-}
-
-/* HEADER */
-.dashboard-header-bar {
+  flex-grow: 1;
+  padding: 2rem;
+  overflow-y: auto;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 0;
+  justify-content: center;
 }
 
-/* Đây mới là nơi tăng font-size */
-.dashboard-header-bar h1 {
-  font-size: 50px !important;
-  font-weight: 700;
-  margin: 0;
-  letter-spacing: -0.5px;
-  line-height: 1;
+.contentWrapper {
+  width: 100%;
+  max-width: 1400px;
 }
 
-.title-group h1 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 600;
-}
-.title-group p {
-  font-size: 14px;
-  color: #666;
-}
-
-.text-black {
-  color: #111827;
-}
-
-.text-accent {
-  color: #20b2aa; /* xanh accent */
-  margin-left: 4px;
-}
-
-.text-welcome {
-  font-size: 30px;
-  overflow: hidden;
-  border-right: 2px solid #10b981;
-  white-space: nowrap;
-  animation: typing 2.5s steps(20, end), blink 0.75s step-end infinite;
-  width: fit-content;
-  margin-left: auto;
-  margin-top: auto;
-}
-
-@keyframes typing {
-  from {
-    width: 0;
-  }
-  to {
-    width: 100%;
-  }
-}
-
-@keyframes blink {
-  from,
-  to {
-    border-color: transparent;
-  }
-  50% {
-    border-color: #10b981;
-  }
-}
-
-/* --- TOOLBAR: Search + Filter --- */
-.info-tools {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-/* Ô tìm kiếm */
-.info-tools input[type="text"] {
-  background-color: #f3f4f6;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #111827;
-  outline: none;
-  width: 200px;
-  transition: background 0.2s ease;
-}
-
-.info-tools input[type="text"]::placeholder {
-  color: #6b7280;
-}
-
-/* Dropdown bộ lọc */
-.info-tools select {
-  background-color: #f3f4f6;
-  color: #111827;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-size: 14px;
-  outline: none;
-  cursor: pointer;
-  appearance: none;
-}
-
-/* Hover/focus effect nếu cần */
-.info-tools input[type="text"]:focus,
-.info-tools select:focus {
-  background-color: #e5e7eb;
-}
-
-/* ACTION CARDS */
-.top-action-row {
-  display: flex;
-  gap: 20px;
+/* Header */
+.header {
   margin-bottom: 24px;
 }
 
-.action-card-v2 {
-  flex: 1;
-  background-color: #fff;
+.headerTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+}
+
+.welcomeMessage {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+
+/* Summary Cards */
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.summaryCard {
+  background-color: var(--card-background);
   border-radius: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   padding: 20px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  transition: transform 0.2s ease;
+  gap: 16px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px var(--shadow-color);
+  position: relative;
+  overflow: hidden;
 }
 
-.action-card-v2:hover {
-  transform: translateY(-2px);
-}
-
-.card-text h4 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #111827;
-}
-
-.card-text p {
-  margin: 6px 0;
-  font-size: 13px;
-  color: #6b7280;
-}
-
-.card-text a {
-  font-size: 13px;
-  color: #20b2aa;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.card-text a:hover {
-  text-decoration: underline;
-}
-
-.card-icon {
-  display: flex;
-  align-items: center;
-}
-
-.icon-circle {
-  background-color: #d1fae5;
-  color: #047857;
-  width: 36px;
-  height: 36px;
+.summaryIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  font-size: 18px;
+  flex-shrink: 0;
 }
 
-/* THÔNG TIN CHUNG */
-.info-section {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-  margin-bottom: 24px;
+.summaryIcon svg {
+  width: 24px;
+  height: 24px;
 }
-.info-header {
+
+.summaryInfo {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.info-tools {
-  display: flex;
-  gap: 12px;
-}
-.info-tools input {
-  padding: 6px 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-}
-.info-tools select {
-  padding: 6px 10px;
-  border-radius: 8px;
+  flex-direction: column;
 }
 
-/* THẺ THÔNG TIN */
-.info-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
-  margin-top: 16px;
-}
-.info-card {
-  background-color: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 16px;
-}
-.card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.icon-btn {
-  background: none;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
-}
-.note {
-  font-style: italic;
-  font-size: 12px;
-  color: #888;
-}
-.card-bottom {
-  margin-top: 12px;
+.summaryValue {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
-.view-btn {
-  background-color: #20b2aa;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-/* PHÂN TRANG */
-.pagination {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 20px;
-}
-.page-nav {
-  display: flex;
-  gap: 6px;
-}
-.page-nav button {
-  background-color: #f3f4f6;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  color: #666;
-}
-.page-nav button.active {
-  background-color: #20b2aa;
-  color: white;
-  font-weight: bold;
-}
-
-/* PHẦN PHẢI */
-.main-right-grid {
-  display: grid;
-  grid-template-columns: 7fr 3fr; /* tỷ lệ 7/3 */
-  gap: 20px;
-  margin-top: 24px;
-}
-
-/* Responsive xuống 1 cột ở màn nhỏ */
-@media (max-width: 768px) {
-  .main-right-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* HEALTH CHECK BOX */
-.health-check-box {
-  background: white;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-}
-.health-check-box h4 {
-  text-decoration: none;
-  border-bottom: none;
-}
-
-.box-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-.health-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 0;
-  border-top: 1px solid #eee;
-}
-.health-item:first-child {
-  border-top: none;
-}
-.health-left h5 {
-  margin: 0;
+.summaryLabel {
   font-size: 14px;
-  border-bottom: none;
+  color: var(--text-secondary);
 }
-.health-left p {
-  margin: 4px 0;
-  font-size: 13px;
-}
-.tag {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: 10px;
+
+.summaryUnit {
+  position: absolute;
+  top: 12px;
+  right: 16px;
   font-size: 12px;
   font-weight: 500;
-}
-.tag.blue {
-  background-color: #e0f2fe;
-  color: #2563eb;
-}
-.tag.green {
-  background-color: #d1fae5;
-  color: #059669;
-}
-.health-right .count {
-  font-size: 13px;
-  margin-bottom: 6px;
-}
-.btn-join {
-  background-color: #20b2aa;
-  color: white;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 12px;
 }
 
-/* REMINDERS */
+/* Card Colors */
+.summaryCard.blue .summaryIcon { background-color: var(--blue-icon-bg); color: var(--blue-text); }
+.summaryCard.blue .summaryValue { color: var(--blue-text); }
+.summaryCard.blue .summaryUnit { background-color: var(--blue-bg); color: var(--blue-text); }
 
-.box.reminders {
-  background-color: #ffffff;
+.summaryCard.green .summaryIcon { background-color: var(--green-icon-bg); color: var(--green-text); }
+.summaryCard.green .summaryValue { color: var(--green-text); }
+.summaryCard.green .summaryUnit { background-color: var(--green-bg); color: var(--green-text); }
+
+.summaryCard.purple .summaryIcon { background-color: var(--purple-icon-bg); color: var(--purple-text); }
+.summaryCard.purple .summaryValue { color: var(--purple-text); }
+.summaryCard.purple .summaryUnit { background-color: var(--purple-bg); color: var(--purple-text); }
+
+
+/* Dashboard Grid */
+.dashboardGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.leftColumn, .rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Content Card */
+.contentCard {
+  background-color: var(--card-background);
   border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* tạo bóng mờ */
-  border: 1px solid #f3f4f6; /* tuỳ chọn đường viền nhẹ */
+  padding: 24px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
-.reminder-list {
+.cardTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cardTitle::before {
+  content: '';
+  width: 4px;
+  height: 18px;
+  background-color: var(--blue-text);
+  border-radius: 2px;
+}
+
+.cardSubtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0 0 20px 0;
+}
+
+/* Student Info */
+.studentList, .eventList, .medicationList, .announcementList {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: 10px;
 }
 
-.reminder-card {
+.studentItem {
   display: flex;
-  align-items: flex-start;
-  border-radius: 12px;
-  padding: 16px;
-  gap: 14px;
-  border: 1px solid transparent;
-}
-
-.reminder-icon {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  min-height: 36px;
-  border-radius: 50%;
-  background-color: white;
-  display: flex;
-  justify-content: center;
   align-items: center;
-  font-size: 18px;
+  gap: 12px;
 }
 
-.reminder-content strong {
+.studentAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--blue-icon-bg);
+  color: var(--blue-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 600;
-  font-size: 14px;
-  color: #111827;
+  font-size: 18px;
+  flex-shrink: 0;
 }
 
-.reminder-content p {
-  margin: 4px 0;
-  font-size: 13px;
-  color: #4b5563;
-  white-space: pre-line;
+.studentDetails {
+  flex-grow: 1;
 }
 
-.reminder-content a {
+.studentDetails strong {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.studentDetails p {
   font-size: 13px;
-  color: #20b2aa;
+  color: var(--text-secondary);
+  margin: 2px 0 0 0;
+}
+
+.studentDetails p span {
+  margin: 0 8px;
+  color: var(--border-color);
+}
+
+/* Status Badge */
+.statusBadge {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
   font-weight: 500;
-  text-decoration: none;
+  white-space: nowrap;
 }
 
-.reminder-content a:hover {
-  text-decoration: underline;
+.statusGood {
+  background-color: var(--green-bg);
+  color: var(--green-text);
+  border: 1px solid var(--green-icon-bg);
 }
 
-/* Color variants */
-.reminder-card.yellow {
-  background-color: #fef9c3;
-  border-color: #fef08a;
+.statusNormal {
+  background-color: var(--blue-bg);
+  color: var(--blue-text);
+  border: 1px solid var(--blue-icon-bg);
 }
 
-.reminder-card.blue {
-  background-color: #e0f2fe;
-  border-color: #bae6fd;
+/* Medical Events */
+.eventItem, .medicationItem, .announcementItem {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
 }
 
-.reminder-card.green {
-  background-color: #dcfce7;
-  border-color: #bbf7d0;
+.eventIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.eventIcon.green { background-color: var(--green-icon-bg); }
+.eventIcon.orange { background-color: var(--orange-icon-bg); }
+.eventIcon.blue { background-color: var(--blue-icon-bg); }
+
+
+.eventDetails { flex-grow: 1; }
+.eventDetails strong { font-size: 15px; font-weight: 600; }
+.eventDetails p { font-size: 13px; color: var(--text-secondary); margin: 2px 0; }
+.eventDetails p span { margin: 0 8px; color: var(--border-color); }
+.eventDetails > span { font-size: 12px; color: #94a3b8; }
+
+
+.statusHoànthành { background-color: var(--green-bg); color: var(--green-text); }
+.statusTheodõi { background-color: var(--orange-bg); color: var(--orange-text); }
+.statusĐãxửlý { background-color: var(--blue-bg); color: var(--blue-text); }
+
+/* Medication Requests */
+.medicationIconWrapper {
+    padding-top: 4px;
+}
+.medicationIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--purple-icon-bg);
+    color: var(--purple-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-
-.green {
-  background-color: #e6fcef;
+.medicationIcon svg {
+    width: 20px;
+    height: 20px;
 }
 
-.yellow {
-  background-color: #fff9db;
+.medicationDetails { flex-grow: 1; }
+.medicationDetails strong { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+.medicationDetails p { font-size: 13px; color: var(--text-secondary); margin: 2px 0 0 0; }
+.medicationDetails p strong { font-size: 14px; font-weight: 500; color: var(--text-primary)}
+.medicationDetails > span { font-size: 12px; color: #94a3b8; display: block; margin-top: 4px; }
+
+
+.statusApproved { background-color: var(--blue-bg); color: var(--blue-text); }
+.statusPending { background-color: var(--orange-bg); color: var(--orange-text); }
+.statusRejected { background-color: var(--red-bg); color: var(--red-text); }
+.statusCompleted { background-color: var(--green-bg); color: var(--green-text); }
+
+/* School Announcements */
+.announcementIcon {
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.red {
-  background-color: #ffe5e5;
-}
+.announcementDetails { flex-grow: 1; }
+.announcementDetails strong { font-size: 15px; font-weight: 600; }
+.announcementDetails p { font-size: 14px; color: var(--text-secondary); margin: 4px 0; line-height: 1.5; }
+.announcementDetails > span { font-size: 12px; color: #94a3b8; }
 
+.tagBadge {
+    padding: 3px 10px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    border: 1px solid transparent;
+}
+.tagQuantrọng { background-color: var(--red-bg); color: var(--red-text); border-color: var(--red-icon-bg); }
+.tagThôngtin { background-color: var(--blue-bg); color: var(--blue-text); border-color: var(--blue-icon-bg); }
+.tagThôngbáo { background-color: #f1f5f9; color: #64748b; border-color: #e2e8f0; }
+
+
+/* Feedback Modal */
 .feedbackOverlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.4);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999;
+  z-index: 1000;
 }
 
 .feedbackModal {
-  background: white;
-  border-radius: 12px;
-  padding: 30px;
+  background-color: white;
+  padding: 24px;
+  border-radius: 16px;
   width: 400px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.2);
-  animation: fadeIn 0.3s ease;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 .feedbackModal h3 {
-  margin-bottom: 10px;
-  font-size: 20px;
-  color: #1e3a8a;
+  margin-top: 0;
 }
 
 .feedbackModal textarea {
   width: 100%;
-  padding: 10px;
-  resize: none;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-family: 'Segoe UI', sans-serif;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 16px;
+  resize: vertical;
+  min-height: 100px;
 }
 
 .modalActions {
-  margin-top: 15px;
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 8px;
 }
 
 .modalActions button {
   padding: 8px 16px;
   border: none;
-  border-radius: 6px;
-  background-color: #3b82f6;
-  color: white;
+  border-radius: 8px;
   cursor: pointer;
 }
 
-.modalActions button:last-child {
-  background-color: #94a3b8;
+.modalActions button:first-child {
+  background-color: var(--blue-text);
+  color: white;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+.modalActions button:last-child {
+  background-color: #e2e8f0;
+}
+
+.modalActions button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Loading state */
+.loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+.customSpinner {
+  text-align: center;
+}
+.spinnerIcon {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+.spinnerText {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 

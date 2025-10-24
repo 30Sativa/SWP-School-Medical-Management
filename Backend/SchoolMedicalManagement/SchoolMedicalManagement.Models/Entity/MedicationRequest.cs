@@ -9,7 +9,7 @@ public partial class MedicationRequest
 
     public int StudentId { get; set; }
 
-    public int ParentId { get; set; }
+    public Guid ParentId { get; set; }
 
     public string? MedicationName { get; set; }
 
@@ -17,17 +17,21 @@ public partial class MedicationRequest
 
     public string? Instructions { get; set; }
 
-    public DateOnly RequestDate { get; set; }
+    public DateTime RequestDate { get; set; }
 
-    public string? Status { get; set; }
+    public int? StatusId { get; set; }
 
     public string? ImagePath { get; set; }
 
-    public int? ReceivedBy { get; set; }
+    public Guid? ReceivedBy { get; set; }
+
+    public bool? IsActive { get; set; }
 
     public virtual User Parent { get; set; } = null!;
 
     public virtual User? ReceivedByNavigation { get; set; }
+
+    public virtual MedicationRequestStatus? Status { get; set; }
 
     public virtual Student Student { get; set; } = null!;
 }

@@ -3,12 +3,16 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import style from "../../assets/css/ResultPage.module.css";
+import Notification from "../../components/Notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
+import { notifySuccess, notifyError } from "../../utils/notification";
 
 const VaccineResult = () => {
   const { id } = useParams();
   const [records, setRecords] = useState([]);
   const [campaignStatus, setCampaignStatus] = useState("");
   const [loading, setLoading] = useState(true);
+  // Removed unused modalLoading state
   const [editingIndex, setEditingIndex] = useState(null);
   const [viewingIndex, setViewingIndex] = useState(null);
   const navigate = useNavigate();
@@ -89,15 +93,18 @@ const VaccineResult = () => {
         },
         { headers: { "Content-Type": "application/json" } }
       );
-      alert("Lưu thành công!");
+      notifySuccess("Lưu thành công!");
       setEditingIndex(null);
     } catch (error) {
-      alert("Lỗi khi lưu dữ liệu: " + JSON.stringify(error.response?.data));
+      notifyError(
+        "Lỗi khi lưu dữ liệu: " + JSON.stringify(error.response?.data)
+      );
     }
   };
 
-  const handleSendNotification = async (student) => {
+  const handleSendNotificationAndEmail = async (student) => {
     try {
+      // Gửi notification
       const note = student.followUpNote
         ? `Ghi chú: ${student.followUpNote}`
         : "Không có ghi chú.";
@@ -109,23 +116,146 @@ const VaccineResult = () => {
           message: `Học sinh ${
             student.studentName
           } đã ${student.result.toLowerCase()} trong đợt tiêm chủng.\n${note}`,
-          typeId: 8,
+          typeId: 2,
           isRead: false,
         },
         { headers: { "Content-Type": "application/json" } }
       );
-      alert("Đã gửi thông báo đến phụ huynh!");
+      // Gửi email
+      await axios.post(
+        "https://swp-school-medical-management.onrender.com/api/Email/send-by-userid",
+        {
+          userId: student.parentId,
+          subject: `Kết quả tiêm chủng cho học sinh ${student.studentName}`,
+          body: `Học sinh ${
+            student.studentName
+          } đã ${student.result?.toLowerCase()} trong đợt tiêm chủng.\n${note}`,
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      notifySuccess("Đã gửi thông báo và email đến phụ huynh!");
     } catch (error) {
-      console.error("Lỗi khi gửi thông báo:", error);
-      alert("Không thể gửi thông báo: " + error.response?.data?.message);
+      console.error("Lỗi khi gửi thông báo/email:", error);
+      notifyError(
+        "Không thể gửi thông báo/email: " + error.response?.data?.message
+      );
     }
+  };
+
+  // Gửi thông báo & email hàng loạt
+  const handleSendAllNotifications = async () => {
+    const studentsToSend = records.filter(
+      (r) =>
+        r.result &&
+        r.parentId !== null &&
+        r.parentId !== undefined &&
+        r.parentId !== "" &&
+        (typeof r.parentId === "number" || typeof r.parentId === "string")
+    );
+    // Log các trường hợp không hợp lệ
+    records.forEach((r) => {
+      if (
+        r.result &&
+        (!r.parentId ||
+          r.parentId === "" ||
+          r.parentId === null ||
+          r.parentId === undefined)
+      ) {
+        console.warn(
+          "Không có parentId hợp lệ cho học sinh:",
+          r.studentName,
+          r
+        );
+      }
+    });
+    if (studentsToSend.length === 0) return;
+    let successCount = 0;
+    let failCount = 0;
+    for (const student of studentsToSend) {
+      if (
+        !student.parentId ||
+        student.parentId === "" ||
+        student.parentId === null ||
+        student.parentId === undefined
+      ) {
+        // Bỏ qua nếu không hợp lệ
+        continue;
+      }
+      try {
+        const note = student.followUpNote
+          ? `Ghi chú: ${student.followUpNote}`
+          : "Không có ghi chú.";
+        const notificationPayload = {
+          receiverId: student.parentId,
+          title: "Kết quả tiêm chủng",
+          message: `Học sinh ${
+            student.studentName
+          } đã ${student.result.toLowerCase()} trong đợt tiêm chủng.\n${note}`,
+          typeId: 2, // <-- SỬA LẠI TỪ 8 THÀNH 2
+          isRead: false,
+        };
+        const emailPayload = {
+          userId: student.parentId,
+          subject: `Kết quả tiêm chủng cho học sinh ${student.studentName}`,
+          body: `Học sinh ${
+            student.studentName
+          } đã ${student.result?.toLowerCase()} trong đợt tiêm chủng.\n${note}`,
+        };
+        console.log(
+          "Gửi notification cho:",
+          student.studentName,
+          "parentId:",
+          student.parentId,
+          "typeof:",
+          typeof student.parentId
+        );
+        console.log("Notification payload:", notificationPayload);
+        console.log("Email payload:", emailPayload);
+        await axios.post(
+          "https://swp-school-medical-management.onrender.com/api/Notification/send",
+          notificationPayload,
+          { headers: { "Content-Type": "application/json" } }
+        );
+        await axios.post(
+          "https://swp-school-medical-management.onrender.com/api/Email/send-by-userid",
+          emailPayload,
+          { headers: { "Content-Type": "application/json" } }
+        );
+        successCount++;
+      } catch (err) {
+        failCount++;
+        console.error(
+          "Lỗi gửi cho:",
+          student.studentName,
+          "parentId:",
+          student.parentId,
+          err.response?.data || err.message
+        );
+      }
+    }
+    if (successCount > 0)
+      notifySuccess(
+        `Đã gửi thông báo & email cho ${successCount} phụ huynh thành công!`
+      );
+    if (failCount > 0)
+      notifyError(`Không gửi được cho ${failCount} phụ huynh.`);
   };
 
   return (
     <div className={style.container}>
+      {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
       <h2 className={style.title}>Kết quả tiêm chủng</h2>
       <button className={style.btnBack} onClick={() => navigate(-1)}>
         ← Quay lại
+      </button>
+
+      <button
+        className={style.btnBack}
+        style={{ marginBottom: 16, marginRight: 12 }}
+        onClick={handleSendAllNotifications}
+        disabled={records.filter((r) => r.result && r.parentId).length === 0}
+      >
+        Gửi thông báo & email hàng loạt
       </button>
 
       <table className={style.resultTable}>
@@ -213,8 +343,10 @@ const VaccineResult = () => {
                           </button>
                         ))}
                       {campaignStatus === "Đã hoàn thành" && r.result && (
-                        <button onClick={() => handleSendNotification(r)}>
-                          Gửi thông báo
+                        <button
+                          onClick={() => handleSendNotificationAndEmail(r)}
+                        >
+                          Gửi thông báo & email
                         </button>
                       )}
                     </td>
@@ -252,6 +384,7 @@ const VaccineResult = () => {
           </div>
         </div>
       )}
+      <Notification />
     </div>
   );
 };

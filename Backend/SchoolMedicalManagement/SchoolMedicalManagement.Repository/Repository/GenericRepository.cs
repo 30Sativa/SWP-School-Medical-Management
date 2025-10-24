@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,14 +10,10 @@ namespace SchoolMedicalManagement.Repository.Repository
 {
     public class GenericRepository<T> where T : class
     {
-        protected SwpEduHealV1Context _context;
+        protected SwpEduHealV5Context _context;
 
-        public GenericRepository()
-        {
-            _context ??= new SwpEduHealV1Context();
-        }
 
-        public GenericRepository(SwpEduHealV1Context context)
+        public GenericRepository(SwpEduHealV5Context context)
         {
             _context = context;
         }

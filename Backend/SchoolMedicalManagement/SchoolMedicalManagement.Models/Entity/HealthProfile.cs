@@ -9,15 +9,21 @@ public partial class HealthProfile
 
     public int? StudentId { get; set; }
 
-    public string? Height { get; set; }
+    public decimal? Height { get; set; }
 
-    public string? Weight { get; set; }
+    public decimal? Weight { get; set; }
 
     public string? ChronicDiseases { get; set; }
 
     public string? Allergies { get; set; }
 
     public string? GeneralNote { get; set; }
+
+    public DateTime? CreatedDate { get; set; }
+
+    public DateTime? LastUpdatedDate { get; set; }
+
+    public bool? IsActive { get; set; }
 
     public virtual Student? Student { get; set; }
 }

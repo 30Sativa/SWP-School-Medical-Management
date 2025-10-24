@@ -5,7 +5,11 @@ import axios from "axios";
 import style from "../../assets/css/homepage.module.css";
 import logo from "../../assets/icon/eduhealth.jpg";
 import { useNavigate } from "react-router-dom";
+
 import UserMenu from "../../components/UserMenu";
+
+import { jwtDecode } from "jwt-decode";
+
 
 const apiUrl = "https://swp-school-medical-management.onrender.com/api/BlogPost";
 
@@ -18,13 +22,24 @@ const BlogPublic = () => {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState({});
 
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [username, setUsername] = useState("");
+  const [role, setRole] = useState("");
+
   useEffect(() => {
     const fetchBlogs = async () => {
       setLoading(true);
       try {
         const res = await axios.get(apiUrl);
         const blogsData = Array.isArray(res.data) ? res.data : res.data?.data || [];
+
         setBlogs(blogsData.filter(blog => blog.isActive !== false));
+
+        const sortedBlogs = blogsData
+          .filter(blog => blog.isActive !== false)
+          .sort((a, b) => new Date(b.postedDate) - new Date(a.postedDate));
+        setBlogs(sortedBlogs);
+
       } catch {
         setBlogs([]);
       } finally {
@@ -34,12 +49,45 @@ const BlogPublic = () => {
     fetchBlogs();
   }, []);
 
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        const name = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"];
+        const roleName = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+        setUsername(name);
+        setRole(roleName);
+      } catch (e) {
+        setUsername("");
+        setRole("");
+      }
+    } else {
+      setUsername("");
+      setRole("");
+    }
+  }, []);
+
+  const handleDashboard = () => {
+    if (role === "Manager") navigate("/manager");
+    else if (role === "Nurse") navigate("/nurse");
+    else if (role === "Parent") navigate("/parent");
+    else navigate("/");
+  };
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
+
+
   const filteredBlogs = blogs.filter(blog => {
     const matchSearch =
       blog.title.toLowerCase().includes(searchText.toLowerCase()) ||
       blog.content.toLowerCase().includes(searchText.toLowerCase());
     return matchSearch;
   });
+
 
   // Sắp xếp theo thời gian tạo mới nhất lên đầu
   const sortedBlogs = [...filteredBlogs].sort((a, b) => {
@@ -50,6 +98,10 @@ const BlogPublic = () => {
 
   const totalPages = Math.ceil(sortedBlogs.length / blogsPerPage);
   const paginatedBlogs = sortedBlogs.slice((currentPage - 1) * blogsPerPage, currentPage * blogsPerPage);
+
+  const totalPages = Math.ceil(filteredBlogs.length / blogsPerPage);
+  const paginatedBlogs = filteredBlogs.slice((currentPage - 1) * blogsPerPage, currentPage * blogsPerPage);
+
 
   return (
     <div style={{ background: "#f8fafb", minHeight: "100vh" }}>
@@ -62,8 +114,38 @@ const BlogPublic = () => {
           <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); navigate("/#about"); }}>Giới thiệu</a>
           <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); navigate("/blog"); }}>Blog Y Tế</a>
           <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); navigate("/#contact"); }}>Liên hệ</a>
+
           {localStorage.getItem("token") ? (
             <UserMenu />
+
+          {username ? (
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <button
+                className={style.loginBtn}
+                style={{ minWidth: 120, fontWeight: 600 }}
+                onClick={() => setShowDropdown((v) => !v)}
+              >
+                {username} &#9662;
+              </button>
+              {showDropdown && (
+                <div style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: '100%',
+                  background: '#fff',
+                  color: '#222',
+                  border: '1px solid #eee',
+                  borderRadius: 8,
+                  minWidth: 150,
+                  boxShadow: '0 4px 16px #0001',
+                  zIndex: 1000,
+                }}>
+                  <button style={{ width: '100%', padding: 10, border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer' }} onClick={() => { setShowDropdown(false); handleDashboard(); }}>MyDashboard</button>
+                  <button style={{ width: '100%', padding: 10, border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', color: '#e11d48' }} onClick={handleLogout}>Logout</button>
+                </div>
+              )}
+            </div>
+
           ) : (
             <button className={style.loginBtn} onClick={() => navigate("/login")}>Đăng nhập</button>
           )}

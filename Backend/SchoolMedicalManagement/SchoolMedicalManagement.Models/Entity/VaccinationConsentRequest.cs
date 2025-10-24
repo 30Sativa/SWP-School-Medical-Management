@@ -11,15 +11,17 @@ public partial class VaccinationConsentRequest
 
     public int CampaignId { get; set; }
 
-    public int ParentId { get; set; }
+    public Guid ParentId { get; set; }
 
-    public DateOnly RequestDate { get; set; }
+    public DateTime RequestDate { get; set; }
 
-    public string? ConsentStatus { get; set; }
+    public int? ConsentStatusId { get; set; }
 
-    public DateOnly? ConsentDate { get; set; }
+    public DateTime? ConsentDate { get; set; }
 
     public virtual VaccinationCampaign Campaign { get; set; } = null!;
+
+    public virtual ConsentStatusType? ConsentStatus { get; set; }
 
     public virtual User Parent { get; set; } = null!;
 

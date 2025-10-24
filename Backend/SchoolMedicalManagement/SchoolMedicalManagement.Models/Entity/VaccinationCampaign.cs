@@ -13,9 +13,13 @@ public partial class VaccinationCampaign
 
     public string? Description { get; set; }
 
-    public int? CreatedBy { get; set; }
+    public Guid? CreatedBy { get; set; }
+
+    public int? StatusId { get; set; }
 
     public virtual User? CreatedByNavigation { get; set; }
+
+    public virtual CampaignStatus? Status { get; set; }
 
     public virtual ICollection<VaccinationConsentRequest> VaccinationConsentRequests { get; set; } = new List<VaccinationConsentRequest>();
 

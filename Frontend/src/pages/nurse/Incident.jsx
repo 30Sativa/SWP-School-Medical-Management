@@ -16,12 +16,27 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
+  BarChart,
+  Bar,
 } from "recharts";
 import { Search, Plus, Users } from "lucide-react";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 dayjs.extend(isoWeek);
 import Select from "react-select";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
+import { toast } from "react-toastify";
+import LoadingOverlay from "../../components/LoadingOverlay";
+import { useNavigate } from "react-router-dom";
+
+// API URL constants
+const MEDICAL_EVENT_API = "https://swp-school-medical-management.onrender.com/api/MedicalEvent";
+const MEDICAL_EVENT_TYPE_API = "https://swp-school-medical-management.onrender.com/api/MedicalEventType";
+const STUDENT_API = "https://swp-school-medical-management.onrender.com/api/Student";
+const USER_API = "https://swp-school-medical-management.onrender.com/api/User";
+const MEDICAL_SUPPLIES_API = "https://swp-school-medical-management.onrender.com/api/MedicalSupplies";
+const NOTIFICATION_API = "https://swp-school-medical-management.onrender.com/api/Notification/send";
 
 const COLORS = ["#F4C430", "#FF6B6B", "#4D96FF", "#9AE6B4", "#FFA500"];
 
@@ -31,7 +46,6 @@ const Incident = () => {
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [eventTypeFilter, setEventTypeFilter] = useState("Tất cả");
   const [dateFilter, setDateFilter] = useState("");
-  const [chartData, setChartData] = useState([]);
   const [summary, setSummary] = useState({
     total: 0,
     sent: 0,
@@ -78,37 +92,82 @@ const Incident = () => {
   const [suppliesUsed, setSuppliesUsed] = useState([]);
   const [bulkSuppliesUsed, setBulkSuppliesUsed] = useState([]);
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true); // loading fetch list
+  const [modalLoading, setModalLoading] = useState(false);
+  const [showSendOption, setShowSendOption] = useState(false);
+  const [eventTypes, setEventTypes] = useState([]);
+  const [showCreateEventTypeModal, setShowCreateEventTypeModal] = useState(false);
+  const [newEventTypeName, setNewEventTypeName] = useState("");
+  const navigate = useNavigate();
 
-  const eventTypes = [
-    { id: "1", name: "Sốt" },
-    { id: "2", name: "Té ngã" },
-    { id: "3", name: "Dị ứng" },
-    { id: "4", name: "Đau bụng" },
-    { id: "5", name: "Tai nạn nhỏ" },
-  ];
   const severityLevels = [
     { id: "1", level: "Nhẹ" },
     { id: "2", level: "Trung bình" },
     { id: "3", level: "Nặng" },
   ];
 
-  const fetchEvents = () => {
+  // Thêm hàm kiểm tra token
+  const getTokenOrRedirect = () => {
     const token = localStorage.getItem("token");
+    if (!token) {
+      notifyError("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!");
+      setTimeout(() => navigate("/login"), 1500);
+      return null;
+    }
+    return token;
+  };
+
+  const fetchEventTypes = () => {
+    const token = getTokenOrRedirect();
+    if (!token) return;
     axios
-      .get("/api/MedicalEvent", {
+      .get(MEDICAL_EVENT_TYPE_API, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        const data = res.data;
+        const types = Array.isArray(data)
+          ? data
+          : data && Array.isArray(data.data)
+          ? data.data
+          : [];
+
+        if (Array.isArray(types)) {
+          const mappedTypes = types.map((t) => ({
+            id: t.eventTypeId || t.id,
+            name: t.eventTypeName || t.name,
+            ...t,
+          }));
+          setEventTypes(mappedTypes);
+        }
+      })
+      .catch((err) => {
+        console.error("❌ Lỗi lấy loại sự cố:", err);
+        setEventTypes([]); // Ensure it's an empty array on error
+        notifyError("Không thể tải danh sách loại sự cố. Vui lòng thử lại.");
+      });
+  };
+
+  const fetchEvents = () => {
+    setLoading(true);
+    const token = getTokenOrRedirect();
+    if (!token) return;
+    axios
+      .get(MEDICAL_EVENT_API, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => {
-        console.log("📥 Danh sách sự cố:", res.data);
-        // Sắp xếp theo thời gian tạo mới nhất
-        const sortedEvents = [...res.data].sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate));
-        setEvents(sortedEvents);
+        // Đúng với API trả về: { status, message, data: [...] }
+        const eventList = Array.isArray(res.data?.data) ? res.data.data : [];
+        setEvents(eventList.sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate)));
       })
       .catch((err) => {
         console.error("❌ Lỗi lấy danh sách sự cố:", err);
-      });
+        setEvents([]);
+      })
+      .finally(() => setLoading(false));
   };
 
   const getStaffName = (id, handledByName) => {
@@ -119,15 +178,129 @@ const Incident = () => {
     return "Không rõ";
   };
 
+  // Hàm gửi notification/email cho phụ huynh: luôn lấy parentId từ API nếu chưa có
+  const sendNotificationToParent = async (studentId, event) => {
+    const token = getTokenOrRedirect();
+    if (!token) return false;
+    try {
+      // Lấy parentId từ event hoặc từ API nếu chưa có
+      let parentId = event.parentId;
+      let studentName = event.studentName;
+      console.log('[DEBUG] Gửi thông báo cho studentId:', studentId, 'event:', event);
+      if (!parentId) {
+        const res = await axios.get(
+          `${STUDENT_API}/${studentId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        console.log('[DEBUG] Kết quả API lấy student:', res.data);
+        parentId = res.data?.data?.parentId;
+        studentName = res.data?.data?.fullName;
+      }
+      console.log('[DEBUG] parentId:', parentId, 'studentName:', studentName);
+      if (!parentId) {
+        notifyError("Không tìm thấy phụ huynh của học sinh này!");
+        return false;
+      }
+      // Trong sendNotificationToParent, tạo message với fallback tránh undefined/null/Invalid Date
+      const message = `Học sinh: ${studentName}\nLoại sự cố: ${event.eventType || "Không rõ"}\nThời gian: ${event.eventDate ? new Date(event.eventDate).toLocaleString() : "Không rõ"}\nMức độ: ${event.severityLevelName || "Không rõ"}\nMô tả: ${event.description || "Không có"}`;
+      const subject = "Thông báo sự cố y tế học đường";
+      await Promise.all([
+        axios.post(
+          NOTIFICATION_API,
+          {
+            receiverId: parentId,
+            title: subject,
+            message,
+            typeId: 2,
+            isRead: false,
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        ),
+        axios.post(
+          "https://swp-school-medical-management.onrender.com/api/Email/send-by-userid",
+          {
+            userId: parentId,
+            subject,
+            body: message,
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        ),
+      ]);
+      setEvents((prev) =>
+        prev.map((e) =>
+          e.eventId === event.eventId ? { ...e, notificationSent: true } : e
+        )
+      );
+      console.log('[DEBUG] Gửi thông báo/email thành công cho parentId:', parentId);
+      return true;
+    } catch (err) {
+      notifyError("Gửi thông báo hoặc email thất bại!");
+      console.error("❌ Lỗi gửi thông báo:", err);
+      if (err.response) {
+        console.error('[DEBUG] Lỗi response:', err.response.data);
+      }
+      return false;
+    }
+  };
+
+  const handleCreateEventType = () => {
+    if (!newEventTypeName.trim()) {
+      notifyError("Tên loại sự cố không được để trống!");
+      return;
+    }
+    setModalLoading(true);
+    const token = getTokenOrRedirect();
+    if (!token) return;
+    axios
+      .post(
+        MEDICAL_EVENT_TYPE_API,
+        { eventTypeName: newEventTypeName },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      .then((res) => {
+        notifySuccess("Tạo loại sự cố mới thành công!");
+        setShowCreateEventTypeModal(false);
+        setNewEventTypeName("");
+
+        const newType = res.data?.data || res.data;
+        // Fetch again to get the full updated list
+        fetchEventTypes();
+
+        if (newType && (newType.eventTypeId || newType.id)) {
+          const newId = (newType.eventTypeId || newType.id).toString();
+          if (showCreateForm) {
+            setNewEvent((prev) => ({ ...prev, eventTypeId: newId }));
+          }
+          if (showBulkCreateForm) {
+            setBulkEvent((prev) => ({ ...prev, eventTypeId: newId }));
+          }
+        }
+      })
+      .catch((err) => {
+        console.error("❌ Lỗi tạo loại sự cố:", err);
+        notifyError(
+          "Lỗi khi tạo loại sự cố mới: " +
+            (err.response?.data?.message || err.message)
+        );
+      })
+      .finally(() => {
+        setModalLoading(false);
+      });
+  };
+
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    console.log("🔑 Token:", token);
+    const token = getTokenOrRedirect();
+    if (!token) return;
+    console.log("🔑 Token: [Sanitized] " + (token ? token.substring(0, 4) + "..." : "No token found"));
     console.log("👤 UserId:", localStorage.getItem("userId"));
 
     fetchEvents();
+    fetchEventTypes();
 
     axios
-      .get("/api/Student", {
+      .get(STUDENT_API, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -153,7 +326,7 @@ const Incident = () => {
       });
 
     axios
-      .get("/api/User", {
+      .get(USER_API, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -166,8 +339,8 @@ const Incident = () => {
       });
 
     axios
-      .get("/api/MedicalSupplies", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      .get(MEDICAL_SUPPLIES_API, {
+        headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
         setSupplies(Array.isArray(res.data.data) ? res.data.data : []);
@@ -180,10 +353,12 @@ const Incident = () => {
 
   useEffect(() => {
     if (selectedEvent?.studentId) {
+      const token = getTokenOrRedirect();
+      if (!token) return;
       axios
-        .get(`/api/MedicalHistory/student/${selectedEvent.studentId}`, {
+        .get(`${STUDENT_API}/${selectedEvent.studentId}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
           },
         })
         .then((res) => {
@@ -239,9 +414,6 @@ const Incident = () => {
       dateMap[groupKey] = (dateMap[groupKey] || 0) + 1;
     });
 
-    setChartData(
-      Object.entries(typeMap).map(([name, value]) => ({ name, value }))
-    );
     setDistributionData(
       Object.entries(dateMap)
         .map(([key, value]) => ({ date: key, value }))
@@ -278,7 +450,8 @@ const Incident = () => {
 
   const handleCreate = () => {
     const currentUserId = localStorage.getItem("userId");
-    const token = localStorage.getItem("token");
+    const token = getTokenOrRedirect();
+    if (!token) return;
 
     // Kiểm tra các trường bắt buộc
     if (
@@ -286,7 +459,7 @@ const Incident = () => {
       isNaN(Number(newEvent.studentId)) ||
       Number(newEvent.studentId) === 0
     ) {
-      alert("Vui lòng chọn học sinh!");
+      notifyError("Vui lòng chọn học sinh!");
       return;
     }
     if (
@@ -294,7 +467,7 @@ const Incident = () => {
       isNaN(Number(newEvent.eventTypeId)) ||
       Number(newEvent.eventTypeId) === 0
     ) {
-      alert("Vui lòng chọn loại sự cố!");
+      notifyError("Vui lòng chọn loại sự cố!");
       return;
     }
     if (
@@ -302,22 +475,23 @@ const Incident = () => {
       isNaN(Number(newEvent.severityId)) ||
       Number(newEvent.severityId) === 0
     ) {
-      alert("Vui lòng chọn mức độ!");
+      notifyError("Vui lòng chọn mức độ!");
       return;
     }
     if (!newEvent.eventDate) {
-      alert("Vui lòng chọn thời gian!");
+      notifyError("Vui lòng chọn thời gian!");
       return;
     }
     if (!newEvent.description) {
-      alert("Vui lòng nhập mô tả!");
+      notifyError("Vui lòng nhập mô tả!");
       return;
     }
     if (!currentUserId) {
-      alert("Vui lòng đăng nhập lại!");
+      notifyError("Vui lòng đăng nhập lại!");
       return;
     }
 
+    const studentObj = allStudents.find(s => Number(s.studentId) === Number(newEvent.studentId));
     const payload = {
       studentId: Number(newEvent.studentId),
       eventTypeId: Number(newEvent.eventTypeId),
@@ -341,13 +515,17 @@ const Incident = () => {
           note: item.note || "",
         })),
       request: "Không có yêu cầu đặc biệt",
+      parentId: studentObj?.parentId,
+      studentName: studentObj?.fullName,
+      parentName: studentObj?.parentName,
+      className: studentObj?.className,
     };
 
     console.log("📤 Payload gửi API:", payload);
     console.log("🔑 Token:", token);
 
     axios
-      .post("/api/MedicalEvent", payload, {
+      .post(MEDICAL_EVENT_API, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -357,6 +535,11 @@ const Incident = () => {
         const added = {
           ...res.data,
           handledByName: "Bạn",
+          notificationSent: false, // mặc định chưa gửi, sẽ cập nhật sau khi gửi
+          parentId: payload.parentId,
+          studentName: payload.studentName,
+          parentName: payload.parentName,
+          className: payload.className,
         };
         setEvents((prev) => [...prev, added]);
         setShowCreateForm(false);
@@ -372,14 +555,31 @@ const Incident = () => {
         });
         setSuppliesUsed([]);
         fetchEvents();
+        // Map lại các trường cho notification
+        const eventTypeObj = eventTypes.find(et => et.id == payload.eventTypeId);
+        const severityObj = severityLevels.find(sl => sl.id == payload.severityId);
+        const notificationEvent = {
+          ...added,
+          eventType: eventTypeObj ? eventTypeObj.name : "Không rõ",
+          severityLevelName: severityObj ? severityObj.level : "Không rõ",
+          description: payload.description || "Không có",
+          eventDate: payload.eventDate || "",
+          studentName: payload.studentName,
+          parentId: payload.parentId,
+        };
+        sendNotificationToParent(notificationEvent.studentId, notificationEvent).then((ok) => {
+          if (ok) {
+            notifySuccess("Tạo sự cố và gửi thông báo thành công!");
+          } else {
+            notifyError("Tạo sự cố thành công nhưng gửi thông báo/email thất bại!");
+          }
+        });
       })
       .catch((err) => {
         const errorDetail =
           err.response?.data?.errors || err.response?.data || err.message;
         console.error("❌ Lỗi tạo sự cố:", errorDetail);
-        alert(
-          "Lỗi khi tạo mới sự cố:\n" + JSON.stringify(errorDetail, null, 2)
-        );
+        notifyError("Lỗi khi tạo mới sự cố!");
       });
   };
 
@@ -398,8 +598,8 @@ const Incident = () => {
 
   const handleUpdate = () => {
     if (!editingEvent) return;
-
-    const token = localStorage.getItem("token");
+    const token = getTokenOrRedirect();
+    if (!token) return;
     const payload = {
       ...editingEvent,
       severityId: Number(editingEvent.severityId),
@@ -423,7 +623,7 @@ const Incident = () => {
     console.log("📤 Payload cập nhật:", payload);
 
     axios
-      .put(`/api/MedicalEvent/${editingEvent.eventId}`, payload, {
+      .put(`${MEDICAL_EVENT_API}/${editingEvent.eventId}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -431,41 +631,60 @@ const Incident = () => {
         fetchEvents();
         setShowEditForm(false);
         setEditingEvent(null);
+        notifySuccess("Cập nhật sự cố thành công!");
       })
       .catch((err) => {
         const errorDetail =
           err.response?.data?.errors || err.response?.data || err.message;
         console.error("❌ Lỗi cập nhật sự cố:", errorDetail);
-        alert(
-          "Lỗi khi cập nhật sự cố:\n" + JSON.stringify(errorDetail, null, 2)
-        );
+        notifyError("Lỗi khi cập nhật sự cố!");
       });
   };
 
   const handleDelete = (id) => {
-    if (window.confirm("Bạn có chắc chắn muốn xoá sự cố này?")) {
-      axios
-        .delete(
-          `https://swp-school-medical-management.onrender.com/api/MedicalEvent/${id}`
-        )
-        .then(() => {
-          setEvents((prev) => prev.filter((e) => e.eventId !== id));
-          setSelectedEvent(null);
-        })
-        .catch((err) => alert("Lỗi khi xoá: " + err));
-    }
+    toast.warn(
+      <div>
+        <div>Bạn có chắc chắn muốn xoá sự cố này?</div>
+        <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+          <button
+            style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: 4, padding: '4px 12px', cursor: 'pointer' }}
+            onClick={() => {
+              toast.dismiss();
+              axios
+                .delete(`${MEDICAL_EVENT_API}/${id}`)
+                .then(() => {
+                  setEvents((prev) => prev.filter((e) => e.eventId !== id));
+                  setSelectedEvent(null);
+                  notifySuccess("Đã xoá sự cố!");
+                })
+                .catch(() => notifyError("Lỗi khi xoá sự cố!"));
+            }}
+          >
+            Xoá
+          </button>
+          <button
+            style={{ background: '#fff', color: '#333', border: '1px solid #ccc', borderRadius: 4, padding: '4px 12px', cursor: 'pointer' }}
+            onClick={() => toast.dismiss()}
+          >
+            Huỷ
+          </button>
+        </div>
+      </div>,
+      { autoClose: false, closeOnClick: false, closeButton: false, position: "top-center" }
+    );
   };
 
   const handleBulkCreate = () => {
     const currentUserId = localStorage.getItem("userId");
-    const token = localStorage.getItem("token");
+    const token = getTokenOrRedirect();
+    if (!token) return;
 
     // Kiểm tra các trường bắt buộc
     if (
       !bulkEvent.selectedStudents ||
       bulkEvent.selectedStudents.length === 0
     ) {
-      alert("Vui lòng chọn ít nhất một học sinh!");
+      notifyError("Vui lòng chọn ít nhất một học sinh!");
       return;
     }
     if (
@@ -473,7 +692,7 @@ const Incident = () => {
       isNaN(Number(bulkEvent.eventTypeId)) ||
       Number(bulkEvent.eventTypeId) === 0
     ) {
-      alert("Vui lòng chọn loại sự cố!");
+      notifyError("Vui lòng chọn loại sự cố!");
       return;
     }
     if (
@@ -481,19 +700,19 @@ const Incident = () => {
       isNaN(Number(bulkEvent.severityId)) ||
       Number(bulkEvent.severityId) === 0
     ) {
-      alert("Vui lòng chọn mức độ!");
+      notifyError("Vui lòng chọn mức độ!");
       return;
     }
     if (!bulkEvent.eventDate) {
-      alert("Vui lòng chọn thời gian!");
+      notifyError("Vui lòng chọn thời gian!");
       return;
     }
     if (!bulkEvent.description) {
-      alert("Vui lòng nhập mô tả!");
+      notifyError("Vui lòng nhập mô tả!");
       return;
     }
     if (!currentUserId) {
-      alert("Vui lòng đăng nhập lại!");
+      notifyError("Vui lòng đăng nhập lại!");
       return;
     }
 
@@ -512,6 +731,7 @@ const Incident = () => {
 
     // Tạo nhiều sự cố cùng lúc
     const promises = bulkEvent.selectedStudents.map((studentId) => {
+      const studentObj = allStudents.find(s => Number(s.studentId) === Number(studentId));
       const payload = {
         studentId: Number(studentId),
         eventTypeId: Number(bulkEvent.eventTypeId),
@@ -524,9 +744,13 @@ const Incident = () => {
         notes: bulkEvent.notes,
         suppliesUsed: suppliesPayload,
         request: "Không có yêu cầu đặc biệt",
+        parentId: studentObj?.parentId,
+        studentName: studentObj?.fullName,
+        parentName: studentObj?.parentName,
+        className: studentObj?.className,
       };
 
-      return axios.post("/api/MedicalEvent", payload, {
+      return axios.post(MEDICAL_EVENT_API, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -534,12 +758,26 @@ const Incident = () => {
     });
 
     Promise.all(promises)
-      .then((responses) => {
-        console.log("✅ Tạo hàng loạt sự cố thành công:", responses);
-        const addedEvents = responses.map((res) => ({
-          ...res.data,
-          handledByName: "Bạn",
-        }));
+      .then(async (responses) => {
+        const addedEvents = responses.map((res) => {
+          const event = res.data;
+          const sid = event.studentId || event.data?.studentId;
+          const studentObj = allStudents.find(s => Number(s.studentId) === Number(sid));
+          return {
+            ...event,
+            studentId: sid,
+            handledByName: "Bạn",
+            notificationSent: false,
+            parentId: event.parentId || studentObj?.parentId,
+            studentName: event.studentName || studentObj?.fullName || "",
+            parentName: event.parentName || studentObj?.parentName || "",
+            className: event.className || studentObj?.className || "",
+            eventType: event.eventType || event.data?.eventType || (eventTypes.find(et => et.id == (event.eventTypeId || event.data?.eventTypeId))?.name) || "Không rõ",
+            severityLevelName: event.severityLevelName || event.data?.severityLevelName || (severityLevels.find(sl => sl.id == (event.severityId || event.data?.severityId))?.level) || "Không rõ",
+            description: event.description || event.data?.description || "Không có",
+            eventDate: event.eventDate || event.data?.eventDate || "",
+          };
+        });
         setEvents((prev) => [...prev, ...addedEvents]);
         setShowBulkCreateForm(false);
         setBulkEvent({
@@ -555,16 +793,24 @@ const Incident = () => {
         setShowAllStudents(false);
         setSearchStudent("");
         fetchEvents();
-        alert(`Đã tạo thành công ${responses.length} sự cố y tế!`);
+        notifySuccess(`Đã tạo thành công ${responses.length} sự cố y tế!`);
+        // Gửi thông báo tuần tự cho từng event, luôn truyền đúng studentId
+        let hasError = false;
+        for (const event of addedEvents) {
+          const ok = await sendNotificationToParent(event.studentId, event);
+          if (!ok) hasError = true;
+        }
+        if (hasError) {
+          notifyError("Một số thông báo/email gửi thất bại. Vui lòng kiểm tra lại!");
+        } else {
+          notifySuccess("Đã gửi thông báo và email cho tất cả phụ huynh!");
+        }
       })
       .catch((err) => {
         const errorDetail =
           err.response?.data?.errors || err.response?.data || err.message;
         console.error("❌ Lỗi tạo hàng loạt sự cố:", errorDetail);
-        alert(
-          "Lỗi khi tạo hàng loạt sự cố:\n" +
-            JSON.stringify(errorDetail, null, 2)
-        );
+        notifyError("Lỗi khi tạo hàng loạt sự cố!");
       });
   };
 
@@ -610,10 +856,37 @@ const Incident = () => {
     );
   };
 
+  // Hàm lấy dữ liệu cho BarChart: top 10 loại sự cố
+  const getBarChartData = (data) => {
+    if (!Array.isArray(data) || data.length === 0) return [];
+    const typeMap = {};
+    data.forEach((event) => {
+      if (event.eventType) {
+        typeMap[event.eventType] = (typeMap[event.eventType] || 0) + 1;
+      }
+    });
+    const sorted = Object.entries(typeMap)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+    return sorted.slice(0, 10);
+  };
+
+  // Skeleton loading rows
+  const skeletonRows = Array.from({ length: itemsPerPage }, (_, i) => (
+    <tr key={i} className={style.skeletonRow}>
+      <td colSpan={5}>
+        <div className={style.skeletonBox} style={{ height: 32, width: "100%" }} />
+      </td>
+    </tr>
+  ));
+
   return (
     <div className={style.pageContainer}>
+      <Notification />
       <Sidebar />
       <div className={style.contentArea}>
+        {/* LOADING OVERLAY */}
+        {(loading || modalLoading) && <LoadingOverlay text="Đang tải dữ liệu..." />}
         <div className={style.header}>
           <h2>Báo cáo sự cố y tế học đường</h2>
           <div className={style.headerButtons}>
@@ -637,12 +910,12 @@ const Incident = () => {
             value={eventTypeFilter}
             onChange={(e) => setEventTypeFilter(e.target.value)}
           >
-            <option>Tất cả</option>
-            <option>Sốt</option>
-            <option>Đau bụng</option>
-            <option>Dị ứng</option>
-            <option>Té ngã</option>
-            <option>Tai nạn nhỏ</option>
+            <option value="Tất cả">Tất cả</option>
+            {eventTypes.map((type) => (
+              <option key={type.id} value={type.name}>
+                {type.name}
+              </option>
+            ))}
           </select>
           <input
             type="date"
@@ -677,37 +950,39 @@ const Incident = () => {
               </tr>
             </thead>
             <tbody>
-              {currentItems.map((event) => (
-                <tr key={event.eventId}>
-                  <td>{event.studentName}</td>
-                  <td>
-                    <span className={style.tagBlue}>{event.eventType}</span>
-                  </td>
-                  <td>{new Date(event.eventDate).toLocaleString()}</td>
-                  <td>
-                    <span
-                      className={
-                        event.severityLevelName === "Nhẹ"
-                          ? style.tagYellow
-                          : event.severityLevelName === "Trung bình"
-                          ? style.tagOrange
-                          : style.tagRed
-                      }
-                    >
-                      {event.severityLevelName}
-                    </span>
-                  </td>
+              {loading
+                ? skeletonRows
+                : currentItems.map((event) => (
+                    <tr key={event.eventId} className={style.tableRow}>
+                      <td>{event.studentName}</td>
+                      <td>
+                        <span className={style.tagBlue}>{event.eventType}</span>
+                      </td>
+                      <td>{new Date(event.eventDate).toLocaleString()}</td>
+                      <td>
+                        <span
+                          className={
+                            event.severityLevelName === "Nhẹ"
+                              ? style.tagYellow
+                              : event.severityLevelName === "Trung bình"
+                              ? style.tagOrange
+                              : style.tagRed
+                          }
+                        >
+                          {event.severityLevelName}
+                        </span>
+                      </td>
 
-                  <td>
-                    <button
-                      className={style.viewDetail}
-                      onClick={() => setSelectedEvent(event)}
-                    >
-                      Xem chi tiết
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                      <td>
+                        <button
+                          className={style.viewDetail}
+                          onClick={() => setSelectedEvent(event)}
+                        >
+                          Xem chi tiết
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
             </tbody>
           </table>
         </div>
@@ -738,27 +1013,22 @@ const Incident = () => {
         <div className={style.summarySection}>
           <div className={style.chartCard}>
             <h4>Thống kê theo loại</h4>
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={40}
-                  outerRadius={70}
-                  fill="#8884d8"
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart
+                data={getBarChartData(filteredEvents)}
+                layout="vertical"
+                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+              >
+                <XAxis type="number" allowDecimals={false} tick={{ fontSize: 13 }} />
+                <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 13 }} />
+                <Tooltip formatter={(value) => [`${value} sự cố`]} />
                 <Legend />
-              </PieChart>
+                <Bar dataKey="value" fill="#4D96FF">
+                  {getBarChartData(filteredEvents).map((entry, index) => (
+                    <Cell key={`cell-bar-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           </div>
 
@@ -943,53 +1213,78 @@ const Incident = () => {
                 Xoá
               </button>
               <button onClick={() => setSelectedEvent(null)}>Đóng</button>
-              <button
-                className={style.sendBtn}
-                onClick={async () => {
-                  // Lấy parentId từ API Student
-                  try {
-                    const token = localStorage.getItem("token");
-                    const res = await axios.get(
-                      `/api/Student/${selectedEvent.studentId}`,
-                      {
-                        headers: { Authorization: `Bearer ${token}` },
-                      }
-                    );
-                    const parentId = res.data?.data?.parentId;
-                    if (!parentId) {
-                      alert("Không tìm thấy phụ huynh của học sinh này!");
-                      return;
-                    }
-                    // Soạn message
-                    const message = `Học sinh: ${
-                      selectedEvent.studentName
-                    }\nLoại sự cố: ${
-                      selectedEvent.eventType
-                    }\nThời gian: ${new Date(
-                      selectedEvent.eventDate
-                    ).toLocaleString()}\nMức độ: ${
-                      selectedEvent.severityLevelName
-                    }\nMô tả: ${selectedEvent.description}`;
-                    await axios.post(
-                      "/api/Notification/send",
+              {selectedEvent && !selectedEvent.notificationSent && (
+                <button
+                  className={style.sendBtn}
+                  onClick={() => setShowSendOption(true)}
+                >
+                  Gửi thông báo
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      {showSendOption && (
+        <div className={style.modalOverlay}>
+          <div className={style.modalContent}>
+            <h4>Bạn muốn gửi thông báo?</h4>
+            <button
+              className={style.sendBtn}
+              onClick={async () => {
+                // Gửi notification và email đồng thời
+                try {
+                  const token = getTokenOrRedirect();
+                  if (!token) return;
+                  const res = await axios.get(
+                    `${STUDENT_API}/${selectedEvent.studentId}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                  );
+                  const parentId = res.data?.data?.parentId;
+                  if (!parentId) {
+                    notifyError("Không tìm thấy phụ huynh của học sinh này!");
+                    return;
+                  }
+                  const message = `Học sinh: ${selectedEvent.studentName}\nLoại sự cố: ${selectedEvent.eventType}\nThời gian: ${selectedEvent.eventDate ? new Date(selectedEvent.eventDate).toLocaleString() : "Không rõ"}\nMức độ: ${selectedEvent.severityLevelName || "Không rõ"}\nMô tả: ${selectedEvent.description || "Không có"}`;
+                  const subject = "Thông báo sự cố y tế học đường";
+                  // Gửi notification và email song song
+                  await Promise.all([
+                    axios.post(
+                      NOTIFICATION_API,
                       {
                         receiverId: parentId,
-                        title: "Thông báo sự cố y tế học đường",
+                        title: subject,
                         message,
                         typeId: 2,
                         isRead: false,
                       },
                       { headers: { Authorization: `Bearer ${token}` } }
-                    );
-                    alert("Đã gửi thông báo cho phụ huynh!");
-                  } catch {
-                    alert("Gửi thông báo thất bại!");
-                  }
-                }}
-              >
-                Gửi thông báo
-              </button>
-            </div>
+                    ),
+                    axios.post(
+                      "https://swp-school-medical-management.onrender.com/api/Email/send-by-userid",
+                      {
+                        userId: parentId,
+                        subject,
+                        body: message,
+                      },
+                      { headers: { Authorization: `Bearer ${token}` } }
+                    ),
+                  ]);
+                  notifySuccess("Đã gửi thông báo và email cho phụ huynh!");
+                  setShowSendOption(false);
+                } catch {
+                  notifyError("Gửi thông báo hoặc email thất bại!");
+                }
+              }}
+            >
+              Gửi thông báo
+            </button>
+            <button
+              className={style.closeBtn}
+              onClick={() => setShowSendOption(false)}
+            >
+              Đóng
+            </button>
           </div>
         </div>
       )}
@@ -1014,9 +1309,10 @@ const Incident = () => {
                 setNewEvent({ ...newEvent, studentId: "" });
                 if (className) {
                   try {
-                    const token = localStorage.getItem("token");
+                    const token = getTokenOrRedirect();
+                    if (!token) return;
                     const res = await axios.get(
-                      `/api/Student/by-class/${encodeURIComponent(className)}`,
+                      `${STUDENT_API}/by-class/${encodeURIComponent(className)}`,
                       {
                         headers: { Authorization: `Bearer ${token}` },
                       }
@@ -1043,7 +1339,7 @@ const Incident = () => {
             <Select
               options={
                 Array.isArray(classStudents)
-                  ? classStudents.map((s) => ({
+                  ? classStudents.filter(s => !!s.parentId).map((s) => ({
                       value: s.studentId,
                       label: s.fullName,
                     }))
@@ -1068,9 +1364,13 @@ const Incident = () => {
 
             <select
               value={newEvent.eventTypeId}
-              onChange={(e) =>
-                setNewEvent({ ...newEvent, eventTypeId: e.target.value })
-              }
+              onChange={(e) => {
+                if (e.target.value === "add_new_type") {
+                  setShowCreateEventTypeModal(true);
+                } else {
+                  setNewEvent({ ...newEvent, eventTypeId: e.target.value });
+                }
+              }}
             >
               <option value="">-- Loại sự cố --</option>
               {eventTypes.map((et) => (
@@ -1078,6 +1378,12 @@ const Incident = () => {
                   {et.name}
                 </option>
               ))}
+              <option
+                value="add_new_type"
+                style={{ color: "#007bff", fontWeight: "bold" }}
+              >
+                + Tạo loại mới...
+              </option>
             </select>
 
             <select
@@ -1448,7 +1754,7 @@ const Incident = () => {
                   <div className={style.selectedClassStudents}>
                     <h4>Học sinh lớp {selectedClass}:</h4>
                     <div className={style.studentCheckboxList}>
-                      {classStudents.map((student) => (
+                      {classStudents.filter(s => !!s.parentId).map((student) => (
                         <label key={student.studentId} className={style.studentCheckbox}>
                           <input
                             type="checkbox"
@@ -1488,7 +1794,7 @@ const Incident = () => {
                 
                 <div className={style.studentSelectionArea}>
                   <div className={style.studentCheckboxList}>
-                    {getFilteredStudents().map((student) => (
+                    {getFilteredStudents().filter(s => !!s.parentId).map((student) => (
                       <label key={student.studentId} className={style.studentCheckbox}>
                         <input
                           type="checkbox"
@@ -1517,9 +1823,13 @@ const Incident = () => {
 
             <select
               value={bulkEvent.eventTypeId}
-              onChange={(e) =>
-                setBulkEvent({ ...bulkEvent, eventTypeId: e.target.value })
-              }
+              onChange={(e) => {
+                if (e.target.value === "add_new_type") {
+                  setShowCreateEventTypeModal(true);
+                } else {
+                  setBulkEvent({ ...bulkEvent, eventTypeId: e.target.value });
+                }
+              }}
             >
               <option value="">-- Loại sự cố --</option>
               {eventTypes.map((et) => (
@@ -1527,6 +1837,12 @@ const Incident = () => {
                   {et.name}
                 </option>
               ))}
+              <option
+                value="add_new_type"
+                style={{ color: "#007bff", fontWeight: "bold" }}
+              >
+                + Tạo loại mới...
+              </option>
             </select>
 
             <select
@@ -1652,14 +1968,14 @@ const Incident = () => {
                 <h4>Học sinh đã chọn ({bulkEvent.selectedStudents.length}):</h4>
                 <div className={style.studentList}>
                   {bulkEvent.selectedStudents.map((studentId) => {
-                    const student = allStudents.find(
-                      (s) => s.studentId === studentId
+                    const studentObj = allStudents.find(
+                      (s) => Number(s.studentId) === Number(studentId)
                     );
                     return (
                       <span key={studentId} className={style.studentTag}>
-                        {student?.fullName || studentId}
-                        {student?.className && (
-                          <span className={style.classTag}> ({student.className})</span>
+                        {studentObj?.fullName || studentId}
+                        {studentObj?.className && (
+                          <span className={style.classTag}> ({studentObj.className})</span>
                         )}
                       </span>
                     );
@@ -1681,6 +1997,36 @@ const Incident = () => {
                   setShowAllStudents(false);
                   setSearchStudent("");
                 }}
+              >
+                Huỷ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showCreateEventTypeModal && (
+        <div className={style.modalOverlay}>
+          <div className={style.modalContent} style={{ maxWidth: "400px" }}>
+            <h3>Tạo loại sự cố mới</h3>
+            <input
+              type="text"
+              placeholder="Nhập tên loại sự cố..."
+              value={newEventTypeName}
+              onChange={(e) => setNewEventTypeName(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px",
+                boxSizing: "border-box",
+                marginBottom: "12px",
+              }}
+            />
+            <div className={style.modalActions}>
+              <button className={style.tagBlue} onClick={handleCreateEventType}>
+                Tạo
+              </button>
+              <button
+                className={style.closeBtn}
+                onClick={() => setShowCreateEventTypeModal(false)}
               >
                 Huỷ
               </button>

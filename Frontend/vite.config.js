@@ -8,7 +8,8 @@ export default defineConfig({
       '/api': {
         target: 'https://swp-school-medical-management.onrender.com',
         changeOrigin: true,
-        secure: false,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/api/, '/api')
       },
     },
   },

@@ -178,63 +178,145 @@
 }
 
 .historyItem {
-  border: 1px solid #e0e7ff;
-  border-radius: 10px;
-  padding: 18px;
-  margin-bottom: 18px;
-  background: #f8fafc;
-  transition: box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.historyItem:not(:last-child) {
+  margin-bottom: 12px;
 }
 
 .historyItem:hover {
-  box-shadow: 0 2px 12px rgba(19, 159, 155, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.status {
-  display: inline-flex;
+.medicationIconWrapper {
+  flex-shrink: 0;
+}
+
+.medicationIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
   align-items: center;
-  gap: 7px;
-  margin: 8px 0;
-  padding: 3px 12px;
-  border-radius: 18px;
-  font-size: 13px;
-  font-weight: bold;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
-  transition: box-shadow 0.25s, transform 0.18s;
-  position: relative;
-  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  justify-content: center;
+  background-color: #eef5ff; /* Default blue background */
 }
 
-.status.done {
-  background: linear-gradient(90deg, #bbf7d0 0%, #34d399 100%);
-  color: #047857;
-  box-shadow: 0 0 8px #6ee7b7a0;
-  border: 1.5px solid #10b981;
+.medicationIcon svg {
+  width: 24px;
+  height: 24px;
+  color: #3b82f6; /* Default blue color */
 }
 
-.status.done::before {
-  content: "✔️";
-  font-size: 1.1em;
+.medicationDetails {
+  flex-grow: 1;
 }
 
-.status.pending {
-  background: linear-gradient(90deg, #fef9c3 0%, #fde68a 100%);
-  color: #b45309;
-  box-shadow: 0 0 8px #fde68a80;
-  border: 1.5px solid #facc15;
+.medicationDetails strong {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  display: block;
+  margin-bottom: 2px;
 }
 
-.status.pending::before {
-  content: "⏳";
-  font-size: 1.1em;
+.medicationDetails p {
+  font-size: 14px;
+  color: #64748b;
+  margin: 2px 0;
+  line-height: 1.4;
 }
 
-.status.reject {
-  background: linear-gradient(90deg, #fecaca 0%, #f87171 100%);
-  color: #b91c1c;
-  box-shadow: 0 0 8px #fca5a580;
-  border: 1.5px solid #ef4444;
+.medicationDetails a {
+  font-weight: 500;
+  color: #3b82f6;
+  text-decoration: none;
+}
+.medicationDetails a:hover {
+  text-decoration: underline;
+}
+
+/* Reusing status badge from dashboard */
+.statusBadge {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.statusRow {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.statusApproved { background-color: #eef5ff; color: #3b82f6; }
+.statusPending { background-color: #fff7ed; color: #f97316; }
+.statusRejected { background-color: #fef2f2; color: #ef4444; }
+.statusCompleted { background-color: #f0fdf4; color: #22c55e; }
+.statusCancelled { background-color: #f1f5f9; color: #64748b; }
+.statusNormal { background-color: #f1f5f9; color: #64748b; }
+
+.cancelBtn {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.cancelBtn:hover {
+  background-color: #dc2626;
+}
+
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btnSecondary {
+  background-color: #e5e7eb;
+  color: #4b5563;
+}
+
+.btnSecondary:hover {
+  background-color: #d1d5db;
+}
+
+.btnDanger {
+  background-color: #ef4444;
+  color: white;
+}
+
+.btnDanger:hover {
+  background-color: #dc2626;
 }
 
 .status.reject::before {
@@ -314,13 +396,13 @@
 }
 
 .fadeIn {
-  animation: fadeIn 0.4s ease-in-out;
+  animation: fadeIn 0.5s ease-in-out;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -434,4 +516,21 @@
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+.removeFileBtn {
+  margin-left: 12px;
+  background: transparent;
+  border: none;
+  color: #dc2626;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.removeFileBtn:hover {
+  transform: scale(1.1);
+}
+
+.Toastify__toast-container {
+  z-index: 99999 !important;
 }

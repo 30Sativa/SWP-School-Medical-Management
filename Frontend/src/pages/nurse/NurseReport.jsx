@@ -13,6 +13,9 @@ import {
 import * as XLSX from "xlsx";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import Notification from "../../components/Notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
+// import { notifySuccess, notifyError } from "../../utils/notification";
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f7f"];
 
@@ -23,10 +26,12 @@ const NurseReport = () => {
     health: null,
     medication: null,
   });
+  const [loading, setLoading] = useState(true); // loading fetch list
   const reportRef = useRef();
 
   useEffect(() => {
     const fetchAll = async () => {
+      setLoading(true);
       try {
         const [vaccine, medical, health, medication] = await Promise.all([
           axios.get("https://swp-school-medical-management.onrender.com/api/Dashboard/vaccination-campaigns/statistics"),
@@ -42,11 +47,15 @@ const NurseReport = () => {
         });
       } catch (err) {
         console.error("Lỗi khi tải dữ liệu:", err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchAll();
   }, []);
 
+  if (loading)
+    return <LoadingOverlay text="Đang tải dữ liệu..." />;
   if (!stats.vaccination || !stats.medical || !stats.health || !stats.medication)
     return <div>Đang tải dữ liệu báo cáo...</div>;
 
@@ -187,6 +196,8 @@ const NurseReport = () => {
           </div>
         </div>
       </main>
+      {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
+      <Notification />
     </div>
   );
 };

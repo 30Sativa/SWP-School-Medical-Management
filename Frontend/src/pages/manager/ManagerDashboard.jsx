@@ -6,6 +6,9 @@ import {
   TeamOutlined,
   ProfileOutlined,
 } from "@ant-design/icons";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 const API_BASE = "/api";
 
@@ -149,6 +152,10 @@ const ManagerDashboard = () => {
             ))}
           </ul>
         </section>
+
+        {loading && <LoadingOverlay text="Đang tải dữ liệu..." />}
+
+        <Notification />
       </div>
     </div>
   );

@@ -1,243 +1,382 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Sidebar from "../../components/sb-Parent/Sidebar";
-import styles from "../../assets/css/ChildCareHistory.module.css";
+import styles from "../../assets/css/NotificationAndReport.module.css"; // Reuse the consistent style
 import axios from "axios";
 import dayjs from "dayjs";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { FiHeart, FiShield, FiAlertTriangle, FiInbox, FiSearch } from 'react-icons/fi';
+
+// Constants
+const API_BASE_URL = "https://swp-school-medical-management.onrender.com/api";
+const FILTERS = {
+  ALL: "all",
+  HEALTH: "health",
+  VACCINE: "vaccine",
+  EVENT: "event",
+};
+
+// Error messages
+const ERROR_MESSAGES = {
+  FETCH_STUDENTS_FAILED: "Lỗi khi tải danh sách học sinh",
+  FETCH_DATA_FAILED: "Đã xảy ra lỗi khi tải dữ liệu",
+  NO_STUDENTS_LINKED: "Tài khoản của bạn chưa được liên kết với học sinh nào. Vui lòng liên hệ nhà trường để được hỗ trợ.",
+};
+
+// API endpoints
+const API_ENDPOINTS = {
+  STUDENTS_BY_PARENT: (parentId) => `${API_BASE_URL}/Student/by-parent/${parentId}`,
+  HEALTH_SUMMARIES: (studentId) => `${API_BASE_URL}/health-checks/summaries/student/${studentId}`, // REVERTED BACK to the correct endpoint
+  VACCINATION_RECORDS: (studentId) => `${API_BASE_URL}/VaccinationCampaign/records/student/${studentId}`,
+  MEDICAL_EVENTS: (studentId) => `${API_BASE_URL}/MedicalEvent/student/${studentId}`,
+};
 
 const ChildCareHistory = () => {
-  const parentId = localStorage.getItem("userId");
+  // State management
   const [students, setStudents] = useState([]);
-  const [selectedStudentId, setSelectedStudentId] = useState(Number(localStorage.getItem("studentId")) || null);
-
-  const [medicalHistory, setMedicalHistory] = useState([]);
+  const [selectedStudentId, setSelectedStudentId] = useState(null);
+  const [healthSummaries, setHealthSummaries] = useState([]);
   const [vaccinationHistory, setVaccinationHistory] = useState([]);
   const [medicalEvents, setMedicalEvents] = useState([]);
-  const [studentName, setStudentName] = useState("");
-  const [searchKeyword, setSearchKeyword] = useState("");
-  const [totalVaccinesThisMonth, setTotalVaccinesThisMonth] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [filter, setFilter] = useState(FILTERS.ALL);
+  const [searchKeyword, setSearchKeyword] = useState("");
 
-  useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        const res = await axios.get(
-          `https://swp-school-medical-management.onrender.com/api/Student/by-parent/${parentId}`
-        );
-        const studentList = res.data?.data || [];
-        setStudents(studentList);
-        if (!selectedStudentId && studentList.length > 0) {
-          setSelectedStudentId(studentList[0].studentId);
-          localStorage.setItem("studentId", studentList[0].studentId);
-        }
-      } catch (err) {
-        console.error("Lỗi khi tải danh sách học sinh:", err);
+  // Get auth data from localStorage
+  const parentId = localStorage.getItem("userId");
+
+  // Utility functions
+  const formatDate = useCallback((dateStr) => {
+    if (!dateStr) return "Chưa có ngày";
+    return dayjs(dateStr).format("DD/MM/YYYY HH:mm");
+  }, []);
+
+  const fetchWithErrorHandling = useCallback(async (url, defaultValue = []) => {
+    try {
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      return response.data?.data || defaultValue;
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        return defaultValue;
       }
-    };
+      console.error(`Error fetching ${url}:`, error);
+      throw error;
+    }
+  }, []);
 
+  // API calls
+  const fetchStudents = useCallback(async () => {
+    if (!parentId) return;
+    try {
+      const studentList = await fetchWithErrorHandling(API_ENDPOINTS.STUDENTS_BY_PARENT(parentId));
+      setStudents(studentList);
+      if (studentList.length > 0) {
+        setSelectedStudentId(studentList[0].studentId);
+      }
+    } catch (error) {
+      console.error(ERROR_MESSAGES.FETCH_STUDENTS_FAILED, error);
+      toast.error(ERROR_MESSAGES.FETCH_STUDENTS_FAILED);
+    }
+  }, [parentId, fetchWithErrorHandling]);
+
+  const fetchStudentData = useCallback(async () => {
+    if (!selectedStudentId) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    try {
+      const [healthData, vaccineData, eventData] = await Promise.all([
+        fetchWithErrorHandling(API_ENDPOINTS.HEALTH_SUMMARIES(selectedStudentId)), // Use the correct, specific endpoint
+        fetchWithErrorHandling(API_ENDPOINTS.VACCINATION_RECORDS(selectedStudentId)),
+        fetchWithErrorHandling(API_ENDPOINTS.MEDICAL_EVENTS(selectedStudentId)),
+      ]);
+
+      setHealthSummaries(Array.isArray(healthData) ? healthData : []);
+      setVaccinationHistory(Array.isArray(vaccineData) ? vaccineData : []);
+      
+      const processedEvents = eventData ? (Array.isArray(eventData) ? eventData : [eventData]) : [];
+      setMedicalEvents(processedEvents);
+
+    } catch (err) {
+      console.error(ERROR_MESSAGES.FETCH_DATA_FAILED, err);
+      setError(ERROR_MESSAGES.FETCH_DATA_FAILED);
+      toast.error(ERROR_MESSAGES.FETCH_DATA_FAILED);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedStudentId, fetchWithErrorHandling]);
+
+  // Event handlers
+  const handleStudentChange = useCallback((e) => {
+    const newStudentId = Number(e.target.value);
+    setSelectedStudentId(newStudentId);
+    localStorage.setItem("studentId", newStudentId); // Restore saving to localStorage
+  }, []);
+
+  // Effects
+  useEffect(() => {
     fetchStudents();
-  }, [parentId]);
+  }, [fetchStudents]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (!selectedStudentId) return;
+    if (selectedStudentId) {
+      fetchStudentData();
+    } else if (students.length === 0) {
+      setLoading(false);
+    }
+  }, [selectedStudentId, fetchStudentData, students]);
 
-        const fetchWith404Handling = async (url) => {
-          try {
-            const res = await axios.get(url);
-            return res.data?.data || [];
-          } catch (err) {
-            if (err.response && err.response.status === 404) {
-              return [];
-            } else {
-              throw err;
-            }
-          }
-        };
+  // Data processing and filtering
+  const combinedAndFilteredItems = useMemo(() => {
+    const health = healthSummaries
+      .filter(item => {
+        if (item && item.recordId !== null && item.recordId !== undefined) { // FIX: Use recordId instead of summaryId
+          return true;
+        }
+        console.warn("Health summary item is missing a 'recordId' and will be filtered out:", item);
+        return false;
+      })
+      .map(item => ({ ...item, type: FILTERS.HEALTH, date: item.checkDate, id: `health-${item.recordId}` })); // FIX: Use recordId for the key
 
-        const [
-          medicalHistoryData,
-          vaccinationData,
-          medicalEventsData,
-          studentResponse
-        ] = await Promise.all([
-          fetchWith404Handling(`https://swp-school-medical-management.onrender.com/api/MedicalHistory/student/${selectedStudentId}`),
-          fetchWith404Handling(`https://swp-school-medical-management.onrender.com/api/VaccinationCampaign/records/student/${selectedStudentId}`),
-          fetchWith404Handling(`https://swp-school-medical-management.onrender.com/api/MedicalEvent/student/${selectedStudentId}`),
-          fetchWith404Handling(`https://swp-school-medical-management.onrender.com/api/Student/${selectedStudentId}`)
-        ]);
+    const vaccine = vaccinationHistory
+      .filter(item => {
+        if (item && item.recordId !== null && item.recordId !== undefined) {
+          return true;
+        }
+        console.warn("Vaccination history item is missing an ID and will be filtered out:", item);
+        return false;
+      })
+      .map(item => ({ ...item, type: FILTERS.VACCINE, date: item.vaccinationDate, id: `vaccine-${item.recordId}` }));
 
-        setMedicalHistory(medicalHistoryData);
-        setVaccinationHistory(Array.isArray(vaccinationData) ? vaccinationData : []);
-        setMedicalEvents(Array.isArray(medicalEventsData) ? medicalEventsData : []);
-        setStudentName(studentResponse?.fullName || "");
+    const events = medicalEvents
+      .filter(item => {
+        if (item && item.eventId !== null && item.eventId !== undefined) {
+          return true;
+        }
+        console.warn("Medical event item is missing an ID and will be filtered out:", item);
+        return false;
+      })
+      .map(item => ({ ...item, type: FILTERS.EVENT, date: item.eventDate, id: `event-${item.eventId}` }));
 
-        const currentMonth = dayjs().month() + 1;
-        const currentYear = dayjs().year();
+    let allItems = [...health, ...vaccine, ...events];
 
-        const vaccineCount = vaccinationData?.filter(item => {
-          const date = dayjs(item.vaccinationDate);
-          return date.month() + 1 === currentMonth && date.year() === currentYear;
-        }).length || 0;
+    // Filter by type
+    if (filter !== FILTERS.ALL) {
+      allItems = allItems.filter(item => item.type === filter);
+    }
 
-        setTotalVaccinesThisMonth(vaccineCount);
-      } catch (err) {
-        console.error("Lỗi khi tải dữ liệu:", err);
-        setError("Đã xảy ra lỗi khi tải dữ liệu.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [selectedStudentId]);
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    return dayjs(dateStr).format("DD/MM/YYYY");
-  };
-
-  const matchesSearch = (text, dateStr, extra = "") => {
+    // Filter by search keyword
     const keyword = searchKeyword.toLowerCase().trim();
-    if (!keyword) return true;
+    if (keyword) {
+      allItems = allItems.filter(item => {
+        const checkText = (text) => text && text.toLowerCase().includes(keyword);
+        const dateText = dayjs(item.date).format("DD/MM/YYYY");
 
-    const formattedDate = dayjs(dateStr).format("DD/MM/YYYY");
+        if (item.type === FILTERS.HEALTH) {
+          return checkText(item.campaignTitle) || checkText(item.generalNote) || checkText(item.followUpNote) || dateText.includes(keyword);
+        }
+        if (item.type === FILTERS.VACCINE) {
+          return checkText(item.campaignName) || checkText(item.followUpNote) || checkText(item.result) || dateText.includes(keyword);
+        }
+        if (item.type === FILTERS.EVENT) {
+          return checkText(item.eventType) || checkText(item.description) || checkText(item.notes) || dateText.includes(keyword);
+        }
+        return false;
+      });
+    }
+
+    // Sort by date descending
+    return allItems.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [healthSummaries, vaccinationHistory, medicalEvents, filter, searchKeyword]);
+
+
+  // Render functions
+  const renderItemCard = (item) => {
+    let icon, tag, tagStyle, iconStyle, title, details;
+
+    switch (item.type) {
+      case FILTERS.HEALTH:
+        icon = <FiHeart />;
+        tag = 'Khám sức khỏe';
+        tagStyle = styles.tagResult;
+        iconStyle = styles.iconHealth;
+        title = item.campaignTitle;
+        details = (
+          <div className={styles.healthDetailsContainer}>
+            <div className={styles.healthSection}>
+              <h4 className={styles.sectionTitle}>Chỉ số cơ thể</h4>
+              <div className={styles.metricsGrid}>
+                <span><strong>Chiều cao:</strong> {item.height} cm</span>
+                <span><strong>Cân nặng:</strong> {item.weight} kg</span>
+                <span><strong>BMI:</strong> {item.bmi}</span>
+                <span><strong>Huyết áp:</strong> {item.bloodPressure}</span>
+                <span><strong>Nhịp tim:</strong> {item.heartRate}</span>
+              </div>
+            </div>
+            
+            <div className={styles.healthSection}>
+              <h4 className={styles.sectionTitle}>Kết quả khám chuyên khoa</h4>
+              <div className={styles.specialistGrid}>
+                <p><strong>Mắt:</strong> {item.visionSummary}</p>
+                <p><strong>Tai-Mũi-Họng:</strong> {item.ent} {item.entNotes && `(${item.entNotes})`}</p>
+                <p><strong>Răng-Hàm-Mặt:</strong> {item.mouth}, Sâu răng: {item.toothDecay} {item.toothNotes && `(${item.toothNotes})`}</p>
+                <p><strong>Họng:</strong> {item.throat}</p>
+              </div>
+            </div>
+
+            <div className={styles.healthSection}>
+              <h4 className={styles.sectionTitle}>Ghi chú & Dặn dò</h4>
+              {item.generalNote && <p><strong>Ghi chú chung:</strong> {item.generalNote}</p>}
+              {item.followUpNote && <p><strong>Dặn dò của bác sĩ:</strong> {item.followUpNote}</p>}
+            </div>
+          </div>
+        );
+        break;
+      case FILTERS.VACCINE:
+        icon = <FiShield />;
+        tag = 'Tiêm chủng';
+        tagStyle = styles.tagConsent;
+        iconStyle = styles.iconVaccine;
+        title = item.campaignName;
+        details = (
+          <>
+            <p><strong>Kết quả:</strong> {item.result || "Chưa có"}</p>
+            <p><strong>Ghi chú:</strong> {item.followUpNote || "Không có"}</p>
+          </>
+        );
+        break;
+      case FILTERS.EVENT:
+        icon = <FiAlertTriangle />;
+        tag = 'Sự cố y tế';
+        tagStyle = styles.tagGeneral;
+        iconStyle = styles.iconGeneral;
+        title = item.eventType;
+        details = (
+          <>
+            <p><strong>Mức độ:</strong> {item.severityLevelName}</p>
+            <p><strong>Mô tả:</strong> {item.description}</p>
+            <p><strong>Ghi chú của điều dưỡng:</strong> {item.notes}</p>
+            <p><strong>Người xử lý:</strong> {item.handledByName}</p>
+          </>
+        );
+        break;
+      default:
+        return null;
+    }
+
     return (
-      (text && text.toLowerCase().includes(keyword)) ||
-      formattedDate.includes(keyword) ||
-      (extra && extra.toLowerCase().includes(keyword))
+      <div className={styles.notificationCard} key={item.id}>
+        <div className={`${styles.cardIcon} ${iconStyle}`}>{icon}</div>
+        <div className={styles.cardContent}>
+          <div className={styles.cardHeader}>
+            <h3>{title}</h3>
+            <span className={`${styles.cardTag} ${tagStyle}`}>{tag}</span>
+          </div>
+          <div className={styles.cardBody}>
+            {details}
+          </div>
+          <div className={styles.cardFooter}>
+            <span className={styles.cardDate}>{formatDate(item.date)}</span>
+          </div>
+        </div>
+      </div>
     );
   };
+
+  const renderEmptyState = (message, details) => (
+    <div className={styles.emptyStateMessage}>
+      <FiInbox size={48} style={{ marginBottom: '16px', color: '#94a3b8' }} />
+      <h4>{message}</h4>
+      {details && <p>{details}</p>}
+    </div>
+  );
+
+  // Main render logic
+  if (students.length === 0 && !loading) {
+    return (
+      <div className={styles.container}>
+        <Sidebar />
+        <main className={styles.content}>
+          <div className={styles.pageWrapper}>
+            <header className={styles.header}>
+              <h2 className={styles.title}>Lịch Sử Chăm Sóc Sức Khỏe</h2>
+            </header>
+            {renderEmptyState("Chưa có liên kết học sinh", ERROR_MESSAGES.NO_STUDENTS_LINKED)}
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  const getStudentName = () => {
+    const student = students.find(s => s.studentId === selectedStudentId);
+    return student?.fullName || "";
+  }
 
   return (
     <div className={styles.container}>
       <Sidebar />
       <div className={styles.content}>
-        <h2 className={styles.title}>Lịch Sử Chăm Sóc Sức Khỏe</h2>
-        <p className={styles.subtitle}>
-          Xin chào, bạn đang đăng nhập với tư cách phụ huynh em <strong>{studentName || "..."}</strong>
-        </p>
+        <div className={styles.pageWrapper}>
+          <header className={styles.header}>
+            <h2 className={styles.title}>Lịch Sử Chăm Sóc Sức Khỏe</h2>
+            {students.length > 0 && (
+              <div className={styles.studentSelector}>
+                <select id="student-select" value={selectedStudentId} onChange={handleStudentChange}>
+                  {students.map(student => (
+                    <option key={student.studentId} value={student.studentId}>
+                      {student.fullName} - Lớp {student.className}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </header>
 
-        {/* Dropdown chọn học sinh */}
-        <label style={{ color: '#059669', fontWeight: 'bold', marginBottom: '8px', display: 'inline-block' }}>
-          Chọn học sinh:
-        </label>
-        <select
-          value={selectedStudentId || ""}
-          onChange={(e) => {
-            const selected = Number(e.target.value);
-            localStorage.setItem("studentId", selected);
-            window.location.reload();
-          }}
-          style={{
-            padding: "10px 16px",
-            borderRadius: "8px",
-            border: "1px solid #3b82f6",
-            fontSize: "15px",
-            outline: "none",
-            marginBottom: "20px",
-            width: "100%",
-            maxWidth: "400px"
-          }}
-        >
-          {students.map((s) => (
-            <option key={s.studentId} value={s.studentId}>
-              {s.fullName} - Lớp {s.className}
-            </option>
-          ))}
-        </select>
+          <div className={styles.layoutGrid}>
+            <div className={styles.mainContent}>
+              <div className={styles.itemList}>
+                {loading ? (
+                  <p>Đang tải dữ liệu...</p>
+                ) : combinedAndFilteredItems.length > 0 ? (
+                  combinedAndFilteredItems.map(renderItemCard)
+                ) : (
+                  renderEmptyState("Không tìm thấy dữ liệu", "Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm của bạn.")
+                )}
+              </div>
+            </div>
 
-        {/* Thanh tìm kiếm */}
-        <div style={{ marginBottom: "20px" }}>
-          <input
-            type="text"
-            placeholder="🔍 Tìm kiếm theo bệnh, chiến dịch, ngày hoặc theo dõi sau tiêm..."
-            value={searchKeyword}
-            onChange={(e) => setSearchKeyword(e.target.value)}
-            style={{
-              padding: "10px 16px",
-              width: "100%",
-              maxWidth: "500px",
-              borderRadius: "8px",
-              border: "1px solid #ccc",
-              fontSize: "15px",
-              outline: "none",
-            }}
-          />
+            <aside className={styles.rightSidebar}>
+              <div className={styles.filterCard}>
+                <h3><FiSearch /> Tìm kiếm</h3>
+                <div className={styles.searchBox}>
+                  <input
+                    type="text"
+                    placeholder="Tìm theo tên, ghi chú, ngày..."
+                    value={searchKeyword}
+                    onChange={(e) => setSearchKeyword(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className={styles.filterCard}>
+                <h3>Lọc theo loại</h3>
+                <div className={styles.tabList}>
+                  <button className={`${styles.tabButton} ${filter === FILTERS.ALL ? styles.active : ""}`} onClick={() => setFilter(FILTERS.ALL)}>Tất cả</button>
+                  <button className={`${styles.tabButton} ${filter === FILTERS.HEALTH ? styles.active : ""}`} onClick={() => setFilter(FILTERS.HEALTH)}>Khám sức khỏe</button>
+                  <button className={`${styles.tabButton} ${filter === FILTERS.VACCINE ? styles.active : ""}`} onClick={() => setFilter(FILTERS.VACCINE)}>Tiêm chủng</button>
+                  <button className={`${styles.tabButton} ${filter === FILTERS.EVENT ? styles.active : ""}`} onClick={() => setFilter(FILTERS.EVENT)}>Sự cố y tế</button>
+                </div>
+              </div>
+            </aside>
+          </div>
         </div>
-
-        <div style={{ marginBottom: "30px", fontSize: "16px" }}>
-          🧮 <strong>Thống kê tháng này:</strong> {totalVaccinesThisMonth} lần tiêm
-        </div>
-
-        {loading ? (
-          <p>Đang tải dữ liệu...</p>
-        ) : error ? (
-          <p className={styles.error}>{error}</p>
-        ) : (
-          <>
-            <div className={styles.section}>
-              <h3>🩺 Lịch Sử Bệnh Án</h3>
-              {medicalHistory.filter(item =>
-                matchesSearch(item.diseaseName, item.diagnosedDate)
-              ).length === 0 ? (
-                <p>Không có bệnh án phù hợp.</p>
-              ) : (
-                medicalHistory
-                  .filter(item => matchesSearch(item.diseaseName, item.diagnosedDate))
-                  .map((item) => (
-                    <div className={styles.historyCard} key={item.historyId}>
-                      <h4>{item.diseaseName}</h4>
-                      <p><strong>Ngày chẩn đoán:</strong> {formatDate(item.diagnosedDate)}</p>
-                      <p><strong>Ghi chú:</strong> {item.note}</p>
-                    </div>
-                  ))
-              )}
-            </div>
-
-            <div className={styles.section}>
-              <h3>💉 Lịch Sử Tiêm Chủng</h3>
-              {vaccinationHistory.filter(item =>
-                matchesSearch(item.campaignName, item.vaccinationDate, item.followUpNote)
-              ).length === 0 ? (
-                <p>Không có lịch sử tiêm chủng phù hợp.</p>
-              ) : (
-                vaccinationHistory
-                  .filter(item => matchesSearch(item.campaignName, item.vaccinationDate, item.followUpNote))
-                  .map((item) => (
-                    <div className={styles.historyCard} key={item.recordId}>
-                      <p><strong>Chiến dịch:</strong> {item.campaignName}</p>
-                      <p><strong>Ngày tiêm:</strong> {formatDate(item.vaccinationDate)}</p>
-                      <p><strong>Kết quả:</strong> {item.result}</p>
-                      <p><strong>Theo dõi sau tiêm:</strong> {item.followUpNote}</p>
-                    </div>
-                  ))
-              )}
-            </div>
-
-            <div className={styles.section}>
-              <h3>🚨 Sự Kiện Y Tế</h3>
-              {medicalEvents.filter(item =>
-                matchesSearch(item.eventType, item.eventDate)
-              ).length === 0 ? (
-                <p>Không có sự kiện y tế phù hợp.</p>
-              ) : (
-                medicalEvents
-                  .filter(item => matchesSearch(item.eventType, item.eventDate))
-                  .map((item) => (
-                    <div className={styles.historyCard} key={item.eventId}>
-                      <h4>{item.eventType}</h4>
-                      <p><strong>Mức độ:</strong> {item.severityLevelName}</p>
-                      <p><strong>Ngày:</strong> {formatDate(item.eventDate)}</p>
-                      <p><strong>Ghi chú:</strong> {item.description}</p>
-                      <p><strong>Điều dưỡng phụ trách:</strong> {item.nurseName}</p>
-                    </div>
-                  ))
-              )}
-            </div>
-          </>
-        )}
       </div>
     </div>
   );

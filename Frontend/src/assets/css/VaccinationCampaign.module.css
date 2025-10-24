@@ -164,13 +164,20 @@
   color: #888;
 }
 .addBtn {
-  padding: 10px 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px !important;
+  padding: 0 18px;
+  font-size: 1rem;
+  font-weight: 600;
   background-color: #20b2aa;
   color: white;
   border: none;
+  border-radius: 8px;
   cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
+  transition: background 0.2s, transform 0.2s;
+  white-space: nowrap !important;
 }
 .addBtn:hover {
   background-color: #178d89;
@@ -181,6 +188,7 @@
   background-color: white;
   border-radius: 6px;
   overflow: hidden;
+  animation: fadeInTable 0.7s cubic-bezier(.4,0,.2,1);
 }
 .studentTable th,
 .studentTable td {
@@ -192,6 +200,27 @@
   background-color: #20b2aa;
   font-weight: 500px;
   color: white;
+}
+.studentTable tbody tr:hover {
+  background: #f0f9ff;
+  transition: background 0.2s;
+}
+.skeletonRow {
+  background: linear-gradient(90deg, #f3f3f3 25%, #e0e7ef 50%, #f3f3f3 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.2s infinite linear;
+}
+.skeletonCell {
+  height: 18px;
+  border-radius: 6px;
+  background: #e5e7eb;
+  margin: 6px 0;
+  width: 100%;
+  animation: skeletonShimmer 1.2s infinite linear;
+}
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 .actionGroup {
   display: flex;
@@ -206,6 +235,11 @@
   text-align: center;
   background-color: #20b2aa;
   color: white;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+.editBtn:hover, .deleteBtn:hover {
+  box-shadow: 0 2px 8px rgba(32,178,170,0.10);
+  transform: translateY(-2px) scale(1.04);
 }
 .editBtn {
   display: flex;
@@ -217,8 +251,6 @@
   display: flex;
   align-items: center;
   gap: 4px;
-}
-.deleteBtn {
   background: #fff0f0;
   color: #e11d48;
   border: 1px solid #ffe4e6;
@@ -226,12 +258,9 @@
   padding: 5px 14px 5px 10px;
   font-size: 15px;
   font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  cursor: pointer;
   transition: background 0.2s, box-shadow 0.2s;
   box-shadow: 0 1px 4px rgba(225,29,72,0.08);
-  cursor: pointer;
 }
 .deleteBtn:hover {
   background: #ffe4e6;
@@ -250,12 +279,31 @@
   color: #222;
   font-weight: 500;
   cursor: pointer;
-  transition: 0.2s;
+  transition: background 0.2s, color 0.2s, transform 0.15s;
 }
 .pagination button:hover {
-  background-color: #ccc;
+  background: #1677ff;
+  color: #fff;
+  transform: scale(1.08);
 }
 .pagination .activePage {
   background-color: #20b2aa;
   color: #fff;
+}
+
+/* Hiệu ứng focus cho ô tìm kiếm */
+.searchBar:focus {
+  border-color: #1677ff;
+  box-shadow: 0 0 0 2px #1677ff33;
+  background: #fff;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+/* Hiệu ứng fade-in cho bảng */
+.studentTable {
+  animation: fadeInTable 0.7s cubic-bezier(.4,0,.2,1);
+}
+@keyframes fadeInTable {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
 }

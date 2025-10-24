@@ -73,6 +73,95 @@
   margin-left: 10px;
 }
 
+/* === Table Row Hover & Animation === */
+.tableRow {
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+  cursor: pointer;
+}
+.tableRow:hover {
+  background: #f0fdfa;
+  box-shadow: 0 2px 8px rgba(32,178,170,0.08);
+  transform: translateY(-2px) scale(1.01);
+}
+
+/* === Fade In Table === */
+.fadeInTable {
+  animation: fadeIn 0.7s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* === Skeleton Loading === */
+.skeletonRow td {
+  padding: 12px;
+  background: #f3f4f6;
+}
+.skeletonBox {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e0e0e0 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.2s infinite linear;
+  border-radius: 6px;
+  height: 24px;
+}
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* === Loading Overlay === */
+.loadingOverlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.7);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.spinner {
+  border: 4px solid #e0e0e0;
+  border-top: 4px solid #20b2aa;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* === Fade In Box === */
+.fadeInBox {
+  animation: fadeInBox 0.7s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes fadeInBox {
+  from { opacity: 0; transform: translateY(32px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* === Pagination Button Animation === */
+.pageBtn {
+  transition: background 0.2s, color 0.2s, transform 0.15s;
+}
+.pageBtn:hover, .pageBtn:focus {
+  background: #20b2aa;
+  color: #fff;
+  outline: none;
+  transform: scale(1.08);
+}
+
+/* === Input Search Animation === */
+.inputSearch {
+  transition: box-shadow 0.2s, border 0.2s;
+}
+.inputSearch:focus {
+  box-shadow: 0 0 0 2px #20b2aa33;
+  border: 1px solid #20b2aa;
+}
+
 .campaignTable th,
 .campaignTable td {
   padding: 12px 20px;
@@ -98,6 +187,7 @@
   cursor: pointer;
   border-radius: 5px;
   transition: background-color 0.3s;
+  white-space: nowrap; /* Thêm thuộc tính này để không cho chữ xuống dòng */
 }
 
 .campaignTable td button:hover {
@@ -134,21 +224,6 @@
   cursor: not-allowed;
 }
 
-.campaignTable td button {
-  padding: 8px 16px;
-  background-color: #20b2aa;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s;
-  white-space: nowrap; /* Thêm thuộc tính này để không cho chữ xuống dòng */
-}
-
-.campaignTable td button:hover {
-  background-color: #20b2aa;
-}
-
 .statusDropdown {
   padding: 6px;
   border: 1px solid #ddd;
@@ -178,5 +253,118 @@
 
 .statusText.Da-huy {
   color: #FF6347; /* Đỏ */
+}
+
+/* Card grid layout */
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+  margin-top: 32px;
+}
+
+.campaignCard {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  padding: 24px 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 200px;
+  transition: box-shadow 0.2s;
+}
+.campaignCard:hover {
+  box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+}
+
+.cardHeader {
+  margin-bottom: 12px;
+}
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a3c40;
+  margin-bottom: 4px;
+}
+.cardBody {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 16px;
+}
+.cardBody b {
+  color: #23b7b7;
+}
+.cardFooter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.statusBadgeWaiting {
+  background: #f3f3f3;
+  color: #888;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.statusBadgeActive {
+  background: #e0f7f5;
+  color: #23b7b7;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.statusBadgeDone {
+  background: #fff3e0;
+  color: #ff9800;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.statusBadgeCancel {
+  background: #ffeaea;
+  color: #e53935;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.btnDetail {
+  background: #23b7b7;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s;
+  margin-left: 0;
+}
+.btnDetail:hover {
+  background: #189a9a;
+}
+
+@media (max-width: 600px) {
+  .cardGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .campaignCard {
+    padding: 16px 10px 14px 10px;
+  }
+  .cardTitle {
+    font-size: 1.1rem;
+  }
+  .btnDetail {
+    font-size: 0.95rem;
+    padding: 7px 12px;
+  }
 }
 

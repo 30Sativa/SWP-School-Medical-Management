@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import styles from "../../assets/css/HealthCheckRecord.module.css";
+import Notification from "../../components/Notification";
+import { notifySuccess, notifyError } from "../../utils/notification";
+import LoadingOverlay from "../../components/LoadingOverlay";
+
 
 const HealthCheckRecord = () => {
   const { recordId } = useParams();
@@ -71,10 +75,10 @@ const HealthCheckRecord = () => {
           bmi: Number(newRecord.bmi),
         }
       );
-      alert("Ghi nhận thành công!");
+      notifySuccess("Ghi nhận thành công!");
       navigate(-1);
     } catch (error) {
-      alert(
+      notifyError(
         "Lỗi ghi nhận! " + (error.response?.data?.message || error.message)
       );
     }
@@ -127,7 +131,8 @@ const HealthCheckRecord = () => {
     // eslint-disable-next-line
   }, [isEditing, record?.height, record?.weight]);
 
-  if (loading) return <div>Đang tải dữ liệu...</div>;
+  if (loading) return <LoadingOverlay text="Đang tải dữ liệu khám sức khỏe..." />;
+
 
   if (!record)
     return (
@@ -158,7 +163,7 @@ const HealthCheckRecord = () => {
             bmi: Number(record.bmi),
           }
         );
-        alert("Ghi nhận thành công!");
+        notifySuccess("Ghi nhận thành công!");
         navigate(-1);
       } else {
         // Cập nhật
@@ -178,14 +183,14 @@ const HealthCheckRecord = () => {
           }
         );
         if (res.status === 200) {
-          alert("Cập nhật thành công!");
+          notifySuccess("Cập nhật thành công!");
           setIsEditing(false);
         } else {
-          alert("Lỗi cập nhật! " + (res.data?.message || ""));
+          notifyError("Lỗi cập nhật! " + (res.data?.message || ""));
         }
       }
     } catch (error) {
-      alert(
+      notifyError(
         "Lỗi khi gửi dữ liệu: " +
           (error.response?.data?.message || error.message)
       );
@@ -367,7 +372,7 @@ const HealthCheckRecord = () => {
       const parentId = studentRes.data?.data?.parentId;
 
       if (!parentId) {
-        alert("Không tìm thấy phụ huynh của học sinh này.");
+        notifyError("Không tìm thấy phụ huynh của học sinh này.");
         return;
       }
 
@@ -397,28 +402,72 @@ Trường Mầm Non
     `.trim();
 
       // 3. Gửi thông báo qua Notification
-      const response = await axios.post(
-        "https://swp-school-medical-management.onrender.com/api/Notification/send",
-        {
-          receiverId: parentId, // ✅ đúng theo VaccineResult
-          title: "Kết quả khám sức khỏe",
-          message: message,
-          typeId: 7, // Loại thông báo khám sức khỏe
-          isRead: false,
-        },
-        {
-          headers: { "Content-Type": "application/json" },
+      let notificationSuccess = false;
+      let emailSuccess = false;
+      let notificationError = null;
+      let emailError = null;
+      try {
+        const response = await axios.post(
+          "https://swp-school-medical-management.onrender.com/api/Notification/send",
+          {
+            receiverId: parentId, // ✅ đúng theo VaccineResult
+            title: "Kết quả khám sức khỏe",
+            message: message,
+            typeId: 7, // Loại thông báo khám sức khỏe
+            isRead: false,
+          },
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+        if (response.status === 200 || response.status === 201) {
+          notificationSuccess = true;
+        } else {
+          notificationError = response.data?.message || "Không rõ lỗi";
         }
-      );
+      } catch (error) {
+        notificationError = error.response?.data?.message || error.message;
+      }
 
-      if (response.status === 200 || response.status === 201) {
-        alert("✅ Đã gửi kết quả khám sức khỏe cho phụ huynh!");
-      } else {
-        alert("❌ Gửi thất bại: " + (response.data?.message || "Không rõ lỗi"));
+      // 4. Gửi email qua API
+      try {
+        const emailRes = await axios.post(
+          "https://swp-school-medical-management.onrender.com/api/Email/send-by-userid",
+          {
+            userId: parentId,
+            subject: "Kết quả khám sức khỏe cho học sinh " + record.studentName,
+            body: message,
+          },
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+        if (emailRes.status === 200) {
+          emailSuccess = true;
+        } else {
+          emailError = emailRes.data?.message || "Không rõ lỗi";
+        }
+      } catch (error) {
+        emailError = error.response?.data?.message || error.message;
+      }
+
+      // 5. Thông báo kết quả
+      if (notificationSuccess && emailSuccess) {
+        notifySuccess("Đã gửi kết quả khám sức khỏe cho phụ huynh qua hệ thống và email!");
+      } else if (!notificationSuccess && !emailSuccess) {
+        notifyError(
+          `Gửi thất bại cả notification và email.\nNotification: ${notificationError}\nEmail: ${emailError}`
+        );
+      } else if (!notificationSuccess) {
+        notifyError(`Notification thất bại: ${notificationError}`);
+        notifySuccess("Đã gửi email cho phụ huynh!");
+      } else if (!emailSuccess) {
+        notifyError(`Email thất bại: ${emailError}`);
+        notifySuccess("Đã gửi notification cho phụ huynh!");
       }
     } catch (error) {
       console.error("Lỗi khi gửi kết quả:", error);
-      alert(
+      notifyError(
         "Đã xảy ra lỗi khi gửi kết quả: " +
           (error.response?.data?.message || error.message)
       );
@@ -427,6 +476,7 @@ Trường Mầm Non
 
   return (
     <div className={styles.container}>
+      <Notification />
       <h2>Thông tin khám sức khỏe: {record.studentName}</h2>
       <button className={styles.backButton} onClick={() => navigate(-1)}>
         ⬅ Quay lại
