@@ -65,8 +65,8 @@ public partial class SwpEduHealV5Context : DbContext
 
     public virtual DbSet<VaccinationRecord> VaccinationRecords { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Data Source=4.196.113.30,1433;Database=SWP_EduHeal_V5;User Id=sa;Password=Yasuo123k@;TrustServerCertificate=true;Encrypt=false;");
+    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    //    => optionsBuilder.UseSqlServer("Data Source=4.196.113.30,1433;Database=SWP_EduHeal_V5;User Id=sa;Password=Yasuo123k@;TrustServerCertificate=true;Encrypt=false;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
