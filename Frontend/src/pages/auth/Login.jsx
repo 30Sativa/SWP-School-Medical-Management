@@ -71,6 +71,7 @@ const Login = () => {
       ) {
         localStorage.setItem("token", token);
         localStorage.setItem("userId", resData.userId);
+        localStorage.setItem("fullname", resData.fullName || "Người dùng");
 
         let roleName = "";
 
@@ -104,11 +105,86 @@ const Login = () => {
         });
 
         setTimeout(() => {
+
+          console.log(
+            "Role for redirect:",
+            roleName,
+            "isFirstLogin:",
+            resData.isFirstLogin,
+            "resData:",
+            resData
+          );
+
+          if (roleName === "Manager") {
+            navigate("/manager");
+          } else if (roleName === "Nurse") {
+            navigate("/nurse");
+          } else if (roleName === "Parent") {
+            if (resData.isFirstLogin) {
+              navigate("/firstlogin", { state: { userId: resData.userId } });
+              return;
+            }
+
+            localStorage.setItem("parentId", resData.userId);
+
+            (async () => {
+              try {
+                const studentRes = await axios.get(
+                  "https://swp-school-medical-management.onrender.com/api/Student"
+                );
+
+                const studentList = studentRes.data?.data;
+
+                if (!Array.isArray(studentList)) {
+                  throw new Error("Dữ liệu học sinh không hợp lệ.");
+                }
+
+                const students = studentList.filter(
+                  (s) => s.parentId === resData.userId
+                );
+
+
+                if (students.length > 0) {
+                  localStorage.setItem(
+                    "studentIds",
+                    JSON.stringify(students.map((s) => s.studentId))
+                  );
+                  localStorage.setItem("studentId", students[0].studentId);
+                } else {
+                  toast.warn("Không tìm thấy học sinh thuộc tài khoản này.", {
+                    position: "top-center",
+                    autoClose: 3000,
+                  });
+                }
+
+                navigate("/parent");
+              } catch (studentError) {
+                console.error("❌ Lỗi khi lấy học sinh:", studentError);
+                toast.error("Lỗi khi tải danh sách học sinh.", {
+                  position: "top-center",
+                  autoClose: 3000,
+                });
+              }
+            })();
+          } else {
+            alert("❗ Vai trò không xác định!");
+            navigate("/");
+          }
+
+          // Lưu role, fullname, ...
+          // Chuyển hướng về homepage sau đăng nhập thành công
+          navigate("/");
+
+          // Lưu role, fullname, ...
+          // Chuyển hướng về homepage sau đăng nhập thành công
+          navigate("/");
+
           if (roleName === "Parent" && resData.isFirstLogin) {
             navigate("/firstlogin", { state: { userId: resData.userId } });
             return;
           }
           navigate("/");
+
         }, 2000);
       } else {
         toast.error("Đăng nhập thất bại!", {

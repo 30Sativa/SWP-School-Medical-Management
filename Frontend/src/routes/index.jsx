@@ -65,6 +65,26 @@ const AppRouter = () => {
       <Route path="/sendnotifications" element={<ProtectedRoute><SendNotifications /></ProtectedRoute>} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+
+      {/* Add more routes as needed */}
+      <Route path="/medicine" element={<MedicationHandle />} />
+      <Route path="/vaccines" element={<VaccinCampaign />} />
+      <Route path="/hisofcare" element={<ChildCareHistory />} />
+      <Route path="/incidents" element={<Incident />} />
+      <Route path="/vaccines" element={<VaccinCampaign />} />
+      <Route path="/supplies" element={<MedicalSupplies />} />
+      <Route path="/vaccination-campaigns" element={<VaccinationCampaign />} />
+      <Route path="/vaccines/:id" element={<CampaignDetail />} />
+      <Route path="/vaccines/:id/result" element={<VaccinationResultPage />} />
+      <Route path="/health-check-campaign" element={<HealthCheckCampaign />} />
+      <Route path="/health-check" element={<HealthCheckList />} />
+      <Route path="/healthcheck/:campaignId" element={<HealthCheckDetail />} />
+      <Route path="/health-record/:recordId" element={<HealthCheckRecord />} />
+      <Route path="/report" element={<NurseReport />} />
+      <Route path="/viewBlog" element={<ViewBlog />} />
+      <Route path="/manager/blog" element={<Blog />} />
+      <Route path="/manager/blog/create" element={<BlogCreate />} />
+
       <Route path="/medicine" element={<ProtectedRoute><MedicationHandle /></ProtectedRoute>} />
       <Route path="/vaccines" element={<ProtectedRoute><VaccinCampaign /></ProtectedRoute>} />
       <Route path="/incidents" element={<ProtectedRoute><Incident /></ProtectedRoute>} />
@@ -78,6 +98,7 @@ const AppRouter = () => {
       <Route path="/health-record/:recordId" element={<ProtectedRoute><HealthCheckRecord /></ProtectedRoute>} />
       <Route path="/report" element={<ProtectedRoute><NurseReport /></ProtectedRoute>} />
       <Route path="/viewBlog" element={<ProtectedRoute><ViewBlog /></ProtectedRoute>} />
+
     </Routes>
   );
 };

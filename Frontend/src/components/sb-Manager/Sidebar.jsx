@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+
+import { Home, Users, ClipboardList, Rss, Flag, LogOut, Menu, Bell, ClipboardPlus, User } from "lucide-react";
+
+import { Home, Home as Home2, Users, Rss, Bell, LogOut, Menu, User, Globe } from "lucide-react";
+
+
+import { Home, Home as Home2, Users, Rss, Bell, LogOut, Menu, User, Globe } from "lucide-react";
+
+
 import { Home, Users, Rss, Bell, LogOut, Menu, User, LayoutDashboard } from "lucide-react";
+
 import style from "./Sidebar.module.css";
 import { jwtDecode } from "jwt-decode";
 
@@ -39,11 +49,19 @@ const Sidebar = () => {
         {isOpen && <span className={style.systemName}>EduHealth</span>}
       </div>
       <nav>
+
+        <NavLink to="/" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
+          <Globe size={20} stroke="#fff" />
+          <span>Trang chủ</span>
+        </NavLink>
+        <NavLink to="/manager" className={({ isActive }) => `${style.navItem} ${isActive ? style.active : ""}`}>
+
         <div
           className={style.navItem}
           style={{ cursor: 'pointer' }}
           onClick={() => navigate('/')}
         >
+
           <Home size={20} />
           <span>Trang chủ</span>
         </div>

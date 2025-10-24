@@ -6,6 +6,7 @@ import axios from "axios";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import UserMenu from "../../components/UserMenu";
 
 const API_BASE_URL = "https://swp-school-medical-management.onrender.com/api";
 
@@ -265,6 +266,17 @@ const ParentDashboard = () => {
     <div className={styles.container}>
       <Sidebar />
       <main className={styles.content}>
+
+        <header className={styles.dashboardHeaderBar}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className={styles.titleGroup}>
+              <h1>
+                <span className={styles.textBlack}>Bảng điều khiển</span>
+                <span className={styles.textAccent}> Phụ huynh</span>
+              </h1>
+            </div>
+            <UserMenu />
+
         {dataError ? (
           <div style={{
             display: 'flex',
@@ -300,6 +312,7 @@ const ParentDashboard = () => {
             >
               Thử lại
             </button>
+
           </div>
         ) : (
           <div style={{

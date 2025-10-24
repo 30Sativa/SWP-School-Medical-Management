@@ -5,7 +5,11 @@ import axios from "axios";
 import style from "../../assets/css/homepage.module.css";
 import logo from "../../assets/icon/eduhealth.jpg";
 import { useNavigate } from "react-router-dom";
+
+import UserMenu from "../../components/UserMenu";
+
 import { jwtDecode } from "jwt-decode";
+
 
 const apiUrl = "https://swp-school-medical-management.onrender.com/api/BlogPost";
 
@@ -17,6 +21,7 @@ const BlogPublic = () => {
   const blogsPerPage = 5;
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState({});
+
   const [showDropdown, setShowDropdown] = useState(false);
   const [username, setUsername] = useState("");
   const [role, setRole] = useState("");
@@ -27,10 +32,14 @@ const BlogPublic = () => {
       try {
         const res = await axios.get(apiUrl);
         const blogsData = Array.isArray(res.data) ? res.data : res.data?.data || [];
+
+        setBlogs(blogsData.filter(blog => blog.isActive !== false));
+
         const sortedBlogs = blogsData
           .filter(blog => blog.isActive !== false)
           .sort((a, b) => new Date(b.postedDate) - new Date(a.postedDate));
         setBlogs(sortedBlogs);
+
       } catch {
         setBlogs([]);
       } finally {
@@ -39,6 +48,7 @@ const BlogPublic = () => {
     };
     fetchBlogs();
   }, []);
+
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -70,6 +80,7 @@ const BlogPublic = () => {
     navigate("/login");
   };
 
+
   const filteredBlogs = blogs.filter(blog => {
     const matchSearch =
       blog.title.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -77,8 +88,20 @@ const BlogPublic = () => {
     return matchSearch;
   });
 
+
+  // Sắp xếp theo thời gian tạo mới nhất lên đầu
+  const sortedBlogs = [...filteredBlogs].sort((a, b) => {
+    const dateA = new Date(a.postedDate);
+    const dateB = new Date(b.postedDate);
+    return dateB - dateA;
+  });
+
+  const totalPages = Math.ceil(sortedBlogs.length / blogsPerPage);
+  const paginatedBlogs = sortedBlogs.slice((currentPage - 1) * blogsPerPage, currentPage * blogsPerPage);
+
   const totalPages = Math.ceil(filteredBlogs.length / blogsPerPage);
   const paginatedBlogs = filteredBlogs.slice((currentPage - 1) * blogsPerPage, currentPage * blogsPerPage);
+
 
   return (
     <div style={{ background: "#f8fafb", minHeight: "100vh" }}>
@@ -91,6 +114,10 @@ const BlogPublic = () => {
           <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); navigate("/#about"); }}>Giới thiệu</a>
           <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); navigate("/blog"); }}>Blog Y Tế</a>
           <a href="#" className={style.navLink} onClick={e => { e.preventDefault(); navigate("/#contact"); }}>Liên hệ</a>
+
+          {localStorage.getItem("token") ? (
+            <UserMenu />
+
           {username ? (
             <div style={{ position: 'relative', display: 'inline-block' }}>
               <button
@@ -118,6 +145,7 @@ const BlogPublic = () => {
                 </div>
               )}
             </div>
+
           ) : (
             <button className={style.loginBtn} onClick={() => navigate("/login")}>Đăng nhập</button>
           )}
